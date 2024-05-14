@@ -12,6 +12,7 @@ func main() {
 	fmt.Println("Starting server...")
 	router := echo.New()
 	database.InitDB()
+	database.Migrate()
 
 	router.GET("/hello", controller.GetHello)
 	router.Start(":8080")

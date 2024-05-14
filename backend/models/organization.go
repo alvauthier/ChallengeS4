@@ -14,6 +14,6 @@ type Organization struct {
 	Description string    `gorm:"not null"`
 	CreatedAt   time.Time
 	UpdatedAt   time.Time
-	Users       []User
-	Concerts    []Concert
+	Users       []User    `gorm:"foreignKey:OrganizationId"`
+	Concerts    []Concert `gorm:"foreignKey:OrganizationId"`
 }

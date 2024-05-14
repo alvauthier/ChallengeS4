@@ -14,7 +14,8 @@ type TicketListing struct {
 	Status        string    `gorm:"not null"`
 	CreatedAt     time.Time
 	UpdatedAt     time.Time
-	Ticket        Ticket
-	Conversations *[]Conversation
-	Sale          *Sale
+	TicketId      uuid.UUID
+	Ticket        Ticket          `gorm:"foreignKey:TicketId"`
+	Conversations *[]Conversation `gorm:"foreignKey:TicketListingId"`
+	Sale          *Sale           `gorm:"foreignKey:TicketListingId"`
 }

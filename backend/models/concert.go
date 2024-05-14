@@ -16,7 +16,10 @@ type Concert struct {
 	Date         time.Time `gorm:"not null"`
 	CreatedAt    time.Time
 	UpdatedAt    time.Time
-	Categories   []Category `gorm:"many2many:concert_categories"`
-	Organisation Organization
-	Interests    []Interest `gorm:"many2many:concert_interests;"`
+	// Categories     []Category `gorm:"many2many:concert_categories"`
+	OrganizationId uuid.UUID
+	Organisation   Organization `gorm:"foreignKey:OrganizationId"`
+	Interests      []Interest   `gorm:"many2many:concert_interests;"`
+	// ConcertCategories []ConcertCategory `gorm:"many2many:concert_categories"`
+	ConcertCategories []ConcertCategory `gorm:"foreignKey:ConcertId"`
 }

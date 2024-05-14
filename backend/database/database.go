@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"weezemaster/models"
 
 	"github.com/joho/godotenv"
 	"gorm.io/driver/postgres"
@@ -13,9 +14,11 @@ import (
 var db *gorm.DB
 
 func InitDB() {
-	err := godotenv.Load()
+	wd, _ := os.Getwd()
+	log.Printf("Current working directory: %s", wd)
+	err := godotenv.Load("../../.env")
 	if err != nil {
-		log.Fatalf("Error loading .env file")
+		log.Fatalf("Error loading .env file: %v", err)
 	}
 	host := os.Getenv("POSTGRES_HOST")
 	port := os.Getenv("POSTGRES_PORT")
@@ -33,4 +36,23 @@ func InitDB() {
 
 func GetDB() *gorm.DB {
 	return db
+}
+
+func Migrate() {
+	err := db.AutoMigrate(
+		&models.ConcertCategory{},
+		&models.User{},
+		&models.Organization{},
+		&models.Concert{},
+		&models.Category{},
+		&models.Interest{},
+		&models.Ticket{},
+		&models.TicketListing{},
+		&models.Sale{},
+		&models.Conversation{},
+		&models.Message{},
+	)
+	if err != nil {
+		log.Fatalf("Error migrating database schema: %v", err)
+	}
 }

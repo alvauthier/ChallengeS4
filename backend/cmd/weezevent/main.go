@@ -34,6 +34,12 @@ func main() {
 	router.PATCH("/categories/:id", controller.UpdateCategory)
 	router.DELETE("/categories/:id", controller.DeleteCategory)
 
+	router.GET("/concerts", controller.GetAllConcerts)
+	router.GET("/concerts/:id", controller.GetConcert)
+	router.POST("/concerts", controller.CreateConcert)
+	router.PATCH("/concerts/:id", controller.UpdateConcert)
+	router.DELETE("/concerts/:id", controller.DeleteConcert)
+
 	router.Start(":8080")
 
 }

@@ -5,14 +5,31 @@ import (
 	"weezemaster/internal/controller"
 	"weezemaster/internal/database"
 
+	_ "weezemaster/docs" // L'import du package docs généré par swag init
+
 	"github.com/labstack/echo/v4"
+	echoSwagger "github.com/swaggo/echo-swagger"
 )
+
+// @title Weezemaster API
+// @version 1.0
+// @description This is a sample server Weezemaster server.
+// @termsOfService http://swagger.io/terms/
+
+// @contact.name API Support
+// @contact.url http://www.swagger.io/support
+// @contact.email support@swagger.io
+
+// @license.name Apache 2.0
+// @license.url http://www.apache.org/licenses/LICENSE-2.0.html
+
+// @host localhost:8080
+// @BasePath /
 
 func main() {
 	fmt.Println("Starting server...")
 	router := echo.New()
 	database.InitDB()
-	// database.Migrate()
 
 	router.GET("/hello", controller.GetHello)
 
@@ -39,6 +56,8 @@ func main() {
 	router.POST("/concerts", controller.CreateConcert)
 	router.PATCH("/concerts/:id", controller.UpdateConcert)
 	router.DELETE("/concerts/:id", controller.DeleteConcert)
+
+	router.GET("/swagger/*", echoSwagger.WrapHandler)
 
 	router.Start(":8080")
 

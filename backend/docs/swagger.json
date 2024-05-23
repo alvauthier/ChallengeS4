@@ -1,7 +1,7 @@
 {
     "swagger": "2.0",
     "info": {
-        "description": "This is a sample server Weezemaster server.",
+        "description": "This is the swagger documentation for the Weezemaster API.",
         "title": "Weezemaster API",
         "termsOfService": "http://swagger.io/terms/",
         "contact": {
@@ -17,5 +17,509 @@
     },
     "host": "localhost:8080",
     "basePath": "/",
-    "paths": {}
+    "paths": {
+        "/users": {
+            "get": {
+                "description": "Récupère tous les utilisateurs",
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Récupère tous les utilisateurs",
+                "operationId": "get-all-users",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/models.User"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/users/{id}": {
+            "get": {
+                "description": "Récupère un utilisateur par ID",
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Récupère un utilisateur",
+                "operationId": "get-user",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "ID de l'utilisateur",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.User"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "models.Category": {
+            "type": "object",
+            "properties": {
+                "concertCategories": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.ConcertCategory"
+                    }
+                },
+                "createdAt": {
+                    "type": "string"
+                },
+                "deletedAt": {
+                    "type": "string"
+                },
+                "id": {
+                    "description": "gorm.Model",
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "updatedAt": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.Concert": {
+            "type": "object",
+            "properties": {
+                "concertCategories": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.ConcertCategory"
+                    }
+                },
+                "createdAt": {
+                    "type": "string"
+                },
+                "date": {
+                    "type": "string"
+                },
+                "deletedAt": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "id": {
+                    "description": "gorm.Model",
+                    "type": "string"
+                },
+                "interests": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.Interest"
+                    }
+                },
+                "location": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "organization": {
+                    "$ref": "#/definitions/models.Organization"
+                },
+                "organizationId": {
+                    "type": "string"
+                },
+                "updatedAt": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.ConcertCategory": {
+            "type": "object",
+            "properties": {
+                "category": {
+                    "$ref": "#/definitions/models.Category"
+                },
+                "categoryId": {
+                    "type": "integer"
+                },
+                "concert": {
+                    "$ref": "#/definitions/models.Concert"
+                },
+                "concertId": {
+                    "type": "string"
+                },
+                "createdAt": {
+                    "type": "string"
+                },
+                "deletedAt": {
+                    "type": "string"
+                },
+                "id": {
+                    "description": "gorm.Model",
+                    "type": "string"
+                },
+                "nbTickets": {
+                    "type": "integer"
+                },
+                "price": {
+                    "type": "number"
+                },
+                "tickets": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.Ticket"
+                    }
+                },
+                "updatedAt": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.Conversation": {
+            "type": "object",
+            "properties": {
+                "buyer": {
+                    "$ref": "#/definitions/models.User"
+                },
+                "buyerId": {
+                    "type": "string"
+                },
+                "createdAt": {
+                    "type": "string"
+                },
+                "deletedAt": {
+                    "type": "string"
+                },
+                "id": {
+                    "description": "gorm.Model",
+                    "type": "string"
+                },
+                "messages": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.Message"
+                    }
+                },
+                "ticketListing": {
+                    "$ref": "#/definitions/models.TicketListing"
+                },
+                "ticketListingId": {
+                    "type": "string"
+                },
+                "updatedAt": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.Interest": {
+            "type": "object",
+            "properties": {
+                "concerts": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.Concert"
+                    }
+                },
+                "createdAt": {
+                    "type": "string"
+                },
+                "deletedAt": {
+                    "type": "string"
+                },
+                "id": {
+                    "description": "gorm.Model",
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "updatedAt": {
+                    "type": "string"
+                },
+                "users": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.User"
+                    }
+                }
+            }
+        },
+        "models.Message": {
+            "type": "object",
+            "properties": {
+                "author": {
+                    "$ref": "#/definitions/models.User"
+                },
+                "authorId": {
+                    "type": "string"
+                },
+                "content": {
+                    "type": "string"
+                },
+                "conversation": {
+                    "$ref": "#/definitions/models.Conversation"
+                },
+                "conversationId": {
+                    "type": "string"
+                },
+                "createdAt": {
+                    "type": "string"
+                },
+                "deletedAt": {
+                    "type": "string"
+                },
+                "id": {
+                    "description": "gorm.Model",
+                    "type": "string"
+                },
+                "readed": {
+                    "type": "boolean"
+                },
+                "sentAt": {
+                    "type": "string"
+                },
+                "updatedAt": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.Organization": {
+            "type": "object",
+            "properties": {
+                "concerts": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.Concert"
+                    }
+                },
+                "createdAt": {
+                    "type": "string"
+                },
+                "deletedAt": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "id": {
+                    "description": "gorm.Model",
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "updatedAt": {
+                    "type": "string"
+                },
+                "users": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.User"
+                    }
+                }
+            }
+        },
+        "models.Sale": {
+            "type": "object",
+            "properties": {
+                "buyer": {
+                    "$ref": "#/definitions/models.User"
+                },
+                "buyerId": {
+                    "type": "string"
+                },
+                "createdAt": {
+                    "type": "string"
+                },
+                "deletedAt": {
+                    "type": "string"
+                },
+                "finalPrice": {
+                    "type": "number"
+                },
+                "id": {
+                    "description": "gorm.Model",
+                    "type": "string"
+                },
+                "seller": {
+                    "$ref": "#/definitions/models.User"
+                },
+                "sellerId": {
+                    "type": "string"
+                },
+                "ticketListingId": {
+                    "type": "string"
+                },
+                "ticketSold": {
+                    "$ref": "#/definitions/models.TicketListing"
+                },
+                "updatedAt": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.Ticket": {
+            "type": "object",
+            "properties": {
+                "concertCategory": {
+                    "$ref": "#/definitions/models.ConcertCategory"
+                },
+                "concertCategoryId": {
+                    "type": "string"
+                },
+                "createdAt": {
+                    "type": "string"
+                },
+                "deletedAt": {
+                    "type": "string"
+                },
+                "id": {
+                    "description": "gorm.Model",
+                    "type": "string"
+                },
+                "ticketListing": {
+                    "$ref": "#/definitions/models.TicketListing"
+                },
+                "updatedAt": {
+                    "type": "string"
+                },
+                "user": {
+                    "$ref": "#/definitions/models.User"
+                },
+                "userId": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.TicketListing": {
+            "type": "object",
+            "properties": {
+                "conversations": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.Conversation"
+                    }
+                },
+                "createdAt": {
+                    "type": "string"
+                },
+                "deletedAt": {
+                    "type": "string"
+                },
+                "id": {
+                    "description": "gorm.Model",
+                    "type": "string"
+                },
+                "price": {
+                    "type": "number"
+                },
+                "sale": {
+                    "$ref": "#/definitions/models.Sale"
+                },
+                "status": {
+                    "type": "string"
+                },
+                "ticket": {
+                    "$ref": "#/definitions/models.Ticket"
+                },
+                "ticketId": {
+                    "type": "string"
+                },
+                "updatedAt": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.User": {
+            "type": "object",
+            "properties": {
+                "conversations": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.Conversation"
+                    }
+                },
+                "createdAt": {
+                    "type": "string"
+                },
+                "deletedAt": {
+                    "type": "string"
+                },
+                "email": {
+                    "description": "l'email de l'utilisateur\n\nrequired: true\nexample: john@doe.com",
+                    "type": "string"
+                },
+                "firstname": {
+                    "description": "le prénom de l'utilisateur\n\nrequired: true\nexample: John",
+                    "type": "string"
+                },
+                "id": {
+                    "description": "gorm.Model\nl'ID de l'utilisateur\n\nrequired: true\nexample: 123e4567-e89b-12d3-a456-426614174000",
+                    "type": "string"
+                },
+                "interests": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.Interest"
+                    }
+                },
+                "lastConnexion": {
+                    "type": "string"
+                },
+                "lastname": {
+                    "description": "le nom de l'utilisateur\n\nrequired: true\nexample: Doe",
+                    "type": "string"
+                },
+                "messages": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.Message"
+                    }
+                },
+                "organization": {
+                    "$ref": "#/definitions/models.Organization"
+                },
+                "organizationId": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string"
+                },
+                "role": {
+                    "type": "string"
+                },
+                "salesAsBuyer": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.Sale"
+                    }
+                },
+                "salesAsSeller": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.Sale"
+                    }
+                },
+                "tickets": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.Ticket"
+                    }
+                },
+                "updatedAt": {
+                    "type": "string"
+                }
+            }
+        }
+    }
 }

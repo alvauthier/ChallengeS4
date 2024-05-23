@@ -11,6 +11,13 @@ import (
 	"gorm.io/gorm"
 )
 
+// GetAllUsers godoc
+// @Summary		Récupère tous les utilisateurs
+// @Description	Récupère tous les utilisateurs
+// @ID				get-all-users
+// @Produce		json
+// @Success		200	{array}	models.User
+// @Router			/users [get]
 func GetAllUsers(c echo.Context) error {
 	db := database.GetDB()
 
@@ -22,6 +29,13 @@ func GetAllUsers(c echo.Context) error {
 	return c.JSON(http.StatusOK, users)
 }
 
+// @Summary		Récupère un utilisateur
+// @Description	Récupère un utilisateur par ID
+// @ID				get-user
+// @Produce		json
+// @Param			id	path		string	true	"ID de l'utilisateur"
+// @Success		200	{object}	models.User
+// @Router			/users/{id} [get]
 func GetUser(c echo.Context) error {
 	db := database.GetDB()
 

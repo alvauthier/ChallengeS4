@@ -4,11 +4,10 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"gorm.io/gorm"
 )
 
 type Message struct {
-	gorm.Model
+	// gorm.Model
 	ID             uuid.UUID `gorm:"unique;type:uuid;primaryKey"`
 	Content        string    `gorm:"not null"`
 	Readed         bool      `gorm:"not null"`
@@ -17,4 +16,7 @@ type Message struct {
 	SentAt         time.Time
 	ConversationId uuid.UUID
 	Conversation   Conversation `gorm:"foreignKey:ConversationId"`
+	CreatedAt      time.Time
+	UpdatedAt      time.Time
+	DeletedAt      *time.Time `gorm:"index"`
 }

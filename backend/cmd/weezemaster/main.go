@@ -5,26 +5,26 @@ import (
 	"weezemaster/internal/controller"
 	"weezemaster/internal/database"
 
-	_ "weezemaster/docs" // L'import du package docs généré par swag init
+	_ "weezemaster/docs"
 
 	"github.com/labstack/echo/v4"
 	echoSwagger "github.com/swaggo/echo-swagger"
 )
 
-// @title Weezemaster API
-// @version 1.0
-// @description This is a sample server Weezemaster server.
-// @termsOfService http://swagger.io/terms/
+//	@title			Weezemaster API
+//	@version		1.0
+//	@description	This is the swagger documentation for the Weezemaster API.
+//	@termsOfService	http://swagger.io/terms/
 
-// @contact.name API Support
-// @contact.url http://www.swagger.io/support
-// @contact.email support@swagger.io
+//	@contact.name	API Support
+//	@contact.url	http://www.swagger.io/support
+//	@contact.email	support@swagger.io
 
-// @license.name Apache 2.0
-// @license.url http://www.apache.org/licenses/LICENSE-2.0.html
+//	@license.name	Apache 2.0
+//	@license.url	http://www.apache.org/licenses/LICENSE-2.0.html
 
-// @host localhost:8080
-// @BasePath /
+//	@host		localhost:8080
+//	@BasePath	/
 
 func main() {
 	fmt.Println("Starting server...")

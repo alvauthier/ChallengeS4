@@ -4,15 +4,15 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"gorm.io/gorm"
 )
 
 type Conversation struct {
-	gorm.Model
+	// gorm.Model
 	ID              uuid.UUID `gorm:"unique;type:uuid;primaryKey"`
 	CreatedAt       time.Time
 	UpdatedAt       time.Time
-	Messages        []Message `gorm:"foreignKey:ConversationId"`
+	DeletedAt       *time.Time `gorm:"index"`
+	Messages        []Message  `gorm:"foreignKey:ConversationId"`
 	BuyerId         uuid.UUID
 	Buyer           User `gorm:"foreignKey:BuyerId"`
 	TicketListingId uuid.UUID

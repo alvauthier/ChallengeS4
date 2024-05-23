@@ -1,16 +1,369 @@
 basePath: /
+definitions:
+  models.Category:
+    properties:
+      concertCategories:
+        items:
+          $ref: '#/definitions/models.ConcertCategory'
+        type: array
+      createdAt:
+        type: string
+      deletedAt:
+        type: string
+      id:
+        description: gorm.Model
+        type: integer
+      name:
+        type: string
+      updatedAt:
+        type: string
+    type: object
+  models.Concert:
+    properties:
+      concertCategories:
+        items:
+          $ref: '#/definitions/models.ConcertCategory'
+        type: array
+      createdAt:
+        type: string
+      date:
+        type: string
+      deletedAt:
+        type: string
+      description:
+        type: string
+      id:
+        description: gorm.Model
+        type: string
+      interests:
+        items:
+          $ref: '#/definitions/models.Interest'
+        type: array
+      location:
+        type: string
+      name:
+        type: string
+      organization:
+        $ref: '#/definitions/models.Organization'
+      organizationId:
+        type: string
+      updatedAt:
+        type: string
+    type: object
+  models.ConcertCategory:
+    properties:
+      category:
+        $ref: '#/definitions/models.Category'
+      categoryId:
+        type: integer
+      concert:
+        $ref: '#/definitions/models.Concert'
+      concertId:
+        type: string
+      createdAt:
+        type: string
+      deletedAt:
+        type: string
+      id:
+        description: gorm.Model
+        type: string
+      nbTickets:
+        type: integer
+      price:
+        type: number
+      tickets:
+        items:
+          $ref: '#/definitions/models.Ticket'
+        type: array
+      updatedAt:
+        type: string
+    type: object
+  models.Conversation:
+    properties:
+      buyer:
+        $ref: '#/definitions/models.User'
+      buyerId:
+        type: string
+      createdAt:
+        type: string
+      deletedAt:
+        type: string
+      id:
+        description: gorm.Model
+        type: string
+      messages:
+        items:
+          $ref: '#/definitions/models.Message'
+        type: array
+      ticketListing:
+        $ref: '#/definitions/models.TicketListing'
+      ticketListingId:
+        type: string
+      updatedAt:
+        type: string
+    type: object
+  models.Interest:
+    properties:
+      concerts:
+        items:
+          $ref: '#/definitions/models.Concert'
+        type: array
+      createdAt:
+        type: string
+      deletedAt:
+        type: string
+      id:
+        description: gorm.Model
+        type: integer
+      name:
+        type: string
+      updatedAt:
+        type: string
+      users:
+        items:
+          $ref: '#/definitions/models.User'
+        type: array
+    type: object
+  models.Message:
+    properties:
+      author:
+        $ref: '#/definitions/models.User'
+      authorId:
+        type: string
+      content:
+        type: string
+      conversation:
+        $ref: '#/definitions/models.Conversation'
+      conversationId:
+        type: string
+      createdAt:
+        type: string
+      deletedAt:
+        type: string
+      id:
+        description: gorm.Model
+        type: string
+      readed:
+        type: boolean
+      sentAt:
+        type: string
+      updatedAt:
+        type: string
+    type: object
+  models.Organization:
+    properties:
+      concerts:
+        items:
+          $ref: '#/definitions/models.Concert'
+        type: array
+      createdAt:
+        type: string
+      deletedAt:
+        type: string
+      description:
+        type: string
+      id:
+        description: gorm.Model
+        type: string
+      name:
+        type: string
+      updatedAt:
+        type: string
+      users:
+        items:
+          $ref: '#/definitions/models.User'
+        type: array
+    type: object
+  models.Sale:
+    properties:
+      buyer:
+        $ref: '#/definitions/models.User'
+      buyerId:
+        type: string
+      createdAt:
+        type: string
+      deletedAt:
+        type: string
+      finalPrice:
+        type: number
+      id:
+        description: gorm.Model
+        type: string
+      seller:
+        $ref: '#/definitions/models.User'
+      sellerId:
+        type: string
+      ticketListingId:
+        type: string
+      ticketSold:
+        $ref: '#/definitions/models.TicketListing'
+      updatedAt:
+        type: string
+    type: object
+  models.Ticket:
+    properties:
+      concertCategory:
+        $ref: '#/definitions/models.ConcertCategory'
+      concertCategoryId:
+        type: string
+      createdAt:
+        type: string
+      deletedAt:
+        type: string
+      id:
+        description: gorm.Model
+        type: string
+      ticketListing:
+        $ref: '#/definitions/models.TicketListing'
+      updatedAt:
+        type: string
+      user:
+        $ref: '#/definitions/models.User'
+      userId:
+        type: string
+    type: object
+  models.TicketListing:
+    properties:
+      conversations:
+        items:
+          $ref: '#/definitions/models.Conversation'
+        type: array
+      createdAt:
+        type: string
+      deletedAt:
+        type: string
+      id:
+        description: gorm.Model
+        type: string
+      price:
+        type: number
+      sale:
+        $ref: '#/definitions/models.Sale'
+      status:
+        type: string
+      ticket:
+        $ref: '#/definitions/models.Ticket'
+      ticketId:
+        type: string
+      updatedAt:
+        type: string
+    type: object
+  models.User:
+    properties:
+      conversations:
+        items:
+          $ref: '#/definitions/models.Conversation'
+        type: array
+      createdAt:
+        type: string
+      deletedAt:
+        type: string
+      email:
+        description: |-
+          l'email de l'utilisateur
+
+          required: true
+          example: john@doe.com
+        type: string
+      firstname:
+        description: |-
+          le prénom de l'utilisateur
+
+          required: true
+          example: John
+        type: string
+      id:
+        description: |-
+          gorm.Model
+          l'ID de l'utilisateur
+
+          required: true
+          example: 123e4567-e89b-12d3-a456-426614174000
+        type: string
+      interests:
+        items:
+          $ref: '#/definitions/models.Interest'
+        type: array
+      lastConnexion:
+        type: string
+      lastname:
+        description: |-
+          le nom de l'utilisateur
+
+          required: true
+          example: Doe
+        type: string
+      messages:
+        items:
+          $ref: '#/definitions/models.Message'
+        type: array
+      organization:
+        $ref: '#/definitions/models.Organization'
+      organizationId:
+        type: string
+      password:
+        type: string
+      role:
+        type: string
+      salesAsBuyer:
+        items:
+          $ref: '#/definitions/models.Sale'
+        type: array
+      salesAsSeller:
+        items:
+          $ref: '#/definitions/models.Sale'
+        type: array
+      tickets:
+        items:
+          $ref: '#/definitions/models.Ticket'
+        type: array
+      updatedAt:
+        type: string
+    type: object
 host: localhost:8080
 info:
   contact:
     email: support@swagger.io
     name: API Support
     url: http://www.swagger.io/support
-  description: This is a sample server Weezemaster server.
+  description: This is the swagger documentation for the Weezemaster API.
   license:
     name: Apache 2.0
     url: http://www.apache.org/licenses/LICENSE-2.0.html
   termsOfService: http://swagger.io/terms/
   title: Weezemaster API
   version: "1.0"
-paths: {}
+paths:
+  /users:
+    get:
+      description: Récupère tous les utilisateurs
+      operationId: get-all-users
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.User'
+            type: array
+      summary: Récupère tous les utilisateurs
+  /users/{id}:
+    get:
+      description: Récupère un utilisateur par ID
+      operationId: get-user
+      parameters:
+      - description: ID de l'utilisateur
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.User'
+      summary: Récupère un utilisateur
 swagger: "2.0"

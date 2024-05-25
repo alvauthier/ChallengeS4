@@ -12,7 +12,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
-  final _nameController = TextEditingController();
+  final _firstnameController = TextEditingController();
+  final _lastnameController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -36,7 +37,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: <Widget>[
                         TextFormField(
-                          controller: _nameController,
+                          controller: _firstnameController,
                           decoration: const InputDecoration(
                             labelText: 'Prénom',
                           ),
@@ -48,7 +49,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           },
                         ),
                         TextFormField(
-                          controller: _nameController,
+                          controller: _lastnameController,
                           decoration: const InputDecoration(
                             labelText: 'Nom',
                           ),

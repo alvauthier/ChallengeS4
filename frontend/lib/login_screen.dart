@@ -1,53 +1,79 @@
 import 'package:flutter/material.dart';
-import 'package:frontend/register_screen.dart';
 
-class LoginScreen extends StatelessWidget {
+class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
+
+  @override
+  _LoginScreenState createState() => _LoginScreenState();
+}
+
+class _LoginScreenState extends State<LoginScreen> {
+  final _formKey = GlobalKey<FormState>();
+  final _emailController = TextEditingController();
+  final _passwordController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Stack(
         children: <Widget>[
-          Container(
-            decoration: const BoxDecoration(
-              image: DecorationImage(
-                image: AssetImage("assets/background.jpg"), // Remplacez par le chemin de votre image
-                fit: BoxFit.cover,
-              ),
-            ),
-          ),
           Column(
             children: <Widget>[
               AppBar(
                 title: const Text(
-                  'Bienvenue sur Weezevent !',
-                  style: TextStyle(color: Colors.white), // Change la couleur du texte
+                  'Se connecter',
                 ),
-                backgroundColor: Colors.transparent, // Rend l'app bar transparente
-                elevation: 0, // Supprime l'ombre sous l'app bar
+                elevation: 0,
               ),
               Expanded(
-                child: Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: <Widget>[
-                      ElevatedButton(
-                        onPressed: () {
-                          // Navigate to the login screen
-                          // Navigator.push(context, MaterialPageRoute(builder: (context) => LoginScreen()));
-                        },
-                        child: const Text('Se connecter'),
-                      ),
-                      const SizedBox(height: 20),
-                      ElevatedButton(
-                        onPressed: () {
-                          // Navigate to the sign up screen
-                          Navigator.push(context, MaterialPageRoute(builder: (context) => const RegisterScreen()));
-                        },
-                        child: const Text('Créer un compte'),
-                      ),
-                    ],
+                child: Padding(
+                  padding: const EdgeInsets.all(20),
+                  child: Form(
+                    key: _formKey,
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: <Widget>[
+                        TextFormField(
+                          controller: _emailController,
+                          decoration: const InputDecoration(
+                            labelText: 'Email',
+                          ),
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Veuillez entrer votre email';
+                            }
+                            return null;
+                          },
+                        ),
+                        TextFormField(
+                          controller: _passwordController,
+                          decoration: const InputDecoration(
+                            labelText: 'Mot de passe',
+                          ),
+                          obscureText: true,
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Veuillez entrer votre mot de passe';
+                            }
+                            return null;
+                          },
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.only(top: 15.0),
+                          child: Container(
+                            width: double.infinity,
+                            child: ElevatedButton(
+                              onPressed: () {
+                                if (_formKey.currentState!.validate()) {
+                                  // Process data.
+                                }
+                              },
+                              child: const Text('Se connecter'),
+                            ),
+                          ),
+                        )
+                      ],
+                    ),
                   ),
                 ),
               ),

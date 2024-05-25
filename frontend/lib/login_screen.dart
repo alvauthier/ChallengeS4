@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/register_screen.dart';
 
 class LoginScreen extends StatelessWidget {
   const LoginScreen({super.key});
@@ -9,7 +10,7 @@ class LoginScreen extends StatelessWidget {
       body: Stack(
         children: <Widget>[
           Container(
-            decoration: BoxDecoration(
+            decoration: const BoxDecoration(
               image: DecorationImage(
                 image: AssetImage("assets/background.jpg"), // Remplacez par le chemin de votre image
                 fit: BoxFit.cover,
@@ -19,7 +20,7 @@ class LoginScreen extends StatelessWidget {
           Column(
             children: <Widget>[
               AppBar(
-                title: Text(
+                title: const Text(
                   'Bienvenue sur Weezevent !',
                   style: TextStyle(color: Colors.white), // Change la couleur du texte
                 ),
@@ -36,15 +37,15 @@ class LoginScreen extends StatelessWidget {
                           // Navigate to the login screen
                           // Navigator.push(context, MaterialPageRoute(builder: (context) => LoginScreen()));
                         },
-                        child: Text('Se connecter'),
+                        child: const Text('Se connecter'),
                       ),
-                      SizedBox(height: 20),
+                      const SizedBox(height: 20),
                       ElevatedButton(
                         onPressed: () {
                           // Navigate to the sign up screen
-                          // Navigator.push(context, MaterialPageRoute(builder: (context) => SignUpScreen()));
+                          Navigator.push(context, MaterialPageRoute(builder: (context) => const RegisterScreen()));
                         },
-                        child: Text('Créer un compte'),
+                        child: const Text('Créer un compte'),
                       ),
                     ],
                   ),

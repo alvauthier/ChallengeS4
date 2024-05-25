@@ -334,6 +334,265 @@ info:
   title: Weezemaster API
   version: "1.0"
 paths:
+  /categories:
+    get:
+      description: Récupère toutes les catégories
+      operationId: get-all-categories
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.Category'
+            type: array
+      summary: Récupère toutes les catégories
+      tags:
+      - Categories
+    post:
+      description: Créé une catégorie
+      operationId: create-category
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.Category'
+            type: array
+      summary: Créé une catégorie
+      tags:
+      - Categories
+  /categories/{id}:
+    delete:
+      description: Supprime une catégorie par ID
+      operationId: delete-category
+      parameters:
+      - description: ID de la catégorie
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+      summary: Supprime une catégorie
+      tags:
+      - Categories
+    get:
+      description: Récupère une catégorie par ID
+      operationId: get-category
+      parameters:
+      - description: ID de la catégorie
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Category'
+      summary: Récupère une catégorie
+      tags:
+      - Categories
+    patch:
+      description: Modifie une catégorie par ID
+      operationId: update-category
+      parameters:
+      - description: ID de la catégorie
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Category'
+      summary: Modifie une catégorie
+      tags:
+      - Categories
+  /concerts:
+    get:
+      description: Récupère tous les concerts
+      operationId: get-all-concerts
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.Concert'
+            type: array
+      summary: Récupère tous les concerts
+      tags:
+      - Concerts
+    post:
+      description: Créé un concert
+      operationId: create-concert
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.Concert'
+      summary: Créé un concert
+      tags:
+      - Concerts
+  /concerts/{id}:
+    delete:
+      description: Supprime un concert par ID
+      operationId: delete-concert
+      parameters:
+      - description: ID du concert
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+      summary: Supprime un concert
+      tags:
+      - Concerts
+    get:
+      description: Récupère un concert par ID
+      operationId: get-concert
+      parameters:
+      - description: ID du concert
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Concert'
+      summary: Récupère un concert
+      tags:
+      - Concerts
+    patch:
+      description: Modifie un concert par ID
+      operationId: update-concert
+      parameters:
+      - description: ID du concert
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Concert'
+      summary: Modifie un concert
+      tags:
+      - Concerts
+  /interests:
+    get:
+      description: Récupère tous les centres d'intérêts
+      operationId: get-all-interests
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.Interest'
+            type: array
+      summary: Récupère tous les centres d'intérêts
+      tags:
+      - Interests
+    post:
+      description: Créé un centre d'intérêt
+      operationId: create-interest
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.Interest'
+            type: array
+      summary: Créé un centre d'intérêt
+      tags:
+      - Interests
+  /interests/{id}:
+    delete:
+      description: Supprime un centre d'intérêt par ID
+      operationId: delete-interest
+      parameters:
+      - description: ID du centre d'intérêt
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+      summary: Supprime un centre d'intérêt
+      tags:
+      - Interests
+    get:
+      description: Récupère un centre d'intérêt par ID
+      operationId: get-interest
+      parameters:
+      - description: ID du centre d'intérêt
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Interest'
+      summary: Récupère un centre d'intérêt
+      tags:
+      - Interests
+    patch:
+      description: Modifie un centre d'intérêt par ID
+      operationId: update-interest
+      parameters:
+      - description: ID du centre d'intérêt
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Interest'
+      summary: Modifie un centre d'intérêt
+      tags:
+      - Interests
   /users:
     get:
       description: Récupère tous les utilisateurs
@@ -348,7 +607,39 @@ paths:
               $ref: '#/definitions/models.User'
             type: array
       summary: Récupère tous les utilisateurs
+      tags:
+      - Users
+    post:
+      description: Créé un utilisateur
+      operationId: create-user
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.User'
+      summary: Créé un utilisateur
+      tags:
+      - Users
   /users/{id}:
+    delete:
+      description: Supprime un utilisateur par ID
+      operationId: delete-user
+      parameters:
+      - description: ID de l'utilisateur
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+      summary: Supprime un utilisateur
+      tags:
+      - Users
     get:
       description: Récupère un utilisateur par ID
       operationId: get-user
@@ -366,4 +657,25 @@ paths:
           schema:
             $ref: '#/definitions/models.User'
       summary: Récupère un utilisateur
+      tags:
+      - Users
+    patch:
+      description: Modifie un utilisateur par ID
+      operationId: update-user
+      parameters:
+      - description: ID de l'utilisateur
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.User'
+      summary: Modifie un utilisateur
+      tags:
+      - Users
 swagger: "2.0"

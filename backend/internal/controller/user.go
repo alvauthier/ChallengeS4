@@ -11,10 +11,10 @@ import (
 	"gorm.io/gorm"
 )
 
-// GetAllUsers godoc
 // @Summary		Récupère tous les utilisateurs
 // @Description	Récupère tous les utilisateurs
 // @ID				get-all-users
+// @Tags			Users
 // @Produce		json
 // @Success		200	{array}	models.User
 // @Router			/users [get]
@@ -32,6 +32,7 @@ func GetAllUsers(c echo.Context) error {
 // @Summary		Récupère un utilisateur
 // @Description	Récupère un utilisateur par ID
 // @ID				get-user
+// @Tags			Users
 // @Produce		json
 // @Param			id	path		string	true	"ID de l'utilisateur"
 // @Success		200	{object}	models.User
@@ -51,6 +52,13 @@ func GetUser(c echo.Context) error {
 	return c.JSON(http.StatusOK, user)
 }
 
+// @Summary		Créé un utilisateur
+// @Description	Créé un utilisateur
+// @ID				create-user
+// @Tags			Users
+// @Produce		json
+// @Success		201	{object}	models.User
+// @Router			/users [post]
 func CreateUser(c echo.Context) error {
 	db := database.GetDB()
 
@@ -68,30 +76,6 @@ func CreateUser(c echo.Context) error {
 	return c.JSON(http.StatusCreated, user)
 }
 
-// UpdateUser PUT
-// func UpdateUser(c echo.Context) error {
-// 	db := database.GetDB()
-
-// 	id := c.Param("id")
-// 	var user models.User
-// 	if err := db.Where("id = ?", id).First(&user).Error; err != nil {
-// 		if err == gorm.ErrRecordNotFound {
-// 			return echo.NewHTTPError(http.StatusNotFound, "User not found")
-// 		}
-// 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
-// 	}
-
-// 	if err := c.Bind(&user); err != nil {
-// 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
-// 	}
-
-// 	if err := db.Omit("organization_id", "last_connexion").Save(&user).Error; err != nil {
-// 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
-// 	}
-
-// 	return c.JSON(http.StatusOK, user)
-// }
-
 type UserPatchInput struct {
 	Firstname *string `json:"firstname"`
 	Lastname  *string `json:"lastname"`
@@ -99,6 +83,14 @@ type UserPatchInput struct {
 	Password  *string `json:"password"`
 }
 
+// @Summary		Modifie un utilisateur
+// @Description	Modifie un utilisateur par ID
+// @ID				update-user
+// @Tags			Users
+// @Produce		json
+// @Param			id	path		string	true	"ID de l'utilisateur"
+// @Success		200	{object}	models.User
+// @Router			/users/{id} [patch]
 func UpdateUser(c echo.Context) error {
 	db := database.GetDB()
 
@@ -132,6 +124,14 @@ func UpdateUser(c echo.Context) error {
 	return c.JSON(http.StatusOK, user)
 }
 
+// @Summary		Supprime un utilisateur
+// @Description	Supprime un utilisateur par ID
+// @ID				delete-user
+// @Tags			Users
+// @Produce		json
+// @Param			id	path	string	true	"ID de l'utilisateur"
+// @Success		204
+// @Router			/users/{id} [delete]
 func DeleteUser(c echo.Context) error {
 	db := database.GetDB()
 

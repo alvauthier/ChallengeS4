@@ -10,6 +10,13 @@ import (
 	"gorm.io/gorm"
 )
 
+// @Summary		Récupère tous les centres d'intérêts
+// @Description	Récupère tous les centres d'intérêts
+// @ID				get-all-interests
+// @Tags			Interests
+// @Produce		json
+// @Success		200	{array}	models.Interest
+// @Router			/interests [get]
 func GetAllInterests(c echo.Context) error {
 	db := database.GetDB()
 	var interests []models.Interest
@@ -17,6 +24,14 @@ func GetAllInterests(c echo.Context) error {
 	return c.JSON(http.StatusOK, interests)
 }
 
+// @Summary		Récupère un centre d'intérêt
+// @Description	Récupère un centre d'intérêt par ID
+// @ID				get-interest
+// @Tags			Interests
+// @Produce		json
+// @Param			id	path		string	true	"ID du centre d'intérêt"
+// @Success		200	{object}	models.Interest
+// @Router			/interests/{id} [get]
 func GetInterest(c echo.Context) error {
 	db := database.GetDB()
 	id := c.Param("id")
@@ -25,6 +40,13 @@ func GetInterest(c echo.Context) error {
 	return c.JSON(http.StatusOK, interest)
 }
 
+// @Summary		Créé un centre d'intérêt
+// @Description	Créé un centre d'intérêt
+// @ID				create-interest
+// @Tags			Interests
+// @Produce		json
+// @Success		200	{array}	models.Interest
+// @Router			/interests [post]
 func CreateInterest(c echo.Context) error {
 	db := database.GetDB()
 	interest := new(models.Interest)
@@ -35,23 +57,18 @@ func CreateInterest(c echo.Context) error {
 	return c.JSON(http.StatusCreated, interest)
 }
 
-// update PUT
-// func UpdateInterest(c echo.Context) error {
-// 	db := database.GetDB()
-// 	id := c.Param("id")
-// 	interest := new(models.Interest)
-// 	db.First(&interest, id)
-// 	if err := c.Bind(interest); err != nil {
-// 		return err
-// 	}
-// 	db.Save(&interest)
-// 	return c.JSON(http.StatusOK, interest)
-// }
-
 type InterestPatchInput struct {
 	Name *string `json:"name"`
 }
 
+// @Summary		Modifie un centre d'intérêt
+// @Description	Modifie un centre d'intérêt par ID
+// @ID				update-interest
+// @Tags			Interests
+// @Produce		json
+// @Param			id	path		string	true	"ID du centre d'intérêt"
+// @Success		200	{object}	models.Interest
+// @Router			/interests/{id} [patch]
 func UpdateInterest(c echo.Context) error {
 	db := database.GetDB()
 	id := c.Param("id")
@@ -77,6 +94,14 @@ func UpdateInterest(c echo.Context) error {
 	return c.JSON(http.StatusOK, interest)
 }
 
+// @Summary		Supprime un centre d'intérêt
+// @Description	Supprime un centre d'intérêt par ID
+// @ID				delete-interest
+// @Tags			Interests
+// @Produce		json
+// @Param			id	path		string	true	"ID du centre d'intérêt"
+// @Success		204
+// @Router			/interests/{id} [delete]
 func DeleteInterest(c echo.Context) error {
 	db := database.GetDB()
 	id := c.Param("id")

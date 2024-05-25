@@ -24,11 +24,398 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/categories": {
+            "get": {
+                "description": "Récupère toutes les catégories",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Categories"
+                ],
+                "summary": "Récupère toutes les catégories",
+                "operationId": "get-all-categories",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/models.Category"
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Créé une catégorie",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Categories"
+                ],
+                "summary": "Créé une catégorie",
+                "operationId": "create-category",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/models.Category"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/categories/{id}": {
+            "get": {
+                "description": "Récupère une catégorie par ID",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Categories"
+                ],
+                "summary": "Récupère une catégorie",
+                "operationId": "get-category",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "ID de la catégorie",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.Category"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Supprime une catégorie par ID",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Categories"
+                ],
+                "summary": "Supprime une catégorie",
+                "operationId": "delete-category",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "ID de la catégorie",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    }
+                }
+            },
+            "patch": {
+                "description": "Modifie une catégorie par ID",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Categories"
+                ],
+                "summary": "Modifie une catégorie",
+                "operationId": "update-category",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "ID de la catégorie",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.Category"
+                        }
+                    }
+                }
+            }
+        },
+        "/concerts": {
+            "get": {
+                "description": "Récupère tous les concerts",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Concerts"
+                ],
+                "summary": "Récupère tous les concerts",
+                "operationId": "get-all-concerts",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/models.Concert"
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Créé un concert",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Concerts"
+                ],
+                "summary": "Créé un concert",
+                "operationId": "create-concert",
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/models.Concert"
+                        }
+                    }
+                }
+            }
+        },
+        "/concerts/{id}": {
+            "get": {
+                "description": "Récupère un concert par ID",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Concerts"
+                ],
+                "summary": "Récupère un concert",
+                "operationId": "get-concert",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "ID du concert",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.Concert"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Supprime un concert par ID",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Concerts"
+                ],
+                "summary": "Supprime un concert",
+                "operationId": "delete-concert",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "ID du concert",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    }
+                }
+            },
+            "patch": {
+                "description": "Modifie un concert par ID",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Concerts"
+                ],
+                "summary": "Modifie un concert",
+                "operationId": "update-concert",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "ID du concert",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.Concert"
+                        }
+                    }
+                }
+            }
+        },
+        "/interests": {
+            "get": {
+                "description": "Récupère tous les centres d'intérêts",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Interests"
+                ],
+                "summary": "Récupère tous les centres d'intérêts",
+                "operationId": "get-all-interests",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/models.Interest"
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Créé un centre d'intérêt",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Interests"
+                ],
+                "summary": "Créé un centre d'intérêt",
+                "operationId": "create-interest",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/models.Interest"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/interests/{id}": {
+            "get": {
+                "description": "Récupère un centre d'intérêt par ID",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Interests"
+                ],
+                "summary": "Récupère un centre d'intérêt",
+                "operationId": "get-interest",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "ID du centre d'intérêt",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.Interest"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Supprime un centre d'intérêt par ID",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Interests"
+                ],
+                "summary": "Supprime un centre d'intérêt",
+                "operationId": "delete-interest",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "ID du centre d'intérêt",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    }
+                }
+            },
+            "patch": {
+                "description": "Modifie un centre d'intérêt par ID",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Interests"
+                ],
+                "summary": "Modifie un centre d'intérêt",
+                "operationId": "update-interest",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "ID du centre d'intérêt",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.Interest"
+                        }
+                    }
+                }
+            }
+        },
         "/users": {
             "get": {
                 "description": "Récupère tous les utilisateurs",
                 "produces": [
                     "application/json"
+                ],
+                "tags": [
+                    "Users"
                 ],
                 "summary": "Récupère tous les utilisateurs",
                 "operationId": "get-all-users",
@@ -43,6 +430,25 @@ const docTemplate = `{
                         }
                     }
                 }
+            },
+            "post": {
+                "description": "Créé un utilisateur",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Users"
+                ],
+                "summary": "Créé un utilisateur",
+                "operationId": "create-user",
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/models.User"
+                        }
+                    }
+                }
             }
         },
         "/users/{id}": {
@@ -51,8 +457,64 @@ const docTemplate = `{
                 "produces": [
                     "application/json"
                 ],
+                "tags": [
+                    "Users"
+                ],
                 "summary": "Récupère un utilisateur",
                 "operationId": "get-user",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "ID de l'utilisateur",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.User"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Supprime un utilisateur par ID",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Users"
+                ],
+                "summary": "Supprime un utilisateur",
+                "operationId": "delete-user",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "ID de l'utilisateur",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    }
+                }
+            },
+            "patch": {
+                "description": "Modifie un utilisateur par ID",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Users"
+                ],
+                "summary": "Modifie un utilisateur",
+                "operationId": "update-user",
                 "parameters": [
                     {
                         "type": "string",

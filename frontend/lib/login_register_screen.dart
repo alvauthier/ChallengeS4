@@ -13,7 +13,7 @@ class LoginRegisterScreen extends StatelessWidget {
           Container(
             decoration: const BoxDecoration(
               image: DecorationImage(
-                image: AssetImage("assets/background.jpg"), // Remplacez par le chemin de votre image
+                image: AssetImage("assets/background.jpg"),
                 fit: BoxFit.cover,
               ),
             ),
@@ -22,11 +22,11 @@ class LoginRegisterScreen extends StatelessWidget {
             children: <Widget>[
               AppBar(
                 title: const Text(
-                  'Bienvenue sur Weezevent !',
-                  style: TextStyle(color: Colors.white), // Change la couleur du texte
+                  'Bienvenue sur Weezemaster !',
+                  style: TextStyle(color: Colors.white),
                 ),
-                backgroundColor: Colors.transparent, // Rend l'app bar transparente
-                elevation: 0, // Supprime l'ombre sous l'app bar
+                backgroundColor: Colors.transparent,
+                elevation: 0,
               ),
               Expanded(
                 child: Center(
@@ -35,7 +35,6 @@ class LoginRegisterScreen extends StatelessWidget {
                     children: <Widget>[
                       ElevatedButton(
                         onPressed: () {
-                          // Navigate to the login screen
                           Navigator.push(context, MaterialPageRoute(builder: (context) => LoginScreen()));
                         },
                         child: const Text('Se connecter'),
@@ -43,7 +42,6 @@ class LoginRegisterScreen extends StatelessWidget {
                       const SizedBox(height: 20),
                       ElevatedButton(
                         onPressed: () {
-                          // Navigate to the sign up screen
                           Navigator.push(context, MaterialPageRoute(builder: (context) => const RegisterScreen()));
                         },
                         child: const Text('Créer un compte'),

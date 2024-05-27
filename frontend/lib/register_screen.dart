@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -14,6 +16,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final _confirmPasswordController = TextEditingController();
   final _firstnameController = TextEditingController();
   final _lastnameController = TextEditingController();
+
+  final RegExp emailRegExp = RegExp(
+      r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$');
+  final RegExp passwordRegExp = RegExp(
+      r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#\$&*~]).{8,}$');
 
   @override
   Widget build(BuildContext context) {
@@ -68,6 +75,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           validator: (value) {
                             if (value == null || value.isEmpty) {
                               return 'Veuillez entrer votre email';
+                            } else if (!emailRegExp.hasMatch(value)) {
+                              return 'Veuillez entrer un email valide';
                             }
                             return null;
                           },
@@ -81,6 +90,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           validator: (value) {
                             if (value == null || value.isEmpty) {
                               return 'Veuillez entrer votre mot de passe';
+                            } else if (!passwordRegExp.hasMatch(value)) {
+                              return 'Le mot de passe doit contenir au moins 8 caractères, dont une majuscule, une minuscule, un chiffre et un caractère spécial';
                             }
                             return null;
                           },
@@ -106,9 +117,38 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           child: Container(
                             width: double.infinity,
                             child: ElevatedButton(
-                              onPressed: () {
+                              onPressed: () async {
                                 if (_formKey.currentState!.validate()) {
                                   // Process data.
+                                  try {
+                                    var response = await http.post(
+                                      Uri.parse('http://10.0.2.2:8080/users'), // 10.0.2.2 => localhost
+                                      headers: <String, String>{
+                                        'Content-Type': 'application/json; charset=UTF-8',
+                                      },
+                                      body: jsonEncode(<String, String>{
+                                        'firstname': _firstnameController.text,
+                                        'lastname': _lastnameController.text,
+                                        'email': _emailController.text,
+                                        'password': _passwordController.text,
+                                      }),
+                                    );
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        content: Text(response.statusCode == 201
+                                            ? 'Inscription réussie'
+                                            : 'Erreur lors de l\'inscription'),
+                                        duration: Duration(seconds: 5),
+                                      ),
+                                    );
+                                  } catch (e) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      const SnackBar(
+                                        content: Text('Une erreur est survenue. Veuillez vérifier votre connexion internet ou réessayer plus tard.'),
+                                        duration: Duration(seconds: 5),
+                                      ),
+                                    );
+                                  }
                                 }
                               },
                               child: const Text('S\'inscrire'),

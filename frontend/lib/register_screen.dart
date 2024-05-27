@@ -141,6 +141,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                         duration: Duration(seconds: 5),
                                       ),
                                     );
+                                    if (response.statusCode == 201) {
+                                      Navigator.pop(context);
+                                    }
                                   } catch (e) {
                                     ScaffoldMessenger.of(context).showSnackBar(
                                       const SnackBar(

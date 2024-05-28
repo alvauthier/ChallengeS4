@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:frontend/login_register_screen.dart';
 import 'dart:convert';
 
 class ProfileScreen extends StatefulWidget {
@@ -16,8 +17,25 @@ class _ProfileScreenState extends State<ProfileScreen> {
   @override
   void initState() {
     super.initState();
-    getEmailFromJwt();
+    verifyJwtAndRedirectIfNecessary();
   }
+
+  Future<void> verifyJwtAndRedirectIfNecessary() async {
+    String? jwt = await storage.read(key: 'token');
+    // if (jwt == null || !_isTokenValid(jwt)) {
+    if (jwt == null) {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => LoginRegisterScreen()),
+      );
+    } else {
+      getEmailFromJwt();
+    }
+  }
+
+  // bool _isTokenValid(String token) {
+  //   return false;
+  // }
 
   Future<void> getEmailFromJwt() async {
     String? jwt = await storage.read(key: 'token');

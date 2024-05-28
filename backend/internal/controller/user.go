@@ -2,6 +2,7 @@ package controller
 
 import (
 	"net/http"
+	"os"
 	"time"
 	"weezemaster/internal/database"
 	"weezemaster/internal/models"
@@ -123,6 +124,11 @@ func Login(c echo.Context) error {
 		return c.JSON(http.StatusUnauthorized, map[string]string{"message": "Invalid credentials"})
 	}
 
+	token, err := createToken(user.Email)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{"message": err.Error()})
+	}
+	fmt.Println(token)
 	return c.JSON(http.StatusOK, user)
 }
 
@@ -205,7 +211,7 @@ func CheckPasswordHash(password, hash string) bool {
 	return err == nil
 }
 
-var secretKey = []byte("secret-key")
+var secretKey = []byte(os.Getenv("SECRET_KEY"))
 
 func createToken(username string) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256,

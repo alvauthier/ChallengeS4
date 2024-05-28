@@ -593,6 +593,45 @@ paths:
       summary: Modifie un centre d'intérêt
       tags:
       - Interests
+  /login:
+    post:
+      description: Se connecter avec un email et un mot de passe
+      operationId: login
+      parameters:
+      - description: Email de l'utilisateur
+        in: query
+        name: email
+        required: true
+        type: string
+      - description: Mot de passe de l'utilisateur
+        in: query
+        name: password
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.User'
+      summary: Se connecter
+      tags:
+      - Users
+  /register:
+    post:
+      description: Créé un utilisateur
+      operationId: create-user
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.User'
+      summary: Créé un utilisateur
+      tags:
+      - Users
   /users:
     get:
       description: Récupère tous les utilisateurs
@@ -607,19 +646,6 @@ paths:
               $ref: '#/definitions/models.User'
             type: array
       summary: Récupère tous les utilisateurs
-      tags:
-      - Users
-    post:
-      description: Créé un utilisateur
-      operationId: create-user
-      produces:
-      - application/json
-      responses:
-        "201":
-          description: Created
-          schema:
-            $ref: '#/definitions/models.User'
-      summary: Créé un utilisateur
       tags:
       - Users
   /users/{id}:

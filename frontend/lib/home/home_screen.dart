@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:frontend/home/blocs/home_bloc.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
+import 'package:frontend/concert/concert_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -60,11 +61,20 @@ class HomeScreen extends StatelessWidget {
                         child: ListView.builder(
                           itemBuilder: (context, index) {
                             final concert = state.concerts[index];
-                            return Padding(
-                              padding: const EdgeInsets.symmetric(vertical: 20.0, horizontal: 10.0),
-                              child: Card(
-                                elevation: 0,
-                                shape: RoundedRectangleBorder(
+                            return GestureDetector(
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => ConcertScreen(concertId: concert.id),
+                                  ),
+                                );
+                              },
+                              child: Padding(
+                                padding: const EdgeInsets.symmetric(vertical: 20.0, horizontal: 10.0),
+                                child: Card(
+                                  elevation: 0,
+                                  shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(10),
                                 ),
                                 child: Column(
@@ -96,7 +106,7 @@ class HomeScreen extends StatelessWidget {
                                       padding: const EdgeInsets.symmetric(vertical: 2.0, horizontal: 20.0),
                                       child: Text(
                                         formatDate(concert.date),
-                                        style: const TextStyle(
+                                          style: const TextStyle(
                                           color: Colors.grey,
                                         ),
                                       ),
@@ -111,6 +121,7 @@ class HomeScreen extends StatelessWidget {
                                       ),
                                     ),
                                   ],
+                                ),
                                 ),
                               ),
                             );

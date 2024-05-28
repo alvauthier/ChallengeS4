@@ -25,111 +25,123 @@ class ConcertScreen extends StatelessWidget {
       child: SafeArea(
         child: Scaffold(
           backgroundColor: Colors.white,
-          body: BlocBuilder<ConcertBloc, ConcertState>(
-            builder: (context, state) {
-              if (state is ConcertLoading) {
-                return const Center(
-                  child: CircularProgressIndicator(),
-                );
-              }
+          body: Stack(
+            children: [
+              BlocBuilder<ConcertBloc, ConcertState>(
+                builder: (context, state) {
+                  if (state is ConcertLoading) {
+                    return const Center(
+                      child: CircularProgressIndicator(),
+                    );
+                  }
 
-              if (state is ConcertDataLoadingError) {
-                return Center(
-                  child: Text(
-                    state.errorMessage,
-                    style: const TextStyle(color: Colors.red),
-                  ),
-                );
-              }
+                  if (state is ConcertDataLoadingError) {
+                    return Center(
+                      child: Text(
+                        state.errorMessage,
+                        style: const TextStyle(color: Colors.red),
+                      ),
+                    );
+                  }
 
-              if (state is ConcertDataLoadingSuccess) {
-                return Column(
-                  children: <Widget> [
-                    Image.network(
-                      'https://picsum.photos/seed/picsum/800/400',
-                      width: double.infinity,
-                      height: 200,
-                      fit: BoxFit.cover,
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.all(10.0),
-                      child: Align(
-                        alignment: Alignment.centerLeft,
-                        child: Text(
-                          formatDate(state.concert.date),
-                          style: const TextStyle(
-                            fontSize: 20
+                  if (state is ConcertDataLoadingSuccess) {
+                    return Column(
+                        children: <Widget> [
+                          Image.network(
+                            'https://picsum.photos/seed/picsum/800/400',
+                            width: double.infinity,
+                            height: 200,
+                            fit: BoxFit.cover,
                           ),
-                        ),
-                      ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.all(10.0),
-                      child: Align(
-                        alignment: Alignment.centerLeft,
-                        child: Text(
-                          state.concert.name,
-                          style: const TextStyle(
-                              fontSize: 30,
-                              fontWeight: FontWeight.bold
+                          Padding(
+                            padding: const EdgeInsets.all(10.0),
+                            child: Align(
+                              alignment: Alignment.centerLeft,
+                              child: Text(
+                                formatDate(state.concert.date),
+                                style: const TextStyle(
+                                    fontSize: 20
+                                ),
+                              ),
+                            ),
                           ),
-                        ),
-                      ),
-                    ),
-                    ListTile(
-                      leading: const Icon(Icons.location_on),
-                      title: Text(state.concert.location),
-                    ),
-                    const ListTile(
-                      leading: Icon(Icons.event_seat),
-                      title: Text('300 restant'),
-                    ),
-                    const Divider(),
-                    const Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 10.0, vertical: 15.0),
-                      child: Align(
-                        alignment: Alignment.centerLeft,
-                        child: Text(
-                          'A propos de cet événement',
-                          style: TextStyle(
-                              fontSize: 25,
-                              fontWeight: FontWeight.bold
+                          Padding(
+                            padding: const EdgeInsets.all(10.0),
+                            child: Align(
+                              alignment: Alignment.centerLeft,
+                              child: Text(
+                                state.concert.name,
+                                style: const TextStyle(
+                                    fontSize: 30,
+                                    fontWeight: FontWeight.bold
+                                ),
+                              ),
+                            ),
                           ),
-                        ),
-                      ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.all(10.0),
-                      child: Align(
-                        alignment: Alignment.centerLeft,
-                        child: Text(
-                          state.concert.description,
-                          style: const TextStyle(
-                              fontSize: 20
+                          ListTile(
+                            leading: const Icon(Icons.location_on),
+                            title: Text(state.concert.location),
                           ),
-                        ),
-                      ),
-                    ),
-                    const Divider(),
-                    const Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 10.0, vertical: 15.0),
-                      child: Align(
-                        alignment: Alignment.centerLeft,
-                        child: Text(
-                          'Ticket disponible à la revente',
-                          style: TextStyle(
-                              fontSize: 25,
-                              fontWeight: FontWeight.bold
+                          const ListTile(
+                            leading: Icon(Icons.event_seat),
+                            title: Text('300 restant'),
                           ),
-                        ),
-                      ),
-                    ),
-                  ]
-                );
-              }
+                          const Divider(),
+                          const Padding(
+                            padding: EdgeInsets.symmetric(horizontal: 10.0, vertical: 15.0),
+                            child: Align(
+                              alignment: Alignment.centerLeft,
+                              child: Text(
+                                'A propos de cet événement',
+                                style: TextStyle(
+                                    fontSize: 25,
+                                    fontWeight: FontWeight.bold
+                                ),
+                              ),
+                            ),
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.all(10.0),
+                            child: Align(
+                              alignment: Alignment.centerLeft,
+                              child: Text(
+                                state.concert.description,
+                                style: const TextStyle(
+                                    fontSize: 20
+                                ),
+                              ),
+                            ),
+                          ),
+                          const Divider(),
+                          const Padding(
+                            padding: EdgeInsets.symmetric(horizontal: 10.0, vertical: 15.0),
+                            child: Align(
+                              alignment: Alignment.centerLeft,
+                              child: Text(
+                                'Ticket disponible à la revente',
+                                style: TextStyle(
+                                    fontSize: 25,
+                                    fontWeight: FontWeight.bold
+                                ),
+                              ),
+                            ),
+                          ),
+                        ]
+                    );
+                  }
 
-              return const SizedBox();
-            },
+                  return const SizedBox();
+                },
+              ),
+              Positioned(
+                top: 10.0,
+                left: 10.0,
+                child: FloatingActionButton(
+                  child: Icon(Icons.arrow_back),
+                  onPressed: () => Navigator.pop(context),
+                ),
+              ),
+            ],
           ),
           bottomNavigationBar: BottomAppBar(
             child: Padding(

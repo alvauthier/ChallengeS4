@@ -34,9 +34,19 @@ class HomeScreen extends StatelessWidget {
 
               if (state is HomeDataLoadingError) {
                 return Center(
-                  child: Text(
-                    state.errorMessage,
-                    style: const TextStyle(color: Colors.red),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: <Widget>[
+                      Image.asset('assets/no_internet.png', width: 100, height: 100),
+                      const Padding(
+                        padding: const EdgeInsets.only(top: 20),
+                        child: Text(
+                          'Une erreur est survenue. Veuillez vérifier votre connexion internet ou réessayez plus tard.',
+                          style: TextStyle(fontSize: 16),
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                    ],
                   ),
                 );
               }

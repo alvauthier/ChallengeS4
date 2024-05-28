@@ -1,7 +1,7 @@
 class Concert {
   final String id;
   final String name;
-  final String date;
+  final DateTime date;
   final String location;
 
   Concert({

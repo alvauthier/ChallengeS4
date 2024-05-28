@@ -60,13 +60,14 @@ class ConcertScreen extends StatelessWidget {
                               child: Text(
                                 formatDate(state.concert.date),
                                 style: const TextStyle(
-                                    fontSize: 20
+                                    fontSize: 20,
+                                    fontFamily: 'ReadexProRegular'
                                 ),
                               ),
                             ),
                           ),
                           Padding(
-                            padding: const EdgeInsets.only(top: 20.0, right: 10.0, left: 10.0),
+                            padding: const EdgeInsets.only(top: 15.0, right: 10.0, left: 10.0),
                             child: Align(
                               alignment: Alignment.centerLeft,
                               child: Text(
@@ -80,11 +81,21 @@ class ConcertScreen extends StatelessWidget {
                           ),
                           ListTile(
                             leading: const Icon(Icons.location_on),
-                            title: Text(state.concert.location),
+                            title: Text(
+                                state.concert.location,
+                                style: const TextStyle(
+                                    fontFamily: 'ReadexProRegular'
+                                )
+                            ),
                           ),
                           const ListTile(
                             leading: Icon(Icons.event_seat),
-                            title: Text('300 restant'),
+                            title: Text(
+                                '300 restant',
+                                style: TextStyle(
+                                    fontFamily: 'ReadexProRegular'
+                                )
+                            ),
                           ),
                           const Divider(),
                           const Padding(
@@ -95,7 +106,7 @@ class ConcertScreen extends StatelessWidget {
                                 'A propos de cet événement',
                                 style: TextStyle(
                                     fontSize: 25,
-                                    fontWeight: FontWeight.bold
+                                    fontFamily: 'ReadexProSemiBold'
                                 ),
                               ),
                             ),
@@ -105,7 +116,12 @@ class ConcertScreen extends StatelessWidget {
                             child: Padding(
                               padding: const EdgeInsets.only(top: 10.0, right: 10.0, left: 10.0),
                               child: Chip(
-                                label: Text('Pop'),
+                                label: const Text(
+                                    'Pop',
+                                    style: TextStyle(
+                                        fontFamily: 'ReadexProRegular'
+                                    )
+                                ),
                                 backgroundColor: Colors.deepOrange.shade100,
                                 shape: const StadiumBorder(),
                                 side: BorderSide.none,
@@ -120,7 +136,8 @@ class ConcertScreen extends StatelessWidget {
                                 state.concert.description,
                                 style: const TextStyle(
                                     fontSize: 16,
-                                    color: Colors.grey
+                                    color: Colors.grey,
+                                    fontFamily: 'ReadexProRegular'
                                 ),
                               ),
                             ),
@@ -134,7 +151,7 @@ class ConcertScreen extends StatelessWidget {
                                 'Ticket disponible à la revente',
                                 style: TextStyle(
                                     fontSize: 25,
-                                    fontWeight: FontWeight.bold
+                                    fontFamily: 'ReadexProSemiBold'
                                 ),
                               ),
                             ),
@@ -166,7 +183,7 @@ class ConcertScreen extends StatelessWidget {
                     '100€',
                     style: TextStyle(
                         fontSize: 20,
-                        fontWeight: FontWeight.bold
+                        fontFamily: 'ReadexProBold'
                     ),
                   ),
                   ElevatedButton(

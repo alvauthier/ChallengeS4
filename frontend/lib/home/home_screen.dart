@@ -83,7 +83,7 @@ class HomeScreen extends StatelessWidget {
                             '${state.concerts.length} concerts',
                             style: const TextStyle(
                               fontSize: 30,
-                              fontWeight: FontWeight.w600,
+                              fontFamily: 'ReadexProSemibold',
                             ),
                           ),
                         ),
@@ -138,7 +138,8 @@ class HomeScreen extends StatelessWidget {
                                         child: Text(
                                           formatDate(concert.date),
                                           style: const TextStyle(
-                                            color: Colors.grey,
+                                            color: Colors.black54,
+                                            fontFamily: 'ReadexProRegular',
                                           ),
                                         ),
                                       ),
@@ -147,7 +148,8 @@ class HomeScreen extends StatelessWidget {
                                         child: Text(
                                           concert.location,
                                           style: const TextStyle(
-                                            color: Colors.black,
+                                            color: Colors.grey,
+                                            fontFamily: 'ReadexProRegular',
                                           ),
                                         ),
                                       ),

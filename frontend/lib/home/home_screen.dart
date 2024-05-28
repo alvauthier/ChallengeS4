@@ -34,7 +34,7 @@ class HomeScreen extends StatelessWidget {
                   itemBuilder: (context, index) {
                     final concert = state.concerts[index];
                     return Padding(
-                      padding: const EdgeInsets.all(8.0),
+                      padding: const EdgeInsets.all(10.0),
                       child: Card(
                         elevation: 0,
                         shape: RoundedRectangleBorder(
@@ -56,17 +56,17 @@ class HomeScreen extends StatelessWidget {
                               ),
                             ),
                             Padding(
-                              padding: const EdgeInsets.all(8.0),
+                              padding: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 16.0),
                               child: Text(
                                 concert.name,
                                 style: const TextStyle(
                                   fontWeight: FontWeight.bold,
-                                  fontSize: 18,
+                                  fontSize: 26,
                                 ),
                               ),
                             ),
                             Padding(
-                              padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                              padding: const EdgeInsets.symmetric(vertical: 2.0, horizontal: 16.0),
                               child: Text(
                                 concert.date,
                                 style: const TextStyle(
@@ -75,7 +75,7 @@ class HomeScreen extends StatelessWidget {
                               ),
                             ),
                             Padding(
-                              padding: const EdgeInsets.all(8.0),
+                              padding: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 16.0),
                               child: Text(
                                 concert.location,
                                 style: const TextStyle(

@@ -39,6 +39,8 @@ dependencies:
   flinq: ^2.0.2
   flutter_bloc: ^8.1.5
 
+  intl: ^0.17.0
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

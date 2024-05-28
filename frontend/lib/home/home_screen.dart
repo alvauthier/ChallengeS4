@@ -1,9 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/home/blocs/home_bloc.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:intl/intl.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
+
+  String formatDate(String date) {
+    DateTime dateTime = DateTime.parse(date);
+
+    DateFormat dateFormat = DateFormat('dd/MM/yyyy HH:mm', 'fr_FR');
+
+    String formattedDate = dateFormat.format(dateTime);
+
+    return formattedDate;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -84,7 +95,7 @@ class HomeScreen extends StatelessWidget {
                                     Padding(
                                       padding: const EdgeInsets.symmetric(vertical: 2.0, horizontal: 20.0),
                                       child: Text(
-                                        concert.date,
+                                        formatDate(concert.date),
                                         style: const TextStyle(
                                           color: Colors.grey,
                                         ),

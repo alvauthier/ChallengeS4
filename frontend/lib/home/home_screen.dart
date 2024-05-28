@@ -39,7 +39,7 @@ class HomeScreen extends StatelessWidget {
                         'https://picsum.photos/seed/picsum/200/300'
                       ),
                       title: Text(concert.name),
-                      subtitle: Text(concert.date.toString()),
+                      subtitle: Text(concert.date),
                       trailing: Text(concert.location)
                     );
                   },

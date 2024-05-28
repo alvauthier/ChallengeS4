@@ -3,22 +3,44 @@ import 'package:frontend/home/blocs/home_bloc.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import 'package:frontend/concert/concert_screen.dart';
+import 'package:frontend/components/search_bar.dart';
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
-  String formatDate(String date) {
-    DateTime dateTime = DateTime.parse(date);
+  @override
+  _HomeScreenState createState() => _HomeScreenState();
+}
 
-    DateFormat dateFormat = DateFormat('dd/MM/yyyy HH:mm', 'fr_FR');
+class _HomeScreenState extends State<HomeScreen> {
+  final TextEditingController _searchController = TextEditingController();
+  List _filteredConcerts = [];
 
-    String formattedDate = dateFormat.format(dateTime);
+  @override
+  void initState() {
+    super.initState();
+    _searchController.addListener(_onSearchChanged);
+  }
 
-    return formattedDate;
+  @override
+  void dispose() {
+    _searchController.removeListener(_onSearchChanged);
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  void _onSearchChanged() {
+    setState(() {});
   }
 
   Future<void> _refreshData(BuildContext context) async {
     context.read<HomeBloc>().add(HomeDataLoaded());
+  }
+
+  String formatDate(String date) {
+    DateTime dateTime = DateTime.parse(date);
+    DateFormat dateFormat = DateFormat('dd/MM/yyyy HH:mm', 'fr_FR');
+    return dateFormat.format(dateTime);
   }
 
   @override
@@ -71,16 +93,27 @@ class HomeScreen extends StatelessWidget {
               }
 
               if (state is HomeDataLoadingSuccess) {
+                _filteredConcerts = state.concerts.where((concert) {
+                  return concert.name.toLowerCase().contains(_searchController.text.toLowerCase());
+                }).toList();
+
                 return RefreshIndicator(
                   onRefresh: () => _refreshData(context),
                   child: Column(
                     children: [
+                      CustomSearchBar(
+                        controller: _searchController,
+                        onChanged: (text) {
+                          setState(() {
+                          });
+                        },
+                      ),
                       Padding(
                         padding: const EdgeInsets.all(10.0),
                         child: Align(
                           alignment: Alignment.centerLeft,
                           child: Text(
-                            '${state.concerts.length} concerts',
+                            '${_filteredConcerts.length} concerts',
                             style: const TextStyle(
                               fontSize: 30,
                               fontWeight: FontWeight.w600,
@@ -91,7 +124,7 @@ class HomeScreen extends StatelessWidget {
                       Expanded(
                         child: ListView.builder(
                           itemBuilder: (context, index) {
-                            final concert = state.concerts[index];
+                            final concert = _filteredConcerts[index];
                             return GestureDetector(
                               onTap: () {
                                 Navigator.push(
@@ -157,7 +190,7 @@ class HomeScreen extends StatelessWidget {
                               ),
                             );
                           },
-                          itemCount: state.concerts.length,
+                          itemCount: _filteredConcerts.length,
                         ),
                       ),
                     ],

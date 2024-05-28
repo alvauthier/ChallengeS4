@@ -83,7 +83,7 @@ class HomeScreen extends StatelessWidget {
                             '${state.concerts.length} concerts',
                             style: const TextStyle(
                               fontSize: 30,
-                              fontWeight: FontWeight.bold,
+                              fontWeight: FontWeight.w600,
                             ),
                           ),
                         ),
@@ -128,7 +128,7 @@ class HomeScreen extends StatelessWidget {
                                         child: Text(
                                           concert.name,
                                           style: const TextStyle(
-                                            fontWeight: FontWeight.bold,
+                                            fontFamily: 'ReadexProBold',
                                             fontSize: 26,
                                           ),
                                         ),

@@ -73,6 +73,27 @@ flutter:
     - assets/background.jpg
     - assets/no_internet.png
 
+  fonts:
+    - family: ReadexProRegular
+      fonts:
+        - asset: assets/fonts/ReadexPro-Regular.ttf
+
+    - family: ReadexProBold
+      fonts:
+        - asset: assets/fonts/ReadexPro-Bold.ttf
+
+    - family: ReadexProLight
+      fonts:
+          - asset: assets/fonts/ReadexPro-Light.ttf
+
+    - family: ReadexProSemiBold
+      fonts:
+          - asset: assets/fonts/ReadexPro-SemiBold.ttf
+
+    - family: ReadexProMedium
+      fonts:
+          - asset: assets/fonts/ReadexPro-Medium.ttf
+
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware
 

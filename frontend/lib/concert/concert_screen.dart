@@ -73,7 +73,7 @@ class ConcertScreen extends StatelessWidget {
                                 state.concert.name,
                                 style: const TextStyle(
                                     fontSize: 30,
-                                    fontWeight: FontWeight.bold
+                                    fontFamily: 'ReadexProBold'
                                 ),
                               ),
                             ),
@@ -97,6 +97,18 @@ class ConcertScreen extends StatelessWidget {
                                     fontSize: 25,
                                     fontWeight: FontWeight.bold
                                 ),
+                              ),
+                            ),
+                          ),
+                          Align(
+                            alignment: Alignment.centerLeft,
+                            child: Padding(
+                              padding: const EdgeInsets.only(top: 10.0, right: 10.0, left: 10.0),
+                              child: Chip(
+                                label: Text('Pop'),
+                                backgroundColor: Colors.deepOrange.shade100,
+                                shape: const StadiumBorder(),
+                                side: BorderSide.none,
                               ),
                             ),
                           ),

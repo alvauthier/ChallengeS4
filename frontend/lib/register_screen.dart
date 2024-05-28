@@ -122,7 +122,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                   // Process data.
                                   try {
                                     var response = await http.post(
-                                      Uri.parse('http://10.0.2.2:8080/users'), // 10.0.2.2 => localhost
+                                      Uri.parse('http://10.0.2.2:8080/register'), // 10.0.2.2 => localhost
                                       headers: <String, String>{
                                         'Content-Type': 'application/json; charset=UTF-8',
                                       },

@@ -31,9 +31,10 @@ func main() {
 	router := echo.New()
 	database.InitDB()
 
+	router.POST("/register", controller.Register)
+	router.POST("/login", controller.Login)
 	router.GET("/users", controller.GetAllUsers)
 	router.GET("/users/:id", controller.GetUser)
-	router.POST("/users", controller.CreateUser)
 	router.PATCH("/users/:id", controller.UpdateUser)
 	router.DELETE("/users/:id", controller.DeleteUser)
 

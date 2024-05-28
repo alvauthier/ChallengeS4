@@ -62,8 +62,8 @@ func GetUser(c echo.Context) error {
 // @Tags			Users
 // @Produce		json
 // @Success		201	{object}	models.User
-// @Router			/users [post]
-func CreateUser(c echo.Context) error {
+// @Router			/register [post]
+func Register(c echo.Context) error {
 	db := database.GetDB()
 
 	user := new(models.User)
@@ -91,6 +91,39 @@ type UserPatchInput struct {
 	Lastname  *string `json:"lastname"`
 	Email     *string `json:"email"`
 	Password  *string `json:"password"`
+}
+
+// @Summary		Se connecter
+// @Description	Se connecter avec un email et un mot de passe
+// @ID				login
+// @Tags			Users
+// @Produce		json
+// @Param			email		query		string	true	"Email de l'utilisateur"
+// @Param			password	query		string	true	"Mot de passe de l'utilisateur"
+// @Success		200	{object}	models.User
+// @Router			/login [post]
+func Login(c echo.Context) error {
+	db := database.GetDB()
+
+	var requestBody map[string]string
+	if err := c.Bind(&requestBody); err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]string{"message": "Invalid request"})
+	}
+
+	email := requestBody["email"]
+	password := requestBody["password"]
+
+	var user models.User
+	if err := db.Where("email = ?", email).First(&user).Error; err != nil {
+		return c.JSON(http.StatusUnauthorized, map[string]string{"message": "Invalid credentials"})
+	}
+
+	err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password))
+	if err != nil {
+		return c.JSON(http.StatusUnauthorized, map[string]string{"message": "Invalid credentials"})
+	}
+
+	return c.JSON(http.StatusOK, user)
 }
 
 // @Summary		Modifie un utilisateur

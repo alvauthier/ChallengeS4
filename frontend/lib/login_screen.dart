@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -11,6 +13,9 @@ class _LoginScreenState extends State<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
+
+  final RegExp emailRegExp = RegExp(
+      r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$');
 
   @override
   Widget build(BuildContext context) {
@@ -41,6 +46,8 @@ class _LoginScreenState extends State<LoginScreen> {
                           validator: (value) {
                             if (value == null || value.isEmpty) {
                               return 'Veuillez entrer votre email';
+                            } else if (!emailRegExp.hasMatch(value)) {
+                              return 'Veuillez entrer un email valide';
                             }
                             return null;
                           },
@@ -63,9 +70,41 @@ class _LoginScreenState extends State<LoginScreen> {
                           child: Container(
                             width: double.infinity,
                             child: ElevatedButton(
-                              onPressed: () {
+                              onPressed: () async {
                                 if (_formKey.currentState!.validate()) {
                                   // Process data.
+                                  try {
+                                    var response = await http.post(
+                                      Uri.parse('http://10.0.2.2:8080/login'), // 10.0.2.2 => localhost
+                                      headers: <String, String>{
+                                        'Content-Type': 'application/json; charset=UTF-8',
+                                      },
+                                      body: jsonEncode(<String, String>{
+                                        'email': _emailController.text,
+                                        'password': _passwordController.text,
+                                      }),
+                                    );
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        content: Text(response.statusCode == 200
+                                            ? 'Connexion réussie'
+                                            : 'Erreur lors de la connexion'),
+                                        duration: Duration(seconds: 1),
+                                      ),
+                                    );
+                                    if (response.statusCode == 200) {
+                                      // Naviguer vers la page d'accueil ou une autre page après la connexion réussie
+                                      Navigator.pop(context);
+                                    }
+                                  } catch (e) {
+                                    // Gérer les erreurs de connexion
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      const SnackBar(
+                                        content: Text('Une erreur est survenue. Veuillez vérifier votre connexion internet ou réessayer plus tard.'),
+                                        duration: Duration(seconds: 2),
+                                      ),
+                                    );
+                                  }
                                 }
                               },
                               child: const Text('Se connecter'),

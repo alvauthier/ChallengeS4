@@ -15,7 +15,7 @@ func LoadUserFixtures() {
 		{
 			ID:        uuid.New(),
 			Email:     "user@user.fr",
-			Password:  "test",
+			Password:  "$2a$14$kA0gw8VhoFo4u4OLGT1.H.hrPa0C17ovGxSxN884DbMDXqO2Ks/IO", // password: Testtest1@
 			Firstname: "John",
 			Lastname:  "Doe",
 			Role:      "user",
@@ -23,7 +23,7 @@ func LoadUserFixtures() {
 		{
 			ID:        uuid.New(),
 			Email:     "admin@user.fr",
-			Password:  "test",
+			Password:  "$2a$14$kA0gw8VhoFo4u4OLGT1.H.hrPa0C17ovGxSxN884DbMDXqO2Ks/IO", // password: Testtest1@
 			Firstname: "Steve",
 			Lastname:  "Jobs",
 			Role:      "admin",

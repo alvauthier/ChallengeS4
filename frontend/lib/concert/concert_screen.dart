@@ -76,6 +76,28 @@ class ConcertScreen extends StatelessWidget {
                         ),
                       ),
                     ),
+                    ListTile(
+                      leading: const Icon(Icons.location_on),
+                      title: Text(state.concert.location),
+                    ),
+                    const ListTile(
+                      leading: Icon(Icons.event_seat),
+                      title: Text('300 restant'),
+                    ),
+                    const Divider(),
+                    const Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 10.0, vertical: 15.0),
+                      child: Align(
+                        alignment: Alignment.centerLeft,
+                        child: Text(
+                          'A propos de cet événement',
+                          style: TextStyle(
+                              fontSize: 25,
+                              fontWeight: FontWeight.bold
+                          ),
+                        ),
+                      ),
+                    ),
                     Padding(
                       padding: const EdgeInsets.all(10.0),
                       child: Align(
@@ -88,13 +110,19 @@ class ConcertScreen extends StatelessWidget {
                         ),
                       ),
                     ),
-                    ListTile(
-                      leading: const Icon(Icons.location_on),
-                      title: Text(state.concert.location),
-                    ),
-                    const ListTile(
-                      leading: Icon(Icons.event_seat),
-                      title: Text('300 restant'),
+                    const Divider(),
+                    const Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 10.0, vertical: 15.0),
+                      child: Align(
+                        alignment: Alignment.centerLeft,
+                        child: Text(
+                          'Ticket disponible à la revente',
+                          style: TextStyle(
+                              fontSize: 25,
+                              fontWeight: FontWeight.bold
+                          ),
+                        ),
+                      ),
                     ),
                   ]
                 );
@@ -111,7 +139,10 @@ class ConcertScreen extends StatelessWidget {
                 children: <Widget>[
                   const Text(
                     '100€',
-                    style: TextStyle(fontSize: 20),
+                    style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold
+                    ),
                   ),
                   ElevatedButton(
                     onPressed: () {

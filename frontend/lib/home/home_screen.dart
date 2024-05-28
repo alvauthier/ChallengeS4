@@ -83,7 +83,8 @@ class HomeScreen extends StatelessWidget {
                             '${state.concerts.length} concerts',
                             style: const TextStyle(
                               fontSize: 30,
-                              fontFamily: 'ReadexProSemibold',
+                              fontFamily: 'Readex Pro',
+                              fontWeight: FontWeight.w600
                             ),
                           ),
                         ),
@@ -128,7 +129,8 @@ class HomeScreen extends StatelessWidget {
                                         child: Text(
                                           concert.name,
                                           style: const TextStyle(
-                                            fontFamily: 'ReadexProBold',
+                                            fontFamily: 'Readex Pro',
+                                            fontWeight: FontWeight.w700,
                                             fontSize: 26,
                                           ),
                                         ),
@@ -139,7 +141,7 @@ class HomeScreen extends StatelessWidget {
                                           formatDate(concert.date),
                                           style: const TextStyle(
                                             color: Colors.black54,
-                                            fontFamily: 'ReadexProRegular',
+                                            fontFamily: 'Readex Pro',
                                           ),
                                         ),
                                       ),
@@ -149,7 +151,7 @@ class HomeScreen extends StatelessWidget {
                                           concert.location,
                                           style: const TextStyle(
                                             color: Colors.grey,
-                                            fontFamily: 'ReadexProRegular',
+                                            fontFamily: 'Readex Pro',
                                           ),
                                         ),
                                       ),

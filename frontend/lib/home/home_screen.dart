@@ -101,11 +101,20 @@ class _HomeScreenState extends State<HomeScreen> {
                   onRefresh: () => _refreshData(context),
                   child: Column(
                     children: [
+                      const Padding(
+                        padding: EdgeInsets.symmetric(vertical: 20.0),
+                        child: Text(
+                          'Weezemaster',
+                          style: TextStyle(
+                            fontSize: 28,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
                       CustomSearchBar(
                         controller: _searchController,
                         onChanged: (text) {
-                          setState(() {
-                          });
+                          setState(() {});
                         },
                       ),
                       Padding(

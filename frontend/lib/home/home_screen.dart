@@ -46,6 +46,12 @@ class HomeScreen extends StatelessWidget {
                           textAlign: TextAlign.center,
                         ),
                       ),
+                      ElevatedButton(
+                        onPressed: () {
+                          context.read<HomeBloc>().add(HomeDataLoaded());
+                        },
+                        child: const Text('Réessayer'),
+                      ),
                     ],
                   ),
                 );

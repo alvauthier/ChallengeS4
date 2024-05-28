@@ -73,6 +73,12 @@ func CreateUser(c echo.Context) error {
 
 	user.ID = uuid.New()
 
+	hashedPassword, err := HashPassword(user.Password)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
+	user.Password = hashedPassword
+
 	if err := db.Omit("organization_id", "last_connexion").Create(&user).Error; err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
@@ -110,6 +116,14 @@ func UpdateUser(c echo.Context) error {
 	patchUser := new(UserPatchInput)
 	if err := c.Bind(patchUser); err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]string{"message": "Invalid request"})
+	}
+
+	if patchUser.Password != nil {
+		hashedPassword, err := HashPassword(*patchUser.Password)
+		if err != nil {
+			return c.JSON(http.StatusInternalServerError, map[string]string{"message": err.Error()})
+		}
+		patchUser.Password = &hashedPassword
 	}
 
 	if patchUser.Email != nil {

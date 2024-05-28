@@ -31,7 +31,7 @@ type User struct {
 	// required: true
 	// example: Doe
 	Lastname       string `gorm:"not null"`
-	Role           string `gorm:"not null"`
+	Role           string `gorm:"not null;default:user"`
 	LastConnexion  time.Time
 	CreatedAt      time.Time
 	UpdatedAt      time.Time

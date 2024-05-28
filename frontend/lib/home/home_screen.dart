@@ -30,66 +30,85 @@ class HomeScreen extends StatelessWidget {
               }
 
               if (state is HomeDataLoadingSuccess) {
-                return ListView.builder(
-                  itemBuilder: (context, index) {
-                    final concert = state.concerts[index];
-                    return Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 20.0, horizontal: 10.0),
-                      child: Card(
-                        elevation: 0,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            ClipRRect(
-                              borderRadius: const BorderRadius.only(
-                                topLeft: Radius.circular(10),
-                                topRight: Radius.circular(10),
-                              ),
-                              child: Image.network(
-                                'https://picsum.photos/seed/picsum/800/400', // URL de l'image unique
-                                width: double.infinity,
-                                height: 200,
-                                fit: BoxFit.cover,
-                              ),
+                return Column(
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.all(10.0),
+                        child: Align(
+                          alignment: Alignment.centerLeft,
+                          child: Text(
+                            '${state.concerts.length} concerts',
+                            style: const TextStyle(
+                                fontSize: 30,
+                                fontWeight: FontWeight.bold
                             ),
-                            Padding(
-                              padding: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 20.0),
-                              child: Text(
-                                concert.name,
-                                style: const TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 26,
-                                ),
-                              ),
-                            ),
-                            Padding(
-                              padding: const EdgeInsets.symmetric(vertical: 2.0, horizontal: 20.0),
-                              child: Text(
-                                concert.date,
-                                style: const TextStyle(
-                                  color: Colors.grey,
-                                ),
-                              ),
-                            ),
-                            Padding(
-                              padding: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 20.0),
-                              child: Text(
-                                concert.location,
-                                style: const TextStyle(
-                                  color: Colors.black,
-                                ),
-                              ),
-                            ),
-                          ],
+                          ),
                         ),
                       ),
-                    );
-                  },
-                  itemCount: state.concerts.length,
-                );
+                      Expanded(
+                        child: ListView.builder(
+                          itemBuilder: (context, index) {
+                            final concert = state.concerts[index];
+                            return Padding(
+                              padding: const EdgeInsets.symmetric(vertical: 20.0, horizontal: 10.0),
+                              child: Card(
+                                elevation: 0,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    ClipRRect(
+                                      borderRadius: const BorderRadius.only(
+                                        topLeft: Radius.circular(10),
+                                        topRight: Radius.circular(10),
+                                      ),
+                                      child: Image.network(
+                                        'https://picsum.photos/seed/picsum/800/400', // URL de l'image unique
+                                        width: double.infinity,
+                                        height: 200,
+                                        fit: BoxFit.cover,
+                                      ),
+                                    ),
+                                    Padding(
+                                      padding: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 20.0),
+                                      child: Text(
+                                        concert.name,
+                                        style: const TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 26,
+                                        ),
+                                      ),
+                                    ),
+                                    Padding(
+                                      padding: const EdgeInsets.symmetric(vertical: 2.0, horizontal: 20.0),
+                                      child: Text(
+                                        concert.date,
+                                        style: const TextStyle(
+                                          color: Colors.grey,
+                                        ),
+                                      ),
+                                    ),
+                                    Padding(
+                                      padding: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 20.0),
+                                      child: Text(
+                                        concert.location,
+                                        style: const TextStyle(
+                                          color: Colors.black,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            );
+                          },
+                          itemCount: state.concerts.length,
+                        ),
+                      ),
+                    ],
+                  );
               }
 
               return const SizedBox();

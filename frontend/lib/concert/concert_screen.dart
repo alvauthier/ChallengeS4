@@ -54,7 +54,7 @@ class ConcertScreen extends StatelessWidget {
                             fit: BoxFit.cover,
                           ),
                           Padding(
-                            padding: const EdgeInsets.all(10.0),
+                            padding: const EdgeInsets.only(top: 30.0, right: 10.0, left: 10.0),
                             child: Align(
                               alignment: Alignment.centerLeft,
                               child: Text(
@@ -66,7 +66,7 @@ class ConcertScreen extends StatelessWidget {
                             ),
                           ),
                           Padding(
-                            padding: const EdgeInsets.all(10.0),
+                            padding: const EdgeInsets.only(top: 20.0, right: 10.0, left: 10.0),
                             child: Align(
                               alignment: Alignment.centerLeft,
                               child: Text(
@@ -88,7 +88,7 @@ class ConcertScreen extends StatelessWidget {
                           ),
                           const Divider(),
                           const Padding(
-                            padding: EdgeInsets.symmetric(horizontal: 10.0, vertical: 15.0),
+                            padding: EdgeInsets.only(top: 20.0, right: 10.0, left: 10.0),
                             child: Align(
                               alignment: Alignment.centerLeft,
                               child: Text(
@@ -101,20 +101,21 @@ class ConcertScreen extends StatelessWidget {
                             ),
                           ),
                           Padding(
-                            padding: const EdgeInsets.all(10.0),
+                            padding: const EdgeInsets.only(top: 10.0, right: 10.0, left: 10.0, bottom: 20.0),
                             child: Align(
                               alignment: Alignment.centerLeft,
                               child: Text(
                                 state.concert.description,
                                 style: const TextStyle(
-                                    fontSize: 20
+                                    fontSize: 16,
+                                    color: Colors.grey
                                 ),
                               ),
                             ),
                           ),
                           const Divider(),
                           const Padding(
-                            padding: EdgeInsets.symmetric(horizontal: 10.0, vertical: 15.0),
+                            padding: EdgeInsets.only(top: 20.0, right: 10.0, left: 10.0),
                             child: Align(
                               alignment: Alignment.centerLeft,
                               child: Text(
@@ -160,7 +161,11 @@ class ConcertScreen extends StatelessWidget {
                     onPressed: () {
                     },
                     style: ElevatedButton.styleFrom(
-                      foregroundColor: Colors.white, backgroundColor: Colors.black,
+                      foregroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(6.0),
+                      ),
+                      backgroundColor: Colors.deepOrange,
                     ),
                     child: const Text('Réserver un ticket'),
                   ),

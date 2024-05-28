@@ -17,6 +17,10 @@ class HomeScreen extends StatelessWidget {
     return formattedDate;
   }
 
+  Future<void> _refreshData(BuildContext context) async {
+    context.read<HomeBloc>().add(HomeDataLoaded());
+  }
+
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
@@ -33,32 +37,43 @@ class HomeScreen extends StatelessWidget {
               }
 
               if (state is HomeDataLoadingError) {
-                return Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: <Widget>[
-                      Image.asset('assets/no_internet.png', width: 100, height: 100),
-                      const Padding(
-                        padding: const EdgeInsets.only(top: 20),
-                        child: Text(
-                          'Une erreur est survenue. Veuillez vérifier votre connexion internet ou réessayez plus tard.',
-                          style: TextStyle(fontSize: 16),
-                          textAlign: TextAlign.center,
+                return RefreshIndicator(
+                  onRefresh: () => _refreshData(context),
+                  child: SingleChildScrollView(
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    child: SizedBox(
+                      height: MediaQuery.of(context).size.height,
+                      child: Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: <Widget>[
+                            Image.asset('assets/no_internet.png', width: 100, height: 100),
+                            const Padding(
+                              padding: EdgeInsets.only(top: 20),
+                              child: Text(
+                                'Une erreur est survenue. Veuillez vérifier votre connexion internet ou réessayer plus tard.',
+                                style: TextStyle(fontSize: 16),
+                                textAlign: TextAlign.center,
+                              ),
+                            ),
+                            ElevatedButton(
+                              onPressed: () {
+                                context.read<HomeBloc>().add(HomeDataLoaded());
+                              },
+                              child: const Text('Réessayer'),
+                            ),
+                          ],
                         ),
                       ),
-                      ElevatedButton(
-                        onPressed: () {
-                          context.read<HomeBloc>().add(HomeDataLoaded());
-                        },
-                        child: const Text('Réessayer'),
-                      ),
-                    ],
+                    ),
                   ),
                 );
               }
 
               if (state is HomeDataLoadingSuccess) {
-                return Column(
+                return RefreshIndicator(
+                  onRefresh: () => _refreshData(context),
+                  child: Column(
                     children: [
                       Padding(
                         padding: const EdgeInsets.all(10.0),
@@ -67,8 +82,8 @@ class HomeScreen extends StatelessWidget {
                           child: Text(
                             '${state.concerts.length} concerts',
                             style: const TextStyle(
-                                fontSize: 30,
-                                fontWeight: FontWeight.bold
+                              fontSize: 30,
+                              fontWeight: FontWeight.bold,
                             ),
                           ),
                         ),
@@ -91,53 +106,53 @@ class HomeScreen extends StatelessWidget {
                                 child: Card(
                                   elevation: 0,
                                   shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(10),
-                                ),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    ClipRRect(
-                                      borderRadius: const BorderRadius.only(
-                                        topLeft: Radius.circular(10),
-                                        topRight: Radius.circular(10),
-                                      ),
-                                      child: Image.network(
-                                        'https://picsum.photos/seed/picsum/800/400', // URL de l'image unique
-                                        width: double.infinity,
-                                        height: 200,
-                                        fit: BoxFit.cover,
-                                      ),
-                                    ),
-                                    Padding(
-                                      padding: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 20.0),
-                                      child: Text(
-                                        concert.name,
-                                        style: const TextStyle(
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: 26,
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      ClipRRect(
+                                        borderRadius: const BorderRadius.only(
+                                          topLeft: Radius.circular(10),
+                                          topRight: Radius.circular(10),
+                                        ),
+                                        child: Image.network(
+                                          'https://picsum.photos/seed/picsum/800/400', // URL de l'image unique
+                                          width: double.infinity,
+                                          height: 200,
+                                          fit: BoxFit.cover,
                                         ),
                                       ),
-                                    ),
-                                    Padding(
-                                      padding: const EdgeInsets.symmetric(vertical: 2.0, horizontal: 20.0),
-                                      child: Text(
-                                        formatDate(concert.date),
+                                      Padding(
+                                        padding: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 20.0),
+                                        child: Text(
+                                          concert.name,
                                           style: const TextStyle(
-                                          color: Colors.grey,
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 26,
+                                          ),
                                         ),
                                       ),
-                                    ),
-                                    Padding(
-                                      padding: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 20.0),
-                                      child: Text(
-                                        concert.location,
-                                        style: const TextStyle(
-                                          color: Colors.black,
+                                      Padding(
+                                        padding: const EdgeInsets.symmetric(vertical: 2.0, horizontal: 20.0),
+                                        child: Text(
+                                          formatDate(concert.date),
+                                          style: const TextStyle(
+                                            color: Colors.grey,
+                                          ),
                                         ),
                                       ),
-                                    ),
-                                  ],
-                                ),
+                                      Padding(
+                                        padding: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 20.0),
+                                        child: Text(
+                                          concert.location,
+                                          style: const TextStyle(
+                                            color: Colors.black,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
                                 ),
                               ),
                             );
@@ -146,7 +161,8 @@ class HomeScreen extends StatelessWidget {
                         ),
                       ),
                     ],
-                  );
+                  ),
+                );
               }
 
               return const SizedBox();

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:frontend/profile_screen.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
@@ -92,13 +93,17 @@ class _LoginScreenState extends State<LoginScreen> {
                                         content: Text(response.statusCode == 200
                                             ? 'Connexion réussie'
                                             : 'Email et/ou mot de passe incorrects'),
-                                        duration: Duration(seconds: 1),
+                                        duration: Duration(seconds: 2),
                                       ),
                                     );
                                     if (response.statusCode == 200) {
                                       await storage.write(key: 'token', value: response.body);
-                                      Navigator.pop(context);
                                       // Navigator.pop(context);
+                                      // Navigator.pop(context);
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(builder: (context) => ProfileScreen()),
+                                      );
                                     }
                                   } catch (e) {
                                     ScaffoldMessenger.of(context).showSnackBar(

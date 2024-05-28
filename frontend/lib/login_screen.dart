@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
@@ -16,6 +17,8 @@ class _LoginScreenState extends State<LoginScreen> {
 
   final RegExp emailRegExp = RegExp(
       r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$');
+
+      final storage = new FlutterSecureStorage();
 
   @override
   Widget build(BuildContext context) {
@@ -88,16 +91,16 @@ class _LoginScreenState extends State<LoginScreen> {
                                       SnackBar(
                                         content: Text(response.statusCode == 200
                                             ? 'Connexion réussie'
-                                            : 'Erreur lors de la connexion'),
+                                            : 'Email et/ou mot de passe incorrects'),
                                         duration: Duration(seconds: 1),
                                       ),
                                     );
                                     if (response.statusCode == 200) {
-                                      // Naviguer vers la page d'accueil ou une autre page après la connexion réussie
+                                      await storage.write(key: 'token', value: response.body);
                                       Navigator.pop(context);
+                                      // Navigator.pop(context);
                                     }
                                   } catch (e) {
-                                    // Gérer les erreurs de connexion
                                     ScaffoldMessenger.of(context).showSnackBar(
                                       const SnackBar(
                                         content: Text('Une erreur est survenue. Veuillez vérifier votre connexion internet ou réessayer plus tard.'),

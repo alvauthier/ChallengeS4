@@ -128,8 +128,7 @@ func Login(c echo.Context) error {
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]string{"message": err.Error()})
 	}
-	fmt.Println(token)
-	return c.JSON(http.StatusOK, user)
+	return c.JSON(http.StatusOK, map[string]string{"token": token})
 }
 
 // @Summary		Modifie un utilisateur

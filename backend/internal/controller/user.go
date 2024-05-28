@@ -213,11 +213,11 @@ func CheckPasswordHash(password, hash string) bool {
 
 var secretKey = []byte(os.Getenv("SECRET_KEY"))
 
-func createToken(username string) (string, error) {
+func createToken(email string) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256,
 		jwt.MapClaims{
-			"username": username,
-			"exp":      time.Now().Add(time.Hour * 24).Unix(),
+			"email": email,
+			"exp":   time.Now().Add(time.Hour * 24).Unix(),
 		})
 
 	tokenString, err := token.SignedString(secretKey)

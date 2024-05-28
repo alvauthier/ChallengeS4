@@ -34,7 +34,7 @@ class HomeScreen extends StatelessWidget {
                   itemBuilder: (context, index) {
                     final concert = state.concerts[index];
                     return Padding(
-                      padding: const EdgeInsets.all(10.0),
+                      padding: const EdgeInsets.symmetric(vertical: 20.0, horizontal: 10.0),
                       child: Card(
                         elevation: 0,
                         shape: RoundedRectangleBorder(
@@ -56,7 +56,7 @@ class HomeScreen extends StatelessWidget {
                               ),
                             ),
                             Padding(
-                              padding: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 16.0),
+                              padding: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 20.0),
                               child: Text(
                                 concert.name,
                                 style: const TextStyle(
@@ -66,7 +66,7 @@ class HomeScreen extends StatelessWidget {
                               ),
                             ),
                             Padding(
-                              padding: const EdgeInsets.symmetric(vertical: 2.0, horizontal: 16.0),
+                              padding: const EdgeInsets.symmetric(vertical: 2.0, horizontal: 20.0),
                               child: Text(
                                 concert.date,
                                 style: const TextStyle(
@@ -75,7 +75,7 @@ class HomeScreen extends StatelessWidget {
                               ),
                             ),
                             Padding(
-                              padding: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 16.0),
+                              padding: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 20.0),
                               child: Text(
                                 concert.location,
                                 style: const TextStyle(

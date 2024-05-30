@@ -2,11 +2,39 @@ import 'package:flutter/material.dart';
 import 'package:frontend/concert/blocs/concert_bloc.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
+import 'package:frontend/components/resale_ticket.dart';
 
 class ConcertScreen extends StatelessWidget {
   final String concertId;
 
   const ConcertScreen({super.key, required this.concertId});
+
+  static const resaleTickets = [
+    {
+      'reseller': {
+        'name': 'John Doe',
+        'avatar': 'https://thispersondoesnotexist.com/',
+      },
+      'location': 'Fosse',
+      'price': '90€',
+    },
+    {
+      'reseller': {
+        'name': 'Jane Doe',
+        'avatar': 'https://thispersondoesnotexist.com/',
+      },
+      'location': 'Balcon',
+      'price': '80€',
+    },
+    {
+      'reseller': {
+        'name': 'John Smith',
+        'avatar': 'https://thispersondoesnotexist.com/',
+      },
+      'location': 'Balcon',
+      'price': '85€',
+    },
+  ];
 
   String formatDate(String date) {
     DateTime dateTime = DateTime.parse(date);
@@ -45,7 +73,8 @@ class ConcertScreen extends StatelessWidget {
                   }
 
                   if (state is ConcertDataLoadingSuccess) {
-                    return Column(
+                    return SingleChildScrollView(
+                      child: Column(
                         children: <Widget> [
                           Image.network(
                             'https://picsum.photos/seed/picsum/800/400',
@@ -150,7 +179,7 @@ class ConcertScreen extends StatelessWidget {
                             child: Align(
                               alignment: Alignment.centerLeft,
                               child: Text(
-                                'Ticket disponible à la revente',
+                                'Tickets disponibles à la revente',
                                 style: TextStyle(
                                     fontSize: 25,
                                     fontFamily: 'Readex Pro',
@@ -159,7 +188,10 @@ class ConcertScreen extends StatelessWidget {
                               ),
                             ),
                           ),
-                        ]
+                          for (var resaleTicket in resaleTickets)
+                            ResaleTicket(ticket: Ticket.fromMap(resaleTicket)),
+                      ]
+                      ),
                     );
                   }
 
@@ -170,7 +202,7 @@ class ConcertScreen extends StatelessWidget {
                 top: 10.0,
                 left: 10.0,
                 child: FloatingActionButton(
-                  child: Icon(Icons.arrow_back),
+                  child: const Icon(Icons.arrow_back),
                   onPressed: () => Navigator.pop(context),
                 ),
               ),
@@ -201,10 +233,10 @@ class ConcertScreen extends StatelessWidget {
                       backgroundColor: Colors.deepOrange,
                     ),
                     child: const Text(
-                        'Réserver un ticket',
-                        style: TextStyle(
-                            fontFamily: 'Readex Pro'
-                        )
+                      'Réserver un ticket',
+                      style: TextStyle(
+                          fontFamily: 'Readex Pro'
+                      )
                     ),
                   ),
                 ],

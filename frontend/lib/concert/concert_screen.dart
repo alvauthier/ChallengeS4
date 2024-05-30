@@ -190,6 +190,22 @@ class ConcertScreen extends StatelessWidget {
                           ),
                           for (var resaleTicket in resaleTickets)
                             ResaleTicket(ticket: Ticket.fromMap(resaleTicket)),
+                          ElevatedButton(
+                              onPressed: () {},
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.deepOrange,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(6.0),
+                                ),
+                              ),
+                              child: const Text(
+                                'Consulter toutes les reventes',
+                                style: TextStyle(
+                                    fontFamily: 'Readex Pro',
+                                    color: Colors.white
+                                )
+                              )
+                          ),
                       ]
                       ),
                     );

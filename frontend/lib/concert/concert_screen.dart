@@ -3,6 +3,7 @@ import 'package:frontend/concert/blocs/concert_bloc.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import 'package:frontend/components/resale_ticket.dart';
+import 'package:frontend/components/organiser_widget.dart';
 
 class ConcertScreen extends StatelessWidget {
   final String concertId;
@@ -35,6 +36,12 @@ class ConcertScreen extends StatelessWidget {
       'price': '85€',
     },
   ];
+
+  static const organiser = {
+      'avatar': 'https://picsum.photos/200/300',
+      'name': 'John Doe',
+      'followers': '1000',
+  };
 
   String formatDate(String date) {
     DateTime dateTime = DateTime.parse(date);
@@ -206,7 +213,23 @@ class ConcertScreen extends StatelessWidget {
                                 )
                               )
                           ),
-                      ]
+                          const Divider(),
+                          const Padding(
+                            padding: EdgeInsets.only(top: 20.0, right: 10.0, left: 10.0),
+                            child: Align(
+                              alignment: Alignment.centerLeft,
+                              child: Text(
+                                'Organisé par',
+                                style: TextStyle(
+                                    fontSize: 25,
+                                    fontFamily: 'Readex Pro',
+                                    fontWeight: FontWeight.w600
+                                ),
+                              ),
+                            ),
+                          ),
+                          OrganiserWidget(organiser: Organiser.fromMap(organiser))
+                        ]
                       ),
                     );
                   }

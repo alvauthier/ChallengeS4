@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:frontend/concert/blocs/concert_bloc.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import 'package:frontend/components/resale_ticket.dart';
 import 'package:frontend/components/organiser_widget.dart';
+import 'package:frontend/components/interest_chip.dart';
 
 class ConcertScreen extends StatelessWidget {
   final String concertId;
@@ -149,20 +151,15 @@ class ConcertScreen extends StatelessWidget {
                               ),
                             ),
                           ),
-                          Align(
-                            alignment: Alignment.centerLeft,
-                            child: Padding(
-                              padding: const EdgeInsets.only(top: 10.0, right: 10.0, left: 10.0),
-                              child: Chip(
-                                label: const Text(
-                                    'Pop',
-                                    style: TextStyle(
-                                        fontFamily: 'Readex Pro'
-                                    )
-                                ),
-                                backgroundColor: Colors.deepOrange.shade100,
-                                shape: const StadiumBorder(),
-                                side: BorderSide.none,
+                          Padding(
+                            padding: const EdgeInsets.only(top: 10.0, right: 10.0, left: 10.0),
+                            child: Align(
+                              alignment: Alignment.topLeft,
+                              child: Wrap(
+                                spacing: 10.0,
+                                runSpacing: 5.0,
+                                alignment: WrapAlignment.start, // This is also important
+                                children: state.concert.interests.map((interest) => InterestChip(interest: interest)).toList(),
                               ),
                             ),
                           ),

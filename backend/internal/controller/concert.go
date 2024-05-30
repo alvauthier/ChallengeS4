@@ -36,7 +36,7 @@ func GetConcert(c echo.Context) error {
 	db := database.GetDB()
 	id := c.Param("id")
 	var concert models.Concert
-	if err := db.Where("id = ?", id).First(&concert).Error; err != nil {
+	if err := db.Preload("Interests").Where("id = ?", id).First(&concert).Error; err != nil {
 		if err == gorm.ErrRecordNotFound {
 			return echo.NewHTTPError(http.StatusNotFound, "Concert not found")
 		}

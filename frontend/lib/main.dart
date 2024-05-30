@@ -1,5 +1,3 @@
-import 'package:frontend/login_register_screen.dart';
-import 'package:frontend/profile_screen.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:flutter/material.dart';
 import 'package:frontend/home/home_screen.dart';

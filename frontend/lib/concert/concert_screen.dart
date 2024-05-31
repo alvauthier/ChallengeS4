@@ -39,12 +39,6 @@ class ConcertScreen extends StatelessWidget {
     },
   ];
 
-  static const organiser = {
-      'avatar': 'https://picsum.photos/200/300',
-      'name': 'John Doe',
-      'followers': '1000',
-  };
-
   String formatDate(String date) {
     DateTime dateTime = DateTime.parse(date);
 
@@ -225,7 +219,12 @@ class ConcertScreen extends StatelessWidget {
                               ),
                             ),
                           ),
-                          OrganiserWidget(organiser: Organiser.fromMap(organiser))
+                          OrganiserWidget(organiser: Organiser.fromMap({
+                            'id': state.concert.organization.id,
+                            'name': state.concert.organization.name,
+                            'avatar': 'https://picsum.photos/seed/picsum/200/200',
+                            'followers': '1000',
+                          }))
                         ]
                       ),
                     );

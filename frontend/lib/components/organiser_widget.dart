@@ -1,14 +1,16 @@
 import 'package:flutter/material.dart';
 
 class Organiser {
+  final String id;
   final String avatar;
   final String name;
   final String followers;
 
-  Organiser({required this.avatar, required this.name, required this.followers});
+  Organiser({required this.id, required this.avatar, required this.name, required this.followers});
 
   factory Organiser.fromMap(Map<String, String> map) {
     return Organiser(
+      id: map['id']!,
       avatar: map['avatar']!,
       name: map['name']!,
       followers: map['followers']!,

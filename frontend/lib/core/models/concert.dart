@@ -1,4 +1,5 @@
 import 'package:frontend/core/models/interest.dart';
+import 'package:frontend/core/models/organization.dart';
 
 class Concert {
   final String id;
@@ -7,6 +8,7 @@ class Concert {
   final String date;
   final String location;
   final List<Interest> interests;
+  final Organization organization;
 
   Concert({
     required this.id,
@@ -14,7 +16,8 @@ class Concert {
     required this.description,
     required this.date,
     required this.location,
-    required this.interests
+    required this.interests,
+    required this.organization
   });
 
   factory Concert.fromJson(Map<String, dynamic> json) {
@@ -27,7 +30,8 @@ class Concert {
         description: json['Description'],
         date: json['Date'],
         location: json['Location'],
-        interests: interestList
+        interests: interestList,
+        organization: json['Organization'] != null ? Organization.fromJson(json['Organization']) : Organization(id: '', name: '')
     );
   }
 }

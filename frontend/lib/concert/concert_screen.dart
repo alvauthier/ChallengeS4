@@ -246,35 +246,47 @@ class ConcertScreen extends StatelessWidget {
           bottomNavigationBar: BottomAppBar(
             child: Padding(
               padding: const EdgeInsets.all(8.0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: <Widget>[
-                  const Text(
-                    '100€',
-                    style: TextStyle(
-                        fontSize: 20,
-                        fontFamily: 'Readex Pro',
-                        fontWeight: FontWeight.w700
-                    ),
-                  ),
-                  ElevatedButton(
-                    onPressed: () {
-                    },
-                    style: ElevatedButton.styleFrom(
-                      foregroundColor: Colors.white,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(6.0),
-                      ),
-                      backgroundColor: Colors.deepOrange,
-                    ),
-                    child: const Text(
-                      'Réserver un ticket',
-                      style: TextStyle(
-                          fontFamily: 'Readex Pro'
-                      )
-                    ),
-                  ),
-                ],
+              child: BlocBuilder<ConcertBloc, ConcertState>(
+                builder: (context, state) {
+                  if (state is ConcertDataLoadingSuccess) {
+                    var prices = state.concert.concertCategories.map((concertCategory) => concertCategory.price).toList();
+                    var minPrice = prices.reduce((value, element) => value < element ? value : element);
+                    var maxPrice = prices.reduce((value, element) => value > element ? value : element);
+
+                    return Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: <Widget>[
+                        Text(
+                          '$minPrice€ - $maxPrice€',
+                          style: const TextStyle(
+                              fontSize: 20,
+                              fontFamily: 'Readex Pro',
+                              fontWeight: FontWeight.w700
+                          ),
+                        ),
+                        ElevatedButton(
+                          onPressed: () {
+                          },
+                          style: ElevatedButton.styleFrom(
+                            foregroundColor: Colors.white,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(6.0),
+                            ),
+                            backgroundColor: Colors.deepOrange,
+                          ),
+                          child: const Text(
+                              'Réserver un ticket',
+                              style: TextStyle(
+                                  fontFamily: 'Readex Pro'
+                              )
+                          ),
+                        ),
+                      ],
+                    );
+                  }
+
+                  return const SizedBox();
+                },
               ),
             ),
           ),

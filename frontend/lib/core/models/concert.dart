@@ -1,5 +1,6 @@
 import 'package:frontend/core/models/interest.dart';
 import 'package:frontend/core/models/organization.dart';
+import 'package:frontend/core/models/concert_category.dart';
 
 class Concert {
   final String id;
@@ -9,6 +10,7 @@ class Concert {
   final String location;
   final List<Interest> interests;
   final Organization organization;
+  final List<ConcertCategory> concertCategories;
 
   Concert({
     required this.id,
@@ -17,12 +19,18 @@ class Concert {
     required this.date,
     required this.location,
     required this.interests,
-    required this.organization
+    required this.organization,
+    required this.concertCategories
   });
 
   factory Concert.fromJson(Map<String, dynamic> json) {
     var interestListFromJson = json['Interests'] as List? ?? [];
     List<Interest> interestList = interestListFromJson.map((i) => Interest.fromJson(i)).toList();
+
+    var organizationFromJson = json['Organization'] != null ? Organization.fromJson(json['Organization']) : Organization(id: '', name: '');
+
+    var concertCategoryListFromJson = json['ConcertCategories'] as List? ?? [];
+    List<ConcertCategory> concertCategoryList = concertCategoryListFromJson.map((i) => ConcertCategory.fromJson(i)).toList();
 
     return Concert(
         id: json['ID'],
@@ -31,7 +39,8 @@ class Concert {
         date: json['Date'],
         location: json['Location'],
         interests: interestList,
-        organization: json['Organization'] != null ? Organization.fromJson(json['Organization']) : Organization(id: '', name: '')
+        organization: organizationFromJson,
+        concertCategories: concertCategoryList
     );
   }
 }

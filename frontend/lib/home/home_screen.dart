@@ -108,6 +108,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           style: TextStyle(
                             fontSize: 28,
                             fontWeight: FontWeight.bold,
+                            fontFamily: 'ReadexProBold',
                           ),
                         ),
                       ),

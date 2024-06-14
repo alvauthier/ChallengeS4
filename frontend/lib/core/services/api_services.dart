@@ -3,6 +3,7 @@ import 'dart:developer';
 import 'dart:io';
 
 import 'package:flinq/flinq.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:frontend/core/exceptions/api_exception.dart';
 import 'package:frontend/core/models/concert.dart';
 import 'package:http/http.dart' as http;

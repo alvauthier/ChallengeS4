@@ -39,7 +39,7 @@ func GetAllUsers(c echo.Context) error {
 // @ID				get-user
 // @Tags			Users
 // @Produce		json
-// @Param			id	path		string	true	"ID de l'utilisateur"
+// @Param			id	path		string	true	"ID de l'utilisateur"	format(uuid)
 // @Success		200	{object}	models.User
 // @Router			/users/{id} [get]
 func GetUser(c echo.Context) error {
@@ -136,7 +136,7 @@ func Login(c echo.Context) error {
 // @ID				update-user
 // @Tags			Users
 // @Produce		json
-// @Param			id	path		string	true	"ID de l'utilisateur"
+// @Param			id	path		string	true	"ID de l'utilisateur"	format(uuid)
 // @Success		200	{object}	models.User
 // @Router			/users/{id} [patch]
 func UpdateUser(c echo.Context) error {
@@ -185,7 +185,7 @@ func UpdateUser(c echo.Context) error {
 // @ID				delete-user
 // @Tags			Users
 // @Produce		json
-// @Param			id	path	string	true	"ID de l'utilisateur"
+// @Param			id	path	string	true	"ID de l'utilisateur"	format(uuid)
 // @Success		204
 // @Router			/users/{id} [delete]
 func DeleteUser(c echo.Context) error {

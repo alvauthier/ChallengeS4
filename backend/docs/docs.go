@@ -83,7 +83,7 @@ const docTemplate = `{
                 "operationId": "get-category",
                 "parameters": [
                     {
-                        "type": "string",
+                        "type": "integer",
                         "description": "ID de la catégorie",
                         "name": "id",
                         "in": "path",
@@ -111,7 +111,7 @@ const docTemplate = `{
                 "operationId": "delete-category",
                 "parameters": [
                     {
-                        "type": "string",
+                        "type": "integer",
                         "description": "ID de la catégorie",
                         "name": "id",
                         "in": "path",
@@ -136,7 +136,7 @@ const docTemplate = `{
                 "operationId": "update-category",
                 "parameters": [
                     {
-                        "type": "string",
+                        "type": "integer",
                         "description": "ID de la catégorie",
                         "name": "id",
                         "in": "path",
@@ -210,6 +210,7 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
+                        "format": "uuid",
                         "description": "ID du concert",
                         "name": "id",
                         "in": "path",
@@ -238,6 +239,7 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
+                        "format": "uuid",
                         "description": "ID du concert",
                         "name": "id",
                         "in": "path",
@@ -263,6 +265,7 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
+                        "format": "uuid",
                         "description": "ID du concert",
                         "name": "id",
                         "in": "path",
@@ -338,7 +341,7 @@ const docTemplate = `{
                 "operationId": "get-interest",
                 "parameters": [
                     {
-                        "type": "string",
+                        "type": "integer",
                         "description": "ID du centre d'intérêt",
                         "name": "id",
                         "in": "path",
@@ -366,7 +369,7 @@ const docTemplate = `{
                 "operationId": "delete-interest",
                 "parameters": [
                     {
-                        "type": "string",
+                        "type": "integer",
                         "description": "ID du centre d'intérêt",
                         "name": "id",
                         "in": "path",
@@ -391,7 +394,7 @@ const docTemplate = `{
                 "operationId": "update-interest",
                 "parameters": [
                     {
-                        "type": "string",
+                        "type": "integer",
                         "description": "ID du centre d'intérêt",
                         "name": "id",
                         "in": "path",
@@ -504,6 +507,7 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
+                        "format": "uuid",
                         "description": "ID de l'utilisateur",
                         "name": "id",
                         "in": "path",
@@ -532,6 +536,7 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
+                        "format": "uuid",
                         "description": "ID de l'utilisateur",
                         "name": "id",
                         "in": "path",
@@ -557,6 +562,7 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
+                        "format": "uuid",
                         "description": "ID de l'utilisateur",
                         "name": "id",
                         "in": "path",

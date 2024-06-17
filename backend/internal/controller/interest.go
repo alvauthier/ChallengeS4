@@ -29,7 +29,7 @@ func GetAllInterests(c echo.Context) error {
 // @ID				get-interest
 // @Tags			Interests
 // @Produce		json
-// @Param			id	path		string	true	"ID du centre d'intérêt"
+// @Param			id	path		int	true	"ID du centre d'intérêt"
 // @Success		200	{object}	models.Interest
 // @Router			/interests/{id} [get]
 func GetInterest(c echo.Context) error {
@@ -66,7 +66,7 @@ type InterestPatchInput struct {
 // @ID				update-interest
 // @Tags			Interests
 // @Produce		json
-// @Param			id	path		string	true	"ID du centre d'intérêt"
+// @Param			id	path		int	true	"ID du centre d'intérêt"
 // @Success		200	{object}	models.Interest
 // @Router			/interests/{id} [patch]
 func UpdateInterest(c echo.Context) error {
@@ -99,7 +99,7 @@ func UpdateInterest(c echo.Context) error {
 // @ID				delete-interest
 // @Tags			Interests
 // @Produce		json
-// @Param			id	path		string	true	"ID du centre d'intérêt"
+// @Param			id	path		int	true	"ID du centre d'intérêt"
 // @Success		204
 // @Router			/interests/{id} [delete]
 func DeleteInterest(c echo.Context) error {

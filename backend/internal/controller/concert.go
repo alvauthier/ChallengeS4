@@ -29,7 +29,7 @@ func GetAllConcerts(c echo.Context) error {
 // @ID				get-concert
 // @Tags			Concerts
 // @Produce		json
-// @Param			id	path		string	true	"ID du concert"
+// @Param			id	path		string	true	"ID du concert"	format(uuid)
 // @Success		200	{object}	models.Concert
 // @Router			/concerts/{id} [get]
 func GetConcert(c echo.Context) error {
@@ -72,7 +72,7 @@ func CreateConcert(c echo.Context) error {
 // @ID				update-concert
 // @Tags			Concerts
 // @Produce		json
-// @Param			id	path		string	true	"ID du concert"
+// @Param			id	path		string	true	"ID du concert"	format(uuid)
 // @Success		200	{object}	models.Concert
 // @Router			/concerts/{id} [patch]
 func UpdateConcert(c echo.Context) error {
@@ -99,7 +99,7 @@ func UpdateConcert(c echo.Context) error {
 // @ID				delete-concert
 // @Tags			Concerts
 // @Produce		json
-// @Param			id	path	string	true	"ID du concert"
+// @Param			id	path	string	true	"ID du concert"	format(uuid)
 // @Success		204
 // @Router			/concerts/{id} [delete]
 func DeleteConcert(c echo.Context) error {

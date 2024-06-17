@@ -126,7 +126,8 @@ class _HomeScreenState extends State<HomeScreen> {
                             '${_filteredConcerts.length} concerts',
                             style: const TextStyle(
                               fontSize: 30,
-                              fontWeight: FontWeight.w600,
+                              fontFamily: 'Readex Pro',
+                              fontWeight: FontWeight.w600
                             ),
                           ),
                         ),
@@ -171,7 +172,8 @@ class _HomeScreenState extends State<HomeScreen> {
                                         child: Text(
                                           concert.name,
                                           style: const TextStyle(
-                                            fontFamily: 'ReadexProBold',
+                                            fontFamily: 'Readex Pro',
+                                            fontWeight: FontWeight.w700,
                                             fontSize: 26,
                                           ),
                                         ),
@@ -181,7 +183,8 @@ class _HomeScreenState extends State<HomeScreen> {
                                         child: Text(
                                           formatDate(concert.date),
                                           style: const TextStyle(
-                                            color: Colors.grey,
+                                            color: Colors.black54,
+                                            fontFamily: 'Readex Pro',
                                           ),
                                         ),
                                       ),
@@ -190,7 +193,8 @@ class _HomeScreenState extends State<HomeScreen> {
                                         child: Text(
                                           concert.location,
                                           style: const TextStyle(
-                                            color: Colors.black,
+                                            color: Colors.grey,
+                                            fontFamily: 'Readex Pro',
                                           ),
                                         ),
                                       ),

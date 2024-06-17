@@ -1,12 +1,43 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:frontend/concert/blocs/concert_bloc.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
+import 'package:frontend/components/resale_ticket.dart';
+import 'package:frontend/components/organiser_widget.dart';
+import 'package:frontend/components/interest_chip.dart';
 
 class ConcertScreen extends StatelessWidget {
   final String concertId;
 
   const ConcertScreen({super.key, required this.concertId});
+
+  static const resaleTickets = [
+    {
+      'reseller': {
+        'name': 'John Doe',
+        'avatar': 'https://thispersondoesnotexist.com/',
+      },
+      'location': 'Fosse',
+      'price': '90€',
+    },
+    {
+      'reseller': {
+        'name': 'Jane Doe',
+        'avatar': 'https://thispersondoesnotexist.com/',
+      },
+      'location': 'Balcon',
+      'price': '80€',
+    },
+    {
+      'reseller': {
+        'name': 'John Smith',
+        'avatar': 'https://thispersondoesnotexist.com/',
+      },
+      'location': 'Balcon',
+      'price': '85€',
+    },
+  ];
 
   String formatDate(String date) {
     DateTime dateTime = DateTime.parse(date);
@@ -45,7 +76,8 @@ class ConcertScreen extends StatelessWidget {
                   }
 
                   if (state is ConcertDataLoadingSuccess) {
-                    return Column(
+                    return SingleChildScrollView(
+                      child: Column(
                         children: <Widget> [
                           Image.network(
                             'https://picsum.photos/seed/picsum/800/400',
@@ -60,31 +92,43 @@ class ConcertScreen extends StatelessWidget {
                               child: Text(
                                 formatDate(state.concert.date),
                                 style: const TextStyle(
-                                    fontSize: 20
+                                    fontSize: 20,
+                                    fontFamily: 'Readex Pro'
                                 ),
                               ),
                             ),
                           ),
                           Padding(
-                            padding: const EdgeInsets.only(top: 20.0, right: 10.0, left: 10.0),
+                            padding: const EdgeInsets.only(top: 15.0, right: 10.0, left: 10.0),
                             child: Align(
                               alignment: Alignment.centerLeft,
                               child: Text(
                                 state.concert.name,
                                 style: const TextStyle(
                                     fontSize: 30,
-                                    fontFamily: 'ReadexProBold'
+                                    fontFamily: 'Readex Pro',
+                                    fontWeight: FontWeight.w700
                                 ),
                               ),
                             ),
                           ),
                           ListTile(
                             leading: const Icon(Icons.location_on),
-                            title: Text(state.concert.location),
+                            title: Text(
+                                state.concert.location,
+                                style: const TextStyle(
+                                    fontFamily: 'Readex Pro'
+                                )
+                            ),
                           ),
                           const ListTile(
                             leading: Icon(Icons.event_seat),
-                            title: Text('300 restant'),
+                            title: Text(
+                                '300 restant',
+                                style: TextStyle(
+                                    fontFamily: 'Readex Pro'
+                                )
+                            ),
                           ),
                           const Divider(),
                           const Padding(
@@ -95,20 +139,21 @@ class ConcertScreen extends StatelessWidget {
                                 'A propos de cet événement',
                                 style: TextStyle(
                                     fontSize: 25,
-                                    fontWeight: FontWeight.bold
+                                    fontFamily: 'Readex Pro',
+                                    fontWeight: FontWeight.w600
                                 ),
                               ),
                             ),
                           ),
-                          Align(
-                            alignment: Alignment.centerLeft,
-                            child: Padding(
-                              padding: const EdgeInsets.only(top: 10.0, right: 10.0, left: 10.0),
-                              child: Chip(
-                                label: Text('Pop'),
-                                backgroundColor: Colors.deepOrange.shade100,
-                                shape: const StadiumBorder(),
-                                side: BorderSide.none,
+                          Padding(
+                            padding: const EdgeInsets.only(top: 10.0, right: 10.0, left: 10.0),
+                            child: Align(
+                              alignment: Alignment.topLeft,
+                              child: Wrap(
+                                spacing: 10.0,
+                                runSpacing: 5.0,
+                                alignment: WrapAlignment.start, // This is also important
+                                children: state.concert.interests.map((interest) => InterestChip(interest: interest)).toList(),
                               ),
                             ),
                           ),
@@ -120,7 +165,8 @@ class ConcertScreen extends StatelessWidget {
                                 state.concert.description,
                                 style: const TextStyle(
                                     fontSize: 16,
-                                    color: Colors.grey
+                                    color: Colors.grey,
+                                    fontFamily: 'Readex Pro'
                                 ),
                               ),
                             ),
@@ -131,15 +177,56 @@ class ConcertScreen extends StatelessWidget {
                             child: Align(
                               alignment: Alignment.centerLeft,
                               child: Text(
-                                'Ticket disponible à la revente',
+                                'Tickets disponibles à la revente',
                                 style: TextStyle(
                                     fontSize: 25,
-                                    fontWeight: FontWeight.bold
+                                    fontFamily: 'Readex Pro',
+                                    fontWeight: FontWeight.w600
                                 ),
                               ),
                             ),
                           ),
+                          for (var resaleTicket in resaleTickets)
+                            ResaleTicket(ticket: Ticket.fromMap(resaleTicket)),
+                          ElevatedButton(
+                              onPressed: () {},
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.deepOrange,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(6.0),
+                                ),
+                              ),
+                              child: const Text(
+                                'Consulter toutes les reventes',
+                                style: TextStyle(
+                                    fontFamily: 'Readex Pro',
+                                    color: Colors.white
+                                )
+                              )
+                          ),
+                          const Divider(),
+                          const Padding(
+                            padding: EdgeInsets.only(top: 20.0, right: 10.0, left: 10.0),
+                            child: Align(
+                              alignment: Alignment.centerLeft,
+                              child: Text(
+                                'Organisé par',
+                                style: TextStyle(
+                                    fontSize: 25,
+                                    fontFamily: 'Readex Pro',
+                                    fontWeight: FontWeight.w600
+                                ),
+                              ),
+                            ),
+                          ),
+                          OrganiserWidget(organiser: Organiser.fromMap({
+                            'id': state.concert.organization.id,
+                            'name': state.concert.organization.name,
+                            'avatar': 'https://picsum.photos/seed/picsum/200/200',
+                            'followers': '1000',
+                          }))
                         ]
+                      ),
                     );
                   }
 
@@ -150,7 +237,7 @@ class ConcertScreen extends StatelessWidget {
                 top: 10.0,
                 left: 10.0,
                 child: FloatingActionButton(
-                  child: Icon(Icons.arrow_back),
+                  child: const Icon(Icons.arrow_back),
                   onPressed: () => Navigator.pop(context),
                 ),
               ),
@@ -159,29 +246,47 @@ class ConcertScreen extends StatelessWidget {
           bottomNavigationBar: BottomAppBar(
             child: Padding(
               padding: const EdgeInsets.all(8.0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: <Widget>[
-                  const Text(
-                    '100€',
-                    style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold
-                    ),
-                  ),
-                  ElevatedButton(
-                    onPressed: () {
-                    },
-                    style: ElevatedButton.styleFrom(
-                      foregroundColor: Colors.white,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(6.0),
-                      ),
-                      backgroundColor: Colors.deepOrange,
-                    ),
-                    child: const Text('Réserver un ticket'),
-                  ),
-                ],
+              child: BlocBuilder<ConcertBloc, ConcertState>(
+                builder: (context, state) {
+                  if (state is ConcertDataLoadingSuccess) {
+                    var prices = state.concert.concertCategories.map((concertCategory) => concertCategory.price).toList();
+                    var minPrice = prices.reduce((value, element) => value < element ? value : element);
+                    var maxPrice = prices.reduce((value, element) => value > element ? value : element);
+
+                    return Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: <Widget>[
+                        Text(
+                          '$minPrice€ - $maxPrice€',
+                          style: const TextStyle(
+                              fontSize: 20,
+                              fontFamily: 'Readex Pro',
+                              fontWeight: FontWeight.w700
+                          ),
+                        ),
+                        ElevatedButton(
+                          onPressed: () {
+                          },
+                          style: ElevatedButton.styleFrom(
+                            foregroundColor: Colors.white,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(6.0),
+                            ),
+                            backgroundColor: Colors.deepOrange,
+                          ),
+                          child: const Text(
+                              'Réserver un ticket',
+                              style: TextStyle(
+                                  fontFamily: 'Readex Pro'
+                              )
+                          ),
+                        ),
+                      ],
+                    );
+                  }
+
+                  return const SizedBox();
+                },
               ),
             ),
           ),

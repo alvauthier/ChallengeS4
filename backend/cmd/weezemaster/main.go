@@ -31,6 +31,13 @@ func main() {
 	router := echo.New()
 	database.InitDB()
 
+	router.Use(func(next echo.HandlerFunc) echo.HandlerFunc {
+		return func(c echo.Context) error {
+			c.Response().Header().Set("Content-Type", "application/json; charset=utf-8")
+			return next(c)
+		}
+	})
+
 	router.POST("/register", controller.Register)
 	router.POST("/login", controller.Login)
 	router.GET("/users", controller.GetAllUsers)

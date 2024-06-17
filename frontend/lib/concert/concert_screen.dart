@@ -252,12 +252,19 @@ class ConcertScreen extends StatelessWidget {
                     var prices = state.concert.concertCategories.map((concertCategory) => concertCategory.price).toList();
                     var minPrice = prices.reduce((value, element) => value < element ? value : element);
                     var maxPrice = prices.reduce((value, element) => value > element ? value : element);
+                    
+                    String priceText;
+                    if (prices.length > 1) {
+                      priceText = '$minPrice€ - $maxPrice€';
+                    } else {
+                      priceText = '$minPrice€';
+                    }
 
                     return Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: <Widget>[
                         Text(
-                          '$minPrice€ - $maxPrice€',
+                          priceText,
                           style: const TextStyle(
                               fontSize: 20,
                               fontFamily: 'Readex Pro',

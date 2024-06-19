@@ -19,7 +19,7 @@ class ConcertScreen extends StatelessWidget {
         'avatar': 'https://thispersondoesnotexist.com/',
       },
       'location': 'Fosse',
-      'price': '90€',
+      'price': '90',
     },
     {
       'reseller': {
@@ -27,7 +27,7 @@ class ConcertScreen extends StatelessWidget {
         'avatar': 'https://thispersondoesnotexist.com/',
       },
       'location': 'Balcon',
-      'price': '80€',
+      'price': '80',
     },
     {
       'reseller': {
@@ -35,7 +35,7 @@ class ConcertScreen extends StatelessWidget {
         'avatar': 'https://thispersondoesnotexist.com/',
       },
       'location': 'Balcon',
-      'price': '85€',
+      'price': '85',
     },
   ];
 
@@ -255,9 +255,9 @@ class ConcertScreen extends StatelessWidget {
                     
                     String priceText;
                     if (prices.length > 1) {
-                      priceText = '$minPrice€ - $maxPrice€';
+                      priceText = '$minPrice € - $maxPrice €';
                     } else {
-                      priceText = '$minPrice€';
+                      priceText = '$minPrice €';
                     }
 
                     return Row(

@@ -53,8 +53,8 @@ class ResaleTicket extends StatelessWidget {
                 borderRadius: BorderRadius.circular(10),
                 child: Image.network(
                   ticket.reseller.avatar,
-                  width: 150,
-                  height: 150,
+                  width: 140,
+                  height: 140,
                   fit: BoxFit.cover,
                 ),
               ),
@@ -75,7 +75,7 @@ class ResaleTicket extends StatelessWidget {
                           ),
                           const Spacer(),
                           Text(
-                            ticket.price,
+                            '${ticket.price} €',
                             style: const TextStyle(
                               fontWeight: FontWeight.w700,
                               fontSize: 26,

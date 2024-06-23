@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	_ "weezemaster/internal/config"
 	"weezemaster/internal/models"
 
 	"github.com/joho/godotenv"

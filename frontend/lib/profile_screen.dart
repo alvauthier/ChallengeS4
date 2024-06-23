@@ -11,7 +11,7 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
-  final storage = new FlutterSecureStorage();
+  final storage = const FlutterSecureStorage();
   String? email;
 
   @override

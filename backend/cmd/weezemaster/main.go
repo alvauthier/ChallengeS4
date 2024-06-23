@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"weezemaster/internal/controller"
 	"weezemaster/internal/database"
+	"weezemaster/internal/middleware"
 
 	_ "weezemaster/docs"
 
@@ -38,6 +39,9 @@ func main() {
 		}
 	})
 
+	authenticated := router.Group("")
+	authenticated.Use(middleware.JWTMiddleware())
+
 	router.POST("/register", controller.Register)
 	router.POST("/login", controller.Login)
 	router.GET("/users", controller.GetAllUsers)
@@ -57,11 +61,11 @@ func main() {
 	router.PATCH("/categories/:id", controller.UpdateCategory)
 	router.DELETE("/categories/:id", controller.DeleteCategory)
 
-	router.GET("/concerts", controller.GetAllConcerts)
-	router.GET("/concerts/:id", controller.GetConcert)
-	router.POST("/concerts", controller.CreateConcert)
-	router.PATCH("/concerts/:id", controller.UpdateConcert)
-	router.DELETE("/concerts/:id", controller.DeleteConcert)
+	authenticated.GET("/concerts", controller.GetAllConcerts)
+	authenticated.GET("/concerts/:id", controller.GetConcert)
+	authenticated.POST("/concerts", controller.CreateConcert)
+	authenticated.PATCH("/concerts/:id", controller.UpdateConcert)
+	authenticated.DELETE("/concerts/:id", controller.DeleteConcert)
 
 	router.GET("/swagger/*", echoSwagger.WrapHandler)
 

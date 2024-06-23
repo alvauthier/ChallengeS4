@@ -2,8 +2,8 @@ package controller
 
 import (
 	"net/http"
-	"os"
 	"time"
+	"weezemaster/internal/config"
 	"weezemaster/internal/database"
 	"weezemaster/internal/models"
 
@@ -124,11 +124,19 @@ func Login(c echo.Context) error {
 		return c.JSON(http.StatusUnauthorized, map[string]string{"message": "Invalid credentials"})
 	}
 
-	token, err := createToken(user.Email)
+	accessToken, err := createAccessToken(user.Email, user.Role)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]string{"message": err.Error()})
 	}
-	return c.JSON(http.StatusOK, map[string]string{"token": token})
+
+	refreshToken, err := createRefreshToken(user.Email, user.Role)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{"message": err.Error()})
+	}
+	return c.JSON(http.StatusOK, map[string]string{
+		"access_token":  accessToken,
+		"refresh_token": refreshToken,
+	})
 }
 
 // @Summary		Modifie un utilisateur
@@ -210,16 +218,40 @@ func CheckPasswordHash(password, hash string) bool {
 	return err == nil
 }
 
-var secretKey = []byte(os.Getenv("SECRET_KEY"))
+func generateJTI() string {
+	return fmt.Sprintf("%d", time.Now().UnixNano())
+}
 
-func createToken(email string) (string, error) {
+func createAccessToken(email, role string) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256,
 		jwt.MapClaims{
 			"email": email,
+			"role":  role,
 			"exp":   time.Now().Add(time.Hour * 24).Unix(),
+			"iat":   time.Now().Unix(),
+			"jti":   generateJTI(),
 		})
 
-	tokenString, err := token.SignedString(secretKey)
+	tokenString, err := token.SignedString(config.SecretKey)
+	if err != nil {
+		return "", err
+	}
+
+	fmt.Println(tokenString)
+	return tokenString, nil
+}
+
+func createRefreshToken(email, role string) (string, error) {
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256,
+		jwt.MapClaims{
+			"email": email,
+			"role":  role,
+			"exp":   time.Now().Add(time.Hour * 24 * 30).Unix(),
+			"iat":   time.Now().Unix(),
+			"jti":   generateJTI(),
+		})
+
+	tokenString, err := token.SignedString(config.SecretKey)
 	if err != nil {
 		return "", err
 	}
@@ -227,18 +259,26 @@ func createToken(email string) (string, error) {
 	return tokenString, nil
 }
 
-func verifyToken(tokenString string) error {
-	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
-		return secretKey, nil
+func verifyToken(tokenString string) (jwt.MapClaims, error) {
+	token, err := jwt.ParseWithClaims(tokenString, &jwt.MapClaims{}, func(token *jwt.Token) (interface{}, error) {
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
+		}
+		return config.SecretKey, nil
 	})
 
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	if !token.Valid {
-		return fmt.Errorf("invalid token")
+		return nil, fmt.Errorf("invalid token")
 	}
 
-	return nil
+	claims, ok := token.Claims.(*jwt.MapClaims)
+	if !ok {
+		return nil, fmt.Errorf("invalid token claims")
+	}
+
+	return *claims, nil
 }

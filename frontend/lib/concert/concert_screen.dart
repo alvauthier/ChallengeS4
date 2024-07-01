@@ -1,11 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:frontend/booking_screen.dart';
 import 'package:frontend/concert/blocs/concert_bloc.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:frontend/core/services/token_services.dart';
+import 'package:frontend/login_register_screen.dart';
+import 'package:frontend/login_screen.dart';
 import 'package:intl/intl.dart';
 import 'package:frontend/components/resale_ticket.dart';
 import 'package:frontend/components/organiser_widget.dart';
 import 'package:frontend/components/interest_chip.dart';
+import 'package:jwt_decoder/jwt_decoder.dart';
 
 class ConcertScreen extends StatelessWidget {
   final String concertId;
@@ -272,7 +277,29 @@ class ConcertScreen extends StatelessWidget {
                           ),
                         ),
                         ElevatedButton(
-                          onPressed: () {
+                          onPressed: () async {
+                            final tokenService = TokenService();
+                            String? token = await tokenService.getAccessToken();
+                            print(token);
+                            
+                            if (token == null || JwtDecoder.isExpired(token)) {
+                              print("Je rentre dans le if du token null / expired");
+                            // If the token is null or refresh failed, redirect to login
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => const LoginRegisterScreen(),
+                              ),
+                            );
+                          } else {
+                            // Navigate to the booking page
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => BookingScreen(concertId: concertId),
+                              ),
+                            );
+                          }
                           },
                           style: ElevatedButton.styleFrom(
                             foregroundColor: Colors.white,

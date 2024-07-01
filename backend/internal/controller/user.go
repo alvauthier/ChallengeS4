@@ -227,7 +227,7 @@ func createAccessToken(email, role string) (string, error) {
 		jwt.MapClaims{
 			"email": email,
 			"role":  role,
-			"exp":   time.Now().Add(time.Hour * 24).Unix(),
+			"exp":   time.Now().Add(time.Minute * 1).Unix(),
 			"iat":   time.Now().Unix(),
 			"jti":   generateJTI(),
 		})

@@ -21,3 +21,21 @@ func JWTMiddleware() echo.MiddlewareFunc {
 		},
 	})
 }
+
+func CheckRole(allowedRoles ...string) echo.MiddlewareFunc {
+	return func(next echo.HandlerFunc) echo.HandlerFunc {
+		return func(c echo.Context) error {
+			user := c.Get("user").(*jwt.Token)
+			claims := user.Claims.(*jwt.MapClaims)
+			userRole := (*claims)["role"].(string)
+
+			for _, role := range allowedRoles {
+				if role == userRole {
+					return next(c)
+				}
+			}
+
+			return echo.NewHTTPError(http.StatusForbidden, "You do not have the necessary permissions to access this resource")
+		}
+	}
+}

@@ -5,7 +5,7 @@ import 'dart:convert';
 
 class BookingScreen extends StatefulWidget {
   final String concertId;
-  const BookingScreen({Key? key, required this.concertId}) : super(key: key);
+  const BookingScreen({super.key, required this.concertId});
 
   @override
   _BookingScreenState createState() => _BookingScreenState();
@@ -19,9 +19,9 @@ class _BookingScreenState extends State<BookingScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Booking Screen'),
+        title: const Text('Booking Screen'),
       ),
-      body: Center(
+      body: const Center(
         child: Text('Bonjour booking'),
       ),
     );

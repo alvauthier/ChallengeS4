@@ -246,8 +246,8 @@ func createRefreshToken(email, role string) (string, error) {
 		jwt.MapClaims{
 			"email": email,
 			"role":  role,
-			// "exp":   time.Now().Add(time.Hour * 24 * 30).Unix(),
-			"exp": time.Now().Add(time.Minute * 2).Unix(), // 2 minutes pour les tests
+			"exp":   time.Now().Add(time.Hour * 24 * 30).Unix(),
+			// "exp": time.Now().Add(time.Minute * 2).Unix(), // 2 minutes pour les tests
 			"iat": time.Now().Unix(),
 			"jti": generateJTI(),
 		})

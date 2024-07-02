@@ -286,14 +286,13 @@ class ConcertScreen extends StatelessWidget {
                             print("TOKEN SERVICE REFRESH TOKEN");
                             if (token == null || !await tokenService.refreshToken()) {
                               print("Je rentre dans le if du token null");
-                            // If the token is null or refresh failed, redirect to login
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => const LoginRegisterScreen(),
-                              ),
-                            );
-                          } else {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => const LoginRegisterScreen(),
+                                ),
+                              );
+                            } else {
                             // Navigate to the booking page
                             Navigator.push(
                               context,

@@ -247,8 +247,9 @@ func createRefreshToken(email, role string) (string, error) {
 			"email": email,
 			"role":  role,
 			"exp":   time.Now().Add(time.Hour * 24 * 30).Unix(),
-			"iat":   time.Now().Unix(),
-			"jti":   generateJTI(),
+			// "exp": time.Now().Add(time.Minute * 1).Unix(), // 1 minute pour les tests
+			"iat": time.Now().Unix(),
+			"jti": generateJTI(),
 		})
 
 	tokenString, err := token.SignedString(config.SecretKey)

@@ -284,7 +284,6 @@ class ConcertScreen extends StatelessWidget {
                             print(token);
                             print(refreshToken);                            
                             print("TOKEN SERVICE REFRESH TOKEN");
-                            print(await tokenService.refreshToken());
                             if (token == null || !await tokenService.refreshToken()) {
                               print("Je rentre dans le if du token null");
                             // If the token is null or refresh failed, redirect to login

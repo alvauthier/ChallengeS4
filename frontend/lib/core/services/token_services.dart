@@ -1,6 +1,7 @@
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:jwt_decoder/jwt_decoder.dart';
 
 class TokenService {
   final _storage = const FlutterSecureStorage();
@@ -32,6 +33,11 @@ class TokenService {
       return false;
     }
 
+    if (JwtDecoder.isExpired(refreshToken)) {
+      print('Refresh token expired');
+      return false;
+    }
+
     print('Refresh token found: $refreshToken');
 
     final response = await http.post(
@@ -49,10 +55,6 @@ class TokenService {
       await setAccessToken(data['access_token']);
       return true;
     }
-
-    if (response.statusCode == 401) {
-      print("Token refresh failed STATUS 401");    
-      }
 
     return false;
   }

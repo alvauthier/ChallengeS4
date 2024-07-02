@@ -29,16 +29,16 @@ class TokenService {
     // print('Refreshing token...');
     final refreshToken = await _storage.read(key: _refreshTokenKey);
     if (refreshToken == null) {
-      // print('No refresh token found');
+      print('No refresh token found');
       return false;
     }
 
     if (JwtDecoder.isExpired(refreshToken)) {
-      // print('Refresh token expired');
+      print('Refresh token expired');
       return false;
     }
 
-    // print('Refresh token found: $refreshToken');
+    print('Refresh token found: $refreshToken');
 
     final response = await http.post(
       Uri.parse(_refreshUrl),
@@ -50,7 +50,7 @@ class TokenService {
     );
 
     if (response.statusCode == 200) {
-      // print("Token refreshed STATUS 200");
+      print("Token refreshed successfully");
       final data = jsonDecode(response.body);
       await setAccessToken(data['access_token']);
       return true;
@@ -66,7 +66,6 @@ class TokenService {
   Future<String?> getValidAccessToken() async {
     print('Getting valid access token...');
     String? accessToken = await getAccessToken();
-    print(JwtDecoder.isExpired(accessToken!));
     if (accessToken == null || JwtDecoder.isExpired(accessToken)) {
       print('Access token expired, Generating a new one...');
       bool success = await refreshToken();

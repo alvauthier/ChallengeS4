@@ -279,20 +279,19 @@ class ConcertScreen extends StatelessWidget {
                         ElevatedButton(
                           onPressed: () async {
                             final tokenService = TokenService();
-                            String? token = await tokenService.getAccessToken();
+                            String? token = await tokenService.getValidAccessToken();
                             // String? refreshToken = await tokenService.getRefreshToken();
                             // print(token);
                             // print(refreshToken);                            
                             // print("TOKEN SERVICE REFRESH TOKEN");
-                            if (token == null || !await tokenService.refreshToken()) {
-                              // print("Je rentre dans le if du token null");
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => const LoginRegisterScreen(),
-                                ),
-                              );
-                            } else {
+                            if (token == null) {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => const LoginRegisterScreen(),
+                              ),
+                            );
+                          } else {
                             // Navigate to the booking page
                             Navigator.push(
                               context,

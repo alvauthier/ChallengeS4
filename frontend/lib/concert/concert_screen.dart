@@ -81,6 +81,11 @@ class ConcertScreen extends StatelessWidget {
                   }
 
                   if (state is ConcertDataLoadingSuccess) {
+                    // Calcul des tickets restants
+                    int totalRemainingTickets = state.concert.concertCategories
+                        .map((category) => category.availableTickets - category.soldTickets)
+                        .reduce((value, element) => value + element);
+                      
                     return SingleChildScrollView(
                       child: Column(
                         children: <Widget> [
@@ -126,11 +131,11 @@ class ConcertScreen extends StatelessWidget {
                                 )
                             ),
                           ),
-                          const ListTile(
-                            leading: Icon(Icons.event_seat),
+                          ListTile(
+                            leading: const Icon(Icons.event_seat),
                             title: Text(
-                                '300 restant',
-                                style: TextStyle(
+                                '$totalRemainingTickets restant',
+                                style: const TextStyle(
                                     fontFamily: 'Readex Pro'
                                 )
                             ),

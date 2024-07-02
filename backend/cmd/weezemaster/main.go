@@ -64,7 +64,8 @@ func main() {
 
 	router.GET("/concerts", controller.GetAllConcerts)
 	router.GET("/concerts/:id", controller.GetConcert)
-	authenticated.POST("/concerts", controller.CreateConcert, middleware.CheckRole("organization", "admin"))
+	// authenticated.GET("/concerts/:id", controller.GetConcert, middleware.CheckRole("user")) // pour tester les rôles
+	authenticated.POST("/concerts", controller.CreateConcert, middleware.CheckRole("organizer", "admin"))
 	authenticated.PATCH("/concerts/:id", controller.UpdateConcert)
 	authenticated.DELETE("/concerts/:id", controller.DeleteConcert)
 

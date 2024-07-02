@@ -280,12 +280,12 @@ class ConcertScreen extends StatelessWidget {
                           onPressed: () async {
                             final tokenService = TokenService();
                             String? token = await tokenService.getAccessToken();
-                            String? refreshToken = await tokenService.getRefreshToken();
-                            print(token);
-                            print(refreshToken);                            
-                            print("TOKEN SERVICE REFRESH TOKEN");
+                            // String? refreshToken = await tokenService.getRefreshToken();
+                            // print(token);
+                            // print(refreshToken);                            
+                            // print("TOKEN SERVICE REFRESH TOKEN");
                             if (token == null || !await tokenService.refreshToken()) {
-                              print("Je rentre dans le if du token null");
+                              // print("Je rentre dans le if du token null");
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(

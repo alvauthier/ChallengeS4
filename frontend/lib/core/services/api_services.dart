@@ -15,7 +15,7 @@ class ApiServices {
   static Future<List<Concert>> getConcerts() async {
     try {
       final tokenService = TokenService();
-      String? jwtToken = await tokenService.getAccessToken();
+      String? jwtToken = await tokenService.getValidAccessToken();
       final response = await http.get(
         Uri.parse('http://10.0.2.2:8080/concerts'),
         headers: {

@@ -282,3 +282,38 @@ func verifyToken(tokenString string) (jwt.MapClaims, error) {
 
 	return *claims, nil
 }
+
+func RefreshAccessToken(c echo.Context) error {
+	var requestBody map[string]string
+	if err := c.Bind(&requestBody); err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]string{"message": "Invalid request"})
+	}
+
+	refreshToken := requestBody["refresh_token"]
+
+	// Vérifie le refresh token
+	claims, err := verifyToken(refreshToken)
+	fmt.Println("REFRESH TOKEN FUNCTION")
+	fmt.Println(claims)
+	fmt.Println(err)
+	if err != nil {
+		return c.JSON(http.StatusUnauthorized, map[string]string{"message": "Invalid refresh token"})
+	}
+
+	// Extrait l'email et le rôle à partir des claims du refresh token
+	email, emailOk := claims["email"].(string)
+	role, roleOk := claims["role"].(string)
+	if !emailOk || !roleOk {
+		return c.JSON(http.StatusInternalServerError, map[string]string{"message": "Invalid token claims"})
+	}
+
+	// Génère un nouvel access token
+	accessToken, err := createAccessToken(email, role)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{"message": err.Error()})
+	}
+
+	return c.JSON(http.StatusOK, map[string]string{
+		"access_token": accessToken,
+	})
+}

@@ -44,6 +44,7 @@ func main() {
 
 	router.POST("/register", controller.Register)
 	router.POST("/login", controller.Login)
+	router.POST("/refresh", controller.RefreshAccessToken)
 	router.GET("/users", controller.GetAllUsers)
 	router.GET("/users/:id", controller.GetUser)
 	router.PATCH("/users/:id", controller.UpdateUser)

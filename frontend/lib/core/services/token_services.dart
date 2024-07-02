@@ -6,10 +6,14 @@ class TokenService {
   final _storage = const FlutterSecureStorage();
   final String _refreshTokenKey = 'refresh_token';
   final String _accessTokenKey = 'access_token';
-  final String _refreshUrl = 'https://yourapi.com/refresh';
+  final String _refreshUrl = 'http://10.0.2.2:8080/refresh';
 
   Future<String?> getAccessToken() async {
     return await _storage.read(key: _accessTokenKey);
+  }
+
+  Future<String?> getRefreshToken() async {
+    return await _storage.read(key: _refreshTokenKey);
   }
 
   Future<void> setAccessToken(String token) async {
@@ -21,22 +25,34 @@ class TokenService {
   }
 
   Future<bool> refreshToken() async {
+    print('Refreshing token...');
     final refreshToken = await _storage.read(key: _refreshTokenKey);
     if (refreshToken == null) {
+      print('No refresh token found');
       return false;
     }
 
+    print('Refresh token found: $refreshToken');
+
     final response = await http.post(
       Uri.parse(_refreshUrl),
-      body: jsonEncode({'refreshToken': refreshToken}),
-      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({"refresh_token": refreshToken}),
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      },
     );
 
     if (response.statusCode == 200) {
+      print("Token refreshed STATUS 200");
       final data = jsonDecode(response.body);
-      await setAccessToken(data['accessToken']);
+      await setAccessToken(data['access_token']);
       return true;
     }
+
+    if (response.statusCode == 401) {
+      print("Token refresh failed STATUS 401");    
+      }
 
     return false;
   }

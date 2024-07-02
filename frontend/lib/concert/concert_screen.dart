@@ -280,10 +280,13 @@ class ConcertScreen extends StatelessWidget {
                           onPressed: () async {
                             final tokenService = TokenService();
                             String? token = await tokenService.getAccessToken();
+                            String? refreshToken = await tokenService.getRefreshToken();
                             print(token);
-                            
-                            if (token == null || JwtDecoder.isExpired(token)) {
-                              print("Je rentre dans le if du token null / expired");
+                            print(refreshToken);                            
+                            print("TOKEN SERVICE REFRESH TOKEN");
+                            print(await tokenService.refreshToken());
+                            if (token == null || !await tokenService.refreshToken()) {
+                              print("Je rentre dans le if du token null");
                             // If the token is null or refresh failed, redirect to login
                             Navigator.push(
                               context,

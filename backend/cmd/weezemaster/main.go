@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"weezemaster/internal/controller"
 	"weezemaster/internal/database"
+	"weezemaster/internal/middleware"
 
 	_ "weezemaster/docs"
 
@@ -38,9 +39,13 @@ func main() {
 		}
 	})
 
+	authenticated := router.Group("")
+	authenticated.Use(middleware.JWTMiddleware())
+
 	router.POST("/register", controller.Register)
 	router.POST("/login", controller.Login)
-	router.GET("/users", controller.GetAllUsers)
+	router.POST("/refresh", controller.RefreshAccessToken)
+	authenticated.GET("/users", controller.GetAllUsers, middleware.CheckRole("admin"))
 	router.GET("/users/:id", controller.GetUser)
 	router.PATCH("/users/:id", controller.UpdateUser)
 	router.DELETE("/users/:id", controller.DeleteUser)
@@ -59,9 +64,10 @@ func main() {
 
 	router.GET("/concerts", controller.GetAllConcerts)
 	router.GET("/concerts/:id", controller.GetConcert)
-	router.POST("/concerts", controller.CreateConcert)
-	router.PATCH("/concerts/:id", controller.UpdateConcert)
-	router.DELETE("/concerts/:id", controller.DeleteConcert)
+	// authenticated.GET("/concerts/:id", controller.GetConcert, middleware.CheckRole("user")) // pour tester les rôles
+	authenticated.POST("/concerts", controller.CreateConcert, middleware.CheckRole("organizer", "admin"))
+	authenticated.PATCH("/concerts/:id", controller.UpdateConcert)
+	authenticated.DELETE("/concerts/:id", controller.DeleteConcert)
 
 	router.GET("/swagger/*", echoSwagger.WrapHandler)
 

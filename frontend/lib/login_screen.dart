@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:frontend/home/home_screen.dart';
 import 'package:frontend/profile_screen.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -19,7 +20,7 @@ class _LoginScreenState extends State<LoginScreen> {
   final RegExp emailRegExp = RegExp(
       r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$');
 
-      final storage = new FlutterSecureStorage();
+  final storage = const FlutterSecureStorage();
 
   @override
   Widget build(BuildContext context) {
@@ -97,12 +98,16 @@ class _LoginScreenState extends State<LoginScreen> {
                                       ),
                                     );
                                     if (response.statusCode == 200) {
-                                      await storage.write(key: 'token', value: response.body);
+                                      final Map<String, dynamic> responseData = jsonDecode(response.body);
+                                      final String accessToken = responseData['access_token'];
+                                      final String refreshToken = responseData['refresh_token'];
+                                      await storage.write(key: 'access_token', value: accessToken);
+                                      await storage.write(key: 'refresh_token', value: refreshToken);
                                       // Navigator.pop(context);
                                       // Navigator.pop(context);
                                       Navigator.push(
                                         context,
-                                        MaterialPageRoute(builder: (context) => ProfileScreen()),
+                                        MaterialPageRoute(builder: (context) => HomeScreen()),
                                       );
                                     }
                                   } catch (e) {

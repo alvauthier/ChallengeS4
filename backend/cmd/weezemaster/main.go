@@ -45,7 +45,7 @@ func main() {
 	router.POST("/register", controller.Register)
 	router.POST("/login", controller.Login)
 	router.POST("/refresh", controller.RefreshAccessToken)
-	router.GET("/users", controller.GetAllUsers)
+	authenticated.GET("/users", controller.GetAllUsers, middleware.CheckRole("admin"))
 	router.GET("/users/:id", controller.GetUser)
 	router.PATCH("/users/:id", controller.UpdateUser)
 	router.DELETE("/users/:id", controller.DeleteUser)
@@ -64,7 +64,7 @@ func main() {
 
 	router.GET("/concerts", controller.GetAllConcerts)
 	router.GET("/concerts/:id", controller.GetConcert)
-	authenticated.POST("/concerts", controller.CreateConcert)
+	authenticated.POST("/concerts", controller.CreateConcert, middleware.CheckRole("organization", "admin"))
 	authenticated.PATCH("/concerts/:id", controller.UpdateConcert)
 	authenticated.DELETE("/concerts/:id", controller.DeleteConcert)
 

@@ -296,7 +296,7 @@ class ConcertScreen extends StatelessWidget {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (context) => BookingScreen(concertId: concertId),
+                                builder: (context) => BookingScreen(concertCategories: state.concert.concertCategories),
                               ),
                             );
                           }

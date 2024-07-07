@@ -191,24 +191,41 @@ class ConcertScreen extends StatelessWidget {
                               ),
                             ),
                           ),
-                          for (var resaleTicket in resaleTickets)
-                            ResaleTicket(ticket: Ticket.fromMap(resaleTicket)),
-                          ElevatedButton(
-                            onPressed: () {},
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.deepOrange,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(6.0),
+                          if (resaleTickets.isEmpty)
+                            const Padding(
+                              padding: EdgeInsets.all(10.0),
+                              child: Align(
+                                alignment: Alignment.centerLeft,
+                                child: Text(
+                                  "Il n'y a actuellement pas de tickets disponibles à la revente.",
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    color: Colors.grey,
+                                    fontFamily: 'Readex Pro',
+                                  ),
+                                ),
                               ),
                             ),
-                            child: const Text(
-                              'Consulter toutes les reventes',
-                              style: TextStyle(
-                                fontFamily: 'Readex Pro',
-                                color: Colors.white,
+                          if (resaleTickets.isNotEmpty)
+                            for (var resaleTicket in resaleTickets)
+                              ResaleTicket(ticket: Ticket.fromMap(resaleTicket)),
+                          if (resaleTickets.isNotEmpty)
+                            ElevatedButton(
+                              onPressed: () {},
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.deepOrange,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(6.0),
+                                ),
+                              ),
+                              child: const Text(
+                                'Consulter toutes les reventes',
+                                style: TextStyle(
+                                  fontFamily: 'Readex Pro',
+                                  color: Colors.white,
+                                ),
                               ),
                             ),
-                          ),
                           const Divider(),
                           const Padding(
                             padding: EdgeInsets.only(top: 20.0, right: 10.0, left: 10.0),
@@ -288,20 +305,20 @@ class ConcertScreen extends StatelessWidget {
                             final tokenService = TokenService();
                             String? token = await tokenService.getValidAccessToken();
                             if (token == null) {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => const LoginRegisterScreen(),
-                              ),
-                            );
-                          } else {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => BookingScreen(concertId: concertId),
-                              ),
-                            );
-                          }
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => const LoginRegisterScreen(),
+                                ),
+                              );
+                            } else {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => BookingScreen(concertId: concertId),
+                                ),
+                              );
+                            }
                           },
                           style: ElevatedButton.styleFrom(
                             foregroundColor: Colors.white,

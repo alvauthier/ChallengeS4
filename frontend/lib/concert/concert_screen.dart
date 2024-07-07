@@ -16,12 +16,8 @@ class ConcertScreen extends StatelessWidget {
 
   String formatDate(String date) {
     DateTime dateTime = DateTime.parse(date);
-
     DateFormat dateFormat = DateFormat('dd/MM/yyyy HH:mm', 'fr_FR');
-
-    String formattedDate = dateFormat.format(dateTime);
-
-    return formattedDate;
+    return dateFormat.format(dateTime);
   }
 
   @override
@@ -78,6 +74,10 @@ class ConcertScreen extends StatelessWidget {
                         }
                       }
                     }
+                    
+                    List selectedResaleTickets = resaleTickets.length > 2
+                        ? (resaleTickets..shuffle()).take(2).toList()
+                        : resaleTickets;
 
                     return SingleChildScrollView(
                       child: Column(
@@ -207,9 +207,9 @@ class ConcertScreen extends StatelessWidget {
                               ),
                             ),
                           if (resaleTickets.isNotEmpty)
-                            for (var resaleTicket in resaleTickets)
+                            for (var resaleTicket in selectedResaleTickets)
                               ResaleTicket(ticket: Ticket.fromMap(resaleTicket)),
-                          if (resaleTickets.isNotEmpty)
+                          if (resaleTickets.length > 2)
                             ElevatedButton(
                               onPressed: () {},
                               style: ElevatedButton.styleFrom(

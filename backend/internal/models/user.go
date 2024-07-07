@@ -19,8 +19,8 @@ type User struct {
 	//
 	// required: true
 	// example: john@doe.com
-	Email    string `gorm:"unique;not null"`
-	Password string `gorm:"not null"`
+	Email    string `gorm:"unique;not null" json:"email"`
+	Password string `gorm:"not null" json:"-"`
 	// le prénom de l'utilisateur
 	//
 	// required: true

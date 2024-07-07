@@ -1,3 +1,4 @@
+import 'package:frontend/core/models/category.dart';
 import 'package:frontend/core/models/ticket.dart';
 
 class ConcertCategory {
@@ -6,6 +7,7 @@ class ConcertCategory {
   final int soldTickets;
   final int price;
   final List<Ticket> tickets;
+  final Category category;
 
   ConcertCategory({
     required this.id,
@@ -13,6 +15,7 @@ class ConcertCategory {
     required this.soldTickets,
     required this.price,
     required this.tickets,
+    required this.category 
   });
 
   factory ConcertCategory.fromJson(Map<String, dynamic> json) {
@@ -25,6 +28,7 @@ class ConcertCategory {
       soldTickets: json['SoldTickets'] ?? 0,
       price: json['Price'] ?? 0,
       tickets: ticketList,
+      category: Category.fromJson(json['Category']),
     );
   }
 }

@@ -56,9 +56,9 @@ class ConcertScreen extends StatelessWidget {
 
                     // Filtrer les tickets pour la revente
                     List resaleTickets = [];
-                    for (var category in concert.concertCategories) {
-                      if (category.tickets.isNotEmpty) {
-                        for (var ticket in category.tickets) {
+                    for (var concerCategory in concert.concertCategories) {
+                      if (concerCategory.tickets.isNotEmpty) {
+                        for (var ticket in concerCategory.tickets) {
                           if (ticket.ticketListing != null && ticket.ticketListing!.status == 'available') {
                             resaleTickets.add(
                               {
@@ -66,7 +66,7 @@ class ConcertScreen extends StatelessWidget {
                                   'name': '${ticket.user.firstname} ${ticket.user.lastname}',
                                   'avatar': 'https://thispersondoesnotexist.com/',
                                 },
-                                'category': 'Work in progress',
+                                'category': concerCategory.category.name,
                                 'price': ticket.ticketListing!.price.toString(),
                               }
                             );

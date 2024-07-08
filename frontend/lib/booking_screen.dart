@@ -56,7 +56,7 @@ class _BookingScreenState extends State<BookingScreen> {
                                 ),
                               ],
                             ),
-                            subtitle: Text('Nombre de tickets: ${concertCategory.numberTickets}'),
+                            subtitle: Text('Nombre de tickets: ${concertCategory.availableTickets}'),
                             value: concertCategory.category.id,
                             groupValue: selectedCategory,
                             onChanged: (int? value) {

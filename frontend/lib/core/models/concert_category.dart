@@ -1,24 +1,34 @@
 import 'package:frontend/core/models/category.dart';
+import 'package:frontend/core/models/ticket.dart';
 
 class ConcertCategory {
   final String id;
-  final int numberTickets;
+  final int availableTickets;
+  final int soldTickets;
   final int price;
+  final List<Ticket> tickets;
   final Category category;
 
   ConcertCategory({
     required this.id,
-    required this.numberTickets,
+    required this.availableTickets,
+    required this.soldTickets,
     required this.price,
-    required this.category
+    required this.tickets,
+    required this.category 
   });
 
   factory ConcertCategory.fromJson(Map<String, dynamic> json) {
+    var ticketListFromJson = json['Tickets'] as List? ?? [];
+    List<Ticket> ticketList = ticketListFromJson.map((i) => Ticket.fromJson(i)).toList();
+
     return ConcertCategory(
       id: json['ID'],
-      numberTickets: json['NumberTickets'] ?? 0,
+      availableTickets: json['AvailableTickets'] ?? 0,
+      soldTickets: json['SoldTickets'] ?? 0,
       price: json['Price'] ?? 0,
-      category: Category.fromJson(json['Category'])
+      tickets: ticketList,
+      category: Category.fromJson(json['Category']),
     );
   }
 }

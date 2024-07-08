@@ -19,22 +19,24 @@ func LoadConcertCategoryFixtures() {
 
 	if concert.ID != uuid.Nil {
 		categoryAssociations := map[int]struct {
-			NbTickets int
-			Price     float64
+			AvailableTickets int
+			SoldTickets      int
+			Price            float64
 		}{
-			1: {NbTickets: 200, Price: 70.0},
-			3: {NbTickets: 170, Price: 100.0},
-			4: {NbTickets: 120, Price: 170.0},
-			5: {NbTickets: 80, Price: 250.0},
+			1: {AvailableTickets: 200, SoldTickets: 0, Price: 70.0},
+			3: {AvailableTickets: 170, SoldTickets: 0, Price: 100.0},
+			4: {AvailableTickets: 120, SoldTickets: 0, Price: 170.0},
+			5: {AvailableTickets: 80, SoldTickets: 0, Price: 250.0},
 		}
 
 		for categoryID, details := range categoryAssociations {
 			concertCategory := models.ConcertCategory{
-				ID:         uuid.New(),
-				ConcertId:  concert.ID,
-				CategoryId: categoryID,
-				NbTickets:  details.NbTickets,
-				Price:      details.Price,
+				ID:               uuid.New(),
+				ConcertId:        concert.ID,
+				CategoryId:       categoryID,
+				AvailableTickets: details.AvailableTickets,
+				SoldTickets:      details.SoldTickets,
+				Price:            details.Price,
 			}
 			result := db.Create(&concertCategory)
 			if result.Error != nil {

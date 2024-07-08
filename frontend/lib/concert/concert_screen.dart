@@ -1,57 +1,23 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:frontend/booking_screen.dart';
 import 'package:frontend/concert/blocs/concert_bloc.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:frontend/core/services/token_services.dart';
 import 'package:frontend/login_register_screen.dart';
-import 'package:frontend/login_screen.dart';
 import 'package:intl/intl.dart';
 import 'package:frontend/components/resale_ticket.dart';
 import 'package:frontend/components/organiser_widget.dart';
 import 'package:frontend/components/interest_chip.dart';
-import 'package:jwt_decoder/jwt_decoder.dart';
 
 class ConcertScreen extends StatelessWidget {
   final String concertId;
 
   const ConcertScreen({super.key, required this.concertId});
 
-  static const resaleTickets = [
-    {
-      'reseller': {
-        'name': 'John Doe',
-        'avatar': 'https://thispersondoesnotexist.com/',
-      },
-      'location': 'Fosse',
-      'price': '90',
-    },
-    {
-      'reseller': {
-        'name': 'Jane Doe',
-        'avatar': 'https://thispersondoesnotexist.com/',
-      },
-      'location': 'Balcon',
-      'price': '80',
-    },
-    {
-      'reseller': {
-        'name': 'John Smith',
-        'avatar': 'https://thispersondoesnotexist.com/',
-      },
-      'location': 'Balcon',
-      'price': '85',
-    },
-  ];
-
   String formatDate(String date) {
     DateTime dateTime = DateTime.parse(date);
-
     DateFormat dateFormat = DateFormat('dd/MM/yyyy HH:mm', 'fr_FR');
-
-    String formattedDate = dateFormat.format(dateTime);
-
-    return formattedDate;
+    return dateFormat.format(dateTime);
   }
 
   @override
@@ -81,6 +47,38 @@ class ConcertScreen extends StatelessWidget {
                   }
 
                   if (state is ConcertDataLoadingSuccess) {
+                    final concert = state.concert;
+
+                    // Calcul des tickets restants
+                    int totalRemainingTickets = concert.concertCategories
+                        .map((category) => category.availableTickets - category.soldTickets)
+                        .reduce((value, element) => value + element);
+
+                    // Filtrer les tickets pour la revente
+                    List resaleTickets = [];
+                    for (var concerCategory in concert.concertCategories) {
+                      if (concerCategory.tickets.isNotEmpty) {
+                        for (var ticket in concerCategory.tickets) {
+                          if (ticket.ticketListing != null && ticket.ticketListing!.status == 'available') {
+                            resaleTickets.add(
+                              {
+                                'reseller': {
+                                  'name': '${ticket.user.firstname} ${ticket.user.lastname}',
+                                  'avatar': 'https://thispersondoesnotexist.com/',
+                                },
+                                'category': concerCategory.category.name,
+                                'price': ticket.ticketListing!.price.toString(),
+                              }
+                            );
+                          }
+                        }
+                      }
+                    }
+
+                    List selectedResaleTickets = resaleTickets.length > 2
+                        ? (resaleTickets..shuffle()).take(2).toList()
+                        : resaleTickets;
+
                     return SingleChildScrollView(
                       child: Column(
                         children: <Widget> [
@@ -97,8 +95,8 @@ class ConcertScreen extends StatelessWidget {
                               child: Text(
                                 formatDate(state.concert.date),
                                 style: const TextStyle(
-                                    fontSize: 20,
-                                    fontFamily: 'Readex Pro'
+                                  fontSize: 20,
+                                  fontFamily: 'Readex Pro',
                                 ),
                               ),
                             ),
@@ -110,9 +108,9 @@ class ConcertScreen extends StatelessWidget {
                               child: Text(
                                 state.concert.name,
                                 style: const TextStyle(
-                                    fontSize: 30,
-                                    fontFamily: 'Readex Pro',
-                                    fontWeight: FontWeight.w700
+                                  fontSize: 30,
+                                  fontFamily: 'Readex Pro',
+                                  fontWeight: FontWeight.w700,
                                 ),
                               ),
                             ),
@@ -120,19 +118,19 @@ class ConcertScreen extends StatelessWidget {
                           ListTile(
                             leading: const Icon(Icons.location_on),
                             title: Text(
-                                state.concert.location,
-                                style: const TextStyle(
-                                    fontFamily: 'Readex Pro'
-                                )
+                              state.concert.location,
+                              style: const TextStyle(
+                                fontFamily: 'Readex Pro',
+                              ),
                             ),
                           ),
-                          const ListTile(
-                            leading: Icon(Icons.event_seat),
+                          ListTile(
+                            leading: const Icon(Icons.event_seat),
                             title: Text(
-                                '300 restant',
-                                style: TextStyle(
-                                    fontFamily: 'Readex Pro'
-                                )
+                              '$totalRemainingTickets places restantes',
+                              style: const TextStyle(
+                                fontFamily: 'Readex Pro',
+                              ),
                             ),
                           ),
                           const Divider(),
@@ -141,11 +139,11 @@ class ConcertScreen extends StatelessWidget {
                             child: Align(
                               alignment: Alignment.centerLeft,
                               child: Text(
-                                'A propos de cet événement',
+                                'À propos de cet événement',
                                 style: TextStyle(
-                                    fontSize: 25,
-                                    fontFamily: 'Readex Pro',
-                                    fontWeight: FontWeight.w600
+                                  fontSize: 25,
+                                  fontFamily: 'Readex Pro',
+                                  fontWeight: FontWeight.w600,
                                 ),
                               ),
                             ),
@@ -157,8 +155,10 @@ class ConcertScreen extends StatelessWidget {
                               child: Wrap(
                                 spacing: 10.0,
                                 runSpacing: 5.0,
-                                alignment: WrapAlignment.start, // This is also important
-                                children: state.concert.interests.map((interest) => InterestChip(interest: interest)).toList(),
+                                alignment: WrapAlignment.start,
+                                children: state.concert.interests
+                                    .map((interest) => InterestChip(interest: interest))
+                                    .toList(),
                               ),
                             ),
                           ),
@@ -169,9 +169,9 @@ class ConcertScreen extends StatelessWidget {
                               child: Text(
                                 state.concert.description,
                                 style: const TextStyle(
-                                    fontSize: 16,
-                                    color: Colors.grey,
-                                    fontFamily: 'Readex Pro'
+                                  fontSize: 16,
+                                  color: Colors.grey,
+                                  fontFamily: 'Readex Pro',
                                 ),
                               ),
                             ),
@@ -184,16 +184,33 @@ class ConcertScreen extends StatelessWidget {
                               child: Text(
                                 'Tickets disponibles à la revente',
                                 style: TextStyle(
-                                    fontSize: 25,
-                                    fontFamily: 'Readex Pro',
-                                    fontWeight: FontWeight.w600
+                                  fontSize: 25,
+                                  fontFamily: 'Readex Pro',
+                                  fontWeight: FontWeight.w600,
                                 ),
                               ),
                             ),
                           ),
-                          for (var resaleTicket in resaleTickets)
-                            ResaleTicket(ticket: Ticket.fromMap(resaleTicket)),
-                          ElevatedButton(
+                          if (resaleTickets.isEmpty)
+                            const Padding(
+                              padding: EdgeInsets.all(10.0),
+                              child: Align(
+                                alignment: Alignment.centerLeft,
+                                child: Text(
+                                  "Il n'y a actuellement pas de tickets disponibles à la revente.",
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    color: Colors.grey,
+                                    fontFamily: 'Readex Pro',
+                                  ),
+                                ),
+                              ),
+                            ),
+                          if (resaleTickets.isNotEmpty)
+                            for (var resaleTicket in selectedResaleTickets)
+                              ResaleTicket(ticket: Ticket.fromMap(resaleTicket)),
+                          if (resaleTickets.length > 2)
+                            ElevatedButton(
                               onPressed: () {},
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: Colors.deepOrange,
@@ -204,11 +221,11 @@ class ConcertScreen extends StatelessWidget {
                               child: const Text(
                                 'Consulter toutes les reventes',
                                 style: TextStyle(
-                                    fontFamily: 'Readex Pro',
-                                    color: Colors.white
-                                )
-                              )
-                          ),
+                                  fontFamily: 'Readex Pro',
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ),
                           const Divider(),
                           const Padding(
                             padding: EdgeInsets.only(top: 20.0, right: 10.0, left: 10.0),
@@ -217,25 +234,32 @@ class ConcertScreen extends StatelessWidget {
                               child: Text(
                                 'Organisé par',
                                 style: TextStyle(
-                                    fontSize: 25,
-                                    fontFamily: 'Readex Pro',
-                                    fontWeight: FontWeight.w600
+                                  fontSize: 25,
+                                  fontFamily: 'Readex Pro',
+                                  fontWeight: FontWeight.w600,
                                 ),
                               ),
                             ),
                           ),
-                          OrganiserWidget(organiser: Organiser.fromMap({
-                            'id': state.concert.organization.id,
-                            'name': state.concert.organization.name,
-                            'avatar': 'https://picsum.photos/seed/picsum/200/200',
-                            'followers': '1000',
-                          }))
-                        ]
+                          OrganiserWidget(
+                            organiser: Organiser.fromMap({
+                              'id': state.concert.organization.id,
+                              'name': state.concert.organization.name,
+                              'avatar': 'https://picsum.photos/seed/picsum/200/200',
+                              'followers': '1000',
+                            }),
+                          ),
+                        ],
+                      ),
+                    );
+                  } else {
+                    return const Center(
+                      child: Text(
+                        'État inattendu',
+                        style: TextStyle(color: Colors.red),
                       ),
                     );
                   }
-
-                  return const SizedBox();
                 },
               ),
               Positioned(
@@ -257,7 +281,7 @@ class ConcertScreen extends StatelessWidget {
                     var prices = state.concert.concertCategories.map((concertCategory) => concertCategory.price).toList();
                     var minPrice = prices.reduce((value, element) => value < element ? value : element);
                     var maxPrice = prices.reduce((value, element) => value > element ? value : element);
-                    
+
                     String priceText;
                     if (prices.length > 1) {
                       priceText = '$minPrice € - $maxPrice €';
@@ -271,35 +295,30 @@ class ConcertScreen extends StatelessWidget {
                         Text(
                           priceText,
                           style: const TextStyle(
-                              fontSize: 20,
-                              fontFamily: 'Readex Pro',
-                              fontWeight: FontWeight.w700
+                            fontSize: 20,
+                            fontFamily: 'Readex Pro',
+                            fontWeight: FontWeight.w600,
                           ),
                         ),
                         ElevatedButton(
                           onPressed: () async {
                             final tokenService = TokenService();
                             String? token = await tokenService.getValidAccessToken();
-                            // String? refreshToken = await tokenService.getRefreshToken();
-                            // print(token);
-                            // print(refreshToken);                            
-                            // print("TOKEN SERVICE REFRESH TOKEN");
                             if (token == null) {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => const LoginRegisterScreen(),
-                              ),
-                            );
-                          } else {
-                            // Navigate to the booking page
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => BookingScreen(concertCategories: state.concert.concertCategories),
-                              ),
-                            );
-                          }
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => const LoginRegisterScreen(),
+                                ),
+                              );
+                            } else {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => BookingScreen(concertCategories: state.concert.concertCategories),
+                                ),
+                              );
+                            }
                           },
                           style: ElevatedButton.styleFrom(
                             foregroundColor: Colors.white,
@@ -309,10 +328,10 @@ class ConcertScreen extends StatelessWidget {
                             backgroundColor: Colors.deepOrange,
                           ),
                           child: const Text(
-                              'Réserver un ticket',
-                              style: TextStyle(
-                                  fontFamily: 'Readex Pro'
-                              )
+                            'Réserver un ticket',
+                            style: TextStyle(
+                              fontFamily: 'Readex Pro',
+                            ),
                           ),
                         ),
                       ],

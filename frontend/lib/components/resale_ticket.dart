@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
 
 class Ticket {
-  final String location;
+  final String category;
   final String price;
   final Reseller reseller;
 
-  Ticket({required this.location, required this.price, required this.reseller});
+  Ticket({required this.category, required this.price, required this.reseller});
 
   factory Ticket.fromMap(Map<String, dynamic> map) {
     return Ticket(
-      location: map['location'] as String,
+      category: map['category'] as String,
       price: map['price'] as String,
       reseller: Reseller.fromMap(map['reseller'] as Map<String, dynamic>),
     );
@@ -87,7 +87,7 @@ class ResaleTicket extends StatelessWidget {
                       Row(
                         children: [
                           const Icon(Icons.location_on),
-                          Text(ticket.location),
+                          Text(ticket.category),
                         ],
                       ),
                       const Spacer(),
@@ -96,7 +96,7 @@ class ResaleTicket extends StatelessWidget {
                         children: [
                           ElevatedButton(
                             onPressed: () {
-
+                              
                             },
                             style: ElevatedButton.styleFrom(
                               foregroundColor: Colors.white,

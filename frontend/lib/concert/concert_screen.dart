@@ -48,7 +48,7 @@ class ConcertScreen extends StatelessWidget {
 
                   if (state is ConcertDataLoadingSuccess) {
                     final concert = state.concert;
-                    
+
                     // Calcul des tickets restants
                     int totalRemainingTickets = concert.concertCategories
                         .map((category) => category.availableTickets - category.soldTickets)
@@ -74,7 +74,7 @@ class ConcertScreen extends StatelessWidget {
                         }
                       }
                     }
-                    
+
                     List selectedResaleTickets = resaleTickets.length > 2
                         ? (resaleTickets..shuffle()).take(2).toList()
                         : resaleTickets;
@@ -315,7 +315,7 @@ class ConcertScreen extends StatelessWidget {
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                  builder: (context) => BookingScreen(concertId: concertId),
+                                  builder: (context) => BookingScreen(concertCategories: state.concert.concertCategories),
                                 ),
                               );
                             }

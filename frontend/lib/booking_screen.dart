@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:flutter_stripe/flutter_stripe.dart' as stripe;
 import 'dart:convert';
 import 'package:frontend/core/models/concert_category.dart';
 import 'package:frontend/core/services/token_services.dart';
@@ -17,6 +18,7 @@ class _BookingScreenState extends State<BookingScreen> {
   final storage = const FlutterSecureStorage();
   String? email;
   String? selectedCategory;
+  int? selectedAmount;
 
   Future<void> proceedToPayment() async {
     if (selectedCategory == null) {
@@ -59,6 +61,26 @@ class _BookingScreenState extends State<BookingScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Erreur lors de la connexion au serveur. Veuillez réessayer.')),
       );
+    }
+  }
+
+  Future<Map<String, dynamic>?> createPaymentIntent(int amount) async {
+    final url = Uri.parse('http://10.0.2.2:8080/create-payment-intent');
+    final tokenService = TokenService();
+    String? jwtToken = await tokenService.getValidAccessToken();
+    final response = await http.post(
+      url,
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $jwtToken',
+      },
+      body: json.encode({'amount': amount}),
+    );
+    if (response.statusCode == 200) {
+      return json.decode(response.body);
+    } else {
+      print('Failed to create payment intent: ${response.body}');
+      return null;
     }
   }
 
@@ -108,6 +130,7 @@ class _BookingScreenState extends State<BookingScreen> {
                             onChanged: (String? value) {
                               setState(() {
                                 selectedCategory = value;
+                                selectedAmount = concertCategory.price * 100;
                               });
                             },
                           ),
@@ -131,9 +154,43 @@ class _BookingScreenState extends State<BookingScreen> {
           child: Padding(
             padding: const EdgeInsets.all(8.0),
             child: ElevatedButton(
-              onPressed: () {
-                print("Selected category: $selectedCategory");
-                proceedToPayment();
+              onPressed: () async {
+                // print("Selected category: $selectedCategory");
+                // proceedToPayment();
+
+                if (selectedCategory == null || selectedAmount == null) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Veuillez sélectionner une catégorie de billet.')),
+                  );
+                  return;
+                }
+                
+                final paymentIntentData = await createPaymentIntent(selectedAmount!);
+                print('Payment Intent Data: $paymentIntentData');
+                if (paymentIntentData != null) {
+                  await stripe.Stripe.instance.initPaymentSheet(
+                    paymentSheetParameters: stripe.SetupPaymentSheetParameters(
+                      paymentIntentClientSecret: paymentIntentData['client_secret'],
+                      merchantDisplayName: 'Weezemaster',
+                    ),
+                  );
+                  try {
+                    print('Presenting payment sheet');
+                    await stripe.Stripe.instance.presentPaymentSheet();
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Paiement réussi')),
+                    );
+                  } catch (e) {
+                    print('Error presenting payment sheet: $e');
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Echec du paiement')),
+                    );
+                  }
+                } else {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Failed to create payment intent')),
+                  );
+                }
               },
               style: ElevatedButton.styleFrom(
                 shape: RoundedRectangleBorder(

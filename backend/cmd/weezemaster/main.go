@@ -86,6 +86,8 @@ func main() {
 
 	authenticated.POST("/reservation", controller.CreateReservation, middleware.CheckRole("user"))
 
+	authenticated.POST("/create-payment-intent", controller.CreatePaymentIntent, middleware.CheckRole("user"))
+
 	router.GET("/swagger/*", echoSwagger.WrapHandler)
 
 	router.Start(":8080")

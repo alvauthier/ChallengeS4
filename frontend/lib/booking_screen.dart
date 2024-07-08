@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'dart:convert';
 import 'package:frontend/core/models/concert_category.dart';
+import 'package:frontend/core/services/token_services.dart';
+import 'package:http/http.dart' as http;
 
 class BookingScreen extends StatefulWidget {
   final List<ConcertCategory> concertCategories;
@@ -14,7 +16,51 @@ class BookingScreen extends StatefulWidget {
 class _BookingScreenState extends State<BookingScreen> {
   final storage = const FlutterSecureStorage();
   String? email;
-  int? selectedCategory; // Variable to store the selected category
+  String? selectedCategory;
+
+  Future<void> proceedToPayment() async {
+    if (selectedCategory == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Veuillez sélectionner une catégorie de billet.')),
+      );
+      return;
+    }
+
+    final body = jsonEncode({
+      'concertCategoryId': selectedCategory,
+    });
+
+    try {
+      final tokenService = TokenService();
+      String? jwtToken = await tokenService.getValidAccessToken();
+      final response = await http.post(
+        Uri.parse('http://10.0.2.2:8080/reservation'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $jwtToken',
+        },
+        body: body,
+      );
+
+      if (response.statusCode == 200) {
+        // Handle successful response
+        print('Réservation réussie');
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Réservation réussie.')),
+        );
+      } else {
+        print('Erreur lors de la réservation: ${response.body}');
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Une erreur est survenue lors de la réservation. Veuillez réessayer.')),
+        );
+      }
+    } catch (e) {
+      print('Erreur lors de la connexion au serveur: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Erreur lors de la connexion au serveur. Veuillez réessayer.')),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -41,7 +87,7 @@ class _BookingScreenState extends State<BookingScreen> {
                       itemBuilder: (context, index) {
                         var concertCategory = widget.concertCategories[index];
                         return Card(
-                          child: RadioListTile<int>(
+                          child: RadioListTile<String>(
                             title: Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
@@ -57,9 +103,9 @@ class _BookingScreenState extends State<BookingScreen> {
                               ],
                             ),
                             subtitle: Text('Nombre de tickets: ${concertCategory.availableTickets}'),
-                            value: concertCategory.category.id,
+                            value: concertCategory.id,
                             groupValue: selectedCategory,
-                            onChanged: (int? value) {
+                            onChanged: (String? value) {
                               setState(() {
                                 selectedCategory = value;
                               });
@@ -86,7 +132,8 @@ class _BookingScreenState extends State<BookingScreen> {
             padding: const EdgeInsets.all(8.0),
             child: ElevatedButton(
               onPressed: () {
-                // TODO: Implement payment logic here
+                print("Selected category: $selectedCategory");
+                proceedToPayment();
               },
               style: ElevatedButton.styleFrom(
                 shape: RoundedRectangleBorder(

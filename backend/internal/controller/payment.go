@@ -14,6 +14,7 @@ import (
 	"weezemaster/internal/models"
 
 	"github.com/labstack/echo/v4"
+	"github.com/shopspring/decimal"
 
 	"gorm.io/gorm"
 )
@@ -35,7 +36,9 @@ func GetAmountByConcertCategoryId(concertCategoryId string) (int64, error) {
 		}
 		return 0, err
 	}
-	amount := int64(concertCategory.Price * 100)
+	priceDecimal := decimal.NewFromFloat(concertCategory.Price)
+	amountDecimal := priceDecimal.Mul(decimal.NewFromInt(100))
+	amount := amountDecimal.IntPart()
 	return amount, nil
 }
 

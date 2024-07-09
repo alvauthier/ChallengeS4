@@ -6,16 +6,13 @@ class ThankYouScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Merci pour votre achat'),
-      ),
       body: Center(
         child: Padding(
           padding: const EdgeInsets.all(16.0),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
-              Image.asset('assets/thanks_purchase.png'),
+              Image.asset('assets/thanks.gif'),
               const SizedBox(height:70),
               const Text(
                 'Merci pour votre achat !',

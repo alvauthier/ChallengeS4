@@ -50,9 +50,9 @@ class _BookingScreenState extends State<BookingScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Réservation réussie.')),
         );
-        Navigator.push(
+        Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (context) => ThankYouScreen()),
+          MaterialPageRoute(builder: (context) => const ThankYouScreen()),
         );
       } else {
         print('Erreur lors de la réservation: ${response.body}');

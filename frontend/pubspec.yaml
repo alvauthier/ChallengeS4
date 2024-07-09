@@ -76,6 +76,7 @@ flutter:
     - assets/background.jpg
     - assets/no_internet.png
     - .env
+    - assets/thanks_purchase.png
 
   fonts:
     - family: Readex Pro

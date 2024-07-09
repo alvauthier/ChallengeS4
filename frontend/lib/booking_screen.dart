@@ -4,6 +4,7 @@ import 'package:flutter_stripe/flutter_stripe.dart' as stripe;
 import 'dart:convert';
 import 'package:frontend/core/models/concert_category.dart';
 import 'package:frontend/core/services/token_services.dart';
+import 'package:frontend/thank_you_screen.dart';
 import 'package:http/http.dart' as http;
 
 class BookingScreen extends StatefulWidget {
@@ -45,10 +46,13 @@ class _BookingScreenState extends State<BookingScreen> {
       );
 
       if (response.statusCode == 200) {
-        // Handle successful response
         print('Réservation réussie');
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Réservation réussie.')),
+        );
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => ThankYouScreen()),
         );
       } else {
         print('Erreur lors de la réservation: ${response.body}');
@@ -164,7 +168,7 @@ class _BookingScreenState extends State<BookingScreen> {
                   );
                   return;
                 }
-                
+
                 final paymentIntentData = await createPaymentIntent(selectedAmount!);
                 print('Payment Intent Data: $paymentIntentData');
                 if (paymentIntentData != null) {
@@ -180,6 +184,7 @@ class _BookingScreenState extends State<BookingScreen> {
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(content: Text('Paiement réussi')),
                     );
+                    await proceedToPayment();
                   } catch (e) {
                     print('Error presenting payment sheet: $e');
                     ScaffoldMessenger.of(context).showSnackBar(

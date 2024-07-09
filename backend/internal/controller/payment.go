@@ -2,6 +2,7 @@ package controller
 
 import (
 	"encoding/json"
+	"errors"
 	"io"
 	"net/http"
 	"net/url"
@@ -9,23 +10,47 @@ import (
 	"strings"
 	"weezemaster/internal/config"
 
+	"weezemaster/internal/database"
+	"weezemaster/internal/models"
+
 	"github.com/labstack/echo/v4"
+
+	"gorm.io/gorm"
 )
 
 type CreatePaymentIntentRequest struct {
-	Amount int64 `json:"amount"`
+	ConcertCategoryId string `json:"concertCategoryId"`
+}
+
+func GetAmountByConcertCategoryId(concertCategoryId string) (int64, error) {
+	if concertCategoryId == "" {
+		return 0, errors.New("UUID cannot be empty")
+	}
+
+	db := database.GetDB()
+	var concertCategory models.ConcertCategory
+	if err := db.Where("id = ?", concertCategoryId).First(&concertCategory).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return 0, errors.New("no ConcertCategory found with the given UUID")
+		}
+		return 0, err
+	}
+	amount := int64(concertCategory.Price * 100)
+	return amount, nil
 }
 
 func CreatePaymentIntent(c echo.Context) error {
 	req := new(CreatePaymentIntentRequest)
 	if err := c.Bind(req); err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]string{"error": "invalid request"})
+		return c.JSON(http.StatusBadRequest, map[string]string{"error": "Invalid request"})
 	}
+
+	amount, _ := GetAmountByConcertCategoryId(req.ConcertCategoryId)
 
 	urlStr := "https://api.stripe.com/v1/payment_intents"
 
 	data := url.Values{}
-	data.Set("amount", strconv.FormatInt(req.Amount, 10))
+	data.Set("amount", strconv.FormatInt(amount, 10))
 	data.Set("currency", "eur")
 	data.Set("payment_method_types[]", "card")
 

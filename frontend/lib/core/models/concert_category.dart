@@ -5,7 +5,7 @@ class ConcertCategory {
   final String id;
   final int availableTickets;
   final int soldTickets;
-  final int price;
+  final double price;
   final List<Ticket> tickets;
   final Category category;
 
@@ -26,7 +26,7 @@ class ConcertCategory {
       id: json['ID'],
       availableTickets: json['AvailableTickets'] ?? 0,
       soldTickets: json['SoldTickets'] ?? 0,
-      price: json['Price'] ?? 0,
+      price: (json['Price'] ?? 0).toDouble(),
       tickets: ticketList,
       category: Category.fromJson(json['Category']),
     );

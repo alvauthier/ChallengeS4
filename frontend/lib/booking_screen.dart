@@ -19,7 +19,6 @@ class _BookingScreenState extends State<BookingScreen> {
   final storage = const FlutterSecureStorage();
   String? email;
   String? selectedCategory;
-  int? selectedAmount;
 
   Future<void> proceedToPayment() async {
     if (selectedCategory == null) {
@@ -68,7 +67,7 @@ class _BookingScreenState extends State<BookingScreen> {
     }
   }
 
-  Future<Map<String, dynamic>?> createPaymentIntent(int amount) async {
+  Future<Map<String, dynamic>?> createPaymentIntent(String concertCategoryId) async {
     final url = Uri.parse('http://10.0.2.2:8080/create-payment-intent');
     final tokenService = TokenService();
     String? jwtToken = await tokenService.getValidAccessToken();
@@ -78,7 +77,7 @@ class _BookingScreenState extends State<BookingScreen> {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $jwtToken',
       },
-      body: json.encode({'amount': amount}),
+      body: json.encode({'concertCategoryId': concertCategoryId}),
     );
     if (response.statusCode == 200) {
       return json.decode(response.body);
@@ -119,7 +118,7 @@ class _BookingScreenState extends State<BookingScreen> {
                               children: [
                                 Text(concertCategory.category.name.toString()),
                                 Text(
-                                  '${concertCategory.price} €',
+                                  '${concertCategory.price.toStringAsFixed(2)} €',
                                   style: const TextStyle(
                                       fontWeight: FontWeight.w700,
                                       fontSize: 20,
@@ -134,7 +133,6 @@ class _BookingScreenState extends State<BookingScreen> {
                             onChanged: (String? value) {
                               setState(() {
                                 selectedCategory = value;
-                                selectedAmount = concertCategory.price * 100;
                               });
                             },
                           ),
@@ -161,14 +159,14 @@ class _BookingScreenState extends State<BookingScreen> {
               onPressed: selectedCategory == null
                 ? null
                 : () async {
-                  if (selectedCategory == null || selectedAmount == null) {
+                  if (selectedCategory == null) {
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(content: Text('Veuillez sélectionner une catégorie de billet.')),
                     );
                     return;
                   }
 
-                  final paymentIntentData = await createPaymentIntent(selectedAmount!);
+                  final paymentIntentData = await createPaymentIntent(selectedCategory!);
                   if (paymentIntentData != null) {
                     await stripe.Stripe.instance.initPaymentSheet(
                       paymentSheetParameters: stripe.SetupPaymentSheetParameters(

@@ -67,7 +67,7 @@ class ConcertScreen extends StatelessWidget {
                                   'avatar': 'https://thispersondoesnotexist.com/',
                                 },
                                 'category': concerCategory.category.name,
-                                'price': ticket.ticketListing!.price.toString(),
+                                'price': ticket.ticketListing!.price.toStringAsFixed(2),
                               }
                             );
                           }
@@ -284,9 +284,9 @@ class ConcertScreen extends StatelessWidget {
 
                     String priceText;
                     if (prices.length > 1) {
-                      priceText = '$minPrice € - $maxPrice €';
+                      priceText = '${minPrice.toStringAsFixed(2)} € - ${maxPrice.toStringAsFixed(2)} €';
                     } else {
-                      priceText = '$minPrice €';
+                      priceText = '${minPrice.toStringAsFixed(2)} €';
                     }
 
                     return Row(

@@ -158,56 +158,54 @@ class _BookingScreenState extends State<BookingScreen> {
           child: Padding(
             padding: const EdgeInsets.all(8.0),
             child: ElevatedButton(
-              onPressed: () async {
-                // print("Selected category: $selectedCategory");
-                // proceedToPayment();
-
-                if (selectedCategory == null || selectedAmount == null) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Veuillez sélectionner une catégorie de billet.')),
-                  );
-                  return;
-                }
-
-                final paymentIntentData = await createPaymentIntent(selectedAmount!);
-                print('Payment Intent Data: $paymentIntentData');
-                if (paymentIntentData != null) {
-                  await stripe.Stripe.instance.initPaymentSheet(
-                    paymentSheetParameters: stripe.SetupPaymentSheetParameters(
-                      paymentIntentClientSecret: paymentIntentData['client_secret'],
-                      merchantDisplayName: 'Weezemaster',
-                    ),
-                  );
-                  try {
-                    print('Presenting payment sheet');
-                    await stripe.Stripe.instance.presentPaymentSheet();
+              onPressed: selectedCategory == null
+                ? null
+                : () async {
+                  if (selectedCategory == null || selectedAmount == null) {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Paiement réussi')),
+                      const SnackBar(content: Text('Veuillez sélectionner une catégorie de billet.')),
                     );
-                    await proceedToPayment();
-                  } catch (e) {
-                    print('Error presenting payment sheet: $e');
+                    return;
+                  }
+
+                  final paymentIntentData = await createPaymentIntent(selectedAmount!);
+                  if (paymentIntentData != null) {
+                    await stripe.Stripe.instance.initPaymentSheet(
+                      paymentSheetParameters: stripe.SetupPaymentSheetParameters(
+                        paymentIntentClientSecret: paymentIntentData['client_secret'],
+                        merchantDisplayName: 'Weezemaster',
+                      ),
+                    );
+                    try {
+                      print('Presenting payment sheet');
+                      await stripe.Stripe.instance.presentPaymentSheet();
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Paiement réussi')),
+                      );
+                      await proceedToPayment();
+                    } catch (e) {
+                      print('Error presenting payment sheet: $e');
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Echec du paiement')),
+                      );
+                    }
+                  } else {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Echec du paiement')),
+                      const SnackBar(content: Text('Failed to create payment intent')),
                     );
                   }
-                } else {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Failed to create payment intent')),
-                  );
-                }
-              },
+                },
               style: ElevatedButton.styleFrom(
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(6.0),
                 ),
-                backgroundColor: Colors.deepOrange,
+                backgroundColor: selectedCategory == null ? Colors.grey : Colors.deepOrange,
               ),
-              child: const Text(
+              child: Text(
                 'Procéder au paiement',
                 style: TextStyle(
-                    fontFamily: 'Readex Pro',
-                    color: Colors.white
+                  fontFamily: 'Readex Pro',
+                  color: selectedCategory == null ? Colors.black : Colors.white,
                 ),
               ),
             ),

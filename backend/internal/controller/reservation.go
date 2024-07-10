@@ -57,5 +57,7 @@ func CreateReservation(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to create ticket"})
 	}
 
+	// ticket creation working, but still need to update the number of sold tickets
+
 	return c.JSON(http.StatusOK, ticket)
 }

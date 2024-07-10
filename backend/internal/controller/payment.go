@@ -3,6 +3,7 @@ package controller
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io"
 	"net/http"
 	"net/url"
@@ -20,26 +21,52 @@ import (
 )
 
 type CreatePaymentIntentRequest struct {
-	ConcertCategoryId string `json:"concertCategoryId"`
+	ID string `json:"id"`
 }
 
-func GetAmountByConcertCategoryId(concertCategoryId string) (int64, error) {
-	if concertCategoryId == "" {
+func GetAmountById(id string) (int64, error) {
+	if id == "" {
 		return 0, errors.New("UUID cannot be empty")
 	}
+	fmt.Println("ID: ", id)
+
+	parts := strings.SplitN(id, "_", 2)
+	if len(parts) != 2 {
+		return 0, errors.New("invalid ID format")
+	}
+
+	prefix, idStr := parts[0], parts[1]
 
 	db := database.GetDB()
-	var concertCategory models.ConcertCategory
-	if err := db.Where("id = ?", concertCategoryId).First(&concertCategory).Error; err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return 0, errors.New("no ConcertCategory found with the given UUID")
+
+	switch prefix {
+	case "cc":
+		var concertCategory models.ConcertCategory
+		if err := db.Where("id = ?", idStr).First(&concertCategory).Error; err != nil {
+			if errors.Is(err, gorm.ErrRecordNotFound) {
+				return 0, errors.New("no ConcertCategory found with the given UUID")
+			}
+			return 0, err
 		}
-		return 0, err
+		priceDecimal := decimal.NewFromFloat(concertCategory.Price)
+		amountDecimal := priceDecimal.Mul(decimal.NewFromInt(100))
+		amount := amountDecimal.IntPart()
+		return amount, nil
+	case "tl":
+		var ticketListing models.TicketListing
+		if err := db.Where("id = ?", idStr).First(&ticketListing).Error; err != nil {
+			if errors.Is(err, gorm.ErrRecordNotFound) {
+				return 0, errors.New("no TicketListing found with the given UUID")
+			}
+			return 0, err
+		}
+		priceDecimal := decimal.NewFromFloat(ticketListing.Price)
+		amountDecimal := priceDecimal.Mul(decimal.NewFromInt(100))
+		amount := amountDecimal.IntPart()
+		return amount, nil
+	default:
+		return 0, errors.New("unknown ID prefix")
 	}
-	priceDecimal := decimal.NewFromFloat(concertCategory.Price)
-	amountDecimal := priceDecimal.Mul(decimal.NewFromInt(100))
-	amount := amountDecimal.IntPart()
-	return amount, nil
 }
 
 func CreatePaymentIntent(c echo.Context) error {
@@ -48,7 +75,7 @@ func CreatePaymentIntent(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, map[string]string{"error": "Invalid request"})
 	}
 
-	amount, _ := GetAmountByConcertCategoryId(req.ConcertCategoryId)
+	amount, _ := GetAmountById(req.ID)
 
 	urlStr := "https://api.stripe.com/v1/payment_intents"
 

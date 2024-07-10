@@ -124,12 +124,12 @@ func Login(c echo.Context) error {
 		return c.JSON(http.StatusUnauthorized, map[string]string{"message": "Invalid credentials"})
 	}
 
-	accessToken, err := createAccessToken(user.Email, user.Role)
+	accessToken, err := createAccessToken(user.ID, user.Email, user.Role)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]string{"message": err.Error()})
 	}
 
-	refreshToken, err := createRefreshToken(user.Email, user.Role)
+	refreshToken, err := createRefreshToken(user.ID, user.Email, user.Role)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]string{"message": err.Error()})
 	}
@@ -222,9 +222,10 @@ func generateJTI() string {
 	return fmt.Sprintf("%d", time.Now().UnixNano())
 }
 
-func createAccessToken(email, role string) (string, error) {
+func createAccessToken(id uuid.UUID, email, role string) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256,
 		jwt.MapClaims{
+			"id":    id,
 			"email": email,
 			"role":  role,
 			"exp":   time.Now().Add(time.Minute * 1).Unix(),
@@ -241,9 +242,10 @@ func createAccessToken(email, role string) (string, error) {
 	return tokenString, nil
 }
 
-func createRefreshToken(email, role string) (string, error) {
+func createRefreshToken(id uuid.UUID, email, role string) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256,
 		jwt.MapClaims{
+			"id":    id,
 			"email": email,
 			"role":  role,
 			"exp":   time.Now().Add(time.Hour * 24 * 30).Unix(),
@@ -301,15 +303,16 @@ func RefreshAccessToken(c echo.Context) error {
 		return c.JSON(http.StatusUnauthorized, map[string]string{"message": "Invalid refresh token"})
 	}
 
-	// Extrait l'email et le rôle à partir des claims du refresh token
+	// Extrait l'id, l'email et le rôle à partir des claims du refresh token
+	id, idOk := claims["id"].(uuid.UUID)
 	email, emailOk := claims["email"].(string)
 	role, roleOk := claims["role"].(string)
-	if !emailOk || !roleOk {
+	if !idOk || !emailOk || !roleOk {
 		return c.JSON(http.StatusInternalServerError, map[string]string{"message": "Invalid token claims"})
 	}
 
 	// Génère un nouvel access token
-	accessToken, err := createAccessToken(email, role)
+	accessToken, err := createAccessToken(id, email, role)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]string{"message": err.Error()})
 	}

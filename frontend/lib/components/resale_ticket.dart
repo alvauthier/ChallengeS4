@@ -1,6 +1,6 @@
 import 'dart:convert';
-
 import 'package:flutter/material.dart';
+import 'package:frontend/core/services/payment_services.dart';
 import 'package:frontend/core/services/token_services.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter_stripe/flutter_stripe.dart' as stripe;
@@ -66,6 +66,7 @@ class ResaleTicket extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final paymentService = PaymentService();
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: SizedBox(
@@ -144,28 +145,13 @@ class ResaleTicket extends StatelessWidget {
                           const SizedBox(width: 10),
                           ElevatedButton(
                             onPressed: () async {
-                              print(ticket.id);
-                              final paymentIntentData = await createPaymentIntent(ticket.id);
+                              final paymentIntentData = await paymentService.createPaymentIntent(ticket.id, 'tl_');
                               if (paymentIntentData != null) {
-                                await stripe.Stripe.instance.initPaymentSheet(
-                                  paymentSheetParameters: stripe.SetupPaymentSheetParameters(
-                                    paymentIntentClientSecret: paymentIntentData['client_secret'],
-                                    merchantDisplayName: 'Weezemaster',
-                                    billingDetails: const stripe.BillingDetails(
-                                      address: stripe.Address(
-                                        city: '',
-                                        country: 'FR',
-                                        line1: '',
-                                        line2: '',
-                                        postalCode: '',
-                                        state: '',
-                                      )
-                                    )
-                                  ),
-                                );
                                 try {
-                                  print('Presenting payment sheet');
-                                  await stripe.Stripe.instance.presentPaymentSheet();
+                                  await paymentService.initAndPresentPaymentSheet(
+                                    context,
+                                    paymentIntentData['client_secret'],
+                                  );
                                   ScaffoldMessenger.of(context).showSnackBar(
                                     const SnackBar(content: Text('Paiement réussi')),
                                   );

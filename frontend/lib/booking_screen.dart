@@ -6,6 +6,7 @@ import 'package:frontend/core/models/concert_category.dart';
 import 'package:frontend/core/services/token_services.dart';
 import 'package:frontend/thank_you_screen.dart';
 import 'package:http/http.dart' as http;
+import 'package:frontend/core/services/payment_services.dart';
 
 class BookingScreen extends StatefulWidget {
   final List<ConcertCategory> concertCategories;
@@ -20,7 +21,7 @@ class _BookingScreenState extends State<BookingScreen> {
   String? email;
   String? selectedCategory;
 
-  Future<void> proceedToPayment() async {
+  Future<void> proceedToReservation() async {
     if (selectedCategory == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Veuillez sélectionner une catégorie de billet.')),
@@ -67,28 +68,31 @@ class _BookingScreenState extends State<BookingScreen> {
     }
   }
 
-  Future<Map<String, dynamic>?> createPaymentIntent(String concertCategoryId) async {
-    final url = Uri.parse('http://10.0.2.2:8080/create-payment-intent');
-    final tokenService = TokenService();
-    String? jwtToken = await tokenService.getValidAccessToken();
-    final response = await http.post(
-      url,
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer $jwtToken',
-      },
-      body: json.encode({'concertCategoryId': concertCategoryId}),
-    );
-    if (response.statusCode == 200) {
-      return json.decode(response.body);
-    } else {
-      print('Failed to create payment intent: ${response.body}');
-      return null;
-    }
-  }
+  // Future<Map<String, dynamic>?> createPaymentIntent(String concertCategoryId) async {
+  //   const String prefix = "cc_";
+  //   final String prefixedId = "$prefix$concertCategoryId";
+  //   final url = Uri.parse('http://10.0.2.2:8080/create-payment-intent');
+  //   final tokenService = TokenService();
+  //   String? jwtToken = await tokenService.getValidAccessToken();
+  //   final response = await http.post(
+  //     url,
+  //     headers: {
+  //       'Content-Type': 'application/json',
+  //       'Authorization': 'Bearer $jwtToken',
+  //     },
+  //     body: json.encode({'id': prefixedId}),
+  //   );
+  //   if (response.statusCode == 200) {
+  //     return json.decode(response.body);
+  //   } else {
+  //     print('Failed to create payment intent: ${response.body}');
+  //     return null;
+  //   }
+  // }
 
   @override
   Widget build(BuildContext context) {
+    final paymentService = PaymentService();
     return Scaffold(
         backgroundColor: Colors.white,
         body: Stack(
@@ -166,31 +170,17 @@ class _BookingScreenState extends State<BookingScreen> {
                     return;
                   }
 
-                  final paymentIntentData = await createPaymentIntent(selectedCategory!);
+                  final paymentIntentData = await paymentService.createPaymentIntent(selectedCategory!, 'cc_');
                   if (paymentIntentData != null) {
-                    await stripe.Stripe.instance.initPaymentSheet(
-                      paymentSheetParameters: stripe.SetupPaymentSheetParameters(
-                        paymentIntentClientSecret: paymentIntentData['client_secret'],
-                        merchantDisplayName: 'Weezemaster',
-                        billingDetails: const stripe.BillingDetails(
-                          address: stripe.Address(
-                            city: '',
-                            country: 'FR',
-                            line1: '',
-                            line2: '',
-                            postalCode: '',
-                            state: '',
-                          )
-                        )
-                      ),
-                    );
                     try {
-                      print('Presenting payment sheet');
-                      await stripe.Stripe.instance.presentPaymentSheet();
+                      await paymentService.initAndPresentPaymentSheet(
+                        context,
+                        paymentIntentData['client_secret'],
+                      );
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(content: Text('Paiement réussi')),
                       );
-                      await proceedToPayment();
+                      await proceedToReservation();
                     } catch (e) {
                       print('Error presenting payment sheet: $e');
                       ScaffoldMessenger.of(context).showSnackBar(

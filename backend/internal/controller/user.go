@@ -225,7 +225,7 @@ func generateJTI() string {
 func createAccessToken(id uuid.UUID, email, role string) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256,
 		jwt.MapClaims{
-			"id":    id,
+			"id":    id.String(),
 			"email": email,
 			"role":  role,
 			"exp":   time.Now().Add(time.Minute * 1).Unix(),
@@ -238,14 +238,14 @@ func createAccessToken(id uuid.UUID, email, role string) (string, error) {
 		return "", err
 	}
 
-	fmt.Println(tokenString)
+	// fmt.Println(tokenString)
 	return tokenString, nil
 }
 
 func createRefreshToken(id uuid.UUID, email, role string) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256,
 		jwt.MapClaims{
-			"id":    id,
+			"id":    id.String(),
 			"email": email,
 			"role":  role,
 			"exp":   time.Now().Add(time.Hour * 24 * 30).Unix(),
@@ -296,15 +296,20 @@ func RefreshAccessToken(c echo.Context) error {
 
 	// Vérifie le refresh token
 	claims, err := verifyToken(refreshToken)
-	fmt.Println("REFRESH TOKEN FUNCTION")
-	fmt.Println(claims)
-	fmt.Println(err)
 	if err != nil {
 		return c.JSON(http.StatusUnauthorized, map[string]string{"message": "Invalid refresh token"})
 	}
 
 	// Extrait l'id, l'email et le rôle à partir des claims du refresh token
-	id, idOk := claims["id"].(uuid.UUID)
+	idStr, idOk := claims["id"].(string)
+	if !idOk {
+		return c.JSON(http.StatusInternalServerError, map[string]string{"message": "Invalid token claims"})
+	}
+
+	id, err := uuid.Parse(idStr)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{"message": "Invalid user ID format"})
+	}
 	email, emailOk := claims["email"].(string)
 	role, roleOk := claims["role"].(string)
 	if !idOk || !emailOk || !roleOk {

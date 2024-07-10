@@ -172,6 +172,16 @@ class _BookingScreenState extends State<BookingScreen> {
                       paymentSheetParameters: stripe.SetupPaymentSheetParameters(
                         paymentIntentClientSecret: paymentIntentData['client_secret'],
                         merchantDisplayName: 'Weezemaster',
+                        billingDetails: const stripe.BillingDetails(
+                          address: stripe.Address(
+                            city: '',
+                            country: 'FR',
+                            line1: '',
+                            line2: '',
+                            postalCode: '',
+                            state: '',
+                          )
+                        )
                       ),
                     );
                     try {

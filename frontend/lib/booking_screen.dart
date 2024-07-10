@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:flutter_stripe/flutter_stripe.dart' as stripe;
 import 'dart:convert';
 import 'package:frontend/core/models/concert_category.dart';
 import 'package:frontend/core/services/token_services.dart';
@@ -68,27 +67,6 @@ class _BookingScreenState extends State<BookingScreen> {
     }
   }
 
-  // Future<Map<String, dynamic>?> createPaymentIntent(String concertCategoryId) async {
-  //   const String prefix = "cc_";
-  //   final String prefixedId = "$prefix$concertCategoryId";
-  //   final url = Uri.parse('http://10.0.2.2:8080/create-payment-intent');
-  //   final tokenService = TokenService();
-  //   String? jwtToken = await tokenService.getValidAccessToken();
-  //   final response = await http.post(
-  //     url,
-  //     headers: {
-  //       'Content-Type': 'application/json',
-  //       'Authorization': 'Bearer $jwtToken',
-  //     },
-  //     body: json.encode({'id': prefixedId}),
-  //   );
-  //   if (response.statusCode == 200) {
-  //     return json.decode(response.body);
-  //   } else {
-  //     print('Failed to create payment intent: ${response.body}');
-  //     return null;
-  //   }
-  // }
 
   @override
   Widget build(BuildContext context) {

@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:frontend/core/services/payment_services.dart';
 import 'package:frontend/core/services/token_services.dart';
 import 'package:http/http.dart' as http;
-import 'package:flutter_stripe/flutter_stripe.dart' as stripe;
 
 class Ticket {
   final String id;

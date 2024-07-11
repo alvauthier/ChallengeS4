@@ -11,6 +11,8 @@ import 'package:flutter_stripe/flutter_stripe.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:flutter/material.dart';
 import 'package:frontend/home/home_screen.dart';
+import 'package:frontend/messages_screen.dart'; // Importation de messages_screen.dart
+import 'package:frontend/tickets_screen.dart'; // Importation de tickets_screen.dart
 
 import 'booking_screen.dart';
 
@@ -36,47 +38,53 @@ class MyApp extends StatelessWidget {
         useMaterial3: true,
       ),
       home: MyScaffold(
-        body: Navigator(
-          initialRoute: '/',
-          onGenerateRoute: (RouteSettings settings) {
-            WidgetBuilder builder;
-            switch (settings.name) {
-              case '/':
-                builder = (BuildContext _) => const HomeScreen();
-                break;
-              case '/login-register':
-                builder = (BuildContext _) => const LoginRegisterScreen();
-                break;
-              case '/login':
-                builder = (BuildContext _) => const LoginScreen();
-                break;
-              case '/register':
-                builder = (BuildContext _) => const RegisterScreen();
-                break;
-              case '/concert':
-                builder = (BuildContext _) => ConcertScreen(concertId: concertId);
-                break;
-              case '/booking':
-                builder = (BuildContext _) => BookingScreen(concertCategories: concertCategories);
-                break;
-              case '/profile':
-                builder = (BuildContext _) => const ProfileScreen();
-                break;
-              default:
-                throw Exception('Invalid route: ${settings.name}');
-            }
-            return MaterialPageRoute(builder: builder, settings: settings);
-          },
-        ),
+        concertId: concertId,
+        concertCategories: concertCategories,
       ),
+      onGenerateRoute: (RouteSettings settings) { // Déplacement de onGenerateRoute ici
+        WidgetBuilder builder;
+        switch (settings.name) {
+          case '/':
+            builder = (BuildContext _) => const HomeScreen();
+            break;
+          case '/login-register':
+            builder = (BuildContext _) => const LoginRegisterScreen();
+            break;
+          case '/login':
+            builder = (BuildContext _) => const LoginScreen();
+            break;
+          case '/register':
+            builder = (BuildContext _) => const RegisterScreen();
+            break;
+          case '/concert':
+            builder = (BuildContext _) => ConcertScreen(concertId: concertId);
+            break;
+          case '/booking':
+            builder = (BuildContext _) => BookingScreen(concertCategories: concertCategories);
+            break;
+          case '/profile':
+            builder = (BuildContext _) => const ProfileScreen();
+            break;
+          case '/messages': // Définition de la route pour les messages
+            builder = (BuildContext _) => const MessagesScreen();
+            break;
+          case '/my-tickets': // Définition de la route pour les billets
+            builder = (BuildContext _) => const TicketsScreen();
+            break;
+          default:
+            throw Exception('Invalid route: ${settings.name}');
+        }
+        return MaterialPageRoute(builder: builder, settings: settings);
+      },
     );
   }
 }
 
 class MyScaffold extends StatefulWidget {
-  final Widget body;
+  final String concertId;
+  final List<ConcertCategory> concertCategories;
 
-  const MyScaffold({super.key, required this.body});
+  const MyScaffold({super.key, required this.concertId, required this.concertCategories});
 
   @override
   _MyScaffoldState createState() => _MyScaffoldState();
@@ -88,7 +96,44 @@ class _MyScaffoldState extends State<MyScaffold> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: widget.body,
+      body: Navigator(
+        initialRoute: '/',
+        onGenerateRoute: (RouteSettings settings) {
+          WidgetBuilder builder;
+          switch (settings.name) {
+            case '/':
+              builder = (BuildContext _) => const HomeScreen();
+              break;
+            case '/login-register':
+              builder = (BuildContext _) => const LoginRegisterScreen();
+              break;
+            case '/login':
+              builder = (BuildContext _) => const LoginScreen();
+              break;
+            case '/register':
+              builder = (BuildContext _) => const RegisterScreen();
+              break;
+            case '/concert':
+              builder = (BuildContext _) => ConcertScreen(concertId: widget.concertId);
+              break;
+            case '/booking':
+              builder = (BuildContext _) => BookingScreen(concertCategories: widget.concertCategories);
+              break;
+            case '/profile':
+              builder = (BuildContext _) => const ProfileScreen();
+              break;
+            case '/messages': // Définition de la route pour les messages
+              builder = (BuildContext _) => const MessagesScreen();
+              break;
+            case '/my-tickets': // Définition de la route pour les billets
+              builder = (BuildContext _) => const TicketsScreen();
+              break;
+            default:
+              throw Exception('Invalid route: ${settings.name}');
+          }
+          return MaterialPageRoute(builder: builder, settings: settings);
+        },
+      ),
       bottomNavigationBar: NavigationBar(
         selectedIndex: selectedIndex,
         destinations: const <Widget>[
@@ -105,7 +150,7 @@ class _MyScaffoldState extends State<MyScaffold> {
             label: 'Mes messages',
           ),
           NavigationDestination(
-            icon: Icon(Icons.person),
+            icon: Icon(Icons.person), // Élément de navigation pour le profil
             label: 'Mon profil',
           ),
         ],
@@ -119,10 +164,10 @@ class _MyScaffoldState extends State<MyScaffold> {
               Navigator.pushNamed(context, '/');
               break;
             case 1:
-              Navigator.pushNamed(context, '/my-tickets');
+              Navigator.pushNamed(context, '/my-tickets'); // Navigation vers la page des billets
               break;
             case 2:
-              Navigator.pushNamed(context, '/messages');
+              Navigator.pushNamed(context, '/messages'); // Navigation vers la page des messages
               break;
             case 3:
               Navigator.pushNamed(context, '/profile');

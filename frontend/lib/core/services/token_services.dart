@@ -1,3 +1,4 @@
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
@@ -7,7 +8,7 @@ class TokenService {
   final _storage = const FlutterSecureStorage();
   final String _refreshTokenKey = 'refresh_token';
   final String _accessTokenKey = 'access_token';
-  final String _refreshUrl = 'http://10.0.2.2:8080/refresh';
+  final String _refreshUrl = 'http://${dotenv.env['API_HOST']}:${dotenv.env['API_PORT']}/refresh';
 
   Future<String?> getAccessToken() async {
     return await _storage.read(key: _accessTokenKey);

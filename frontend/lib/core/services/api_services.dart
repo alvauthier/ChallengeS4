@@ -16,8 +16,9 @@ class ApiServices {
     try {
       final tokenService = TokenService();
       String? jwtToken = await tokenService.getValidAccessToken();
+      final apiUrl = 'http://${dotenv.env['API_HOST']}:${dotenv.env['API_PORT']}/concerts';
       final response = await http.get(
-        Uri.parse('http://10.0.2.2:8080/concerts'),
+        Uri.parse(apiUrl),
         headers: {
           'Accept': 'application/json; charset=UTF-8',
           'Authorization': 'Bearer $jwtToken',
@@ -43,8 +44,9 @@ class ApiServices {
     try {
       final tokenService = TokenService();
       String? jwtToken = await tokenService.getAccessToken();
+      final apiUrl = 'http://${dotenv.env['API_HOST']}:${dotenv.env['API_PORT']}/concerts/$id';
       final response = await http.get(
-        Uri.parse('http://10.0.2.2:8080/concerts/$id'),
+        Uri.parse(apiUrl),
         headers: {
           'Accept': 'application/json; charset=UTF-8',
           'Authorization': 'Bearer $jwtToken',

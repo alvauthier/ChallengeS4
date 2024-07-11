@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'dart:convert';
 import 'package:frontend/core/models/concert_category.dart';
@@ -35,8 +36,9 @@ class _BookingScreenState extends State<BookingScreen> {
     try {
       final tokenService = TokenService();
       String? jwtToken = await tokenService.getValidAccessToken();
+      final apiUrl = 'http://${dotenv.env['API_HOST']}:${dotenv.env['API_PORT']}/reservation';
       final response = await http.post(
-        Uri.parse('http://10.0.2.2:8080/reservation'),
+        Uri.parse(apiUrl),
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $jwtToken',

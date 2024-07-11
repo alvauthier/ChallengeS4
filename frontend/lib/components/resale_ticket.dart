@@ -1,8 +1,5 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:frontend/core/services/payment_services.dart';
-import 'package:frontend/core/services/token_services.dart';
-import 'package:http/http.dart' as http;
 
 class Ticket {
   final String id;
@@ -38,28 +35,6 @@ class Reseller {
 
 class ResaleTicket extends StatelessWidget {
   final Ticket ticket;
-
-  Future<Map<String, dynamic>?> createPaymentIntent(String ticketListingId) async {
-    const String prefix = "tl_";
-    final String prefixedId = "$prefix$ticketListingId";
-    final url = Uri.parse('http://10.0.2.2:8080/create-payment-intent');
-    final tokenService = TokenService();
-    String? jwtToken = await tokenService.getValidAccessToken();
-    final response = await http.post(
-      url,
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer $jwtToken',
-      },
-      body: json.encode({'id': prefixedId}),
-    );
-    if (response.statusCode == 200) {
-      return json.decode(response.body);
-    } else {
-      print('Failed to create payment intent: ${response.body}');
-      return null;
-    }
-  }
 
   const ResaleTicket({super.key, required this.ticket});
 

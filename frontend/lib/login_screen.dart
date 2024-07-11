@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:frontend/home/home_screen.dart';
 import 'package:frontend/profile_screen.dart';
@@ -79,8 +80,9 @@ class _LoginScreenState extends State<LoginScreen> {
                                 if (_formKey.currentState!.validate()) {
                                   // Process data.
                                   try {
+                                    final apiUrl = 'http://${dotenv.env['API_HOST']}:${dotenv.env['API_PORT']}/login';
                                     var response = await http.post(
-                                      Uri.parse('http://10.0.2.2:8080/login'), // 10.0.2.2 => localhost
+                                      Uri.parse(apiUrl),
                                       headers: <String, String>{
                                         'Content-Type': 'application/json; charset=UTF-8',
                                       },

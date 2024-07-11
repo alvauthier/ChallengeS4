@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:frontend/core/services/token_services.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter_stripe/flutter_stripe.dart' as stripe;
@@ -7,7 +8,8 @@ import 'package:flutter_stripe/flutter_stripe.dart' as stripe;
 class PaymentService {
   Future<Map<String, dynamic>?> createPaymentIntent(String id, String prefix) async {
     final String prefixedId = "$prefix$id";
-    final url = Uri.parse('http://10.0.2.2:8080/create-payment-intent');
+    final apiUrl = 'http://${dotenv.env['API_HOST']}:${dotenv.env['API_PORT']}/create-payment-intent';
+    final url = Uri.parse(apiUrl);
     final tokenService = TokenService();
     String? jwtToken = await tokenService.getValidAccessToken();
     final response = await http.post(

@@ -1,14 +1,20 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:frontend/core/services/payment_services.dart';
+import 'package:frontend/core/services/token_services.dart';
+import 'package:http/http.dart' as http;
 
 class Ticket {
+  final String id;
   final String category;
   final String price;
   final Reseller reseller;
 
-  Ticket({required this.category, required this.price, required this.reseller});
+  Ticket({required this.id, required this.category, required this.price, required this.reseller});
 
   factory Ticket.fromMap(Map<String, dynamic> map) {
     return Ticket(
+      id: map['id'] as String,
       category: map['category'] as String,
       price: map['price'] as String,
       reseller: Reseller.fromMap(map['reseller'] as Map<String, dynamic>),
@@ -33,10 +39,33 @@ class Reseller {
 class ResaleTicket extends StatelessWidget {
   final Ticket ticket;
 
+  Future<Map<String, dynamic>?> createPaymentIntent(String ticketListingId) async {
+    const String prefix = "tl_";
+    final String prefixedId = "$prefix$ticketListingId";
+    final url = Uri.parse('http://10.0.2.2:8080/create-payment-intent');
+    final tokenService = TokenService();
+    String? jwtToken = await tokenService.getValidAccessToken();
+    final response = await http.post(
+      url,
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $jwtToken',
+      },
+      body: json.encode({'id': prefixedId}),
+    );
+    if (response.statusCode == 200) {
+      return json.decode(response.body);
+    } else {
+      print('Failed to create payment intent: ${response.body}');
+      return null;
+    }
+  }
+
   const ResaleTicket({super.key, required this.ticket});
 
   @override
   Widget build(BuildContext context) {
+    final paymentService = PaymentService();
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: SizedBox(
@@ -114,8 +143,29 @@ class ResaleTicket extends StatelessWidget {
                           ),
                           const SizedBox(width: 10),
                           ElevatedButton(
-                            onPressed: () {
-
+                            onPressed: () async {
+                              final paymentIntentData = await paymentService.createPaymentIntent(ticket.id, 'tl_');
+                              if (paymentIntentData != null) {
+                                try {
+                                  await paymentService.initAndPresentPaymentSheet(
+                                    context,
+                                    paymentIntentData['client_secret'],
+                                  );
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(content: Text('Paiement réussi')),
+                                  );
+                                  // missing proceedToReservation function (need to update the userId in ticket and archive the transaction)
+                                } catch (e) {
+                                  print('Error presenting payment sheet: $e');
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(content: Text('Echec du paiement')),
+                                  );
+                                }
+                              } else {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(content: Text('Failed to create payment intent')),
+                                );
+                              }
                             },
                             style: ElevatedButton.styleFrom(
                               foregroundColor: Colors.white,

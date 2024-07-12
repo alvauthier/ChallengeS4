@@ -59,4 +59,5 @@ class DefaultFirebaseOptions {
     projectId: 'weezemaster-project',
     storageBucket: 'weezemaster-project.appspot.com',
   );
+
 }

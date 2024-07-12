@@ -1,5 +1,3 @@
-import 'dart:ffi';
-
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:frontend/concert/concert_screen.dart';
 import 'package:frontend/core/models/concert_category.dart';
@@ -11,14 +9,18 @@ import 'package:flutter_stripe/flutter_stripe.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:flutter/material.dart';
 import 'package:frontend/home/home_screen.dart';
-
 import 'booking_screen.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'firebase_options.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await dotenv.load(fileName: '.env');
   Stripe.publishableKey = dotenv.env['STRIPE_PUBLIC_KEY']!;
   await Stripe.instance.applySettings();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
   initializeDateFormatting('fr_FR', null).then((_) => runApp(const MyApp()));
 }
 

@@ -84,6 +84,10 @@ func main() {
 	authenticated.PATCH("/concerts/:id", controller.UpdateConcert)
 	authenticated.DELETE("/concerts/:id", controller.DeleteConcert)
 
+	authenticated.GET("/user/interests", controller.GetUserInterests, middleware.CheckRole("user"))
+	authenticated.POST("/user/interests/:id", controller.AddUserInterest, middleware.CheckRole("user"))
+	authenticated.DELETE("/user/interests/:id", controller.RemoveUserInterest, middleware.CheckRole("user"))
+
 	authenticated.POST("/reservation", controller.CreateReservation, middleware.CheckRole("user"))
 
 	authenticated.POST("/create-payment-intent", controller.CreatePaymentIntent, middleware.CheckRole("user"))

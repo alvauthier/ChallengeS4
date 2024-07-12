@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/core/services/payment_services.dart';
+import 'package:frontend/user_interests_screen.dart';
 
 class Ticket {
   final String id;
@@ -100,7 +101,11 @@ class ResaleTicket extends StatelessWidget {
                         children: [
                           ElevatedButton(
                             onPressed: () {
-                              
+                              // navigate to user interest screen FOR DEBUG ONLY NOW
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(builder: (context) => UserInterestsScreen()),
+                              );
                             },
                             style: ElevatedButton.styleFrom(
                               foregroundColor: Colors.white,

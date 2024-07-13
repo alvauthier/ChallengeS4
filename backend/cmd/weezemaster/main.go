@@ -62,20 +62,18 @@ func main() {
 	router.PATCH("/categories/:id", controller.UpdateCategory)
 	router.DELETE("/categories/:id", controller.DeleteCategory)
 
-	// WIP : routes for tickets and ticketlistings
-
 	router.GET("/tickets", controller.GetAllTickets)
 	router.GET("/tickets/:id", controller.GetTicket)
 	router.POST("/tickets", controller.CreateTicket)
 	router.PATCH("/tickets/:id", controller.UpdateTicket)
 	router.DELETE("/tickets/:id", controller.DeleteTicket)
 
-	// router.GET("/ticketlisting", controller.GetAllTicketListings)
-	// router.GET("/ticketlisting/:id", controller.GetTicketListings)
-	// router.POST("/ticketlisting", controller.CreateTicketListings)
-	// router.PATCH("/ticketlisting/:id", controller.UpdateTicketListing)
-	// router.DELETE("/ticketlisting/:id", controller.DeleteTicketListing)
-	// router.GET("/ticketlisting/concert/:id", controller.GetTicketListingByConcertId)
+	router.GET("/ticketlisting", controller.GetAllTicketListings)
+	router.GET("/ticketlisting/:id", controller.GetTicketListings)
+	router.POST("/ticketlisting", controller.CreateTicketListings)
+	router.PATCH("/ticketlisting/:id", controller.UpdateTicketListing)
+	router.DELETE("/ticketlisting/:id", controller.DeleteTicketListing)
+	router.GET("/ticketlisting/concert/:id", controller.GetTicketListingByConcertId)
 
 	router.GET("/concerts", controller.GetAllConcerts)
 	router.GET("/concerts/:id", controller.GetConcert)

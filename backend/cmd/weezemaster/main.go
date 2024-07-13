@@ -64,11 +64,11 @@ func main() {
 
 	// WIP : routes for tickets and ticketlistings
 
-	// router.GET("/tickets", controller.GetAllTickets)
-	// router.GET("/tickets/:id", controller.GetTicket)
-	// router.POST("/tickets", controller.CreateTicket)
-	// // router.PATCH("/tickets/:id", controller.UpdateTicket)
-	// router.DELETE("/tickets/:id", controller.DeleteTicket)
+	router.GET("/tickets", controller.GetAllTickets)
+	router.GET("/tickets/:id", controller.GetTicket)
+	router.POST("/tickets", controller.CreateTicket)
+	router.PATCH("/tickets/:id", controller.UpdateTicket)
+	router.DELETE("/tickets/:id", controller.DeleteTicket)
 
 	// router.GET("/ticketlisting", controller.GetAllTicketListings)
 	// router.GET("/ticketlisting/:id", controller.GetTicketListings)

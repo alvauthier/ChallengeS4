@@ -9,6 +9,7 @@ import 'package:frontend/core/exceptions/api_exception.dart';
 import 'package:frontend/core/models/concert.dart';
 import 'package:frontend/core/services/token_services.dart';
 import 'package:http/http.dart' as http;
+import 'package:frontend/core/models/user.dart';
 
 class ApiServices {
   static const storage = FlutterSecureStorage();
@@ -59,6 +60,34 @@ class ApiServices {
 
       final data = json.decode(response.body) as Map<String, dynamic>;
       return Concert.fromJson(data);
+    } on SocketException catch (error) {
+      log('Network error.', error: error);
+      throw ApiException(message: 'Network error');
+    } catch (error) {
+      log('An error occurred while fetching concert.', error: error);
+      throw ApiException(message: 'Unknown error');
+    }
+  }
+
+  static Future<User> getUser(String id) async {
+    try {
+      final tokenService = TokenService();
+      String? jwtToken = await tokenService.getAccessToken();
+      final apiUrl = 'http://${dotenv.env['API_HOST']}:${dotenv.env['API_PORT']}/users/$id';
+      final response = await http.get(
+        Uri.parse(apiUrl),
+        headers: {
+          'Accept': 'application/json; charset=UTF-8',
+          'Authorization': 'Bearer $jwtToken',
+        },
+      );
+      await Future.delayed(const Duration(seconds: 1));
+      if (response.statusCode < 200 || response.statusCode >= 400) {
+        throw ApiException(message: 'Bad request');
+      }
+
+      final data = json.decode(response.body) as Map<String, dynamic>;
+      return User.fromJson(data);
     } on SocketException catch (error) {
       log('Network error.', error: error);
       throw ApiException(message: 'Network error');

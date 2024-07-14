@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:frontend/booking_screen.dart';
-import 'package:frontend/concert/blocs/concert_bloc.dart';
+import 'package:weezemaster/booking_screen.dart';
+import 'package:weezemaster/concert/blocs/concert_bloc.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:frontend/core/services/token_services.dart';
-import 'package:frontend/login_register_screen.dart';
+import 'package:weezemaster/core/services/token_services.dart';
+import 'package:weezemaster/login_register_screen.dart';
 import 'package:intl/intl.dart';
-import 'package:frontend/components/resale_ticket.dart';
-import 'package:frontend/components/organiser_widget.dart';
-import 'package:frontend/components/interest_chip.dart';
+import 'package:weezemaster/components/resale_ticket.dart';
+import 'package:weezemaster/components/organiser_widget.dart';
+import 'package:weezemaster/components/interest_chip.dart';
 
 class ConcertScreen extends StatelessWidget {
   final String concertId;

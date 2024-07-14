@@ -5,10 +5,10 @@ import 'dart:io';
 import 'package:flinq/flinq.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:frontend/core/exceptions/api_exception.dart';
-import 'package:frontend/core/models/concert.dart';
-import 'package:frontend/core/models/interest.dart';
-import 'package:frontend/core/services/token_services.dart';
+import 'package:weezemaster/core/exceptions/api_exception.dart';
+import 'package:weezemaster/core/models/concert.dart';
+import 'package:weezemaster/core/models/interest.dart';
+import 'package:weezemaster/core/services/token_services.dart';
 import 'package:http/http.dart' as http;
 
 class ApiServices {

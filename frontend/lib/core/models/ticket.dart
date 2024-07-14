@@ -1,5 +1,5 @@
-import 'package:frontend/core/models/user.dart';
-import 'package:frontend/core/models/ticket_listing.dart';
+import 'package:weezemaster/core/models/user.dart';
+import 'package:weezemaster/core/models/ticket_listing.dart';
 
 class Ticket {
   final String id;

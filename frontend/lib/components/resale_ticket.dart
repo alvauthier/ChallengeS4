@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:frontend/core/services/payment_services.dart';
-import 'package:frontend/user_interests_screen.dart';
+import 'package:weezemaster/core/services/payment_services.dart';
+import 'package:weezemaster/user_interests_screen.dart';
 
 class Ticket {
   final String id;

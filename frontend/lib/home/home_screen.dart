@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:frontend/home/blocs/home_bloc.dart';
+import 'package:weezemaster/home/blocs/home_bloc.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
-import 'package:frontend/concert/concert_screen.dart';
-import 'package:frontend/components/search_bar.dart';
+import 'package:weezemaster/concert/concert_screen.dart';
+import 'package:weezemaster/components/search_bar.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});

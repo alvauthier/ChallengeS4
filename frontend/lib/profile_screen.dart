@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:frontend/login_register_screen.dart';
+import 'package:weezemaster/login_register_screen.dart';
 import 'dart:convert';
 
 class ProfileScreen extends StatefulWidget {

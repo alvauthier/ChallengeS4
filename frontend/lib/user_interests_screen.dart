@@ -1,9 +1,9 @@
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
-import 'package:frontend/core/models/interest.dart';
-import 'package:frontend/components/user_interest_chip.dart';
-import 'package:frontend/core/services/api_services.dart';
-import 'package:frontend/core/exceptions/api_exception.dart';
+import 'package:weezemaster/core/models/interest.dart';
+import 'package:weezemaster/components/user_interest_chip.dart';
+import 'package:weezemaster/core/services/api_services.dart';
+import 'package:weezemaster/core/exceptions/api_exception.dart';
 
 class UserInterestsScreen extends StatefulWidget {
   const UserInterestsScreen({super.key});

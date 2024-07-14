@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:frontend/login_screen.dart';
-import 'package:frontend/register_screen.dart';
+import 'package:weezemaster/login_screen.dart';
+import 'package:weezemaster/register_screen.dart';
 
 class LoginRegisterScreen extends StatelessWidget {
   const LoginRegisterScreen({super.key});

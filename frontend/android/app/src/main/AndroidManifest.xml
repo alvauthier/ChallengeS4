@@ -1,6 +1,7 @@
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.weezemaster.app">
     <application
-        android:label="frontend"
+        android:label="Weezemaster"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity

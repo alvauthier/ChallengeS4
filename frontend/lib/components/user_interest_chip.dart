@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:frontend/core/models/interest.dart';
+import 'package:weezemaster/core/models/interest.dart';
 
 class UserInterestChip extends StatelessWidget {
   final Interest interest;

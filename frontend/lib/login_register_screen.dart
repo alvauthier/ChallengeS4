@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/login_screen.dart';
 import 'package:frontend/register_screen.dart';
+import 'package:frontend/register_organization_screen.dart';
 
 class LoginRegisterScreen extends StatelessWidget {
   const LoginRegisterScreen({super.key});
@@ -45,6 +46,13 @@ class LoginRegisterScreen extends StatelessWidget {
                           Navigator.push(context, MaterialPageRoute(builder: (context) => const RegisterScreen()));
                         },
                         child: const Text('Créer un compte'),
+                      ),
+                      const SizedBox(height: 20),
+                      ElevatedButton(
+                        onPressed: () {
+                          Navigator.push(context, MaterialPageRoute(builder: (context) => const RegisterOrganisationScreen()));
+                        },
+                        child: const Text('Créer un compte d\'organisation'),
                       ),
                     ],
                   ),

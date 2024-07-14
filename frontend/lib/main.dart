@@ -37,7 +37,7 @@ class MyApp extends StatelessWidget {
       ),
       home: MyScaffold(
         body: Navigator(
-          initialRoute: '/',
+          initialRoute: '/login-register',
           onGenerateRoute: (RouteSettings settings) {
             WidgetBuilder builder;
             switch (settings.name) {
@@ -61,6 +61,9 @@ class MyApp extends StatelessWidget {
                 break;
               case '/profile':
                 builder = (BuildContext _) => const ProfileScreen();
+                break;
+              case '/register-organization':
+                builder = (BuildContext _) => const RegisterOrganisationScreen();
                 break;
               default:
                 throw Exception('Invalid route: ${settings.name}');

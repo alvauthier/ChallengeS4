@@ -1,6 +1,6 @@
-import 'package:frontend/core/models/interest.dart';
-import 'package:frontend/core/models/organization.dart';
-import 'package:frontend/core/models/concert_category.dart';
+import 'package:weezemaster/core/models/interest.dart';
+import 'package:weezemaster/core/models/organization.dart';
+import 'package:weezemaster/core/models/concert_category.dart';
 
 class Concert {
   final String id;

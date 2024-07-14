@@ -1,7 +1,9 @@
 package controller
 
 import (
+	"fmt"
 	"net/http"
+	"time"
 	"weezemaster/internal/database"
 	"weezemaster/internal/models"
 
@@ -61,16 +63,65 @@ func GetConcert(c echo.Context) error {
 // @Router			/concerts [post]
 func CreateConcert(c echo.Context) error {
 	db := database.GetDB()
-	concert := new(models.Concert)
-	if err := c.Bind(concert); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+
+	// Structure pour lier les champs et récupérer les InterestIDs
+	var input struct {
+		Name           string    `json:"name"`
+		Description    string    `json:"description"`
+		Location       string    `json:"location"`
+		Date           time.Time `json:"date"`
+		OrganizationID uuid.UUID `json:"OrganizationID"`
+		InterestIDs    []int     `json:"InterestIDs"`
 	}
 
-	concert.ID = uuid.New()
+	// Bind les données d'entrée à la structure
+	if err := c.Bind(&input); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, "Failed to bind input: "+err.Error())
+	}
 
+	// Créer un nouvel objet Concert
+	concert := &models.Concert{
+		ID:             uuid.New(),
+		Name:           input.Name,
+		Description:    input.Description,
+		Location:       input.Location,
+		Date:           input.Date,
+		OrganizationId: input.OrganizationID,
+	}
+
+	// Récupérer les objets Interest correspondant aux IDs
+	var interests []models.Interest
+	if len(input.InterestIDs) > 0 {
+		if err := db.Where("id IN (?)", input.InterestIDs).Find(&interests).Error; err != nil {
+			return echo.NewHTTPError(http.StatusInternalServerError, "Failed to find interests: "+err.Error())
+		}
+		concert.Interests = interests
+	}
+
+	// Créer le concert avec les associations
 	if err := db.Create(&concert).Error; err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		return echo.NewHTTPError(http.StatusInternalServerError, "Failed to create concert: "+err.Error())
 	}
+
+	// Envoyer des notifications aux sujets correspondant aux centres d'intérêt
+	for _, interest := range interests {
+		data := map[string]string{
+			"concert_id": concert.ID.String(),
+			"name":       concert.Name,
+		}
+		notification := map[string]string{
+			"title": "Nouveau concert susceptible de vous intéresser",
+			"body":  fmt.Sprintf("Le concert \"%s\" vient d'être ajouté et pourrait vous plaire. Réservez vos places dès maintenant !", concert.Name),
+		}
+
+		fmt.Printf("Sending notification for interest %s\n", sanitizeTopicName(interest.Name))
+		topic := sanitizeTopicName(interest.Name) // Utiliser le nom du centre d'intérêt comme sujet
+		err := SendFCMNotification(topic, data, notification)
+		if err != nil {
+			fmt.Printf("Failed to send notification for interest %s: %v\n", interest.Name, err)
+		}
+	}
+
 	return c.JSON(http.StatusOK, concert)
 }
 

@@ -1,17 +1,35 @@
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:frontend/panel_admin.dart';
-import 'package:frontend/profile_screen.dart';
+import 'package:weezemaster/concert/concert_screen.dart';
+import 'package:weezemaster/core/models/concert_category.dart';
+import 'package:weezemaster/login_register_screen.dart';
+import 'package:weezemaster/login_screen.dart';
+import 'package:weezemaster/profile_screen.dart';
+import 'package:weezemaster/register_screen.dart';
+import 'package:weezemaster/panel_admin.dart';
 import 'package:flutter_stripe/flutter_stripe.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:flutter/material.dart';
-import 'package:frontend/home/home_screen.dart';
-import 'package:frontend/my_tickets/my_tickets_screen.dart';
+import 'package:weezemaster/my_tickets/my_tickets_screen.dart';
+import 'package:weezemaster/home/home_screen.dart';
+import 'booking_screen.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'firebase_options.dart';
+
+Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  await Firebase.initializeApp();
+  // Handle background message
+}
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await dotenv.load(fileName: '.env');
   Stripe.publishableKey = dotenv.env['STRIPE_PUBLIC_KEY']!;
   await Stripe.instance.applySettings();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+  FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
   initializeDateFormatting('fr_FR', null).then((_) => runApp(const MyApp()));
 }
 

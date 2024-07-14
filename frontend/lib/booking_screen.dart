@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'dart:convert';
-import 'package:frontend/core/models/concert_category.dart';
-import 'package:frontend/core/services/token_services.dart';
-import 'package:frontend/thank_you_screen.dart';
+import 'package:weezemaster/core/models/concert_category.dart';
+import 'package:weezemaster/core/services/token_services.dart';
+import 'package:weezemaster/thank_you_screen.dart';
 import 'package:http/http.dart' as http;
-import 'package:frontend/core/services/payment_services.dart';
+import 'package:weezemaster/core/services/payment_services.dart';
 
 class BookingScreen extends StatefulWidget {
   final List<ConcertCategory> concertCategories;

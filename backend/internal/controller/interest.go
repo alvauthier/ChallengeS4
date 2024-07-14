@@ -110,3 +110,124 @@ func DeleteInterest(c echo.Context) error {
 	db.Delete(&interest)
 	return c.NoContent(http.StatusNoContent)
 }
+
+func GetUserInterests(c echo.Context) error {
+	db := database.GetDB()
+	authHeader := c.Request().Header.Get("Authorization")
+	if authHeader == "" {
+		return c.JSON(http.StatusUnauthorized, map[string]string{"error": "Authorization header is missing"})
+	}
+
+	tokenString := authHeader
+	if len(authHeader) > 7 && authHeader[:7] == "Bearer " {
+		tokenString = authHeader[7:]
+	}
+
+	claims, err := verifyToken(tokenString)
+	if err != nil {
+		return c.JSON(http.StatusUnauthorized, map[string]string{"error": "Invalid or expired token"})
+	}
+
+	email, ok := claims["email"].(string)
+	if !ok {
+		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Invalid token claims"})
+	}
+
+	var user models.User
+	if err := db.Where("email = ?", email).First(&user).Error; err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "User not found"})
+	}
+
+	var userInterests []models.Interest
+	if err := db.Model(&user).Association("Interests").Find(&userInterests); err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
+	}
+
+	return c.JSON(http.StatusOK, userInterests)
+}
+
+func AddUserInterest(c echo.Context) error {
+	db := database.GetDB()
+	authHeader := c.Request().Header.Get("Authorization")
+	if authHeader == "" {
+		return c.JSON(http.StatusUnauthorized, map[string]string{"error": "Authorization header is missing"})
+	}
+
+	tokenString := authHeader
+	if len(authHeader) > 7 && authHeader[:7] == "Bearer " {
+		tokenString = authHeader[7:]
+	}
+
+	claims, err := verifyToken(tokenString)
+	if err != nil {
+		return c.JSON(http.StatusUnauthorized, map[string]string{"error": "Invalid or expired token"})
+	}
+
+	email, ok := claims["email"].(string)
+	if !ok {
+		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Invalid token claims"})
+	}
+
+	var user models.User
+	if err := db.Where("email = ?", email).First(&user).Error; err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "User not found"})
+	}
+
+	interestID := c.Param("id")
+	var interest models.Interest
+	if err := db.First(&interest, interestID).Error; err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return echo.NewHTTPError(http.StatusNotFound, "Interest not found")
+		}
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
+
+	if err := db.Model(&user).Association("Interests").Append(&interest); err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
+	}
+
+	return c.JSON(http.StatusOK, interest)
+}
+
+func RemoveUserInterest(c echo.Context) error {
+	db := database.GetDB()
+	authHeader := c.Request().Header.Get("Authorization")
+	if authHeader == "" {
+		return c.JSON(http.StatusUnauthorized, map[string]string{"error": "Authorization header is missing"})
+	}
+
+	tokenString := authHeader
+	if len(authHeader) > 7 && authHeader[:7] == "Bearer " {
+		tokenString = authHeader[7:]
+	}
+
+	claims, err := verifyToken(tokenString)
+	if err != nil {
+		return c.JSON(http.StatusUnauthorized, map[string]string{"error": "Invalid or expired token"})
+	}
+
+	email, ok := claims["email"].(string)
+	if !ok {
+		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Invalid token claims"})
+	}
+
+	var user models.User
+	if err := db.Where("email = ?", email).First(&user).Error; err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "User not found"})
+	}
+
+	interestID := c.Param("id")
+	var interest models.Interest
+	if err := db.First(&interest, interestID).Error; err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return echo.NewHTTPError(http.StatusNotFound, "Interest not found")
+		}
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
+
+	if err := db.Model(&user).Association("Interests").Delete(&interest); err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
+	}
+
+	return c.NoContent(http.StatusNoContent)
+}

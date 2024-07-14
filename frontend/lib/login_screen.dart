@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:frontend/home/home_screen.dart';
-import 'package:frontend/profile_screen.dart';
+import 'package:weezemaster/home/home_screen.dart';
+import 'package:weezemaster/profile_screen.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 

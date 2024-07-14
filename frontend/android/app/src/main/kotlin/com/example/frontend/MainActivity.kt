@@ -1,4 +1,4 @@
-package com.example.frontend
+package com.weezemaster.app
 
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.android.FlutterFragmentActivity

@@ -1,7 +1,7 @@
 import 'package:flutter/foundation.dart';
-import 'package:frontend/core/exceptions/api_exception.dart';
-import 'package:frontend/core/models/concert.dart';
-import 'package:frontend/core/services/api_services.dart';
+import 'package:weezemaster/core/exceptions/api_exception.dart';
+import 'package:weezemaster/core/models/concert.dart';
+import 'package:weezemaster/core/services/api_services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 part 'concert_event.dart';

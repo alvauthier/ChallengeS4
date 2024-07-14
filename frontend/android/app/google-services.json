@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "774862160050",
+    "project_id": "weezemaster-project-262db",
+    "storage_bucket": "weezemaster-project-262db.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:774862160050:android:7965e3dc5bda573c2c49ab",
+        "android_client_info": {
+          "package_name": "com.weezemaster.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBa0ybGXOOeQGaQaHEOzVzPt0TtBdb24rU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -1,5 +1,5 @@
-import 'package:frontend/core/models/category.dart';
-import 'package:frontend/core/models/ticket.dart';
+import 'package:weezemaster/core/models/category.dart';
+import 'package:weezemaster/core/models/ticket.dart';
 
 class ConcertCategory {
   final String id;

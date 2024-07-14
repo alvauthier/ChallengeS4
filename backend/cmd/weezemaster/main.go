@@ -69,6 +69,10 @@ func main() {
 	router.PATCH("/categories/:id", controller.UpdateCategory)
 	router.DELETE("/categories/:id", controller.DeleteCategory)
 
+	router.POST("/registerorganizer", controller.RegisterOrganizer)
+
+	router.POST("/registerorganizer", controller.RegisterOrganizer)
+
 	router.GET("/tickets", controller.GetAllTickets)
 	router.GET("/tickets/:id", controller.GetTicket)
 	router.POST("/tickets", controller.CreateTicket)

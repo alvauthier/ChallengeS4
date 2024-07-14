@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
@@ -16,6 +17,8 @@ class _RegisterOrganisationScreenState extends State<RegisterOrganisationScreen>
   final _confirmPasswordController = TextEditingController();
   final _firstnameController = TextEditingController();
   final _lastnameController = TextEditingController();
+  final _organameController = TextEditingController();
+  final _orgadescriController = TextEditingController();
 
   final RegExp emailRegExp = RegExp(
       r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$');
@@ -44,7 +47,7 @@ class _RegisterOrganisationScreenState extends State<RegisterOrganisationScreen>
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: <Widget>[
                         TextFormField(
-                          controller: _firstnameController,
+                          controller: _organameController,
                           decoration: const InputDecoration(
                             labelText: 'Nom de l\'organisation',
                           ),
@@ -56,7 +59,7 @@ class _RegisterOrganisationScreenState extends State<RegisterOrganisationScreen>
                           },
                         ),
                         TextFormField(
-                          controller: _firstnameController,
+                          controller: _orgadescriController,
                           decoration: const InputDecoration(
                             labelText: 'Description de l\'organisation',
                           ),
@@ -146,7 +149,7 @@ class _RegisterOrganisationScreenState extends State<RegisterOrganisationScreen>
                                   // Process data.
                                   try {
                                     var response = await http.post(
-                                      Uri.parse('http://10.0.2.2:8080/register'), // 10.0.2.2 => localhost
+                                      Uri.parse('http://${dotenv.env['API_HOST']}:${dotenv.env['API_PORT']}/registerorganizer'),
                                       headers: <String, String>{
                                         'Content-Type': 'application/json; charset=UTF-8',
                                       },
@@ -155,6 +158,8 @@ class _RegisterOrganisationScreenState extends State<RegisterOrganisationScreen>
                                         'lastname': _lastnameController.text,
                                         'email': _emailController.text,
                                         'password': _passwordController.text,
+                                        'organization': _organameController.text,
+                                        'orgadescri': _orgadescriController.text
                                       }),
                                     );
                                     ScaffoldMessenger.of(context).showSnackBar(

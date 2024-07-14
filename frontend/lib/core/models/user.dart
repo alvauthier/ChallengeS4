@@ -1,4 +1,4 @@
-import 'package:frontend/core/models/ticket.dart';
+import 'package:weezemaster/core/models/ticket.dart';
 
 class User {
   final String id;

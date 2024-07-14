@@ -1,3 +1,4 @@
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:frontend/core/models/interest.dart';
 import 'package:frontend/components/user_interest_chip.dart';
@@ -21,6 +22,19 @@ class _UserInterestsScreenState extends State<UserInterestsScreen> {
   void initState() {
     super.initState();
     fetchInterests();
+    requestNotificationPermission();
+    
+    FirebaseMessaging.instance.getToken().then((token) {
+      print("FCM Token: $token");
+    });
+    FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+      print('Got a message whilst in the foreground here!');
+      print('Message data: ${message.data}');
+
+      if (message.notification != null) {
+        print('Message also contained a notification: ${message.notification}');
+      }
+    });
   }
 
   Future<void> fetchInterests() async {
@@ -63,8 +77,12 @@ class _UserInterestsScreenState extends State<UserInterestsScreen> {
     try {
       if (isSelected) {
         await ApiServices.removeUserInterest(interest.id);
+        await FirebaseMessaging.instance.unsubscribeFromTopic(sanitizeTopicName(interest.name));
+        print('Unsubscribed from topic: ${sanitizeTopicName(interest.name)}');
       } else {
         await ApiServices.addUserInterest(interest.id);
+        await FirebaseMessaging.instance.subscribeToTopic(sanitizeTopicName(interest.name));
+        print('Subscribed from topic: ${sanitizeTopicName(interest.name)}');
       }
     } on ApiException catch (e) {
       setState(() {
@@ -75,6 +93,27 @@ class _UserInterestsScreenState extends State<UserInterestsScreen> {
         errorMessage = 'An unknown error occurred';
       });
     }
+  }
+
+  void requestNotificationPermission() async {
+    NotificationSettings settings = await FirebaseMessaging.instance.requestPermission(
+      alert: true,
+      badge: true,
+      sound: true,
+      provisional: false,
+    );
+
+    if (settings.authorizationStatus == AuthorizationStatus.authorized) {
+      print('User granted permission');
+    } else if (settings.authorizationStatus == AuthorizationStatus.provisional) {
+      print('User granted provisional permission');
+    } else {
+      print('User declined or has not accepted permission');
+    }
+  }
+
+  String sanitizeTopicName(String topic) {
+    return topic.toLowerCase().replaceAll(' ', '_');
   }
 
   @override

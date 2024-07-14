@@ -2,6 +2,8 @@ package main
 
 import (
 	"fmt"
+	"log"
+	"weezemaster/internal/config"
 	"weezemaster/internal/controller"
 	"weezemaster/internal/database"
 	"weezemaster/internal/middleware"
@@ -31,6 +33,11 @@ func main() {
 	fmt.Println("Starting server...")
 	router := echo.New()
 	database.InitDB()
+
+	err := config.InitFirebase()
+	if err != nil {
+		log.Fatalf("Failed to initialize Firebase: %v", err)
+	}
 
 	router.Use(func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
@@ -80,7 +87,8 @@ func main() {
 	router.GET("/concerts", controller.GetAllConcerts)
 	router.GET("/concerts/:id", controller.GetConcert)
 	// authenticated.GET("/concerts/:id", controller.GetConcert, middleware.CheckRole("user")) // pour tester les rôles
-	authenticated.POST("/concerts", controller.CreateConcert, middleware.CheckRole("organizer", "admin"))
+	router.POST("/concerts", controller.CreateConcert) // changed to public for testing notifications more easily
+	// authenticated.POST("/concerts", controller.CreateConcert, middleware.CheckRole("organizer", "admin"))
 	authenticated.PATCH("/concerts/:id", controller.UpdateConcert)
 	authenticated.DELETE("/concerts/:id", controller.DeleteConcert)
 

@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"fmt"
 	"net/http"
 	"time"
 	"weezemaster/internal/database"
@@ -101,6 +102,26 @@ func CreateConcert(c echo.Context) error {
 	if err := db.Create(&concert).Error; err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, "Failed to create concert: "+err.Error())
 	}
+
+	// Envoyer des notifications aux sujets correspondant aux centres d'intérêt
+	for _, interest := range interests {
+		data := map[string]string{
+			"concert_id": concert.ID.String(),
+			"name":       concert.Name,
+		}
+		notification := map[string]string{
+			"title": "Nouveau concert susceptible de vous intéresser",
+			"body":  fmt.Sprintf("Le concert \"%s\" vient d'être ajouté et pourrait vous plaire. Réservez vos places dès maintenant !", concert.Name),
+		}
+
+		fmt.Printf("Sending notification for interest %s\n", sanitizeTopicName(interest.Name))
+		topic := sanitizeTopicName(interest.Name) // Utiliser le nom du centre d'intérêt comme sujet
+		err := SendFCMNotification(topic, data, notification)
+		if err != nil {
+			fmt.Printf("Failed to send notification for interest %s: %v\n", interest.Name, err)
+		}
+	}
+
 	return c.JSON(http.StatusOK, concert)
 }
 

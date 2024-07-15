@@ -3,14 +3,16 @@ package main
 import (
 	"fmt"
 	"log"
+	"net/http"
 	"weezemaster/internal/config"
 	"weezemaster/internal/controller"
 	"weezemaster/internal/database"
-	"weezemaster/internal/middleware"
+	customMiddleware "weezemaster/internal/middleware" // Alias pour éviter les conflits
 
 	_ "weezemaster/docs"
 
 	"github.com/labstack/echo/v4"
+	echoMiddleware "github.com/labstack/echo/v4/middleware" // Alias pour éviter les conflits
 	echoSwagger "github.com/swaggo/echo-swagger"
 )
 
@@ -46,13 +48,15 @@ func main() {
 		}
 	})
 
+	router.Use(echoMiddleware.CORS()) // Utilisation du middleware CORS d'Echo
+
 	authenticated := router.Group("")
-	authenticated.Use(middleware.JWTMiddleware())
+	authenticated.Use(customMiddleware.JWTMiddleware()) // Utilisation du middleware JWT personnalisé
 
 	router.POST("/register", controller.Register)
 	router.POST("/login", controller.Login)
 	router.POST("/refresh", controller.RefreshAccessToken)
-	authenticated.GET("/users", controller.GetAllUsers, middleware.CheckRole("admin"))
+	authenticated.GET("/users", controller.GetAllUsers, customMiddleware.CheckRole("admin"))
 	router.GET("/users/:id", controller.GetUser)
 	router.PATCH("/users/:id", controller.UpdateUser)
 	router.DELETE("/users/:id", controller.DeleteUser)
@@ -84,22 +88,24 @@ func main() {
 
 	router.GET("/concerts", controller.GetAllConcerts)
 	router.GET("/concerts/:id", controller.GetConcert)
-	// authenticated.GET("/concerts/:id", controller.GetConcert, middleware.CheckRole("user")) // pour tester les rôles
+	// authenticated.GET("/concerts/:id", controller.GetConcert, customMiddleware.CheckRole("user")) // pour tester les rôles
 	router.POST("/concerts", controller.CreateConcert) // changed to public for testing notifications more easily
-	// authenticated.POST("/concerts", controller.CreateConcert, middleware.CheckRole("organizer", "admin"))
+	// authenticated.POST("/concerts", controller.CreateConcert, customMiddleware.CheckRole("organizer", "admin"))
 	authenticated.PATCH("/concerts/:id", controller.UpdateConcert)
 	authenticated.DELETE("/concerts/:id", controller.DeleteConcert)
 
-	authenticated.GET("/user/interests", controller.GetUserInterests, middleware.CheckRole("user"))
-	authenticated.POST("/user/interests/:id", controller.AddUserInterest, middleware.CheckRole("user"))
-	authenticated.DELETE("/user/interests/:id", controller.RemoveUserInterest, middleware.CheckRole("user"))
+	authenticated.GET("/user/interests", controller.GetUserInterests, customMiddleware.CheckRole("user"))
+	authenticated.POST("/user/interests/:id", controller.AddUserInterest, customMiddleware.CheckRole("user"))
+	authenticated.DELETE("/user/interests/:id", controller.RemoveUserInterest, customMiddleware.CheckRole("user"))
 
-	authenticated.POST("/reservation", controller.CreateReservation, middleware.CheckRole("user"))
+	authenticated.POST("/reservation", controller.CreateReservation, customMiddleware.CheckRole("user"))
 
-	authenticated.POST("/create-payment-intent", controller.CreatePaymentIntent, middleware.CheckRole("user"))
+	authenticated.POST("/create-payment-intent", controller.CreatePaymentIntent, customMiddleware.CheckRole("user"))
 
 	router.GET("/swagger/*", echoSwagger.WrapHandler)
 
-	router.Start(":8080")
+	// Nouvelle route WebSocket
+	router.GET("/ws", echo.WrapHandler(http.HandlerFunc(controller.HandleConnections)))
 
+	router.Start(":8080")
 }

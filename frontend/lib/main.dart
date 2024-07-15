@@ -1,18 +1,11 @@
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:weezemaster/concert/concert_screen.dart';
-import 'package:weezemaster/core/models/concert_category.dart';
-import 'package:weezemaster/login_register_screen.dart';
-import 'package:weezemaster/login_screen.dart';
 import 'package:weezemaster/profile_screen.dart';
-import 'package:weezemaster/register_screen.dart';
-import 'package:weezemaster/panel_admin.dart';
 import 'package:flutter_stripe/flutter_stripe.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:flutter/material.dart';
 import 'package:weezemaster/my_tickets/my_tickets_screen.dart';
 import 'package:weezemaster/home/home_screen.dart';
-import 'booking_screen.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
 
@@ -77,10 +70,18 @@ class _MyScaffoldState extends State<MyScaffold> {
   int selectedIndex = 0;
 
   final pages = [
-    const HomeScreen(),
-    const MyTicketsScreen(),
-    const ProfileScreen(), // TODO - Add the missing screen
-    const ProfileScreen(),
+    Navigator(key: GlobalKey<NavigatorState>(), onGenerateRoute: (routeSettings) {
+      return MaterialPageRoute(builder: (context) => const HomeScreen());
+    }),
+    Navigator(key: GlobalKey<NavigatorState>(), onGenerateRoute: (routeSettings) {
+      return MaterialPageRoute(builder: (context) => const MyTicketsScreen());
+    }),
+    Navigator(key: GlobalKey<NavigatorState>(), onGenerateRoute: (routeSettings) {
+      return MaterialPageRoute(builder: (context) => const ProfileScreen());
+    }),
+    Navigator(key: GlobalKey<NavigatorState>(), onGenerateRoute: (routeSettings) {
+      return MaterialPageRoute(builder: (context) => const ProfileScreen());
+    }),
   ];
 
   @override

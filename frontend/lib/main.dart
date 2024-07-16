@@ -12,6 +12,7 @@ import 'package:intl/date_symbol_data_local.dart';
 import 'package:flutter/material.dart';
 import 'package:frontend/home/home_screen.dart';
 import 'package:frontend/register_organization_screen.dart';
+import 'package:frontend/concert_screen.dart';
 import 'booking_screen.dart';
 
 void main() async {
@@ -37,7 +38,7 @@ class MyApp extends StatelessWidget {
       ),
       home: MyScaffold(
         body: Navigator(
-          initialRoute: '/login-register',
+          initialRoute: '/register-concert',
           onGenerateRoute: (RouteSettings settings) {
             WidgetBuilder builder;
             switch (settings.name) {
@@ -64,6 +65,9 @@ class MyApp extends StatelessWidget {
                 break;
               case '/register-organization':
                 builder = (BuildContext _) => const RegisterOrganisationScreen();
+                break;
+              case '/register-concert':
+                builder = (BuildContext _) => const RegisterConcertScreen();
                 break;
               default:
                 throw Exception('Invalid route: ${settings.name}');

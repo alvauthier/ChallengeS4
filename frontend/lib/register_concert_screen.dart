@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:frontend/core/services/api_services.dart';
+import 'package:weezemaster/core/services/api_services.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
-import 'package:frontend/core/models/category.dart';
-import 'package:frontend/core/services/token_services.dart';
-import 'package:frontend/login_register_screen.dart';
+import 'package:weezemaster/core/models/category.dart';
+import 'package:weezemaster/core/services/token_services.dart';
+import 'package:weezemaster/login_register_screen.dart';
 
 
 

@@ -123,7 +123,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         child: Align(
                           alignment: Alignment.centerLeft,
                           child: Text(
-                            '${_filteredConcerts.length} concerts',
+                            '${_filteredConcerts.length} ${_filteredConcerts.length == 1 ? 'concert' : 'concerts'}',
                             style: const TextStyle(
                               fontSize: 30,
                               fontFamily: 'Readex Pro',

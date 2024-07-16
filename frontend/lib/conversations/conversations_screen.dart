@@ -130,8 +130,14 @@ class ConversationsScreenState extends State<ConversationsScreen> {
                                       borderRadius: BorderRadius.circular(10),
                                     ),
                                     child: ListTile(
-                                      title: Text(state.conversations[index].buyer),
-                                      subtitle: Text(formatDate(state.conversations[index].messages.last.updatedAt as String)),
+                                      title: Text(
+                                          state.conversations[index].buyer,
+                                          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 20, fontFamily: 'Readex Pro')
+                                      ),
+                                      subtitle: Text(
+                                          formatDate(state.conversations[index].messages.last.updatedAt as String),
+                                          style: const TextStyle(fontSize: 15, fontFamily: 'Readex Pro')
+                                      ),
                                       onTap: () {
                                         Navigator.pushNamed(context, '/conversation', arguments: state.conversations[index].id);
                                       },

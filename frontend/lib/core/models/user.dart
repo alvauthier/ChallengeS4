@@ -21,7 +21,7 @@ class User {
       id: json['ID'],
       firstname: json['Firstname'],
       lastname: json['Lastname'],
-      tickets: json['Tickets'] != null ? List<Ticket>.from(json['Tickets'].map((e) => Ticket.fromJson(e))) : [],);
+      tickets: json['Tickets'] != null ? List<Ticket>.from(json['Tickets'].map((e) => Ticket.fromJson(e))) : [],
       conversations: (json['Conversations'] as List<dynamic>?)?.map((e) => Conversation.fromJson(e)).toList() ?? [],
     );
   }

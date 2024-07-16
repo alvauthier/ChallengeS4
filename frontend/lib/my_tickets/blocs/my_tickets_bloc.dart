@@ -13,8 +13,8 @@ class MyTicketsBloc extends Bloc<MyTicketsEvent, MyTicketsState> {
       emit(MyTicketsLoading());
 
       try {
-        final user = await ApiServices.getUser(event.userId);
-        emit(MyTicketsDataLoadingSuccess(myTickets: user.tickets));
+        final tickets = await ApiServices.getUserTickets();
+        emit(MyTicketsDataLoadingSuccess(myTickets: tickets));
       } on ApiException catch (error) {
         emit(MyTicketsDataLoadingError(errorMessage: error.message));
       } catch (error) {

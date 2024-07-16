@@ -1,4 +1,5 @@
 import 'package:weezemaster/core/models/category.dart';
+import 'package:weezemaster/core/models/concert.dart';
 import 'package:weezemaster/core/models/ticket.dart';
 
 class ConcertCategory {
@@ -8,6 +9,7 @@ class ConcertCategory {
   final double price;
   final List<Ticket> tickets;
   final Category category;
+  final Concert concert;
 
   ConcertCategory({
     required this.id,
@@ -15,7 +17,8 @@ class ConcertCategory {
     required this.soldTickets,
     required this.price,
     required this.tickets,
-    required this.category 
+    required this.category,
+    required this.concert,
   });
 
   factory ConcertCategory.fromJson(Map<String, dynamic> json) {
@@ -29,6 +32,7 @@ class ConcertCategory {
       price: (json['Price'] ?? 0).toDouble(),
       tickets: ticketList,
       category: Category.fromJson(json['Category']),
+      concert: Concert.fromJson(json['Concert']),
     );
   }
 }

@@ -138,3 +138,41 @@ func DeleteTicket(c echo.Context) error {
 	db.Delete(&ticket)
 	return c.JSON(http.StatusOK, ticket)
 }
+
+func GetUserTickets(c echo.Context) error {
+	db := database.GetDB()
+	authHeader := c.Request().Header.Get("Authorization")
+	if authHeader == "" {
+		return c.JSON(http.StatusUnauthorized, map[string]string{"error": "Authorization header is missing"})
+	}
+
+	tokenString := authHeader
+	if len(authHeader) > 7 && authHeader[:7] == "Bearer " {
+		tokenString = authHeader[7:]
+	}
+
+	claims, err := verifyToken(tokenString)
+	if err != nil {
+		return c.JSON(http.StatusUnauthorized, map[string]string{"error": "Invalid or expired token"})
+	}
+
+	email, ok := claims["email"].(string)
+	if !ok {
+		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Invalid token claims"})
+	}
+
+	var user models.User
+	if err := db.Where("email = ?", email).First(&user).Error; err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "User not found"})
+	}
+
+	var userTickets []models.Ticket
+	if err := db.Preload("ConcertCategory").
+		Preload("ConcertCategory.Concert").
+		Preload("ConcertCategory.Category").
+		Where("user_id = ?", user.ID).Find(&userTickets).Error; err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
+	}
+
+	return c.JSON(http.StatusOK, userTickets)
+}

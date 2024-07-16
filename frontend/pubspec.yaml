@@ -47,6 +47,7 @@ dependencies:
   flutter_stripe: ^10.2.0
   firebase_core: ^3.2.0
   firebase_messaging: ^15.0.3
+  shared_preferences: ^2.0.8
 
 dev_dependencies:
   flutter_test:

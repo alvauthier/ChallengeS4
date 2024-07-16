@@ -119,10 +119,10 @@ class MyTicketsScreenState extends State<MyTicketsScreen> {
           body: Column(
             children: [
               const Padding(
-                padding: EdgeInsets.all(8.0),
+                padding: EdgeInsets.all(20.0),
                 child: Text(
                   'Vos tickets',
-                  style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                  style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold, fontFamily: 'Readex Pro'),
                 ),
               ),
               Expanded(

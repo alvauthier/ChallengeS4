@@ -108,15 +108,64 @@ class ConversationsScreenState extends State<ConversationsScreen> {
                     }
 
                     if (state is ConversationsDataLoadingSuccess) {
-                      return ListView.builder(
-                        itemCount: state.conversations.length,
-                        itemBuilder: (context, index) {
-                          return ListTile(
-                            title: Text(state.conversations[index].buyer),
-                            subtitle: Text(formatDate(state.conversations[index].messages.last.updatedAt as String)),
-                          );
-                        },
-                      );
+                      if(state.conversations.isNotEmpty) {
+                        return Column(
+                          children: [
+                            const Center(
+                              child: Padding(
+                                padding: EdgeInsets.all(20.0),
+                                child: Text(
+                                  'Vos conversations',
+                                  style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold, fontFamily: 'Readex Pro'),
+                                ),
+                              ),
+                            ),
+                            Expanded(
+                              child: ListView.builder(
+                                itemCount: state.conversations.length,
+                                itemBuilder: (context, index) {
+                                  return Card(
+                                    elevation: 0,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(10),
+                                    ),
+                                    child: ListTile(
+                                      title: Text(state.conversations[index].buyer),
+                                      subtitle: Text(formatDate(state.conversations[index].messages.last.updatedAt as String)),
+                                      onTap: () {
+                                        Navigator.pushNamed(context, '/conversation', arguments: state.conversations[index].id);
+                                      },
+                                    ),
+                                  );
+                                },
+                              ),
+                            ),
+                          ],
+                        );
+                      } else {
+                        return const Column(
+                          children: [
+                            Center(
+                              child: Padding(
+                                padding: EdgeInsets.all(20.0),
+                                child: Text(
+                                  'Vos conversations',
+                                  style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold, fontFamily: 'Readex Pro'),
+                                ),
+                              ),
+                            ),
+                            Center(
+                              child: Text(
+                                'Aucune conversation disponible',
+                                style: TextStyle(
+                                  fontFamily: 'Readex Pro',
+                                  fontSize: 20,
+                                ),
+                              ),
+                            )
+                          ]
+                        );
+                      }
                     } else {
                       return const Center(
                         child: Text(

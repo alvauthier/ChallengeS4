@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:weezemaster/resale_tickets_screen.dart';
 import 'package:weezemaster/booking_screen.dart';
 import 'package:weezemaster/concert/blocs/concert_bloc.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -212,7 +213,14 @@ class ConcertScreen extends StatelessWidget {
                               ResaleTicket(ticket: Ticket.fromMap(resaleTicket)),
                           if (resaleTickets.length > 2)
                             ElevatedButton(
-                              onPressed: () {},
+                              onPressed: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => ResaleTicketsScreen(resaleTickets: resaleTickets),
+                                  ),
+                                );
+                              },
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: Colors.deepOrange,
                                 shape: RoundedRectangleBorder(

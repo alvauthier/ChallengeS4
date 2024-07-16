@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:weezemaster/core/services/payment_services.dart';
-import 'package:weezemaster/user_interests_screen.dart';
 
 class Ticket {
   final String id;
@@ -101,11 +100,7 @@ class ResaleTicket extends StatelessWidget {
                         children: [
                           ElevatedButton(
                             onPressed: () {
-                              // navigate to user interest screen FOR DEBUG ONLY NOW
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(builder: (context) => UserInterestsScreen()),
-                              );
+                              // here we navigate to a new conversation with the reseller
                             },
                             style: ElevatedButton.styleFrom(
                               foregroundColor: Colors.white,

@@ -10,6 +10,7 @@ import 'package:flutter/material.dart';
 import 'package:weezemaster/my_tickets/my_tickets_screen.dart';
 import 'package:weezemaster/home/home_screen.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:weezemaster/user_interests_screen.dart';
 import 'firebase_options.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'dart:convert';
@@ -60,7 +61,7 @@ class MyApp extends StatelessWidget {
             builder = (BuildContext _) => const ConversationsScreen();
             break;
           case '/profile':
-            builder = (BuildContext _) => const ProfileScreen();
+            builder = (BuildContext _) => const UserInterestsScreen();
             break;
           default:
             throw Exception('Invalid route: ${settings.name}');
@@ -148,7 +149,7 @@ class _MyScaffoldState extends State<MyScaffold> {
       return MaterialPageRoute(builder: (context) => const ConversationsScreen());
     }),
     Navigator(key: GlobalKey<NavigatorState>(), onGenerateRoute: (routeSettings) {
-      return MaterialPageRoute(builder: (context) => const ProfileScreen());
+      return MaterialPageRoute(builder: (context) => const UserInterestsScreen());
     }),
   ];
 

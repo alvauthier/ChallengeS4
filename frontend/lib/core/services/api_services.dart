@@ -195,7 +195,7 @@ class ApiServices {
       log('Network error.', error: error);
       throw ApiException(message: 'Network error');
     } catch (error) {
-      log('An error occurred while fetching concert.', error: error);
+      log('An error occurred while fetching user.', error: error);
       throw ApiException(message: 'Unknown error');
     }
   }

@@ -1,5 +1,6 @@
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:weezemaster/conversations/conversations_screen.dart';
 import 'package:weezemaster/profile_screen.dart';
 import 'package:flutter_stripe/flutter_stripe.dart';
 import 'package:intl/date_symbol_data_local.dart';
@@ -48,6 +49,9 @@ class MyApp extends StatelessWidget {
             break;
           case '/my-tickets':
             builder = (BuildContext _) => const MyTicketsScreen();
+            break;
+          case '/conversations':
+            builder = (BuildContext _) => const ConversationsScreen();
             break;
           case '/profile':
             builder = (BuildContext _) => const ProfileScreen();
@@ -130,7 +134,7 @@ class _MyScaffoldState extends State<MyScaffold> {
       return MaterialPageRoute(builder: (context) => const MyTicketsScreen());
     }),
     Navigator(key: GlobalKey<NavigatorState>(), onGenerateRoute: (routeSettings) {
-      return MaterialPageRoute(builder: (context) => const ProfileScreen());
+      return MaterialPageRoute(builder: (context) => const ConversationsScreen());
     }),
     Navigator(key: GlobalKey<NavigatorState>(), onGenerateRoute: (routeSettings) {
       return MaterialPageRoute(builder: (context) => const ProfileScreen());

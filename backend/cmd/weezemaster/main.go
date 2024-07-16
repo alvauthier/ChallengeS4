@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"log"
-	"net/http"
 	"weezemaster/internal/config"
 	"weezemaster/internal/controller"
 	"weezemaster/internal/database"
@@ -105,7 +104,8 @@ func main() {
 	router.GET("/swagger/*", echoSwagger.WrapHandler)
 
 	// Nouvelle route WebSocket
-	router.GET("/ws", echo.WrapHandler(http.HandlerFunc(controller.HandleConnections)))
+
+	router.GET("/ws", controller.GetAllCategoriesForMessage)
 
 	router.Start(":8080")
 }

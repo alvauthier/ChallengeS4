@@ -6,6 +6,10 @@ import 'dart:convert';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 import 'package:frontend/core/models/category.dart';
+import 'package:frontend/core/services/token_services.dart';
+import 'package:frontend/login_register_screen.dart';
+
+
 
 class RegisterConcertScreen extends StatefulWidget {
   const RegisterConcertScreen({super.key});
@@ -22,6 +26,7 @@ class _RegisterConcertScreenState extends State<RegisterConcertScreen> {
   final _categoriesController = Map<String, TextEditingController>();
 
   File? _image;
+  String? _base64Image; 
   final picker = ImagePicker();
 
   Future getImage() async {
@@ -30,6 +35,7 @@ class _RegisterConcertScreenState extends State<RegisterConcertScreen> {
     setState(() {
       if (pickedImage != null) {
         _image = File(pickedImage.path);
+        _base64Image = base64Encode(_image!.readAsBytesSync());
       }
     });
   }
@@ -168,31 +174,44 @@ class _RegisterConcertScreenState extends State<RegisterConcertScreen> {
                               width: double.infinity,
                               child: ElevatedButton(
                                 onPressed: () async {
-                                  if (_formKey.currentState!.validate()) {
-                                    try {
-                                      var request = http.MultipartRequest(
-                                        'POST',
-                                        Uri.parse(
-                                            'http://${dotenv.env['API_HOST']}:${dotenv.env['API_PORT']}/registerconcert'),
-                                      );
-                                      if (_image != null) {
-                                        request.files.add(await http.MultipartFile.fromPath(
-                                          'image',
-                                          _image!.path,
-                                        ));
-                                      }
-                                      request.fields['name'] = _nameController.text;
-                                      request.fields['description'] = _descriptionController.text;
-                                      request.fields['city'] = _cityController.text;
-
-                                      selectedCategories.forEach((category, selected) {
+                                  final tokenService = TokenService();
+                                  String? token = await tokenService.getValidAccessToken();
+                                  if (token == null) {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) => const LoginRegisterScreen(),
+                                      ),
+                                    );
+                                  }
+                                    List<Map<String, dynamic>> tabCategories = [];
+                                    selectedCategories.forEach((category, selected) {
                                         if (selected) {
-                                          request.fields['categories[$category]'] =
-                                              _categoriesController[category]!.text;
+                                         tabCategories.add(
+                                          {
+                                            'name': category,
+                                            'places': _categoriesController[category]!.text,
+                                          }
+                                         );
                                         }
                                       });
+                                  if (_formKey.currentState!.validate()) {
+                                    try { 
+                                      var response = await http.post(
+                                      Uri.parse('http://${dotenv.env['API_HOST']}:${dotenv.env['API_PORT']}/registerorganizer'),
+                                      headers: <String, String>{
+                                        'Content-Type': 'application/json; charset=UTF-8',
+                                      },
 
-                                      var response = await request.send();
+                                      body: jsonEncode(<String, dynamic>{
+                                        'name': _nameController.text,
+                                        'description': _descriptionController.text,
+                                        'ville': _cityController.text,
+                                        'token': token!,
+                                        'categories': tabCategories,
+                                        'image': _base64Image,
+                                      }),
+                                    );
                                       ScaffoldMessenger.of(context).showSnackBar(
                                         SnackBar(
                                           content: Text(response.statusCode == 201

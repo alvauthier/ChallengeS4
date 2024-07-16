@@ -12,7 +12,7 @@ import 'package:intl/date_symbol_data_local.dart';
 import 'package:flutter/material.dart';
 import 'package:frontend/home/home_screen.dart';
 import 'package:frontend/register_organization_screen.dart';
-import 'package:frontend/concert_screen.dart';
+import 'package:frontend/register_concert_screen.dart';
 import 'booking_screen.dart';
 
 void main() async {

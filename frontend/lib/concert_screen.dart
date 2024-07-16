@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:frontend/core/services/api_services.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
+import 'package:frontend/core/models/category.dart';
 
 class RegisterConcertScreen extends StatefulWidget {
   const RegisterConcertScreen({super.key});
@@ -17,7 +19,7 @@ class _RegisterConcertScreenState extends State<RegisterConcertScreen> {
   final _nameController = TextEditingController();
   final _descriptionController = TextEditingController();
   final _cityController = TextEditingController();
-  final _categoryController = TextEditingController();
+  final _categoriesController = Map<String, TextEditingController>();
 
   File? _image;
   final picker = ImagePicker();
@@ -26,8 +28,27 @@ class _RegisterConcertScreenState extends State<RegisterConcertScreen> {
     final pickedImage = await picker.pickImage(source: ImageSource.gallery);
 
     setState(() {
-      if(pickedImage != null) {
+      if (pickedImage != null) {
         _image = File(pickedImage.path);
+      }
+    });
+  }
+
+  List<Category> categories = [];
+  Map<String, bool> selectedCategories = {};
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchCategories();
+  }
+
+  Future<void> _fetchCategories() async {
+    categories = await ApiServices.getCategories();
+    setState(() {
+      for (var category in categories) {
+        selectedCategories[category.name] = false;
+        _categoriesController[category.name] = TextEditingController();
       }
     });
   }
@@ -104,18 +125,43 @@ class _RegisterConcertScreenState extends State<RegisterConcertScreen> {
                               return null;
                             },
                           ),
-                          TextFormField(
-                            controller: _categoryController,
-                            decoration: const InputDecoration(
-                              labelText: 'Catégorie de billet',
-                            ),
-                            validator: (value) {
-                              if (value == null || value.isEmpty) {
-                                return 'Veuillez entrer une catégorie de billet';
-                              }
-                              return null;
-                            },
+                          const SizedBox(height: 20),
+                          const Text(
+                            'Catégories de billet',
+                            style: TextStyle(fontWeight: FontWeight.bold),
                           ),
+                          ...categories.map((category) {
+                            return Column(
+                              children: [
+                                CheckboxListTile(
+                                  title: Text(category.name),
+                                  value: selectedCategories[category.name],
+                                  onChanged: (bool? value) {
+                                    setState(() {
+                                      selectedCategories[category.name] = value!;
+                                    });
+                                  },
+                                ),
+                                if (selectedCategories[category.name]!)
+                                  TextFormField(
+                                    controller: _categoriesController[category.name],
+                                    decoration: InputDecoration(
+                                      labelText: 'Nombre de places pour ${category.name}',
+                                    ),
+                                    validator: (value) {
+                                      if (value == null || value.isEmpty) {
+                                        return 'Veuillez entrer le nombre de places pour ${category.name}';
+                                      }
+                                      if (int.tryParse(value) == null) {
+                                        return 'Veuillez entrer un nombre valide';
+                                      }
+                                      return null;
+                                    },
+                                    keyboardType: TextInputType.number,
+                                  ),
+                              ],
+                            );
+                          }).toList(),
                           Padding(
                             padding: const EdgeInsets.only(top: 15.0),
                             child: Container(
@@ -123,11 +169,11 @@ class _RegisterConcertScreenState extends State<RegisterConcertScreen> {
                               child: ElevatedButton(
                                 onPressed: () async {
                                   if (_formKey.currentState!.validate()) {
-                                    // Process data.
                                     try {
                                       var request = http.MultipartRequest(
                                         'POST',
-                                        Uri.parse('http://${dotenv.env['API_HOST']}:${dotenv.env['API_PORT']}/registerconcert'),
+                                        Uri.parse(
+                                            'http://${dotenv.env['API_HOST']}:${dotenv.env['API_PORT']}/registerconcert'),
                                       );
                                       if (_image != null) {
                                         request.files.add(await http.MultipartFile.fromPath(
@@ -138,7 +184,14 @@ class _RegisterConcertScreenState extends State<RegisterConcertScreen> {
                                       request.fields['name'] = _nameController.text;
                                       request.fields['description'] = _descriptionController.text;
                                       request.fields['city'] = _cityController.text;
-                                      request.fields['category'] = _categoryController.text;
+
+                                      selectedCategories.forEach((category, selected) {
+                                        if (selected) {
+                                          request.fields['categories[$category]'] =
+                                              _categoriesController[category]!.text;
+                                        }
+                                      });
+
                                       var response = await request.send();
                                       ScaffoldMessenger.of(context).showSnackBar(
                                         SnackBar(
@@ -154,7 +207,8 @@ class _RegisterConcertScreenState extends State<RegisterConcertScreen> {
                                     } catch (e) {
                                       ScaffoldMessenger.of(context).showSnackBar(
                                         const SnackBar(
-                                          content: Text('Une erreur est survenue. Veuillez vérifier votre connexion internet ou réessayer plus tard.'),
+                                          content: Text(
+                                              'Une erreur est survenue. Veuillez vérifier votre connexion internet ou réessayer plus tard.'),
                                           duration: Duration(seconds: 5),
                                         ),
                                       );
@@ -164,7 +218,7 @@ class _RegisterConcertScreenState extends State<RegisterConcertScreen> {
                                 child: const Text('S\'inscrire'),
                               ),
                             ),
-                          )
+                          ),
                         ],
                       ),
                     ),

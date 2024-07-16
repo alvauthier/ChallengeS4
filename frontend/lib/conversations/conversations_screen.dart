@@ -5,6 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import 'dart:convert';
 import '../login_register_screen.dart';
+import 'package:weezemaster/chat.dart';
 
 class ConversationsScreen extends StatefulWidget {
   const ConversationsScreen({super.key});
@@ -149,9 +150,9 @@ class ConversationsScreenState extends State<ConversationsScreen> {
                           ],
                         );
                       } else {
-                        return const Column(
+                        return Column(
                           children: [
-                            Center(
+                            const Center(
                               child: Padding(
                                 padding: EdgeInsets.all(20.0),
                                 child: Text(
@@ -160,7 +161,7 @@ class ConversationsScreenState extends State<ConversationsScreen> {
                                 ),
                               ),
                             ),
-                            Center(
+                            const Center(
                               child: Text(
                                 'Aucune conversation disponible',
                                 style: TextStyle(
@@ -168,7 +169,16 @@ class ConversationsScreenState extends State<ConversationsScreen> {
                                   fontSize: 20,
                                 ),
                               ),
-                            )
+                            ),
+                            // TODO remove this button
+                            ElevatedButton(
+                              onPressed: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(builder: (context) => const ChatScreen()),
+                                );
+                              },
+                              child: const Text('Fake conv'))
                           ]
                         );
                       }

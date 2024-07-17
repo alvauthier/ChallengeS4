@@ -1,7 +1,10 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:intl/intl.dart';
 import 'components/message_bubble.dart';
+import 'login_register_screen.dart';
+import 'components/ticket_details.dart';
 
 class ChatScreen extends StatefulWidget {
   const ChatScreen({super.key});
@@ -12,6 +15,7 @@ class ChatScreen extends StatefulWidget {
 
 class ChatScreenState extends State<ChatScreen> {
   final buyer = "Michelle Obama";
+  final buyerId = "2593e40d-1275-4096-a9bb-ff8b8947a929";
   final messages = [
     {
       "authorId": "2593e40d-1275-4096-a9bb-ff8b8947a929",
@@ -33,7 +37,7 @@ class ChatScreenState extends State<ChatScreen> {
     }
   ];
   final TextEditingController _controller = TextEditingController();
-  final FlutterSecureStorage _secureStorage = const FlutterSecureStorage();
+  final storage = const FlutterSecureStorage();
   String? userId;
 
   @override
@@ -43,9 +47,51 @@ class ChatScreenState extends State<ChatScreen> {
   }
 
   Future<void> _loadUserId() async {
-    setState(() async {
-      userId = await _secureStorage.read(key: 'id');
-    });
+    String? jwt = await storage.read(key: 'access_token');
+    if (jwt != null) {
+      Map<String, dynamic> decodedToken = _decodeToken(jwt);
+      setState(() {
+        userId = decodedToken['id'] as String;
+      });
+    } else {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => const LoginRegisterScreen()),
+      );
+    }
+  }
+
+  Map<String, dynamic> _decodeToken(String token) {
+    final parts = token.split('.');
+    if (parts.length != 3) {
+      throw Exception('Invalid token');
+    }
+
+    final payload = _decodeBase64(parts[1]);
+    final payloadMap = json.decode(payload);
+    if (payloadMap is! Map<String, dynamic>) {
+      throw Exception('Invalid payload');
+    }
+
+    return payloadMap;
+  }
+
+  String _decodeBase64(String str) {
+    String output = str.replaceAll('-', '+').replaceAll('_', '/');
+    switch (output.length % 4) {
+      case 0:
+        break;
+      case 2:
+        output += '==';
+        break;
+      case 3:
+        output += '=';
+        break;
+      default:
+        throw Exception('Illegal base64url string!"');
+    }
+
+    return utf8.decode(base64Url.decode(output));
   }
 
   String formatDate(String date) {
@@ -87,57 +133,73 @@ class ChatScreenState extends State<ChatScreen> {
           ),
         ),
       ),
-      body: Column(
-        children: [
-          Expanded(
-            child: ListView.builder(
-              padding: const EdgeInsets.symmetric(vertical: 16.0),
-              reverse: true,
-              itemCount: messages.length,
-              itemBuilder: (context, index) {
-                final message = messages[index];
-                final authorId = message["authorId"] as String? ?? "";
-                final content = message["content"] as String? ?? "";
-                final isCurrentUser = authorId == userId;
-                return Column(
-                  children: [
-                    MessageBubble(
-                      authorId: authorId,
-                      content: content,
-                      isCurrentUser: isCurrentUser,
-                      sendAt: formatDate(message["sendAt"] as String? ?? ""),
-                      readed: message["readed"] as bool? ?? false,
-                    ),
-                    const SizedBox(height: 10), // Add space between bubbles
-                  ],
-                );
+      body: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Column(
+          children: [
+            TicketDetails(
+              imageUrl: 'https://picsum.photos/250?image=9',
+              concertName: 'Eras Tour - Taylor Swift',
+              category: 'Category',
+              price: '100€',
+              onCancel: () {
+                // Handle cancel action
               },
+              secondAction: () {
+                // Handle change price action
+              },
+              secondActionText: buyerId == userId ? 'Acheter' : 'Changer le prix',
             ),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Row(
-              children: [
-                Expanded(
-                  child: TextField(
-                    controller: _controller,
-                    decoration: InputDecoration(
-                      hintText: "Saisissez votre message...",
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
+            Expanded(
+              child: ListView.builder(
+                padding: const EdgeInsets.symmetric(vertical: 16.0),
+                reverse: true,
+                itemCount: messages.length,
+                itemBuilder: (context, index) {
+                  final message = messages[index];
+                  final authorId = message["authorId"] as String? ?? "";
+                  final content = message["content"] as String? ?? "";
+                  final isCurrentUser = authorId == userId;
+                  return Column(
+                    children: [
+                      MessageBubble(
+                        authorId: authorId,
+                        content: content,
+                        isCurrentUser: isCurrentUser,
+                        sendAt: formatDate(message["sendAt"] as String? ?? ""),
+                        readed: message["readed"] as bool? ?? false,
+                      ),
+                      const SizedBox(height: 10), // Add space between bubbles
+                    ],
+                  );
+                },
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: TextField(
+                      controller: _controller,
+                      decoration: InputDecoration(
+                        hintText: "Saisissez votre message...",
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
                       ),
                     ),
                   ),
-                ),
-                IconButton(
-                  icon: const Icon(Icons.send),
-                  onPressed: _sendMessage,
-                ),
-              ],
+                  IconButton(
+                    icon: const Icon(Icons.send),
+                    onPressed: _sendMessage,
+                  ),
+                ],
+              ),
             ),
-          ),
-        ],
-      ),
+          ],
+        ),
+      )
     );
   }
 }

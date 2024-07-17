@@ -1,5 +1,7 @@
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:weezemaster/my_tickets/blocs/my_tickets_bloc.dart';
 import 'package:weezemaster/conversations/conversations_screen.dart';
 import 'package:weezemaster/profile_screen.dart';
 import 'package:flutter_stripe/flutter_stripe.dart';
@@ -49,6 +51,10 @@ class MyApp extends StatelessWidget {
             builder = (BuildContext _) => const HomeScreen();
             break;
           case '/my-tickets':
+            builder = (BuildContext _) => BlocProvider(
+              create: (context) => MyTicketsBloc()..add(MyTicketsDataLoaded()),
+              child: const MyTicketsScreen(),
+            );
             builder = (BuildContext _) => const MyTicketsScreen();
             break;
           case '/conversations':
@@ -132,7 +138,12 @@ class _MyScaffoldState extends State<MyScaffold> {
       return MaterialPageRoute(builder: (context) => const HomeScreen());
     }),
     Navigator(key: GlobalKey<NavigatorState>(), onGenerateRoute: (routeSettings) {
-      return MaterialPageRoute(builder: (context) => const MyTicketsScreen());
+      return MaterialPageRoute(
+        builder: (context) => BlocProvider(
+          create: (context) => MyTicketsBloc()..add(MyTicketsDataLoaded()),
+          child: const MyTicketsScreen(),
+        ),
+      );
     }),
     Navigator(key: GlobalKey<NavigatorState>(), onGenerateRoute: (routeSettings) {
       return MaterialPageRoute(builder: (context) => const ConversationsScreen());

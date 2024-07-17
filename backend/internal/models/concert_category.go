@@ -16,7 +16,7 @@ type ConcertCategory struct {
 	Price            float64 `gorm:"not null"`
 	Tickets          []Ticket
 	// Tickets          []Ticket `gorm:"-"`
-	Concert   Concert  `gorm:"foreignKey:ConcertId" json:"-"`
+	Concert   Concert  `gorm:"foreignKey:ConcertId"`
 	Category  Category `gorm:"foreignKey:CategoryId"`
 	CreatedAt time.Time
 	UpdatedAt time.Time

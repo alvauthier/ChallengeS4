@@ -1,22 +1,19 @@
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:web_socket_channel/web_socket_channel.dart';
-import 'package:weezemaster/concert/concert_screen.dart';
-import 'package:weezemaster/core/models/concert_category.dart';
-import 'package:weezemaster/login_register_screen.dart';
-import 'package:weezemaster/login_screen.dart';
+import 'package:weezemaster/my_tickets/blocs/my_tickets_bloc.dart';
+import 'package:weezemaster/conversations/conversations_screen.dart';
 import 'package:weezemaster/profile_screen.dart';
-import 'package:weezemaster/register_screen.dart';
-import 'package:weezemaster/panel_admin.dart';
 import 'package:flutter_stripe/flutter_stripe.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:flutter/material.dart';
 import 'package:weezemaster/my_tickets/my_tickets_screen.dart';
 import 'package:weezemaster/home/home_screen.dart';
-import 'package:weezemaster/websocket.dart'; // Import de la page de messagerie
-import 'booking_screen.dart';
+import 'package:weezemaster/register_organization_screen.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'dart:convert';
 
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   await Firebase.initializeApp();
@@ -54,7 +51,14 @@ class MyApp extends StatelessWidget {
             builder = (BuildContext _) => const HomeScreen();
             break;
           case '/my-tickets':
+            builder = (BuildContext _) => BlocProvider(
+              create: (context) => MyTicketsBloc()..add(MyTicketsDataLoaded()),
+              child: const MyTicketsScreen(),
+            );
             builder = (BuildContext _) => const MyTicketsScreen();
+            break;
+          case '/conversations':
+            builder = (BuildContext _) => const ConversationsScreen();
             break;
           case '/profile':
             builder = (BuildContext _) => const ProfileScreen();
@@ -83,16 +87,76 @@ class MyScaffold extends StatefulWidget {
 
 class _MyScaffoldState extends State<MyScaffold> {
   int selectedIndex = 0;
+  final storage = const FlutterSecureStorage();
+  String? userRole;
+
+  @override
+  void initState() {
+    super.initState();
+    getUserRoleFromJwt();
+  }
+
+  Future<void> getUserRoleFromJwt() async {
+    String? jwt = await storage.read(key: 'access_token');
+    if (jwt != null) {
+      Map<String, dynamic> decodedToken = _decodeToken(jwt);
+      setState(() {
+        userRole = decodedToken['role'];
+      });
+    }
+  }
+
+  Map<String, dynamic> _decodeToken(String token) {
+    final parts = token.split('.');
+    if (parts.length != 3) {
+      throw Exception('Invalid token');
+    }
+
+    final payload = _decodeBase64(parts[1]);
+    final payloadMap = json.decode(payload);
+    if (payloadMap is! Map<String, dynamic>) {
+      throw Exception('Invalid payload');
+    }
+
+    return payloadMap;
+  }
+
+  String _decodeBase64(String str) {
+    String output = str.replaceAll('-', '+').replaceAll('_', '/');
+    switch (output.length % 4) {
+      case 0:
+        break;
+      case 2:
+        output += '==';
+        break;
+      case 3:
+        output += '=';
+        break;
+      default:
+        throw Exception('Illegal base64url string!"');
+    }
+
+    return utf8.decode(base64Url.decode(output));
+  }
 
   final pages = [
-    const HomeScreen(),
-    const MyTicketsScreen(),
-    WebSocketDemo(
-      channel: WebSocketChannel.connect(
-        Uri.parse('ws://${dotenv.env['API_HOST']}:${dotenv.env['API_PORT']}/ws'),
-      ),
-    ),
-    const ProfileScreen(),
+    Navigator(key: GlobalKey<NavigatorState>(), onGenerateRoute: (routeSettings) {
+      return MaterialPageRoute(builder: (context) => const HomeScreen());
+    }),
+    Navigator(key: GlobalKey<NavigatorState>(), onGenerateRoute: (routeSettings) {
+      return MaterialPageRoute(
+        builder: (context) => BlocProvider(
+          create: (context) => MyTicketsBloc()..add(MyTicketsDataLoaded()),
+          child: const MyTicketsScreen(),
+        ),
+      );
+    }),
+    Navigator(key: GlobalKey<NavigatorState>(), onGenerateRoute: (routeSettings) {
+      return MaterialPageRoute(builder: (context) => const ConversationsScreen());
+    }),
+    Navigator(key: GlobalKey<NavigatorState>(), onGenerateRoute: (routeSettings) {
+      return MaterialPageRoute(builder: (context) => const ProfileScreen());
+    }),
   ];
 
   @override
@@ -101,20 +165,20 @@ class _MyScaffoldState extends State<MyScaffold> {
       body: pages[selectedIndex],
       bottomNavigationBar: NavigationBar(
         selectedIndex: selectedIndex,
-        destinations: const <Widget>[
-          NavigationDestination(
+        destinations: <Widget>[
+          const NavigationDestination(
             icon: Icon(Icons.home),
             label: 'Accueil',
           ),
           NavigationDestination(
-            icon: Icon(Icons.receipt),
-            label: 'Mes billets',
+            icon: userRole == 'organizer' ? Icon(Icons.event) : Icon(Icons.receipt),
+            label: userRole == 'organizer' ? 'Mes concerts' : 'Mes billets',
           ),
-          NavigationDestination(
+          const NavigationDestination(
             icon: Icon(Icons.message),
             label: 'Mes messages',
           ),
-          NavigationDestination(
+          const NavigationDestination(
             icon: Icon(Icons.person),
             label: 'Mon profil',
           ),

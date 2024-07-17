@@ -81,7 +81,7 @@ func main() {
 	router.POST("/tickets", controller.CreateTicket)
 	router.PATCH("/tickets/:id", controller.UpdateTicket)
 	router.DELETE("/tickets/:id", controller.DeleteTicket)
-	authenticated.GET("/tickets/mytickets", controller.GetUserTickets, middleware.CheckRole("user"))
+	authenticated.GET("/tickets/mytickets", controller.GetUserTickets)
 
 	router.GET("/ticketlisting", controller.GetAllTicketListings)
 	router.GET("/ticketlisting/:id", controller.GetTicketListings)

@@ -1,11 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:web_socket_channel/web_socket_channel.dart';
 import 'package:weezemaster/conversations/blocs/conversations_bloc.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import 'dart:convert';
+import 'package:http/http.dart' as http;
 import '../login_register_screen.dart';
 import 'package:weezemaster/chat.dart';
+import 'package:weezemaster/websocket.dart';
+import 'package:weezemaster/core/services/token_services.dart';
 
 class ConversationsScreen extends StatefulWidget {
   const ConversationsScreen({super.key});
@@ -16,6 +21,7 @@ class ConversationsScreen extends StatefulWidget {
 
 class ConversationsScreenState extends State<ConversationsScreen> {
   final storage = const FlutterSecureStorage();
+  final tokenService = TokenService();
 
   @override
   void initState() {
@@ -33,6 +39,31 @@ class ConversationsScreenState extends State<ConversationsScreen> {
         MaterialPageRoute(builder: (context) => const LoginRegisterScreen()),
       );
       return '';
+    }
+  }
+
+  Future<String> createConversation() async {
+    final String apiUrl = 'http://${dotenv.env['API_HOST']}:${dotenv.env['API_PORT']}/create_conversation';
+    print('API URL: $apiUrl');
+    String? jwtToken = await tokenService.getValidAccessToken();
+    print('JWT Token: $jwtToken');
+
+    final response = await http.post(
+      Uri.parse(apiUrl),
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $jwtToken',
+      },
+    );
+
+    if (response.statusCode == 200) {
+      final Map<String, dynamic> responseData = json.decode(response.body);
+      print('Conversation created: $responseData');
+      return responseData['conversationId'];
+    } else {
+      print('Failed to create conversation. Status code: ${response.statusCode}');
+      print('Response body: ${response.body}');
+      throw Exception('Failed to create conversation');
     }
   }
 
@@ -78,8 +109,8 @@ class ConversationsScreenState extends State<ConversationsScreen> {
   @override
   Widget build(BuildContext context) {
     return FutureBuilder<String>(
-        future: getUserIdFromJwt(),
-        builder: (BuildContext context, AsyncSnapshot<String> snapshot) {
+      future: getUserIdFromJwt(),
+      builder: (BuildContext context, AsyncSnapshot<String> snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const CircularProgressIndicator();
         } else if (snapshot.hasError) {
@@ -91,7 +122,7 @@ class ConversationsScreenState extends State<ConversationsScreen> {
             child: SafeArea(
               child: Scaffold(
                 backgroundColor: Colors.white,
-                body:  BlocBuilder<ConversationsBloc, ConversationsState>(
+                body: BlocBuilder<ConversationsBloc, ConversationsState>(
                   builder: (context, state) {
                     if (state is ConversationsLoading) {
                       return const Center(
@@ -109,7 +140,7 @@ class ConversationsScreenState extends State<ConversationsScreen> {
                     }
 
                     if (state is ConversationsDataLoadingSuccess) {
-                      if(state.conversations.isNotEmpty) {
+                      if (state.conversations.isNotEmpty) {
                         return Column(
                           children: [
                             const Center(
@@ -132,12 +163,12 @@ class ConversationsScreenState extends State<ConversationsScreen> {
                                     ),
                                     child: ListTile(
                                       title: Text(
-                                          state.conversations[index].buyer,
-                                          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 20, fontFamily: 'Readex Pro')
+                                        state.conversations[index].buyer,
+                                        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 20, fontFamily: 'Readex Pro'),
                                       ),
                                       subtitle: Text(
-                                          formatDate(state.conversations[index].messages.last.updatedAt as String),
-                                          style: const TextStyle(fontSize: 15, fontFamily: 'Readex Pro')
+                                        formatDate(state.conversations[index].messages.last.updatedAt as String),
+                                        style: const TextStyle(fontSize: 15, fontFamily: 'Readex Pro'),
                                       ),
                                       onTap: () {
                                         Navigator.pushNamed(context, '/conversation', arguments: state.conversations[index].id);
@@ -170,16 +201,32 @@ class ConversationsScreenState extends State<ConversationsScreen> {
                                 ),
                               ),
                             ),
-                            // TODO remove this button
                             ElevatedButton(
-                              onPressed: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(builder: (context) => const ChatScreen()),
-                                );
+                              onPressed: () async {
+                                try {
+                                  // Crée une nouvelle conversation et récupère son UUID
+                                  String conversationId = await createConversation();
+                                  print('New conversation ID: $conversationId');
+
+                                  // Ouvre la page de messagerie avec le nouvel UUID
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => WebSocketDemo(
+                                        channel: WebSocketChannel.connect(
+                                          Uri.parse('ws://${dotenv.env['API_HOST']}:${dotenv.env['API_PORT']}/ws'),
+                                        ),
+                                        conversationId: conversationId, // Passe l'UUID à la page de messagerie
+                                      ),
+                                    ),
+                                  );
+                                } catch (e) {
+                                  print('Error creating conversation: $e');
+                                }
                               },
-                              child: const Text('Fake conv'))
-                          ]
+                              child: const Text('Fake conv'),
+                            ),
+                          ],
                         );
                       }
                     } else {
@@ -196,6 +243,7 @@ class ConversationsScreenState extends State<ConversationsScreen> {
             ),
           );
         }
-    });
+      },
+    );
   }
 }

@@ -1,6 +1,7 @@
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:web_socket_channel/web_socket_channel.dart';
 import 'package:weezemaster/my_tickets/blocs/my_tickets_bloc.dart';
 import 'package:weezemaster/conversations/conversations_screen.dart';
 import 'package:weezemaster/profile_screen.dart';
@@ -11,6 +12,7 @@ import 'package:weezemaster/my_tickets/my_tickets_screen.dart';
 import 'package:weezemaster/home/home_screen.dart';
 import 'package:weezemaster/register_organization_screen.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:weezemaster/websocket.dart';
 import 'firebase_options.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'dart:convert';
@@ -55,7 +57,6 @@ class MyApp extends StatelessWidget {
               create: (context) => MyTicketsBloc()..add(MyTicketsDataLoaded()),
               child: const MyTicketsScreen(),
             );
-            builder = (BuildContext _) => const MyTicketsScreen();
             break;
           case '/conversations':
             builder = (BuildContext _) => const ConversationsScreen();
@@ -66,7 +67,18 @@ class MyApp extends StatelessWidget {
           case '/messages':
             builder = (BuildContext _) => WebSocketDemo(
               channel: WebSocketChannel.connect(
-                  Uri.parse('ws://${dotenv.env['API_HOST']}:${dotenv.env['API_PORT']}/ws')),
+                Uri.parse('ws://${dotenv.env['API_HOST']}:${dotenv.env['API_PORT']}/ws'),
+              ),
+              conversationId: '', // Default value
+            );
+            break;
+          case '/websocket':
+            final args = settings.arguments as Map<String, dynamic>;
+            builder = (BuildContext _) => WebSocketDemo(
+              channel: WebSocketChannel.connect(
+                Uri.parse('ws://${dotenv.env['API_HOST']}:${dotenv.env['API_PORT']}/ws'),
+              ),
+              conversationId: args['conversationId'],
             );
             break;
           default:

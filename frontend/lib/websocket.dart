@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 import 'dart:convert';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:uuid/uuid.dart'; // Importer la bibliothèque uuid
+import 'package:uuid/uuid.dart';
 
 void main() async {
   await dotenv.load(fileName: '.env');
@@ -25,6 +25,7 @@ class MyApp extends StatelessWidget {
         channel: WebSocketChannel.connect(
           Uri.parse(webSocketUrl),
         ),
+        conversationId: '', // ConversationId par défaut, peut être remplacé plus tard
       ),
     );
   }
@@ -32,38 +33,39 @@ class MyApp extends StatelessWidget {
 
 class WebSocketDemo extends StatefulWidget {
   final WebSocketChannel channel;
+  final String conversationId;
 
-  WebSocketDemo({required this.channel});
+  WebSocketDemo({required this.channel, required this.conversationId});
 
   @override
   _WebSocketDemoState createState() => _WebSocketDemoState();
 }
 
 class _WebSocketDemoState extends State<WebSocketDemo> {
-  final TextEditingController _controller = TextEditingController(); // Initialisation du TextEditingController
+  final TextEditingController _controller = TextEditingController();
   final List<Map<String, dynamic>> _messages = [];
-  final Uuid uuid = Uuid(); // Initialisation de l'UUID
+  final Uuid uuid = Uuid();
 
   @override
   void dispose() {
-    _controller.dispose(); // N'oubliez pas de disposer du contrôleur lorsque le widget est supprimé
+    _controller.dispose();
     widget.channel.sink.close();
     super.dispose();
   }
 
   void _sendMessage() {
-    print('Attempting to send message'); // Log for debugging
+    print('Attempting to send message');
     if (_controller.text.isNotEmpty) {
       final message = {
         'content': _controller.text,
-        'authorId': uuid.v4(), // Génération d'un UUID valide pour authorId
-        'conversationId': '87508353-99b4-4629-b89a-6c9457594937', // Utilisation de l'UUID spécifique pour conversationId
+        'authorId': uuid.v4(),
+        'conversationId': widget.conversationId, // Utilise l'UUID de la conversation
         'timestamp': DateTime.now().toIso8601String(),
       };
       try {
         widget.channel.sink.add(json.encode(message));
         _controller.clear();
-        print('Message sent: $message'); // Log the sent message
+        print('Message sent: $message');
       } catch (e) {
         print('Error sending message: $e');
       }
@@ -74,21 +76,21 @@ class _WebSocketDemoState extends State<WebSocketDemo> {
   void initState() {
     super.initState();
     widget.channel.stream.listen((message) {
-      print('Raw message received: $message'); // Log the received raw message
+      print('Raw message received: $message');
       setState(() {
         try {
           final decodedMessage = json.decode(message);
-          print('Decoded message: $decodedMessage'); // Log the decoded message
+          print('Decoded message: $decodedMessage');
           _messages.add(decodedMessage);
-          print('Messages list updated: $_messages'); // Log the updated messages list
+          print('Messages list updated: $_messages');
         } catch (e) {
           print('Error decoding message: $e');
         }
       });
     }, onError: (error) {
-      print('WebSocket error: $error'); // Log WebSocket errors
+      print('WebSocket error: $error');
     }, onDone: () {
-      print('WebSocket closed'); // Log when WebSocket is closed
+      print('WebSocket closed');
     });
   }
 
@@ -120,7 +122,7 @@ class _WebSocketDemoState extends State<WebSocketDemo> {
                 children: [
                   Expanded(
                     child: TextField(
-                      controller: _controller, // Associez le contrôleur au TextField
+                      controller: _controller,
                       decoration: const InputDecoration(
                         labelText: 'Send a message',
                       ),

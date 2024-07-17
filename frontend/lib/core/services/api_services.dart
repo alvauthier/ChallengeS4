@@ -8,6 +8,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:weezemaster/core/exceptions/api_exception.dart';
 import 'package:weezemaster/core/models/concert.dart';
 import 'package:weezemaster/core/models/interest.dart';
+import 'package:weezemaster/core/models/category.dart';
 import 'package:weezemaster/core/models/ticket.dart';
 import 'package:weezemaster/core/services/token_services.dart';
 import 'package:http/http.dart' as http;
@@ -200,6 +201,35 @@ class ApiServices {
       throw ApiException(message: 'Unknown error');
     }
   }
+  
+   static Future<List<Category>> getCategories() async {
+    try {
+      final tokenService = TokenService();
+      String? jwtToken = await tokenService.getValidAccessToken();
+      final apiUrl = 'http://${dotenv.env['API_HOST']}:${dotenv.env['API_PORT']}/categories';
+      final response = await http.get(
+        Uri.parse(apiUrl),
+        headers: {
+          'Accept': 'application/json; charset=UTF-8',
+          'Authorization': 'Bearer $jwtToken',
+        },
+      );
+      await Future.delayed(const Duration(seconds: 1));
+      if (response.statusCode < 200 || response.statusCode >= 400) {
+        throw ApiException(message: 'Bad request');
+      }
+
+      final data = json.decode(response.body) as List<dynamic>;
+      return data.mapList((e) => Category.fromJson(e));
+    } on SocketException catch (error) {
+      log('Network error.', error: error);
+      throw ApiException(message: 'Network error');
+    } catch (error) {
+      log('An error occurred while fetching categories.', error: error);
+      throw ApiException(message: 'Unknown error');
+    }
+  }
+
 
   static Future<List<Ticket>> getUserTickets() async {
     try {

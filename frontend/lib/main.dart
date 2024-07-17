@@ -9,6 +9,7 @@ import 'package:intl/date_symbol_data_local.dart';
 import 'package:flutter/material.dart';
 import 'package:weezemaster/my_tickets/my_tickets_screen.dart';
 import 'package:weezemaster/home/home_screen.dart';
+import 'package:weezemaster/register_organization_screen.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';

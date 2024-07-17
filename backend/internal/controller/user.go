@@ -94,6 +94,60 @@ type UserPatchInput struct {
 	Password  *string `json:"password"`
 }
 
+type RequestPayload struct {
+	OrganizationName        string `json:"organization"`
+	OrganizationDescription string `json:"orgadescri"`
+	UserEmail               string `json:"email"`
+	UserPassword            string `json:"password"`
+	UserFirstname           string `json:"firstname"`
+	UserLastname            string `json:"lastname"`
+}
+
+func RegisterOrganizer(c echo.Context) error {
+	db := database.GetDB()
+
+	var payload RequestPayload
+
+	if err := c.Bind(&payload); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
+
+	org := models.Organization{
+		ID:          uuid.New(),
+		Name:        payload.OrganizationName,
+		Description: payload.OrganizationDescription,
+	}
+
+	if err := db.Create(&org).Error; err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
+
+	user := models.User{
+		ID:             uuid.New(),
+		Email:          payload.UserEmail,
+		Password:       payload.UserPassword,
+		Firstname:      payload.UserFirstname,
+		Lastname:       payload.UserLastname,
+		Role:           "organizer",
+		OrganizationId: org.ID,
+	}
+
+	hashedPassword, err := HashPassword(user.Password)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
+	user.Password = hashedPassword
+
+	if err := db.Omit("last_connexion").Create(&user).Error; err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
+
+	return c.JSON(http.StatusCreated, map[string]interface{}{
+		"organization": org,
+		"user":         user,
+	})
+}
+
 // @Summary		Se connecter
 // @Description	Se connecter avec un email et un mot de passe
 // @ID				login

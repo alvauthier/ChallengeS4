@@ -287,6 +287,25 @@ class ConcertScreen extends StatelessWidget {
               child: BlocBuilder<ConcertBloc, ConcertState>(
                 builder: (context, state) {
                   if (state is ConcertDataLoadingSuccess) {
+                    // Calcul des tickets restants
+                    int totalRemainingTickets = state.concert.concertCategories
+                        .map((category) => category.availableTickets - category.soldTickets)
+                        .reduce((value, element) => value + element);
+
+                    if (totalRemainingTickets == 0) {
+                      return Center(
+                        child: Text(
+                          'Places épuisées',
+                          style: TextStyle(
+                            fontSize: 20,
+                            fontFamily: 'Readex Pro',
+                            color: Colors.grey[800],
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      );
+                    }
+
                     var prices = state.concert.concertCategories.map((concertCategory) => concertCategory.price).toList();
                     var minPrice = prices.reduce((value, element) => value < element ? value : element);
                     var maxPrice = prices.reduce((value, element) => value > element ? value : element);

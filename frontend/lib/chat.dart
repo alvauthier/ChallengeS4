@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:intl/intl.dart';
 import 'components/message_bubble.dart';
@@ -15,16 +16,23 @@ class ChatScreen extends StatefulWidget {
 
 class ChatScreenState extends State<ChatScreen> {
   final otherUser = "Michelle Obama";
-  final buyerId = "2593e40d-1275-4096-a9bb-ff8b8947a929";
+  final buyerId = "68cdbafe-de01-418e-b148-b68015de23b9";
+  final ticket = {
+    "imageUrl": "https://picsum.photos/250?image=9",
+    "concertName": "Eras Tour - Taylor Swift",
+    "category": "Category",
+    "price": "100",
+    "maxPrice": "150",
+  };
   final messages = [
     {
-      "authorId": "2593e40d-1275-4096-a9bb-ff8b8947a929",
+      "authorId": "23fe6fff-107c-4fd6-823f-a22c9dc90526",
       "content": "Je vais changer le prix avant que vous ne l'achetiez.",
       "readed": true,
       "sendAt": "2021-10-01T10:00:00Z"
     },
     {
-      "authorId": "2593e40d-1275-4096-a9bb-ff8b8947a929",
+      "authorId": "23fe6fff-107c-4fd6-823f-a22c9dc90526",
       "content": "Bonjour, ça me va je souhaite m'en débarraser rapidement !",
       "readed": true,
       "sendAt": "2021-10-01T10:00:00Z"
@@ -120,6 +128,83 @@ class ChatScreenState extends State<ChatScreen> {
     _controller.clear();
   }
 
+  void _showChangePriceDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        final TextEditingController _priceController = TextEditingController(text: ticket["price"]);
+        return AlertDialog(
+          title: const Text('Nouveau prix'),
+          content: TextField(
+            controller: _priceController,
+            keyboardType: TextInputType.number,
+            inputFormatters: [
+              FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d{0,2}')),
+              TextInputFormatter.withFunction((oldValue, newValue) {
+                final newPrice = double.tryParse(newValue.text);
+                if (newPrice != null && newPrice > double.parse(ticket["maxPrice"]!)) {
+                  return oldValue;
+                }
+                return newValue;
+              }),
+            ],
+            decoration: const InputDecoration(
+              hintText: 'Entrez le nouveau prix',
+            ),
+            style: const TextStyle(fontFamily: 'Readex Pro', fontSize: 40),
+          ),
+          actions: [
+            Row(
+              children: [
+                Expanded(
+                  child: OutlinedButton(
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    },
+                    style: OutlinedButton.styleFrom(
+                      side: const BorderSide(color: Colors.deepOrange, width: 1.0),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(6.0),
+                      ),
+                    ),
+                    child: const Text(
+                      'Annuler',
+                      style: TextStyle(color: Colors.deepOrange, fontFamily: 'Readex Pro'),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: ElevatedButton(
+                    onPressed: () {
+                      final newPrice = _priceController.text;
+                      if (newPrice.isNotEmpty) {
+                        setState(() {
+                          ticket["price"] = newPrice;
+                        });
+                      }
+                      Navigator.of(context).pop();
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.deepOrange,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(6.0),
+                      ),
+                    ),
+                    child: const Text(
+                      'Changer le prix',
+                      style: TextStyle(color: Colors.white, fontFamily: 'Readex Pro'),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -138,15 +223,19 @@ class ChatScreenState extends State<ChatScreen> {
         child: Column(
           children: [
             TicketDetails(
-              imageUrl: 'https://picsum.photos/250?image=9',
-              concertName: 'Eras Tour - Taylor Swift',
-              category: 'Category',
-              price: '100€',
+              imageUrl: ticket["imageUrl"] as String,
+              concertName: ticket["concertName"] as String,
+              category: ticket["category"] as String,
+              price: ticket["price"] as String,
               onCancel: () {
                 // Handle cancel action
               },
               secondAction: () {
-                // Handle change price action
+                if (buyerId == userId) {
+                  // Handle buy action
+                } else {
+                  _showChangePriceDialog();
+                }
               },
               secondActionText: buyerId == userId ? 'Acheter' : 'Changer le prix',
             ),
@@ -191,7 +280,10 @@ class ChatScreenState extends State<ChatScreen> {
                     ),
                   ),
                   IconButton(
-                    icon: const Icon(Icons.send),
+                    icon: const Icon(
+                        Icons.send,
+                        color: Colors.deepOrange,
+                    ),
                     onPressed: _sendMessage,
                   ),
                 ],

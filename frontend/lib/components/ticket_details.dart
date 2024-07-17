@@ -61,7 +61,7 @@ class TicketDetails extends StatelessWidget {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      price,
+                      '$price€',
                       style: const TextStyle(
                           fontWeight: FontWeight.w700,
                           fontSize: 24,

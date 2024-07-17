@@ -1,5 +1,3 @@
-import 'dart:ffi';
-
 class Message {
   final String id;
   final String author;
@@ -7,7 +5,7 @@ class Message {
   final String content;
   final DateTime createdAt;
   final DateTime updatedAt;
-  final Bool readed;
+  final bool readed;
 
   Message({
     required this.id,

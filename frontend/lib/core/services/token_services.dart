@@ -8,7 +8,7 @@ class TokenService {
   final _storage = const FlutterSecureStorage();
   final String _refreshTokenKey = 'refresh_token';
   final String _accessTokenKey = 'access_token';
-  final String _refreshUrl = 'http://${dotenv.env['API_HOST']}:${dotenv.env['API_PORT']}/refresh';
+  final String _refreshUrl = '${dotenv.env['API_PROTOCOL']}://${dotenv.env['API_HOST']}:${dotenv.env['API_PORT']}/refresh';
 
   Future<String?> getAccessToken() async {
     return await _storage.read(key: _accessTokenKey);

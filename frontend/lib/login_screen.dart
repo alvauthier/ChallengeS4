@@ -80,7 +80,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                 if (_formKey.currentState!.validate()) {
                                   // Process data.
                                   try {
-                                    final apiUrl = 'http://${dotenv.env['API_HOST']}:${dotenv.env['API_PORT']}/login';
+                                    final apiUrl = '${dotenv.env['API_PROTOCOL']}://${dotenv.env['API_HOST']}:${dotenv.env['API_PORT']}/login';
                                     var response = await http.post(
                                       Uri.parse(apiUrl),
                                       headers: <String, String>{

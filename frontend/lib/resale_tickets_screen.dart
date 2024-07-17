@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:weezemaster/components/resale_ticket.dart';
-import 'package:weezemaster/concert/blocs/concert_bloc.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 
 class ResaleTicketsScreen extends StatelessWidget {
   final List resaleTickets;

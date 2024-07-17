@@ -47,7 +47,8 @@ func GetUser(c echo.Context) error {
 
 	id := c.Param("id")
 	var user models.User
-	if err := db.Where("id = ?", id).First(&user).Error; err != nil {
+	if err := db.Preload("ConversationsAsBuyer").Preload("ConversationsAsSeller").
+		Where("id = ?", id).First(&user).Error; err != nil {
 		if err == gorm.ErrRecordNotFound {
 			return echo.NewHTTPError(http.StatusNotFound, "User not found")
 		}

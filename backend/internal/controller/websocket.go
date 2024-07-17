@@ -17,6 +17,9 @@ import (
 var upgrader = websocket.Upgrader{
 	ReadBufferSize:  1024,
 	WriteBufferSize: 1024,
+	CheckOrigin: func(r *http.Request) bool {
+		return true
+	},
 }
 
 type IncomingMessage struct {
@@ -65,23 +68,13 @@ func SaveMessage(message models.Message) error {
 	return nil
 }
 
-func CreateMessage(c echo.Context) error {
-	db := database.GetDB()
-	message := new(models.Message)
-	if err := c.Bind(message); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
-	}
-	db.Create(&message)
-	return c.JSON(http.StatusCreated, message)
-}
-
-func WebSocketEndpoint(w http.ResponseWriter, r *http.Request) {
+func WebSocketEndpoint(c echo.Context) error {
 	upgrader.CheckOrigin = func(r *http.Request) bool { return true }
 
-	conn, err := upgrader.Upgrade(w, r, nil)
+	conn, err := upgrader.Upgrade(c.Response(), c.Request(), nil)
 	if err != nil {
-		fmt.Fprintf(w, "%+v\n", err)
-		return
+		fmt.Fprintf(c.Response(), "%+v\n", err)
+		return err
 	}
 	defer conn.Close()
 	clients[conn] = true
@@ -101,17 +94,32 @@ func WebSocketEndpoint(w http.ResponseWriter, r *http.Request) {
 			continue
 		}
 
+		// Validate UUIDs
+		authorID, err := uuid.Parse(incomingMessage.AuthorId)
+		if err != nil {
+			fmt.Println("Invalid AuthorId UUID:", err)
+			continue
+		}
+		conversationID, err := uuid.Parse(incomingMessage.ConversationId)
+		if err != nil {
+			fmt.Println("Invalid ConversationId UUID:", err)
+			continue
+		}
+
 		// Convert incoming message to models.Message
 		message := models.Message{
 			ID:             uuid.New(),
 			Content:        incomingMessage.Content,
 			Readed:         false,
-			AuthorId:       uuid.MustParse(incomingMessage.AuthorId),
+			AuthorId:       authorID,
 			SentAt:         time.Now(),
-			ConversationId: uuid.MustParse(incomingMessage.ConversationId),
+			ConversationId: conversationID,
 			CreatedAt:      time.Now(),
 			UpdatedAt:      time.Now(),
 		}
+
+		// Log the message before saving
+		fmt.Printf("Saving message: %+v\n", message)
 
 		// Save the message to the database using SaveMessage function
 		if err := SaveMessage(message); err != nil {
@@ -123,6 +131,8 @@ func WebSocketEndpoint(w http.ResponseWriter, r *http.Request) {
 		broadcast <- message
 		fmt.Printf("Broadcasting message: %v\n", message)
 	}
+
+	return nil
 }
 
 func Init() {

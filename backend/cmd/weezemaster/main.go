@@ -104,8 +104,10 @@ func main() {
 	router.GET("/swagger/*", echoSwagger.WrapHandler)
 
 	// Nouvelle route WebSocket
+	router.GET("/ws", controller.WebSocketEndpoint)
 
-	router.GET("/ws", controller.GetAllCategoriesForMessage)
+	// Démarre le gestionnaire de messages
+	controller.Init()
 
 	router.Start(":8080")
 }

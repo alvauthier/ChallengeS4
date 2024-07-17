@@ -1,21 +1,30 @@
 import 'package:flutter/material.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 import 'dart:convert';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:uuid/uuid.dart';
 
-void main() => runApp(MyApp());
+void main() async {
+  await dotenv.load(fileName: '.env');
+  runApp(MyApp());
+}
 
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    final String apiHost = dotenv.env['API_HOST']!;
+    final String apiPort = dotenv.env['API_PORT']!;
+    final String webSocketUrl = 'ws://$apiHost:$apiPort/ws';
+
     return MaterialApp(
       title: 'WebSocket Chat',
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
       home: WebSocketDemo(
-          channel: WebSocketChannel.connect(
-            Uri.parse('ws://192.168.1.10:8080'),
-          ),
+        channel: WebSocketChannel.connect(
+          Uri.parse(webSocketUrl),
+        ),
       ),
     );
   }
@@ -33,6 +42,7 @@ class WebSocketDemo extends StatefulWidget {
 class _WebSocketDemoState extends State<WebSocketDemo> {
   final TextEditingController _controller = TextEditingController(); // Initialisation du TextEditingController
   final List<Map<String, dynamic>> _messages = [];
+  final Uuid uuid = Uuid(); // Utilisation de la bibliothèque uuid pour générer des UUID
 
   @override
   void dispose() {
@@ -46,8 +56,8 @@ class _WebSocketDemoState extends State<WebSocketDemo> {
     if (_controller.text.isNotEmpty) {
       final message = {
         'content': _controller.text,
-        'authorId': 'user_id', // Remplacez par l'ID réel de l'utilisateur
-        'conversationId': 'conversation_id', // Remplacez par l'ID réel de la conversation
+        'authorId': uuid.v4(), // Génération d'un UUID valide pour l'ID de l'auteur
+        'conversationId': uuid.v4(), // Génération d'un UUID valide pour l'ID de la conversation
         'timestamp': DateTime.now().toIso8601String(),
       };
       try {
@@ -86,7 +96,7 @@ class _WebSocketDemoState extends State<WebSocketDemo> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('WebSocket Chat'),
+        title: Text('WebSocket Chat'),
       ),
       body: Padding(
         padding: const EdgeInsets.all(8.0),
@@ -111,13 +121,13 @@ class _WebSocketDemoState extends State<WebSocketDemo> {
                   Expanded(
                     child: TextField(
                       controller: _controller, // Associez le contrôleur au TextField
-                      decoration: const InputDecoration(
+                      decoration: InputDecoration(
                         labelText: 'Send a message',
                       ),
                     ),
                   ),
                   IconButton(
-                    icon: const Icon(Icons.send),
+                    icon: Icon(Icons.send),
                     onPressed: _sendMessage,
                   ),
                 ],

@@ -3,6 +3,7 @@ package controller
 import (
 	"fmt"
 	"net/http"
+	"strconv"
 	"time"
 	"weezemaster/internal/database"
 	"weezemaster/internal/models"
@@ -168,4 +169,24 @@ func DeleteConcert(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 	return c.NoContent(http.StatusNoContent)
+}
+
+func GetConcertByOrganizationID(c echo.Context) error {
+	db := database.GetDB()
+
+	organizationID, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]string{"error": "Invalid organization ID"})
+	}
+
+	var concerts []models.Concert
+	if result := db.Where("organization_id = ?", organizationID).Find(&concerts); result.Error != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Error retrieving concerts"})
+	}
+
+	if len(concerts) == 0 {
+		return c.JSON(http.StatusNotFound, map[string]string{"message": "No concerts found for this organization"})
+	}
+
+	return c.JSON(http.StatusOK, concerts)
 }

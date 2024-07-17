@@ -134,7 +134,10 @@ class ChatScreenState extends State<ChatScreen> {
       builder: (BuildContext context) {
         final TextEditingController _priceController = TextEditingController(text: ticket["price"]);
         return AlertDialog(
-          title: const Text('Nouveau prix'),
+          title: const Text(
+              'Nouveau prix',
+              style: TextStyle(fontFamily: 'Readex Pro', fontWeight: FontWeight.bold),
+          ),
           content: TextField(
             controller: _priceController,
             keyboardType: TextInputType.number,
@@ -148,9 +151,6 @@ class ChatScreenState extends State<ChatScreen> {
                 return newValue;
               }),
             ],
-            decoration: const InputDecoration(
-              hintText: 'Entrez le nouveau prix',
-            ),
             style: const TextStyle(fontFamily: 'Readex Pro', fontSize: 40),
           ),
           actions: [

@@ -5,6 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import 'dart:convert';
 import '../login_register_screen.dart';
+import 'package:weezemaster/register_concert_screen.dart';
 
 class ConversationsScreen extends StatefulWidget {
   const ConversationsScreen({super.key});
@@ -25,6 +26,12 @@ class ConversationsScreenState extends State<ConversationsScreen> {
     String? jwt = await storage.read(key: 'access_token');
     if (jwt != null) {
       Map<String, dynamic> decodedToken = _decodeToken(jwt);
+      if(decodedToken['role'] == 'organizer'){
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const RegisterConcertScreen()),
+      );
+      }
       return decodedToken['id'] as String;
     } else {
       Navigator.pushReplacement(

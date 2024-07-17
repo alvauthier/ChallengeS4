@@ -6,6 +6,7 @@ import 'dart:convert';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 import 'package:weezemaster/core/models/category.dart';
+import 'package:weezemaster/core/models/interest.dart';
 import 'package:weezemaster/core/services/token_services.dart';
 import 'package:weezemaster/login_register_screen.dart';
 
@@ -42,11 +43,15 @@ class _RegisterConcertScreenState extends State<RegisterConcertScreen> {
 
   List<Category> categories = [];
   Map<String, bool> selectedCategories = {};
+  List<Interest> interests = [];
+  Map<String, bool> selectedInterests = {};
 
   @override
   void initState() {
     super.initState();
     _fetchCategories();
+    _fetchInterest();
+
   }
 
   Future<void> _fetchCategories() async {
@@ -55,6 +60,16 @@ class _RegisterConcertScreenState extends State<RegisterConcertScreen> {
       for (var category in categories) {
         selectedCategories[category.name] = false;
         _categoriesController[category.name] = TextEditingController();
+      }
+    });
+  }
+
+   Future<void> _fetchInterest() async {
+    interests = await ApiServices.getAllInterests();
+    setState(() {
+      for (var interest in interests) {
+        selectedInterests[interest.name] = false;
+        _categoriesController[interest.name] = TextEditingController();
       }
     });
   }

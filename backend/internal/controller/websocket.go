@@ -61,6 +61,12 @@ func GetAllCategoriesForMessage(c echo.Context) error {
 func SaveMessage(message models.Message) error {
 	db := database.GetDB() // Assume GetDB() returns a *gorm.DB instance
 
+	// Vérifier si la conversation existe
+	var conversation models.Conversation
+	if err := db.First(&conversation, "id = ?", message.ConversationId).Error; err != nil {
+		return fmt.Errorf("could not save message: conversation does not exist")
+	}
+
 	if err := db.Create(&message).Error; err != nil {
 		return fmt.Errorf("could not save message: %v", err)
 	}
@@ -94,13 +100,13 @@ func WebSocketEndpoint(c echo.Context) error {
 			continue
 		}
 
-		// Validate UUIDs
-		authorID, err := uuid.Parse(incomingMessage.AuthorId)
+		authorId, err := uuid.Parse(incomingMessage.AuthorId)
 		if err != nil {
 			fmt.Println("Invalid AuthorId UUID:", err)
 			continue
 		}
-		conversationID, err := uuid.Parse(incomingMessage.ConversationId)
+
+		conversationId, err := uuid.Parse(incomingMessage.ConversationId)
 		if err != nil {
 			fmt.Println("Invalid ConversationId UUID:", err)
 			continue
@@ -111,9 +117,9 @@ func WebSocketEndpoint(c echo.Context) error {
 			ID:             uuid.New(),
 			Content:        incomingMessage.Content,
 			Readed:         false,
-			AuthorId:       authorID,
+			AuthorId:       authorId,
 			SentAt:         time.Now(),
-			ConversationId: conversationID,
+			ConversationId: conversationId,
 			CreatedAt:      time.Now(),
 			UpdatedAt:      time.Now(),
 		}

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 import 'dart:convert';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:uuid/uuid.dart';
+import 'package:uuid/uuid.dart'; // Importer la bibliothèque uuid
 
 void main() async {
   await dotenv.load(fileName: '.env');
@@ -42,7 +42,7 @@ class WebSocketDemo extends StatefulWidget {
 class _WebSocketDemoState extends State<WebSocketDemo> {
   final TextEditingController _controller = TextEditingController(); // Initialisation du TextEditingController
   final List<Map<String, dynamic>> _messages = [];
-  final Uuid uuid = Uuid(); // Utilisation de la bibliothèque uuid pour générer des UUID
+  final Uuid uuid = Uuid(); // Initialisation de l'UUID
 
   @override
   void dispose() {
@@ -56,8 +56,8 @@ class _WebSocketDemoState extends State<WebSocketDemo> {
     if (_controller.text.isNotEmpty) {
       final message = {
         'content': _controller.text,
-        'authorId': uuid.v4(), // Génération d'un UUID valide pour l'ID de l'auteur
-        'conversationId': uuid.v4(), // Génération d'un UUID valide pour l'ID de la conversation
+        'authorId': uuid.v4(), // Génération d'un UUID valide pour authorId
+        'conversationId': '87508353-99b4-4629-b89a-6c9457594937', // Utilisation de l'UUID spécifique pour conversationId
         'timestamp': DateTime.now().toIso8601String(),
       };
       try {
@@ -121,7 +121,7 @@ class _WebSocketDemoState extends State<WebSocketDemo> {
                   Expanded(
                     child: TextField(
                       controller: _controller, // Associez le contrôleur au TextField
-                      decoration: InputDecoration(
+                      decoration: const InputDecoration(
                         labelText: 'Send a message',
                       ),
                     ),

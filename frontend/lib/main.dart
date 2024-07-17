@@ -1,5 +1,6 @@
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:web_socket_channel/web_socket_channel.dart';
 import 'package:weezemaster/concert/concert_screen.dart';
 import 'package:weezemaster/core/models/concert_category.dart';
 import 'package:weezemaster/login_register_screen.dart';
@@ -12,6 +13,7 @@ import 'package:intl/date_symbol_data_local.dart';
 import 'package:flutter/material.dart';
 import 'package:weezemaster/my_tickets/my_tickets_screen.dart';
 import 'package:weezemaster/home/home_screen.dart';
+import 'package:weezemaster/websocket.dart'; // Import de la page de messagerie
 import 'booking_screen.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
@@ -57,6 +59,12 @@ class MyApp extends StatelessWidget {
           case '/profile':
             builder = (BuildContext _) => const ProfileScreen();
             break;
+          case '/messages':
+            builder = (BuildContext _) => WebSocketDemo(
+              channel: WebSocketChannel.connect(
+                  Uri.parse('ws://${dotenv.env['API_HOST']}:${dotenv.env['API_PORT']}/ws')),
+            );
+            break;
           default:
             throw Exception('Invalid route: ${settings.name}');
         }
@@ -79,7 +87,11 @@ class _MyScaffoldState extends State<MyScaffold> {
   final pages = [
     const HomeScreen(),
     const MyTicketsScreen(),
-    const ProfileScreen(), // TODO - Add the missing screen
+    WebSocketDemo(
+      channel: WebSocketChannel.connect(
+        Uri.parse('ws://${dotenv.env['API_HOST']}:${dotenv.env['API_PORT']}/ws'),
+      ),
+    ),
     const ProfileScreen(),
   ];
 

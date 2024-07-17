@@ -18,7 +18,6 @@ class BookingScreen extends StatefulWidget {
 
 class _BookingScreenState extends State<BookingScreen> {
   final storage = const FlutterSecureStorage();
-  String? email;
   String? selectedCategory;
 
   Future<void> proceedToReservation() async {
@@ -74,121 +73,124 @@ class _BookingScreenState extends State<BookingScreen> {
   Widget build(BuildContext context) {
     final paymentService = PaymentService();
     return Scaffold(
-        backgroundColor: Colors.white,
-        body: Stack(
+      backgroundColor: Colors.white,
+      body: Stack(
+        children: [
+          Column(
             children: [
-              Column(
-                children: [
-                  const Padding(
-                    padding: EdgeInsets.only(top: 80.0, bottom: 20.0),
-                    child: Text(
-                      'Choisissez votre catégorie de billets',
-                      style: TextStyle(
-                          fontSize: 20,
-                          fontFamily: 'Readex Pro',
-                          fontWeight: FontWeight.w600
-                      ),
-                    ),
+              const Padding(
+                padding: EdgeInsets.only(top: 80.0, bottom: 20.0),
+                child: Text(
+                  'Choisissez votre catégorie de billets',
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontFamily: 'Readex Pro',
+                    fontWeight: FontWeight.w600,
                   ),
-                  Expanded(
-                    child: ListView.builder(
-                      itemCount: widget.concertCategories.length,
-                      itemBuilder: (context, index) {
-                        var concertCategory = widget.concertCategories[index];
-                        return Card(
-                          child: RadioListTile<String>(
-                            title: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Text(concertCategory.category.name.toString()),
-                                Text(
-                                  '${concertCategory.price.toStringAsFixed(2)} €',
-                                  style: const TextStyle(
-                                      fontWeight: FontWeight.w700,
-                                      fontSize: 20,
-                                      color: Colors.deepOrangeAccent
-                                  ),
-                                ),
-                              ],
-                            ),
-                            subtitle: Text('Nombre de tickets: ${concertCategory.availableTickets}'),
-                            value: concertCategory.id,
-                            groupValue: selectedCategory,
-                            onChanged: (String? value) {
-                              setState(() {
-                                selectedCategory = value;
-                              });
-                            },
-                          ),
-                        );
-                      },
-                    ),
-                  ),
-                ],
-              ),
-              Positioned(
-                top: 10.0,
-                left: 10.0,
-                child: FloatingActionButton(
-                  child: const Icon(Icons.arrow_back),
-                  onPressed: () => Navigator.pop(context),
                 ),
               ),
-            ]
-        ),
-        bottomNavigationBar: BottomAppBar(
-          child: Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: ElevatedButton(
-              onPressed: selectedCategory == null
+              Expanded(
+                child: ListView.builder(
+                  itemCount: widget.concertCategories.length,
+                  itemBuilder: (context, index) {
+                    var concertCategory = widget.concertCategories[index];
+                    int remainingTickets = concertCategory.availableTickets - concertCategory.soldTickets;
+                    bool isSoldOut = remainingTickets == 0;
+                    return Card(
+                      child: RadioListTile<String>(
+                        title: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(concertCategory.category.name.toString()),
+                            Text(
+                              '${concertCategory.price.toStringAsFixed(2)} €',
+                              style: const TextStyle(
+                                fontWeight: FontWeight.w700,
+                                fontSize: 20,
+                                color: Colors.deepOrangeAccent,
+                              ),
+                            ),
+                          ],
+                        ),
+                        subtitle: Text('Nombre de tickets restants: $remainingTickets'),
+                        value: concertCategory.id,
+                        groupValue: selectedCategory,
+                        onChanged: isSoldOut ? null : (String? value) {
+                          setState(() {
+                            selectedCategory = value;
+                          });
+                        },
+                        activeColor: isSoldOut ? Colors.grey : Colors.deepOrangeAccent,
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
+          Positioned(
+            top: 10.0,
+            left: 10.0,
+            child: FloatingActionButton(
+              child: const Icon(Icons.arrow_back),
+              onPressed: () => Navigator.pop(context),
+            ),
+          ),
+        ],
+      ),
+      bottomNavigationBar: BottomAppBar(
+        child: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: ElevatedButton(
+            onPressed: selectedCategory == null
                 ? null
                 : () async {
-                  if (selectedCategory == null) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Veuillez sélectionner une catégorie de billet.')),
-                    );
-                    return;
-                  }
+                    if (selectedCategory == null) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Veuillez sélectionner une catégorie de billet.')),
+                      );
+                      return;
+                    }
 
-                  final paymentIntentData = await paymentService.createPaymentIntent(selectedCategory!, 'cc_');
-                  if (paymentIntentData != null) {
-                    try {
-                      await paymentService.initAndPresentPaymentSheet(
-                        context,
-                        paymentIntentData['client_secret'],
-                      );
+                    final paymentIntentData = await paymentService.createPaymentIntent(selectedCategory!, 'cc_');
+                    if (paymentIntentData != null) {
+                      try {
+                        await paymentService.initAndPresentPaymentSheet(
+                          context,
+                          paymentIntentData['client_secret'],
+                        );
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('Paiement réussi')),
+                        );
+                        await proceedToReservation();
+                      } catch (e) {
+                        print('Error presenting payment sheet: $e');
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('Echec du paiement')),
+                        );
+                      }
+                    } else {
                       ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Paiement réussi')),
-                      );
-                      await proceedToReservation();
-                    } catch (e) {
-                      print('Error presenting payment sheet: $e');
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Echec du paiement')),
+                        const SnackBar(content: Text('Failed to create payment intent')),
                       );
                     }
-                  } else {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Failed to create payment intent')),
-                    );
-                  }
-                },
-              style: ElevatedButton.styleFrom(
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(6.0),
-                ),
-                backgroundColor: selectedCategory == null ? Colors.grey : Colors.deepOrange,
+                  },
+            style: ElevatedButton.styleFrom(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(6.0),
               ),
-              child: Text(
-                'Procéder au paiement',
-                style: TextStyle(
-                  fontFamily: 'Readex Pro',
-                  color: selectedCategory == null ? Colors.black : Colors.white,
-                ),
+              backgroundColor: selectedCategory == null ? Colors.grey : Colors.deepOrange,
+            ),
+            child: Text(
+              'Procéder au paiement',
+              style: TextStyle(
+                fontFamily: 'Readex Pro',
+                color: selectedCategory == null ? Colors.black : Colors.white,
               ),
             ),
           ),
         ),
+      ),
     );
   }
 }

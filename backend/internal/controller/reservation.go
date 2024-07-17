@@ -45,6 +45,11 @@ func CreateReservation(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "User not found"})
 	}
 
+	tx := db.Begin()
+	if tx.Error != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to start transaction"})
+	}
+
 	ticket := models.Ticket{
 		ID:                uuid.New(),
 		CreatedAt:         time.Now(),
@@ -53,11 +58,28 @@ func CreateReservation(c echo.Context) error {
 		ConcertCategoryId: reqBody.ConcertCategoryId,
 	}
 
-	if err := db.Create(&ticket).Error; err != nil {
+	if err := tx.Create(&ticket).Error; err != nil {
+		tx.Rollback()
 		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to create ticket"})
 	}
 
-	// ticket creation working, but still need to update the number of sold tickets
+	var concertCategory models.ConcertCategory
+	if err := tx.Where("id = ?", reqBody.ConcertCategoryId).First(&concertCategory).Error; err != nil {
+		tx.Rollback()
+		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Concert category not found"})
+	}
+
+	concertCategory.SoldTickets += 1
+	concertCategory.UpdatedAt = time.Now()
+
+	if err := tx.Save(&concertCategory).Error; err != nil {
+		tx.Rollback()
+		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to update sold tickets"})
+	}
+
+	if err := tx.Commit().Error; err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to commit transaction"})
+	}
 
 	return c.JSON(http.StatusOK, ticket)
 }

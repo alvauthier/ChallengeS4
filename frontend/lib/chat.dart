@@ -14,7 +14,7 @@ class ChatScreen extends StatefulWidget {
 }
 
 class ChatScreenState extends State<ChatScreen> {
-  final buyer = "Michelle Obama";
+  final otherUser = "Michelle Obama";
   final buyerId = "2593e40d-1275-4096-a9bb-ff8b8947a929";
   final messages = [
     {
@@ -125,7 +125,7 @@ class ChatScreenState extends State<ChatScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          'Négociation avec $buyer',
+          'Négociation avec $otherUser',
           style: const TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.bold,

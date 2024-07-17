@@ -13,9 +13,9 @@ class MyApp extends StatelessWidget {
         primarySwatch: Colors.blue,
       ),
       home: WebSocketDemo(
-        channel: WebSocketChannel.connect(
-          Uri.parse('ws://192.168.1.10:8080'), // Replace with your WebSocket URL
-        ),
+          channel: WebSocketChannel.connect(
+            Uri.parse('ws://192.168.1.10:8080'),
+          ),
       ),
     );
   }
@@ -31,15 +31,23 @@ class WebSocketDemo extends StatefulWidget {
 }
 
 class _WebSocketDemoState extends State<WebSocketDemo> {
-  final TextEditingController _controller = TextEditingController();
+  final TextEditingController _controller = TextEditingController(); // Initialisation du TextEditingController
   final List<Map<String, dynamic>> _messages = [];
 
+  @override
+  void dispose() {
+    _controller.dispose(); // N'oubliez pas de disposer du contrôleur lorsque le widget est supprimé
+    widget.channel.sink.close();
+    super.dispose();
+  }
+
   void _sendMessage() {
+    print('Attempting to send message'); // Log for debugging
     if (_controller.text.isNotEmpty) {
       final message = {
         'content': _controller.text,
-        'authorId': 'user_id', // Replace with actual user ID
-        'conversationId': 'conversation_id', // Replace with actual conversation ID
+        'authorId': 'user_id', // Remplacez par l'ID réel de l'utilisateur
+        'conversationId': 'conversation_id', // Remplacez par l'ID réel de la conversation
         'timestamp': DateTime.now().toIso8601String(),
       };
       try {
@@ -75,17 +83,10 @@ class _WebSocketDemoState extends State<WebSocketDemo> {
   }
 
   @override
-  void dispose() {
-    widget.channel.sink.close();
-    _controller.dispose();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('WebSocket Chat'),
+        title: const Text('WebSocket Chat'),
       ),
       body: Padding(
         padding: const EdgeInsets.all(8.0),
@@ -109,14 +110,14 @@ class _WebSocketDemoState extends State<WebSocketDemo> {
                 children: [
                   Expanded(
                     child: TextField(
-                      controller: _controller,
-                      decoration: InputDecoration(
+                      controller: _controller, // Associez le contrôleur au TextField
+                      decoration: const InputDecoration(
                         labelText: 'Send a message',
                       ),
                     ),
                   ),
                   IconButton(
-                    icon: Icon(Icons.send),
+                    icon: const Icon(Icons.send),
                     onPressed: _sendMessage,
                   ),
                 ],

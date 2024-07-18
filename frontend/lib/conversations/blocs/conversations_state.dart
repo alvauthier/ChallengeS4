@@ -8,9 +8,10 @@ final class ConversationsInitial extends ConversationsState {}
 final class ConversationsLoading extends ConversationsState {}
 
 final class ConversationsDataLoadingSuccess extends ConversationsState {
-  final List<Conversation> conversations;
+  final List<Conversation> conversationsAsBuyer;
+  final List<Conversation> conversationsAsSeller;
 
-  ConversationsDataLoadingSuccess({required this.conversations});
+  ConversationsDataLoadingSuccess({required this.conversationsAsBuyer, required this.conversationsAsSeller});
 }
 
 final class ConversationsDataLoadingError extends ConversationsState {

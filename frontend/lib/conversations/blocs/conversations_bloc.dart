@@ -14,8 +14,9 @@ class ConversationsBloc extends Bloc<ConversationsEvent, ConversationsState> {
 
       try {
         final user = await ApiServices.getUser(event.userId);
-        final conversations = user.conversations;
-        emit(ConversationsDataLoadingSuccess(conversations: conversations));
+        final conversationsAsBuyer = user.conversationsAsBuyer;
+        final conversationsAsSeller = user.conversationsAsSeller;
+        emit(ConversationsDataLoadingSuccess(conversationsAsBuyer: conversationsAsBuyer, conversationsAsSeller: conversationsAsSeller));
       } on ApiException catch (error) {
         emit(ConversationsDataLoadingError(errorMessage: error.message));
       } catch (error) {

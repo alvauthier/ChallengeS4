@@ -135,6 +135,15 @@ class ConcertScreen extends StatelessWidget {
                               ),
                             ),
                           ),
+                          ListTile(
+                            leading: const Icon(Icons.event),
+                            title: Text(
+                              'Organisé par ${state.concert.organization.name}',
+                              style: const TextStyle(
+                                fontFamily: 'Readex Pro',
+                              ),
+                            ),
+                          ),
                           const Divider(),
                           const Padding(
                             padding: EdgeInsets.only(top: 20.0, right: 10.0, left: 10.0),
@@ -235,29 +244,6 @@ class ConcertScreen extends StatelessWidget {
                                 ),
                               ),
                             ),
-                          const Divider(),
-                          const Padding(
-                            padding: EdgeInsets.only(top: 20.0, right: 10.0, left: 10.0),
-                            child: Align(
-                              alignment: Alignment.centerLeft,
-                              child: Text(
-                                'Organisé par',
-                                style: TextStyle(
-                                  fontSize: 25,
-                                  fontFamily: 'Readex Pro',
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                            ),
-                          ),
-                          OrganiserWidget(
-                            organiser: Organiser.fromMap({
-                              'id': state.concert.organization.id,
-                              'name': state.concert.organization.name,
-                              'avatar': 'https://picsum.photos/seed/picsum/200/200',
-                              'followers': '1000',
-                            }),
-                          ),
                         ],
                       ),
                     );

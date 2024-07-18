@@ -46,10 +46,63 @@ func GetTicketListingByConcertId(c echo.Context) error {
 
 func CreateTicketListings(c echo.Context) error {
 	db := database.GetDB()
-	ticketListing := new(models.TicketListing)
-	if err := c.Bind(ticketListing); err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]string{"error": "Invalid payload"})
+
+	authHeader := c.Request().Header.Get("Authorization")
+	if authHeader == "" {
+		return c.JSON(http.StatusUnauthorized, map[string]string{"error": "Authorization header is missing"})
 	}
+
+	tokenString := authHeader
+	if len(authHeader) > 7 && authHeader[:7] == "Bearer " {
+		tokenString = authHeader[7:]
+	}
+
+	claims, err := verifyToken(tokenString)
+	if err != nil {
+		return c.JSON(http.StatusUnauthorized, map[string]string{"error": "Invalid or expired token"})
+	}
+
+	email, ok := claims["email"].(string)
+	if !ok {
+		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Invalid token claims"})
+	}
+
+	var reqBody struct {
+		TicketId uuid.UUID `json:"ticketId"`
+		Price    float64   `json:"price"`
+	}
+	if err := c.Bind(&reqBody); err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]string{"error": "Invalid request body"})
+	}
+
+	var user models.User
+	if err := db.Where("email = ?", email).First(&user).Error; err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "User not found"})
+	}
+
+	var ticket models.Ticket
+	if err := db.Where("id = ? AND user_id = ?", reqBody.TicketId, user.ID).First(&ticket).Error; err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Ticket not found or does not belong to the user"})
+	}
+
+	var concertCategory models.ConcertCategory
+	if err := db.Where("id = ?", ticket.ConcertCategoryId).First(&concertCategory).Error; err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Concert category not found"})
+	}
+
+	if reqBody.Price > concertCategory.Price {
+		return c.JSON(http.StatusBadRequest, map[string]string{"error": "Price exceeds the original ticket price"})
+	}
+
+	ticketListing := models.TicketListing{
+		ID:        uuid.New(),
+		Price:     reqBody.Price,
+		Status:    "available",
+		TicketId:  reqBody.TicketId,
+		CreatedAt: time.Now(),
+		UpdatedAt: time.Now(),
+	}
+
 	if res := db.Create(&ticketListing); res.Error != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Internal server error"})
 	}

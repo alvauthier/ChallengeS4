@@ -1,7 +1,12 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:intl/intl.dart';
+import 'package:weezemaster/core/services/token_services.dart';
 import 'package:weezemaster/my_tickets/blocs/my_tickets_bloc.dart';
+import 'package:http/http.dart' as http;
 
 class MyTicketsScreen extends StatefulWidget {
   const MyTicketsScreen({super.key});
@@ -21,6 +26,89 @@ class MyTicketsScreenState extends State<MyTicketsScreen> {
     DateTime dateTime = DateTime.parse(date);
     DateFormat dateFormat = DateFormat('dd/MM/yyyy HH:mm', 'fr_FR');
     return dateFormat.format(dateTime);
+  }
+
+  void _showResaleDialog(BuildContext context, ticket) {
+    final TextEditingController _priceController = TextEditingController();
+    final maxPrice = ticket.concertCategory.price;
+
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Revendre le ticket'),
+          content: TextField(
+            controller: _priceController,
+            keyboardType: TextInputType.number,
+            decoration: InputDecoration(
+            hintText: 'Entrez le prix (max ${maxPrice.toStringAsFixed(2)} €)',
+          ),
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('Annuler'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            TextButton(
+              child: const Text('Revendre'),
+              onPressed: () async {
+                final enteredPrice = double.tryParse(_priceController.text);
+                if (enteredPrice != null && enteredPrice <= maxPrice) {
+                  await _resellTicket(ticket.id, enteredPrice);
+                  Navigator.of(context).pop();
+                } else {
+                  // Show error message if the price is invalid
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Le prix de revente ne peut pas dépasser le prix d\'achat.'),
+                    ),
+                  );
+                }
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Future<void> _resellTicket(String ticketId, double price) async {
+    final tokenService = TokenService();
+    String? jwtToken = await tokenService.getValidAccessToken();
+
+    final apiUrl = '${dotenv.env['API_PROTOCOL']}://${dotenv.env['API_HOST']}:${dotenv.env['API_PORT']}/ticketlisting';
+
+    final response = await http.post(
+      Uri.parse(apiUrl),
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $jwtToken',
+      },
+      body: jsonEncode({
+        'ticketId': ticketId,
+        'price': price,
+      }),
+    );
+
+    if (response.statusCode == 201) {
+      // Handle successful listing
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Ticket mis en vente avec succès!'),
+        ),
+      );
+      // Refresh the ticket list
+      context.read<MyTicketsBloc>().add(MyTicketsDataLoaded());
+    } else {
+      // Handle error
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Erreur lors de la mise en vente du ticket.'),
+        ),
+      );
+    }
   }
 
   @override
@@ -64,7 +152,7 @@ class MyTicketsScreenState extends State<MyTicketsScreen> {
                                 ],
                               ),
                               trailing: ElevatedButton(
-                                onPressed: () {},
+                                onPressed: () => _showResaleDialog(context, ticket),
                                 style: ElevatedButton.styleFrom(
                                   foregroundColor: Colors.white,
                                   shape: RoundedRectangleBorder(

@@ -57,9 +57,9 @@ class ConcertScreen extends StatelessWidget {
 
                     // Filtrer les tickets pour la revente
                     List resaleTickets = [];
-                    for (var concerCategory in concert.concertCategories) {
-                      if (concerCategory.tickets.isNotEmpty) {
-                        for (var ticket in concerCategory.tickets) {
+                    for (var concertCategory in concert.concertCategories) {
+                      if (concertCategory.tickets.isNotEmpty) {
+                        for (var ticket in concertCategory.tickets) {
                           if (ticket.ticketListing != null && ticket.ticketListing!.status == 'available') {
                             resaleTickets.add(
                               {
@@ -67,7 +67,7 @@ class ConcertScreen extends StatelessWidget {
                                   'name': '${ticket.user.firstname} ${ticket.user.lastname}',
                                   'avatar': 'https://thispersondoesnotexist.com/',
                                 },
-                                'category': concerCategory.category.name,
+                                'category': concertCategory.category.name,
                                 'price': ticket.ticketListing!.price.toStringAsFixed(2),
                                 'id': ticket.ticketListing!.id.toString(),
                               }
@@ -83,7 +83,7 @@ class ConcertScreen extends StatelessWidget {
 
                     return SingleChildScrollView(
                       child: Column(
-                        children: <Widget> [
+                        children: <Widget>[
                           Image.network(
                             'https://picsum.photos/seed/picsum/800/400',
                             width: double.infinity,
@@ -287,8 +287,13 @@ class ConcertScreen extends StatelessWidget {
               child: BlocBuilder<ConcertBloc, ConcertState>(
                 builder: (context, state) {
                   if (state is ConcertDataLoadingSuccess) {
+                    // Filtrer les catégories avec des tickets restants
+                    var remainingCategories = state.concert.concertCategories
+                        .where((category) => category.availableTickets > category.soldTickets)
+                        .toList();
+
                     // Calcul des tickets restants
-                    int totalRemainingTickets = state.concert.concertCategories
+                    int totalRemainingTickets = remainingCategories
                         .map((category) => category.availableTickets - category.soldTickets)
                         .reduce((value, element) => value + element);
 
@@ -306,7 +311,8 @@ class ConcertScreen extends StatelessWidget {
                       );
                     }
 
-                    var prices = state.concert.concertCategories.map((concertCategory) => concertCategory.price).toList();
+                    // Récupérer les prix des catégories restantes
+                    var prices = remainingCategories.map((concertCategory) => concertCategory.price).toList();
                     var minPrice = prices.reduce((value, element) => value < element ? value : element);
                     var maxPrice = prices.reduce((value, element) => value > element ? value : element);
 
@@ -328,37 +334,40 @@ class ConcertScreen extends StatelessWidget {
                             fontWeight: FontWeight.w600,
                           ),
                         ),
-                        ElevatedButton(
-                          onPressed: () async {
-                            final tokenService = TokenService();
-                            String? token = await tokenService.getValidAccessToken();
-                            if (token == null) {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => const LoginRegisterScreen(),
-                                ),
-                              );
-                            } else {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => BookingScreen(concertCategories: state.concert.concertCategories),
-                                ),
-                              );
-                            }
-                          },
-                          style: ElevatedButton.styleFrom(
-                            foregroundColor: Colors.white,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(6.0),
+                        SizedBox(
+                          width: 150,
+                          child: ElevatedButton(
+                            onPressed: () async {
+                              final tokenService = TokenService();
+                              String? token = await tokenService.getValidAccessToken();
+                              if (token == null) {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => const LoginRegisterScreen(),
+                                  ),
+                                );
+                              } else {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => BookingScreen(concertCategories: state.concert.concertCategories),
+                                  ),
+                                );
+                              }
+                            },
+                            style: ElevatedButton.styleFrom(
+                              foregroundColor: Colors.white,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(6.0),
+                              ),
+                              backgroundColor: Colors.deepOrange,
                             ),
-                            backgroundColor: Colors.deepOrange,
-                          ),
-                          child: const Text(
-                            'Réserver un ticket',
-                            style: TextStyle(
-                              fontFamily: 'Readex Pro',
+                            child: const Text(
+                              'Réserver',
+                              style: TextStyle(
+                                fontFamily: 'Readex Pro',
+                              ),
                             ),
                           ),
                         ),

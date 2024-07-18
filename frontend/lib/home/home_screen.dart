@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import 'package:weezemaster/concert/concert_screen.dart';
 import 'package:weezemaster/components/search_bar.dart';
+import 'package:weezemaster/user_interests_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -214,6 +215,20 @@ class _HomeScreenState extends State<HomeScreen> {
 
               return const SizedBox();
             },
+          ),
+          floatingActionButton: FloatingActionButton(
+            onPressed: () {
+              Navigator.push(context, MaterialPageRoute(builder: (context) => const UserInterestsScreen()));
+            },
+            child: const Text(
+              'Choisir mes intérêts',
+              style: TextStyle(
+                fontSize: 12,
+                fontFamily: 'Readex Pro',
+                fontWeight: FontWeight.w600
+              ),
+              textAlign: TextAlign.center,
+            ),
           ),
         ),
       ),

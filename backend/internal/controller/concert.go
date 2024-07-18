@@ -146,7 +146,7 @@ func CreateConcert(c echo.Context) error {
 	}*/
 
 	// Envoyer des notifications aux sujets correspondant aux centres d'intérêt
-	/*for _, interest := range interests {
+	for _, interest := range interests {
 		data := map[string]string{
 			"concert_id": concert.ID.String(),
 			"name":       concert.Name,
@@ -162,7 +162,7 @@ func CreateConcert(c echo.Context) error {
 		if err != nil {
 			fmt.Printf("Failed to send notification for interest %s: %v\n", interest.Name, err)
 		}
-	}*/
+	}
 	fmt.Println("Concert created")
 	return c.JSON(http.StatusOK, map[string]interface{}{
 		"concert":    concert,

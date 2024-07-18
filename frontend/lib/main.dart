@@ -63,9 +63,6 @@ class MyApp extends StatelessWidget {
           case '/profile':
             builder = (BuildContext _) => const ProfileScreen();
             break;
-          case '/login':
-            builder = (BuildContext _) => const LoginScreen();
-            break;
           case '/register-concert':
             builder = (BuildContext _) => const RegisterConcertScreen();
             break;
@@ -192,10 +189,10 @@ class _MyScaffoldState extends State<MyScaffold> {
       body: IndexedStack(
         index: selectedIndex,
         children: userRole == null
-            ? pages.sublist(0, 2) // Only Home and Login for unauthenticated users
+            ? [pages[0],pages[3]] 
             : (userRole == 'user'
-                ? pages.sublist(0, 3) // Home, Tickets, Conversations, Profile for users
-                : [pages[5],pages[4],pages[3]]), // All pages for organizers
+                ? pages.sublist(0, 3)
+                : [pages[5],pages[4],pages[3]]),
       ),
       bottomNavigationBar: userRole == null
         ? _buildNavBarUnauthenticated()
@@ -217,13 +214,9 @@ class _MyScaffoldState extends State<MyScaffold> {
         ),
       ],
       onDestinationSelected: (index) {
-        if (index == 1) {
-          Navigator.pushNamed(context, '/login');
-        } else {
-          setState(() {
-            selectedIndex = index;
-          });
-        }
+        setState(() {
+          selectedIndex = index;
+        });
       },
     );
   }
@@ -279,22 +272,6 @@ class _MyScaffoldState extends State<MyScaffold> {
           selectedIndex = index;
         });
       },
-    );
-  }
-}
-
-class LoginScreen extends StatelessWidget {
-  const LoginScreen({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Se connecter'),
-      ),
-      body: Center(
-        child: const Text('Page de connexion'),
-      ),
     );
   }
 }

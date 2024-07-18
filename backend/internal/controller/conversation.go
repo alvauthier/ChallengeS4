@@ -20,12 +20,42 @@ import (
 func GetConversation(c echo.Context) error {
 	db := database.GetDB()
 	id := c.Param("id")
+
+	authHeader := c.Request().Header.Get("Authorization")
+	if authHeader == "" {
+		return c.JSON(http.StatusUnauthorized, map[string]string{"error": "Authorization header is missing"})
+	}
+
+	tokenString := authHeader
+	if len(authHeader) > 7 && authHeader[:7] == "Bearer " {
+		tokenString = authHeader[7:]
+	}
+
+	claims, err := verifyToken(tokenString)
+	if err != nil {
+		return c.JSON(http.StatusUnauthorized, map[string]string{"error": "Invalid or expired token"})
+	}
+
+	email, ok := claims["email"].(string)
+	if !ok {
+		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Invalid token claims"})
+	}
+
+	var user models.User
+	if err := db.Where("email = ?", email).First(&user).Error; err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "User not found"})
+	}
+
 	var conversation models.Conversation
 	if err := db.Preload("Messages").Where("id = ?", id).First(&conversation).Error; err != nil {
 		if err == gorm.ErrRecordNotFound {
 			return echo.NewHTTPError(http.StatusNotFound, "Conversation not found")
 		}
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
+
+	if user.ID != conversation.BuyerId && user.ID != conversation.SellerId {
+		return echo.NewHTTPError(http.StatusUnauthorized, "User is not part of the conversation")
 	}
 
 	return c.JSON(http.StatusOK, conversation)

@@ -108,6 +108,8 @@ func main() {
 	router.GET("/conversations/:id", controller.GetConversation)
 	router.POST("/conversations", controller.CreateConversation)
 
+	router.POST("/messages", controller.PostMessage)
+
 	router.Start(":8080")
 
 }

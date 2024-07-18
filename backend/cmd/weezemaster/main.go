@@ -76,6 +76,10 @@ func main() {
 	router.PATCH("/categories/:id", controller.UpdateCategory)
 	router.DELETE("/categories/:id", controller.DeleteCategory)
 
+	router.POST("/registerorganizer", controller.RegisterOrganizer)
+
+	router.POST("/registerorganizer", controller.RegisterOrganizer)
+
 	router.GET("/tickets", controller.GetAllTickets)
 	router.GET("/tickets/:id", controller.GetTicket)
 	router.POST("/tickets", controller.CreateTicket)
@@ -97,6 +101,7 @@ func main() {
 	// authenticated.POST("/concerts", controller.CreateConcert, middleware.CheckRole("organizer", "admin"))
 	authenticated.PATCH("/concerts/:id", controller.UpdateConcert)
 	authenticated.DELETE("/concerts/:id", controller.DeleteConcert)
+	authenticated.GET("/organization/concerts", controller.GetConcertByOrganizationID, middleware.CheckRole("organizer"))
 
 	authenticated.GET("/user/interests", controller.GetUserInterests, middleware.CheckRole("user"))
 	authenticated.POST("/user/interests/:id", controller.AddUserInterest, middleware.CheckRole("user"))
@@ -108,6 +113,11 @@ func main() {
 	authenticated.POST("/create-payment-intent", controller.CreatePaymentIntent, middleware.CheckRole("user"))
 
 	router.GET("/swagger/*", echoSwagger.WrapHandler)
+
+	router.GET("/conversations/:id", controller.GetConversation)
+	router.POST("/conversations", controller.CreateConversation)
+
+	router.POST("/messages", controller.PostMessage)
 
 	// if env == "prod" {
 	// 	// Configuration TLS pour production

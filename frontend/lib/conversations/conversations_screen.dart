@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:weezemaster/conversations/blocs/conversations_bloc.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import 'dart:convert';
 import '../login_register_screen.dart';
+import 'package:weezemaster/register_concert_screen.dart';
+import 'package:weezemaster/chat.dart';
+import 'package:weezemaster/core/services/token_services.dart';
 
 class ConversationsScreen extends StatefulWidget {
   const ConversationsScreen({super.key});
@@ -14,17 +16,17 @@ class ConversationsScreen extends StatefulWidget {
 }
 
 class ConversationsScreenState extends State<ConversationsScreen> {
-  final storage = const FlutterSecureStorage();
-
   @override
   void initState() {
     super.initState();
   }
 
   Future<String> getUserIdFromJwt() async {
-    String? jwt = await storage.read(key: 'access_token');
+    final tokenService = TokenService();
+    String? jwt = await tokenService.getValidAccessToken();
     if (jwt != null) {
       Map<String, dynamic> decodedToken = _decodeToken(jwt);
+      print(decodedToken['id']);
       return decodedToken['id'] as String;
     } else {
       Navigator.pushReplacement(
@@ -77,20 +79,20 @@ class ConversationsScreenState extends State<ConversationsScreen> {
   @override
   Widget build(BuildContext context) {
     return FutureBuilder<String>(
-        future: getUserIdFromJwt(),
-        builder: (BuildContext context, AsyncSnapshot<String> snapshot) {
+      future: getUserIdFromJwt(),
+      builder: (BuildContext context, AsyncSnapshot<String> snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const CircularProgressIndicator();
         } else if (snapshot.hasError) {
           return Text('Error: ${snapshot.error}');
-        } else {
+        } else if (snapshot.hasData) {
           String userId = snapshot.data!;
           return BlocProvider(
             create: (context) => ConversationsBloc()..add(ConversationsDataLoaded(userId: userId)),
             child: SafeArea(
               child: Scaffold(
                 backgroundColor: Colors.white,
-                body:  BlocBuilder<ConversationsBloc, ConversationsState>(
+                body: BlocBuilder<ConversationsBloc, ConversationsState>(
                   builder: (context, state) {
                     if (state is ConversationsLoading) {
                       return const Center(
@@ -108,45 +110,73 @@ class ConversationsScreenState extends State<ConversationsScreen> {
                     }
 
                     if (state is ConversationsDataLoadingSuccess) {
-                      if(state.conversations.isNotEmpty) {
-                        return Column(
-                          children: [
-                            const Center(
-                              child: Padding(
-                                padding: EdgeInsets.all(20.0),
-                                child: Text(
-                                  'Vos conversations',
-                                  style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold, fontFamily: 'Readex Pro'),
-                                ),
-                              ),
+                      if (state.conversationsAsSeller.isNotEmpty || state.conversationsAsBuyer.isNotEmpty) {
+                        List<Widget> combinedList = [];
+
+                        if (state.conversationsAsBuyer.isNotEmpty) {
+                          combinedList.add(const Padding(
+                            padding: EdgeInsets.all(20.0),
+                            child: Text(
+                              'Vos conversations en tant qu\'acheteur',
+                              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, fontFamily: 'Readex Pro'),
                             ),
-                            Expanded(
-                              child: ListView.builder(
-                                itemCount: state.conversations.length,
-                                itemBuilder: (context, index) {
-                                  return Card(
-                                    elevation: 0,
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(10),
-                                    ),
-                                    child: ListTile(
-                                      title: Text(
-                                          state.conversations[index].buyer,
-                                          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 20, fontFamily: 'Readex Pro')
-                                      ),
-                                      subtitle: Text(
-                                          formatDate(state.conversations[index].messages.last.updatedAt as String),
-                                          style: const TextStyle(fontSize: 15, fontFamily: 'Readex Pro')
-                                      ),
-                                      onTap: () {
-                                        Navigator.pushNamed(context, '/conversation', arguments: state.conversations[index].id);
-                                      },
-                                    ),
-                                  );
-                                },
+                          ));
+
+                          combinedList.addAll(state.conversationsAsBuyer.map((conversation) {
+                            return ListTile(
+                              title: Text(
+                                  '${conversation.seller.firstname} ${conversation.seller.lastname}',
+                                  style: const TextStyle(
+                                      fontWeight: FontWeight.w600,
+                                      fontFamily: 'Readex Pro',
+                                      fontSize: 20
+                                  )
                               ),
+                              subtitle: Text(formatDate(conversation.updatedAt.toString())),
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(builder: (context) => const ChatScreen()),
+                                );
+                              },
+                            );
+                          }).toList());
+
+                          combinedList.add(const Divider(height: 40));
+                        }
+
+                        if (state.conversationsAsSeller.isNotEmpty) {
+                          combinedList.add(const Padding(
+                            padding: EdgeInsets.only(left: 20.0, right: 20.0, bottom: 20.0),
+                            child: Text(
+                              'Vos conversations en tant que vendeur',
+                              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, fontFamily: 'Readex Pro'),
                             ),
-                          ],
+                          ));
+
+                          combinedList.addAll(state.conversationsAsSeller.map((conversation) {
+                            return ListTile(
+                              title: Text(
+                                  '${conversation.buyer.firstname} ${conversation.buyer.lastname}',
+                                  style: const TextStyle(
+                                      fontWeight: FontWeight.w600,
+                                      fontFamily: 'Readex Pro',
+                                      fontSize: 20
+                                  )
+                              ),
+                              subtitle: Text( formatDate(conversation.updatedAt.toString())),
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(builder: (context) => const ChatScreen()),
+                                );
+                              },
+                            );
+                          }).toList());
+                        }
+
+                        return ListView(
+                          children: combinedList,
                         );
                       } else {
                         return const Column(
@@ -168,24 +198,32 @@ class ConversationsScreenState extends State<ConversationsScreen> {
                                   fontSize: 20,
                                 ),
                               ),
-                            )
-                          ]
+                            ),
+                          ],
                         );
                       }
-                    } else {
-                      return const Center(
-                        child: Text(
-                          'État inattendu',
-                          style: TextStyle(color: Colors.red),
-                        ),
-                      );
                     }
+
+                    return const Center(
+                      child: Text(
+                        'État inattendu',
+                        style: TextStyle(color: Colors.red),
+                      ),
+                    );
                   },
                 ),
               ),
             ),
           );
+        } else {
+          return const Center(
+            child: Text(
+              'Aucune donnée disponible',
+              style: TextStyle(color: Colors.red),
+            ),
+          );
         }
-    });
+      },
+    );
   }
 }

@@ -47,8 +47,7 @@ func GetUser(c echo.Context) error {
 
 	id := c.Param("id")
 	var user models.User
-	if err := db.Preload("ConversationsAsBuyer").Preload("ConversationsAsSeller").
-		Where("id = ?", id).First(&user).Error; err != nil {
+	if err := db.Preload("ConversationsAsBuyer").Preload("ConversationsAsBuyer.Buyer").Preload("ConversationsAsBuyer.Seller").Preload("ConversationsAsSeller").Preload("ConversationsAsSeller.Buyer").Preload("ConversationsAsSeller.Seller").Where("id = ?", id).First(&user).Error; err != nil {
 		if err == gorm.ErrRecordNotFound {
 			return echo.NewHTTPError(http.StatusNotFound, "User not found")
 		}
@@ -93,6 +92,60 @@ type UserPatchInput struct {
 	Lastname  *string `json:"lastname"`
 	Email     *string `json:"email"`
 	Password  *string `json:"password"`
+}
+
+type RequestPayload struct {
+	OrganizationName        string `json:"organization"`
+	OrganizationDescription string `json:"orgadescri"`
+	UserEmail               string `json:"email"`
+	UserPassword            string `json:"password"`
+	UserFirstname           string `json:"firstname"`
+	UserLastname            string `json:"lastname"`
+}
+
+func RegisterOrganizer(c echo.Context) error {
+	db := database.GetDB()
+
+	var payload RequestPayload
+
+	if err := c.Bind(&payload); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
+
+	org := models.Organization{
+		ID:          uuid.New(),
+		Name:        payload.OrganizationName,
+		Description: payload.OrganizationDescription,
+	}
+
+	if err := db.Create(&org).Error; err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
+
+	user := models.User{
+		ID:             uuid.New(),
+		Email:          payload.UserEmail,
+		Password:       payload.UserPassword,
+		Firstname:      payload.UserFirstname,
+		Lastname:       payload.UserLastname,
+		Role:           "organizer",
+		OrganizationId: org.ID,
+	}
+
+	hashedPassword, err := HashPassword(user.Password)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
+	user.Password = hashedPassword
+
+	if err := db.Omit("last_connexion").Create(&user).Error; err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
+
+	return c.JSON(http.StatusCreated, map[string]interface{}{
+		"organization": org,
+		"user":         user,
+	})
 }
 
 // @Summary		Se connecter

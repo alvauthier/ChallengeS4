@@ -8,6 +8,8 @@ import 'package:intl/date_symbol_data_local.dart';
 import 'package:flutter/material.dart';
 import 'package:weezemaster/my_tickets/my_tickets_screen.dart';
 import 'package:weezemaster/home/home_screen.dart';
+import 'package:weezemaster/register_concert_screen.dart';
+import 'package:weezemaster/home_orga/concert_orga_screen.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:weezemaster/user_interests_screen.dart';
 import 'firebase_options.dart';
@@ -54,13 +56,18 @@ class MyApp extends StatelessWidget {
               create: (context) => MyTicketsBloc()..add(MyTicketsDataLoaded()),
               child: const MyTicketsScreen(),
             );
-            builder = (BuildContext _) => const MyTicketsScreen();
             break;
           case '/conversations':
             builder = (BuildContext _) => const ConversationsScreen();
             break;
           case '/profile':
             builder = (BuildContext _) => const UserInterestsScreen();
+            break;
+          case '/register-concert':
+            builder = (BuildContext _) => const RegisterConcertScreen();
+            break;
+          case '/concert-organization':
+            builder = (BuildContext _) => const OrganizerConcertScreen();
             break;
           default:
             throw Exception('Invalid route: ${settings.name}');
@@ -133,55 +140,138 @@ class _MyScaffoldState extends State<MyScaffold> {
   }
 
   final pages = [
-    Navigator(key: GlobalKey<NavigatorState>(), onGenerateRoute: (routeSettings) {
-      return MaterialPageRoute(builder: (context) => const HomeScreen());
-    }),
-    Navigator(key: GlobalKey<NavigatorState>(), onGenerateRoute: (routeSettings) {
-      return MaterialPageRoute(
-        builder: (context) => BlocProvider(
-          create: (context) => MyTicketsBloc()..add(MyTicketsDataLoaded()),
-          child: const MyTicketsScreen(),
-        ),
-      );
-    }),
-    Navigator(key: GlobalKey<NavigatorState>(), onGenerateRoute: (routeSettings) {
-      return MaterialPageRoute(builder: (context) => const ConversationsScreen());
-    }),
-    Navigator(key: GlobalKey<NavigatorState>(), onGenerateRoute: (routeSettings) {
-      return MaterialPageRoute(builder: (context) => const UserInterestsScreen());
-    }),
+    Navigator(
+      key: GlobalKey<NavigatorState>(),
+      onGenerateRoute: (routeSettings) {
+        return MaterialPageRoute(builder: (context) => const HomeScreen());
+      },
+    ),
+    Navigator(
+      key: GlobalKey<NavigatorState>(),
+      onGenerateRoute: (routeSettings) {
+        return MaterialPageRoute(
+          builder: (context) => BlocProvider(
+            create: (context) => MyTicketsBloc()..add(MyTicketsDataLoaded()),
+            child: const MyTicketsScreen(),
+          ),
+        );
+      },
+    ),
+    Navigator(
+      key: GlobalKey<NavigatorState>(),
+      onGenerateRoute: (routeSettings) {
+        return MaterialPageRoute(builder: (context) => const ConversationsScreen());
+      },
+    ),
+    Navigator(
+      key: GlobalKey<NavigatorState>(),
+      onGenerateRoute: (routeSettings) {
+        return MaterialPageRoute(builder: (context) => const UserInterestsScreen());
+      },
+    ),
+    Navigator(
+      key: GlobalKey<NavigatorState>(),
+      onGenerateRoute: (routeSettings) {
+        return MaterialPageRoute(builder: (context) => const RegisterConcertScreen());
+      },
+    ),
+    Navigator(
+      key: GlobalKey<NavigatorState>(),
+      onGenerateRoute: (routeSettings) {
+        return MaterialPageRoute(builder: (context) => const OrganizerConcertScreen());
+      },
+    ),
   ];
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: pages[selectedIndex],
-      bottomNavigationBar: NavigationBar(
-        selectedIndex: selectedIndex,
-        destinations: <Widget>[
-          const NavigationDestination(
-            icon: Icon(Icons.home),
-            label: 'Accueil',
-          ),
-          NavigationDestination(
-            icon: userRole == 'organizer' ? Icon(Icons.event) : Icon(Icons.receipt),
-            label: userRole == 'organizer' ? 'Mes concerts' : 'Mes billets',
-          ),
-          const NavigationDestination(
-            icon: Icon(Icons.message),
-            label: 'Mes messages',
-          ),
-          const NavigationDestination(
-            icon: Icon(Icons.person),
-            label: 'Mon profil',
-          ),
-        ],
-        onDestinationSelected: (index) {
-          setState(() {
-            selectedIndex = index;
-          });
-        },
+      body: IndexedStack(
+        index: selectedIndex,
+        children: userRole == null
+            ? [pages[0],pages[3]]
+            : (userRole == 'user'
+                ? pages.sublist(0, 3)
+                : [pages[5],pages[4],pages[3]]),
       ),
+      bottomNavigationBar: userRole == null
+        ? _buildNavBarUnauthenticated()
+        : (userRole == 'user' ? _buildNavBarUser() : _buildNavBarOrganizer()),
+    );
+  }
+
+  Widget _buildNavBarUnauthenticated() {
+    return NavigationBar(
+      selectedIndex: selectedIndex,
+      destinations: const <Widget>[
+        NavigationDestination(
+          icon: Icon(Icons.home),
+          label: 'Accueil',
+        ),
+        NavigationDestination(
+          icon: Icon(Icons.login),
+          label: 'Se connecter',
+        ),
+      ],
+      onDestinationSelected: (index) {
+        setState(() {
+          selectedIndex = index;
+        });
+      },
+    );
+  }
+
+  Widget _buildNavBarUser() {
+    return NavigationBar(
+      selectedIndex: selectedIndex,
+      destinations: const <Widget>[
+        NavigationDestination(
+          icon: Icon(Icons.home),
+          label: 'Accueil',
+        ),
+        NavigationDestination(
+          icon: Icon(Icons.receipt),
+          label: 'Mes billets',
+        ),
+        NavigationDestination(
+          icon: Icon(Icons.message),
+          label: 'Mes messages',
+        ),
+        NavigationDestination(
+          icon: Icon(Icons.person),
+          label: 'Mon profil',
+        ),
+      ],
+      onDestinationSelected: (index) {
+        setState(() {
+          selectedIndex = index;
+        });
+      },
+    );
+  }
+
+  Widget _buildNavBarOrganizer() {
+    return NavigationBar(
+      selectedIndex: selectedIndex,
+      destinations: const <Widget>[
+        NavigationDestination(
+          icon: Icon(Icons.event),
+          label: 'Mes concerts',
+        ),
+        NavigationDestination(
+          icon: Icon(Icons.add),
+          label: 'Créer un concert',
+        ),
+        NavigationDestination(
+          icon: Icon(Icons.person),
+          label: 'Mon profil',
+        ),
+      ],
+      onDestinationSelected: (index) {
+        setState(() {
+          selectedIndex = index;
+        });
+      },
     );
   }
 }

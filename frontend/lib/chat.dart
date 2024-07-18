@@ -6,44 +6,28 @@ import 'package:intl/intl.dart';
 import 'components/message_bubble.dart';
 import 'login_register_screen.dart';
 import 'components/ticket_details.dart';
+import 'package:weezemaster/core/services/api_services.dart';
 
 class ChatScreen extends StatefulWidget {
-  const ChatScreen({super.key});
+  final String conversationId;
+
+  const ChatScreen({Key? key, required this.conversationId}) : super(key: key);
 
   @override
-  State<ChatScreen> createState() => ChatScreenState();
+  _ChatScreenState createState() => _ChatScreenState();
 }
 
-class ChatScreenState extends State<ChatScreen> {
+class _ChatScreenState extends State<ChatScreen> {
   final otherUser = "Michelle Obama";
-  final buyerId = "68cdbafe-de01-418e-b148-b68015de23b9";
-  final ticket = {
+  late String buyerId = "";
+  late Map<String, String> ticket = {
     "imageUrl": "https://picsum.photos/250?image=9",
     "concertName": "Eras Tour - Taylor Swift",
     "category": "Category",
     "price": "100",
     "maxPrice": "150",
   };
-  final messages = [
-    {
-      "authorId": "23fe6fff-107c-4fd6-823f-a22c9dc90526",
-      "content": "Je vais changer le prix avant que vous ne l'achetiez.",
-      "readed": true,
-      "sendAt": "2021-10-01T10:00:00Z"
-    },
-    {
-      "authorId": "23fe6fff-107c-4fd6-823f-a22c9dc90526",
-      "content": "Bonjour, ça me va je souhaite m'en débarraser rapidement !",
-      "readed": true,
-      "sendAt": "2021-10-01T10:00:00Z"
-    },
-    {
-      "authorId": "68cdbafe-de01-418e-b148-b68015de23b9",
-      "content": "Bonjour je souhaiterais acheter le ticket à 100€, est-ce que c'est possible ?",
-      "readed": true,
-      "sendAt": "2021-10-01T10:01:00Z"
-    }
-  ];
+  late List messages = [];
   final TextEditingController _controller = TextEditingController();
   final storage = const FlutterSecureStorage();
   String? userId;
@@ -52,6 +36,7 @@ class ChatScreenState extends State<ChatScreen> {
   void initState() {
     super.initState();
     _loadUserId();
+    _fetchConversation();
   }
 
   Future<void> _loadUserId() async {
@@ -108,22 +93,44 @@ class ChatScreenState extends State<ChatScreen> {
     return dateFormat.format(dateTime);
   }
 
-  void _sendMessage() {
+  Future<void> _fetchConversation() async {
+    if (widget.conversationId.isNotEmpty) {
+      try {
+        final conversation = await ApiServices.getConversation(widget.conversationId);
+        setState(() {
+          messages = conversation.messages.map((message) => {
+            "authorId": message['AuthorId'], // Changed from AuthorId to authorId
+            "content": message['Content'], // Ensure this matches the key in your JSON/map
+            "readed": message['Readed'], // Ensure this matches the key in your JSON/map
+          }).toList();
+          buyerId = conversation.buyerId;
+          ticket = {
+            "imageUrl": "https://picsum.photos/250?image=9",
+            "concertName": "Eras Tour - Taylor Swift",
+            "category": "Fosse",
+            "price": conversation.price.toString(),
+            "maxPrice": "150",
+          };
+        });
+      } catch (e) {
+        // Handle error or show a message to the user
+        print("Failed to fetch conversation: $e");
+      }
+    }
+  }
+
+  void _sendMessage() async {
     final content = _controller.text;
     if (content.isEmpty || userId == null) {
       return;
     }
 
-    final Map<String, Object> newMessage = {
-      "authorId": userId!,
-      "content": content,
-      "readed": false,
-      "sendAt": DateTime.now().toIso8601String()
-    };
-
-    setState(() {
-      messages.insert(0, newMessage);
-    });
+    try {
+      await ApiServices.sendMessage(widget.conversationId, content);
+      _fetchConversation();
+    } catch (e) {
+      print("Failed to send message: $e");
+    }
 
     _controller.clear();
   }
@@ -242,7 +249,6 @@ class ChatScreenState extends State<ChatScreen> {
             Expanded(
               child: ListView.builder(
                 padding: const EdgeInsets.symmetric(vertical: 16.0),
-                reverse: true,
                 itemCount: messages.length,
                 itemBuilder: (context, index) {
                   final message = messages[index];
@@ -255,7 +261,6 @@ class ChatScreenState extends State<ChatScreen> {
                         authorId: authorId,
                         content: content,
                         isCurrentUser: isCurrentUser,
-                        sendAt: formatDate(message["sendAt"] as String? ?? ""),
                         readed: message["readed"] as bool? ?? false,
                       ),
                       const SizedBox(height: 10), // Add space between bubbles

@@ -135,7 +135,7 @@ class ConversationsScreenState extends State<ConversationsScreen> {
                               onTap: () {
                                 Navigator.push(
                                   context,
-                                  MaterialPageRoute(builder: (context) => const ChatScreen()),
+                                  MaterialPageRoute(builder: (context) => ChatScreen(conversationId: conversation.id)),
                                 );
                               },
                             );
@@ -167,7 +167,7 @@ class ConversationsScreenState extends State<ConversationsScreen> {
                               onTap: () {
                                 Navigator.push(
                                   context,
-                                  MaterialPageRoute(builder: (context) => const ChatScreen()),
+                                  MaterialPageRoute(builder: (context) => ChatScreen(conversationId: conversation.id)),
                                 );
                               },
                             );

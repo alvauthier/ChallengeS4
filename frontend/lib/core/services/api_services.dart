@@ -14,6 +14,8 @@ import 'package:weezemaster/core/services/token_services.dart';
 import 'package:http/http.dart' as http;
 import 'package:weezemaster/core/models/user.dart';
 
+import '../models/conversation.dart';
+
 class ApiServices {
   static const storage = FlutterSecureStorage();
   static Future<List<Concert>> getConcerts() async {
@@ -256,6 +258,62 @@ class ApiServices {
     } catch (error) {
       log('An error occurred while fetching user tickets.', error: error);
       throw ApiException(message: 'Unknown error');
+    }
+  }
+
+  static Future<Conversation> getConversation(String conversationId) async {
+    try {
+      final tokenService = TokenService();
+      String? jwtToken = await tokenService.getValidAccessToken();
+      final apiUrl = 'http://${dotenv.env['API_HOST']}:${dotenv.env['API_PORT']}/conversations/$conversationId';
+      final response = await http.get(
+        Uri.parse(apiUrl),
+        headers: {
+          'Accept': 'application/json; charset=UTF-8',
+          'Authorization': 'Bearer $jwtToken',
+        },
+      );
+
+      if (response.statusCode < 200 || response.statusCode >= 300) {
+        throw ApiException(message: 'Failed to fetch conversation');
+      }
+
+      final data = json.decode(response.body) as Map<String, dynamic>;
+      return Conversation.fromJson(data); // Assuming you have a fromJson method to parse the conversation
+    } on SocketException catch (error) {
+      throw ApiException(message: 'Network error');
+    } catch (error) {
+      throw ApiException(message: 'Unknown error occurred while fetching conversation');
+    }
+  }
+
+  static Future<void> sendMessage(String conversationId, String content) async {
+    try {
+      final tokenService = TokenService();
+      String? jwtToken = await tokenService.getValidAccessToken();
+      final apiUrl = 'http://${dotenv.env['API_HOST']}:${dotenv.env['API_PORT']}/messages';
+      final response = await http.post(
+        Uri.parse(apiUrl),
+        headers: {
+          'Accept': 'application/json; charset=UTF-8',
+          'Authorization': 'Bearer $jwtToken',
+          'Content-Type': 'application/json',
+        },
+        body: json.encode(
+            {
+              'content': content,
+              'conversation_id': conversationId,
+            }
+        ),
+      );
+
+      if (response.statusCode < 200 || response.statusCode >= 300) {
+        throw ApiException(message: 'Failed to send message');
+      }
+    } on SocketException catch (error) {
+      throw ApiException(message: 'Network error');
+    } catch (error) {
+      throw ApiException(message: 'Unknown error occurred while sending message');
     }
   }
 }

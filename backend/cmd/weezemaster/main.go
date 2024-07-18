@@ -98,6 +98,9 @@ func main() {
 	router.DELETE("/ticketlisting/:id", controller.DeleteTicketListing)
 	router.GET("/ticketlisting/concert/:id", controller.GetTicketListingByConcertId)
 
+	// main.go
+	router.GET("/organizations", controller.GetAllOrganizations)
+
 	router.GET("/concerts", controller.GetAllConcerts)
 	router.GET("/concerts/:id", controller.GetConcert)
 	router.POST("/concerts", controller.CreateConcert)

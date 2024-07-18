@@ -3,7 +3,6 @@ package controller
 import (
 	"fmt"
 	"net/http"
-	"strconv"
 	"time"
 	"weezemaster/internal/database"
 	"weezemaster/internal/models"
@@ -218,15 +217,34 @@ func DeleteConcert(c echo.Context) error {
 }
 
 func GetConcertByOrganizationID(c echo.Context) error {
+	fmt.Println('a')
 	db := database.GetDB()
-
-	organizationID, err := strconv.Atoi(c.Param("id"))
-	if err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]string{"error": "Invalid organization ID"})
+	authHeader := c.Request().Header.Get("Authorization")
+	if authHeader == "" {
+		return c.JSON(http.StatusUnauthorized, map[string]string{"error": "Authorization header is missing"})
 	}
 
+	tokenString := authHeader
+	if len(authHeader) > 7 && authHeader[:7] == "Bearer " {
+		tokenString = authHeader[7:]
+	}
+
+	claims, err := verifyToken(tokenString)
+	if err != nil {
+		return c.JSON(http.StatusUnauthorized, map[string]string{"error": "Invalid or expired token"})
+	}
+
+	email, ok := claims["email"].(string)
+	if !ok {
+		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Invalid token claims"})
+	}
+	user := &models.User{}
+	if err := db.Where("email = ?", email).First(user).Error; err != nil {
+		return echo.NewHTTPError(http.StatusNotFound, "User not found")
+	}
+	fmt.Println(user.OrganizationId)
 	var concerts []models.Concert
-	if result := db.Where("organization_id = ?", organizationID).Find(&concerts); result.Error != nil {
+	if result := db.Where("organization_id = ?", user.OrganizationId).Find(&concerts); result.Error != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Error retrieving concerts"})
 	}
 

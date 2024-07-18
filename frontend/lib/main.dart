@@ -10,7 +10,7 @@ import 'package:flutter/material.dart';
 import 'package:weezemaster/my_tickets/my_tickets_screen.dart';
 import 'package:weezemaster/home/home_screen.dart';
 import 'package:weezemaster/register_concert_screen.dart';
-import 'package:weezemaster/concert_orga_screen.dart';
+import 'package:weezemaster/home_orga/concert_orga_screen.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';

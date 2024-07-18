@@ -232,57 +232,58 @@ Future<void> _fetchCategories() async {
                             style: TextStyle(fontWeight: FontWeight.bold),
                           ),
                           ...categories.map((category) {
-                          return Column(
-                            children: [
-                              CheckboxListTile(
-                                title: Text(category.name),
-                                value: selectedCategories[category.id],
-                                onChanged: (bool? value) {
-                                  setState(() {
-                                    selectedCategories[category.id] = value!;
-                                  });
-                                },
-                              ),
-                              if (selectedCategories[category.id]!)
-                                Column(
-                                  children: [
-                                    TextFormField(
-                                      controller: _categoriesController[category.id],
-                                      decoration: InputDecoration(
-                                        labelText: 'Nombre de places pour ${category.name}',
-                                      ),
-                                      validator: (value) {
-                                        if (value == null || value.isEmpty) {
-                                          return 'Veuillez entrer le nombre de places pour ${category.name}';
-                                        }
-                                        if (int.tryParse(value) == null) {
-                                          return 'Veuillez entrer un nombre valide';
-                                        }
-                                        return null;
-                                      },
-                                      keyboardType: TextInputType.number,
-                                    ),
-                                    TextFormField(
-                                      controller: _pricesController[category.id],
-                                      decoration: InputDecoration(
-                                        labelText: 'Prix des places pour ${category.name}',
-                                      ),
-                                      validator: (value) {
-                                        if (value == null || value.isEmpty) {
-                                          return 'Veuillez entrer le prix des places pour ${category.name}';
-                                        }
-                                        if (double.tryParse(value) == null) {
-                                          return 'Veuillez entrer un prix valide';
-                                        }
-                                        return null;
-                                      },
-                                      keyboardType: TextInputType.number,
-                                    ),
-                                  ],
+                            return Column(
+                              children: [
+                                CheckboxListTile(
+                                  title: Text(category.name),
+                                  value: selectedCategories[category.id],
+                                  onChanged: (bool? value) {
+                                    setState(() {
+                                      selectedCategories[category.id] = value!;
+                                    });
+                                  },
                                 ),
-                            ],
-                          );
-                        }).toList(),
+                                if (selectedCategories[category.id]!)
+                                  Column(
+                                    children: [
+                                      TextFormField(
+                                        controller: _categoriesController[category.id],
+                                        decoration: InputDecoration(
+                                          labelText: 'Nombre de places pour ${category.name}',
+                                        ),
+                                        validator: (value) {
+                                          if (value == null || value.isEmpty) {
+                                            return 'Veuillez entrer le nombre de places pour ${category.name}';
+                                          }
+                                          if (int.tryParse(value) == null) {
+                                            return 'Veuillez entrer un nombre valide';
+                                          }
+                                          return null;
+                                        },
+                                        keyboardType: TextInputType.number,
+                                      ),
+                                      TextFormField(
+                                        controller: _pricesController[category.id],
+                                        decoration: InputDecoration(
+                                          labelText: 'Prix des places pour ${category.name}',
+                                        ),
+                                        validator: (value) {
+                                          if (value == null || value.isEmpty) {
+                                            return 'Veuillez entrer le prix des places pour ${category.name}';
+                                          }
+                                          if (double.tryParse(value) == null) {
+                                            return 'Veuillez entrer un prix valide';
+                                          }
+                                          return null;
+                                        },
+                                        keyboardType: TextInputType.number,
+                                      ),
+                                    ],
+                                  ),
+                              ],
+                            );
+                          }).toList(),
+
                           const SizedBox(height: 20),
                           const Text(
                             'Intérêts',
@@ -308,13 +309,14 @@ Future<void> _fetchCategories() async {
                             child: Container(
                               width: double.infinity,
                               child: ElevatedButton(
-                                onPressed: () async {
+                               onPressed: () async {
                                   List<Map<String, dynamic>> tabCategories = [];
                                   selectedCategories.forEach((id, selected) {
                                     if (selected) {
                                       tabCategories.add({
                                         'id': id,
                                         'places': int.parse(_categoriesController[id]!.text),
+                                        'price': double.parse(_pricesController[id]!.text),
                                       });
                                     }
                                   });

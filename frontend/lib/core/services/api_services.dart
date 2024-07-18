@@ -72,11 +72,11 @@ class ApiServices {
     }
   }
 
-  static Future<List<Concert>> getConcertsByOrga(String organization) async {
+  static Future<List<Concert>> getConcertsByOrga() async {
     try {
       final tokenService = TokenService();
       String? jwtToken = await tokenService.getValidAccessToken();
-      final apiUrl = 'http://${dotenv.env['API_HOST']}:${dotenv.env['API_PORT']}/organization/concerts/$organization';
+      final apiUrl = 'http://${dotenv.env['API_HOST']}:${dotenv.env['API_PORT']}/organization/concerts';
       final response = await http.get(
         Uri.parse(apiUrl),
         headers: {

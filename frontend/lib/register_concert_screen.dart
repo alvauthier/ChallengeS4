@@ -1,18 +1,18 @@
+import 'dart:convert';
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:weezemaster/core/services/api_services.dart';
 import 'package:http/http.dart' as http;
-import 'dart:convert';
 import 'package:image_picker/image_picker.dart';
-import 'dart:io';
 import 'package:weezemaster/core/models/category.dart';
-import 'package:weezemaster/core/services/token_services.dart';
+import 'package:weezemaster/core/models/interest.dart';
+import 'package:weezemaster/core/services/api_services.dart';
 import 'package:weezemaster/login_register_screen.dart';
-
-
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class RegisterConcertScreen extends StatefulWidget {
-  const RegisterConcertScreen({super.key});
+  const RegisterConcertScreen({Key? key}) : super(key: key);
 
   @override
   _RegisterConcertScreenState createState() => _RegisterConcertScreenState();
@@ -23,15 +23,18 @@ class _RegisterConcertScreenState extends State<RegisterConcertScreen> {
   final _nameController = TextEditingController();
   final _descriptionController = TextEditingController();
   final _cityController = TextEditingController();
-  final _categoriesController = Map<String, TextEditingController>();
+  final Map<int, TextEditingController> _categoriesController = {};
+  final Map<String, TextEditingController> _interestsController = {};
+  final Map<int, TextEditingController> _pricesController = {};
+  final storage = const FlutterSecureStorage();
 
   File? _image;
-  String? _base64Image; 
+  String? _base64Image;
   final picker = ImagePicker();
+  DateTime? _selectedDate;
 
-  Future getImage() async {
+  Future<void> getImage() async {
     final pickedImage = await picker.pickImage(source: ImageSource.gallery);
-
     setState(() {
       if (pickedImage != null) {
         _image = File(pickedImage.path);
@@ -41,22 +44,98 @@ class _RegisterConcertScreenState extends State<RegisterConcertScreen> {
   }
 
   List<Category> categories = [];
-  Map<String, bool> selectedCategories = {};
+  final Map<int, bool> selectedCategories = {};
+  List<Interest> interests = [];
+  final Map<int, bool> selectedInterests = {};
 
   @override
   void initState() {
     super.initState();
     _fetchCategories();
+    _fetchInterests();
   }
 
-  Future<void> _fetchCategories() async {
-    categories = await ApiServices.getCategories();
+Future<void> _fetchCategories() async {
+  categories = await ApiServices.getCategories();
+  setState(() {
+    for (var category in categories) {
+      selectedCategories[category.id] = false;
+      _categoriesController[category.id] = TextEditingController();
+      _pricesController[category.id] = TextEditingController();
+    }
+  });
+}
+
+
+  Future<void> _fetchInterests() async {
+    interests = await ApiServices.getAllInterests();
     setState(() {
-      for (var category in categories) {
-        selectedCategories[category.name] = false;
-        _categoriesController[category.name] = TextEditingController();
+      for (var interest in interests) {
+        selectedInterests[interest.id] = false;
+        _interestsController[interest.name] = TextEditingController();
       }
     });
+  }
+
+  Future<void> _selectDate(BuildContext context) async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: _selectedDate ?? DateTime.now(),
+      firstDate: DateTime(2000),
+      lastDate: DateTime(2101),
+    );
+    if (picked != null) {
+      setState(() {
+        _selectedDate = picked;
+      });
+    }
+  }
+
+  Future<String> getUserIdFromJwt() async {
+    String? jwt = await storage.read(key: 'access_token');
+    if (jwt != null) {
+      Map<String, dynamic> decodedToken = _decodeToken(jwt);
+      return decodedToken['id'] as String;
+    } else {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => const LoginRegisterScreen()),
+      );
+      return '';
+    }
+  }
+
+  Map<String, dynamic> _decodeToken(String token) {
+    final parts = token.split('.');
+    if (parts.length != 3) {
+      throw Exception('Invalid token');
+    }
+
+    final payload = _decodeBase64(parts[1]);
+    final payloadMap = json.decode(payload);
+    if (payloadMap is! Map<String, dynamic>) {
+      throw Exception('Invalid payload');
+    }
+
+    return payloadMap;
+  }
+
+  String _decodeBase64(String str) {
+    String output = str.replaceAll('-', '+').replaceAll('_', '/');
+    switch (output.length % 4) {
+      case 0:
+        break;
+      case 2:
+        output += '==';
+        break;
+      case 3:
+        output += '=';
+        break;
+      default:
+        throw Exception('Illegal base64url string!');
+    }
+
+    return utf8.decode(base64Url.decode(output));
   }
 
   @override
@@ -132,6 +211,22 @@ class _RegisterConcertScreenState extends State<RegisterConcertScreen> {
                             },
                           ),
                           const SizedBox(height: 20),
+                          Row(
+                            children: [
+                              Expanded(
+                                child: Text(
+                                  _selectedDate == null
+                                      ? 'Pas de date sélectionnée'
+                                      : 'Date: ${_selectedDate!.toLocal().toIso8601String().split('T')[0]}',
+                                ),
+                              ),
+                              ElevatedButton(
+                                onPressed: () => _selectDate(context),
+                                child: const Text('Sélectionner date'),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 20),
                           const Text(
                             'Catégories de billet',
                             style: TextStyle(fontWeight: FontWeight.bold),
@@ -141,100 +236,137 @@ class _RegisterConcertScreenState extends State<RegisterConcertScreen> {
                               children: [
                                 CheckboxListTile(
                                   title: Text(category.name),
-                                  value: selectedCategories[category.name],
+                                  value: selectedCategories[category.id],
                                   onChanged: (bool? value) {
                                     setState(() {
-                                      selectedCategories[category.name] = value!;
+                                      selectedCategories[category.id] = value!;
                                     });
                                   },
                                 ),
-                                if (selectedCategories[category.name]!)
-                                  TextFormField(
-                                    controller: _categoriesController[category.name],
-                                    decoration: InputDecoration(
-                                      labelText: 'Nombre de places pour ${category.name}',
-                                    ),
-                                    validator: (value) {
-                                      if (value == null || value.isEmpty) {
-                                        return 'Veuillez entrer le nombre de places pour ${category.name}';
-                                      }
-                                      if (int.tryParse(value) == null) {
-                                        return 'Veuillez entrer un nombre valide';
-                                      }
-                                      return null;
-                                    },
-                                    keyboardType: TextInputType.number,
+                                if (selectedCategories[category.id]!)
+                                  Column(
+                                    children: [
+                                      TextFormField(
+                                        controller: _categoriesController[category.id],
+                                        decoration: InputDecoration(
+                                          labelText: 'Nombre de places pour ${category.name}',
+                                        ),
+                                        validator: (value) {
+                                          if (value == null || value.isEmpty) {
+                                            return 'Veuillez entrer le nombre de places pour ${category.name}';
+                                          }
+                                          if (int.tryParse(value) == null) {
+                                            return 'Veuillez entrer un nombre valide';
+                                          }
+                                          return null;
+                                        },
+                                        keyboardType: TextInputType.number,
+                                      ),
+                                      TextFormField(
+                                        controller: _pricesController[category.id],
+                                        decoration: InputDecoration(
+                                          labelText: 'Prix des places pour ${category.name}',
+                                        ),
+                                        validator: (value) {
+                                          if (value == null || value.isEmpty) {
+                                            return 'Veuillez entrer le prix des places pour ${category.name}';
+                                          }
+                                          if (double.tryParse(value) == null) {
+                                            return 'Veuillez entrer un prix valide';
+                                          }
+                                          return null;
+                                        },
+                                        keyboardType: TextInputType.number,
+                                      ),
+                                    ],
                                   ),
                               ],
                             );
                           }).toList(),
+
+                          const SizedBox(height: 20),
+                          const Text(
+                            'Intérêts',
+                            style: TextStyle(fontWeight: FontWeight.bold),
+                          ),
+                          Wrap(
+                            spacing: 10,
+                            children: interests.map((interest) {
+                              return ChoiceChip(
+                                label: Text(interest.name),
+                                selected: selectedInterests[interest.id]!,
+                                selectedColor: Colors.deepOrangeAccent,
+                                onSelected: (bool selected) {
+                                  setState(() {
+                                    selectedInterests[interest.id] = selected;
+                                  });
+                                },
+                              );
+                            }).toList(),
+                          ),
                           Padding(
                             padding: const EdgeInsets.only(top: 15.0),
                             child: Container(
                               width: double.infinity,
                               child: ElevatedButton(
-                                onPressed: () async {
-                                  final tokenService = TokenService();
-                                  String? token = await tokenService.getValidAccessToken();
-                                  if (token == null) {
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (context) => const LoginRegisterScreen(),
-                                      ),
-                                    );
-                                  }
-                                    List<Map<String, dynamic>> tabCategories = [];
-                                    selectedCategories.forEach((category, selected) {
-                                        if (selected) {
-                                         tabCategories.add(
-                                          {
-                                            'name': category,
-                                            'places': _categoriesController[category]!.text,
-                                          }
-                                         );
-                                        }
+                               onPressed: () async {
+                                  List<Map<String, dynamic>> tabCategories = [];
+                                  selectedCategories.forEach((id, selected) {
+                                    if (selected) {
+                                      tabCategories.add({
+                                        'id': id,
+                                        'places': int.parse(_categoriesController[id]!.text),
+                                        'price': double.parse(_pricesController[id]!.text),
                                       });
+                                    }
+                                  });
+                                  List<int> selectedInterestsList = [];
+                                  selectedInterests.forEach((id, selected) {
+                                    if (selected) {
+                                      selectedInterestsList.add(id);
+                                    }
+                                  });
                                   if (_formKey.currentState!.validate()) {
-                                    try { 
+                                    try {
+                                      String userId = await getUserIdFromJwt();
                                       var response = await http.post(
-                                      Uri.parse('http://${dotenv.env['API_HOST']}:${dotenv.env['API_PORT']}/registerorganizer'),
-                                      headers: <String, String>{
-                                        'Content-Type': 'application/json; charset=UTF-8',
-                                      },
-
-                                      body: jsonEncode(<String, dynamic>{
-                                        'name': _nameController.text,
-                                        'description': _descriptionController.text,
-                                        'ville': _cityController.text,
-                                        'token': token!,
-                                        'categories': tabCategories,
-                                        'image': _base64Image,
-                                      }),
-                                    );
+                                        Uri.parse('http://${dotenv.env['API_HOST']}:${dotenv.env['API_PORT']}/concerts'),
+                                        headers: <String, String>{
+                                          'Content-Type': 'application/json; charset=UTF-8',
+                                        },
+                                        body: jsonEncode(<String, dynamic>{
+                                          'name': _nameController.text,
+                                          'image': _base64Image,
+                                          'description': _descriptionController.text,
+                                          'location': _cityController.text,
+                                          'date': _selectedDate!.toIso8601String().split('T')[0],
+                                          'userId': userId,
+                                          'InterestIDs': selectedInterestsList,
+                                          'CategoriesIDs': tabCategories,
+                                        }),
+                                      );
                                       ScaffoldMessenger.of(context).showSnackBar(
                                         SnackBar(
-                                          content: Text(response.statusCode == 201
-                                              ? 'Inscription réussie'
-                                              : 'Erreur lors de l\'inscription'),
+                                          content: Text(response.statusCode == 200
+                                              ? 'Création réussie'
+                                              : 'Erreur lors de la création'),
                                           duration: const Duration(seconds: 5),
                                         ),
                                       );
-                                      if (response.statusCode == 201) {
+                                      if (response.statusCode == 200) {
                                         Navigator.pop(context);
                                       }
                                     } catch (e) {
                                       ScaffoldMessenger.of(context).showSnackBar(
                                         const SnackBar(
-                                          content: Text(
-                                              'Une erreur est survenue. Veuillez vérifier votre connexion internet ou réessayer plus tard.'),
+                                          content: Text('Une erreur est survenue. Veuillez vérifier votre connexion internet ou réessayer plus tard.'),
                                           duration: Duration(seconds: 5),
                                         ),
                                       );
                                     }
                                   }
                                 },
-                                child: const Text('S\'inscrire'),
+                                child: const Text('Créer le concert'),
                               ),
                             ),
                           ),

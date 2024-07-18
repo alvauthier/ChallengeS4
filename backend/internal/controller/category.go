@@ -29,7 +29,7 @@ func GetAllCategories(c echo.Context) error {
 // @ID				get-category
 // @Tags			Categories
 // @Produce		json
-// @Param			id	path		string	true	"ID de la catégorie"
+// @Param			id	path		int	true	"ID de la catégorie"
 // @Success		200	{object}	models.Category
 // @Router			/categories/{id} [get]
 func GetCategory(c echo.Context) error {
@@ -66,7 +66,7 @@ type CategoryPatchInput struct {
 // @ID				update-category
 // @Tags			Categories
 // @Produce		json
-// @Param			id	path		string	true	"ID de la catégorie"
+// @Param			id	path		int	true	"ID de la catégorie"
 // @Success		200	{object}	models.Category
 // @Router			/categories/{id} [patch]
 func UpdateCategory(c echo.Context) error {
@@ -109,7 +109,7 @@ func UpdateCategory(c echo.Context) error {
 // @ID				delete-category
 // @Tags			Categories
 // @Produce		json
-// @Param			id	path		string	true	"ID de la catégorie"
+// @Param			id	path		int	true	"ID de la catégorie"
 // @Success		204
 // @Router			/categories/{id} [delete]
 func DeleteCategory(c echo.Context) error {

@@ -374,7 +374,7 @@ paths:
         in: path
         name: id
         required: true
-        type: string
+        type: integer
       produces:
       - application/json
       responses:
@@ -391,7 +391,7 @@ paths:
         in: path
         name: id
         required: true
-        type: string
+        type: integer
       produces:
       - application/json
       responses:
@@ -410,7 +410,7 @@ paths:
         in: path
         name: id
         required: true
-        type: string
+        type: integer
       produces:
       - application/json
       responses:
@@ -456,6 +456,7 @@ paths:
       operationId: delete-concert
       parameters:
       - description: ID du concert
+        format: uuid
         in: path
         name: id
         required: true
@@ -473,6 +474,7 @@ paths:
       operationId: get-concert
       parameters:
       - description: ID du concert
+        format: uuid
         in: path
         name: id
         required: true
@@ -492,6 +494,7 @@ paths:
       operationId: update-concert
       parameters:
       - description: ID du concert
+        format: uuid
         in: path
         name: id
         required: true
@@ -546,7 +549,7 @@ paths:
         in: path
         name: id
         required: true
-        type: string
+        type: integer
       produces:
       - application/json
       responses:
@@ -563,7 +566,7 @@ paths:
         in: path
         name: id
         required: true
-        type: string
+        type: integer
       produces:
       - application/json
       responses:
@@ -582,7 +585,7 @@ paths:
         in: path
         name: id
         required: true
-        type: string
+        type: integer
       produces:
       - application/json
       responses:
@@ -593,6 +596,45 @@ paths:
       summary: Modifie un centre d'intérêt
       tags:
       - Interests
+  /login:
+    post:
+      description: Se connecter avec un email et un mot de passe
+      operationId: login
+      parameters:
+      - description: Email de l'utilisateur
+        in: query
+        name: email
+        required: true
+        type: string
+      - description: Mot de passe de l'utilisateur
+        in: query
+        name: password
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.User'
+      summary: Se connecter
+      tags:
+      - Users
+  /register:
+    post:
+      description: Créé un utilisateur
+      operationId: create-user
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.User'
+      summary: Créé un utilisateur
+      tags:
+      - Users
   /users:
     get:
       description: Récupère tous les utilisateurs
@@ -609,25 +651,13 @@ paths:
       summary: Récupère tous les utilisateurs
       tags:
       - Users
-    post:
-      description: Créé un utilisateur
-      operationId: create-user
-      produces:
-      - application/json
-      responses:
-        "201":
-          description: Created
-          schema:
-            $ref: '#/definitions/models.User'
-      summary: Créé un utilisateur
-      tags:
-      - Users
   /users/{id}:
     delete:
       description: Supprime un utilisateur par ID
       operationId: delete-user
       parameters:
       - description: ID de l'utilisateur
+        format: uuid
         in: path
         name: id
         required: true
@@ -645,6 +675,7 @@ paths:
       operationId: get-user
       parameters:
       - description: ID de l'utilisateur
+        format: uuid
         in: path
         name: id
         required: true
@@ -664,6 +695,7 @@ paths:
       operationId: update-user
       parameters:
       - description: ID de l'utilisateur
+        format: uuid
         in: path
         name: id
         required: true

@@ -10,3 +10,4 @@
 *.njsproj
 *.sln
 *.sw?
+*.lock

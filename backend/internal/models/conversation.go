@@ -15,6 +15,9 @@ type Conversation struct {
 	Messages        []Message  `gorm:"foreignKey:ConversationId"`
 	BuyerId         uuid.UUID
 	Buyer           User `gorm:"foreignKey:BuyerId"`
+	SellerId        uuid.UUID
+	Seller          User `gorm:"foreignKey:SellerId"`
 	TicketListingId uuid.UUID
 	TicketListing   TicketListing `gorm:"foreignKey:TicketListingId"`
+	Price           float64
 }

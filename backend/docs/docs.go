@@ -83,7 +83,7 @@ const docTemplate = `{
                 "operationId": "get-category",
                 "parameters": [
                     {
-                        "type": "string",
+                        "type": "integer",
                         "description": "ID de la catégorie",
                         "name": "id",
                         "in": "path",
@@ -111,7 +111,7 @@ const docTemplate = `{
                 "operationId": "delete-category",
                 "parameters": [
                     {
-                        "type": "string",
+                        "type": "integer",
                         "description": "ID de la catégorie",
                         "name": "id",
                         "in": "path",
@@ -136,7 +136,7 @@ const docTemplate = `{
                 "operationId": "update-category",
                 "parameters": [
                     {
-                        "type": "string",
+                        "type": "integer",
                         "description": "ID de la catégorie",
                         "name": "id",
                         "in": "path",
@@ -210,6 +210,7 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
+                        "format": "uuid",
                         "description": "ID du concert",
                         "name": "id",
                         "in": "path",
@@ -238,6 +239,7 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
+                        "format": "uuid",
                         "description": "ID du concert",
                         "name": "id",
                         "in": "path",
@@ -263,6 +265,7 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
+                        "format": "uuid",
                         "description": "ID du concert",
                         "name": "id",
                         "in": "path",
@@ -338,7 +341,7 @@ const docTemplate = `{
                 "operationId": "get-interest",
                 "parameters": [
                     {
-                        "type": "string",
+                        "type": "integer",
                         "description": "ID du centre d'intérêt",
                         "name": "id",
                         "in": "path",
@@ -366,7 +369,7 @@ const docTemplate = `{
                 "operationId": "delete-interest",
                 "parameters": [
                     {
-                        "type": "string",
+                        "type": "integer",
                         "description": "ID du centre d'intérêt",
                         "name": "id",
                         "in": "path",
@@ -391,7 +394,7 @@ const docTemplate = `{
                 "operationId": "update-interest",
                 "parameters": [
                     {
-                        "type": "string",
+                        "type": "integer",
                         "description": "ID du centre d'intérêt",
                         "name": "id",
                         "in": "path",
@@ -403,6 +406,64 @@ const docTemplate = `{
                         "description": "OK",
                         "schema": {
                             "$ref": "#/definitions/models.Interest"
+                        }
+                    }
+                }
+            }
+        },
+        "/login": {
+            "post": {
+                "description": "Se connecter avec un email et un mot de passe",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Users"
+                ],
+                "summary": "Se connecter",
+                "operationId": "login",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Email de l'utilisateur",
+                        "name": "email",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Mot de passe de l'utilisateur",
+                        "name": "password",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.User"
+                        }
+                    }
+                }
+            }
+        },
+        "/register": {
+            "post": {
+                "description": "Créé un utilisateur",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Users"
+                ],
+                "summary": "Créé un utilisateur",
+                "operationId": "create-user",
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/models.User"
                         }
                     }
                 }
@@ -430,25 +491,6 @@ const docTemplate = `{
                         }
                     }
                 }
-            },
-            "post": {
-                "description": "Créé un utilisateur",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Users"
-                ],
-                "summary": "Créé un utilisateur",
-                "operationId": "create-user",
-                "responses": {
-                    "201": {
-                        "description": "Created",
-                        "schema": {
-                            "$ref": "#/definitions/models.User"
-                        }
-                    }
-                }
             }
         },
         "/users/{id}": {
@@ -465,6 +507,7 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
+                        "format": "uuid",
                         "description": "ID de l'utilisateur",
                         "name": "id",
                         "in": "path",
@@ -493,6 +536,7 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
+                        "format": "uuid",
                         "description": "ID de l'utilisateur",
                         "name": "id",
                         "in": "path",
@@ -518,6 +562,7 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
+                        "format": "uuid",
                         "description": "ID de l'utilisateur",
                         "name": "id",
                         "in": "path",

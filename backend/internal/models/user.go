@@ -19,8 +19,8 @@ type User struct {
 	//
 	// required: true
 	// example: john@doe.com
-	Email    string `gorm:"unique;not null"`
-	Password string `gorm:"not null"`
+	Email    string `gorm:"unique;not null" json:"email"`
+	Password string `gorm:"not null" json:"-"`
 	// le prénom de l'utilisateur
 	//
 	// required: true
@@ -30,18 +30,19 @@ type User struct {
 	//
 	// required: true
 	// example: Doe
-	Lastname       string `gorm:"not null"`
-	Role           string `gorm:"not null"`
-	LastConnexion  time.Time
-	CreatedAt      time.Time
-	UpdatedAt      time.Time
-	DeletedAt      *time.Time `gorm:"index"`
-	Tickets        []Ticket   `gorm:"foreignKey:UserId"`
-	OrganizationId uuid.UUID
-	Organization   *Organization  `gorm:"foreignKey:OrganizationId"`
-	Interests      []Interest     `gorm:"many2many:user_interests;"`
-	Conversations  []Conversation `gorm:"foreignKey:BuyerId"`
-	Messages       []Message      `gorm:"foreignKey:AuthorId"`
-	SalesAsBuyer   []Sale         `gorm:"foreignKey:BuyerId"`
-	SalesAsSeller  []Sale         `gorm:"foreignKey:SellerId"`
+	Lastname              string `gorm:"not null"`
+	Role                  string `gorm:"not null;default:user"`
+	LastConnexion         time.Time
+	CreatedAt             time.Time
+	UpdatedAt             time.Time
+	DeletedAt             *time.Time `gorm:"index"`
+	Tickets               []Ticket   `gorm:"foreignKey:UserId"`
+	OrganizationId        uuid.UUID
+	Organization          *Organization  `gorm:"foreignKey:OrganizationId"`
+	Interests             []Interest     `gorm:"many2many:user_interests;"`
+	ConversationsAsBuyer  []Conversation `gorm:"foreignKey:BuyerId"`
+	ConversationsAsSeller []Conversation `gorm:"foreignKey:SellerId"`
+	Messages              []Message      `gorm:"foreignKey:AuthorId"`
+	SalesAsBuyer          []Sale         `gorm:"foreignKey:BuyerId"`
+	SalesAsSeller         []Sale         `gorm:"foreignKey:SellerId"`
 }

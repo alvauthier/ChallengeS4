@@ -2,8 +2,11 @@ package main
 
 import (
 	"fmt"
+	"log"
+	"weezemaster/internal/config"
 	"weezemaster/internal/controller"
 	"weezemaster/internal/database"
+	"weezemaster/internal/middleware"
 
 	_ "weezemaster/docs"
 
@@ -27,13 +30,37 @@ import (
 //	@BasePath	/
 
 func main() {
+	// erro := godotenv.Load("../../.env")
+	// if erro != nil {
+	// 	log.Fatalf("Error loading .env file")
+	// }
+
+	// env := os.Getenv("ENVIRONMENT")
+
 	fmt.Println("Starting server...")
 	router := echo.New()
 	database.InitDB()
 
-	router.GET("/users", controller.GetAllUsers)
+	err := config.InitFirebase()
+	if err != nil {
+		log.Fatalf("Failed to initialize Firebase: %v", err)
+	}
+
+	router.Use(func(next echo.HandlerFunc) echo.HandlerFunc {
+		return func(c echo.Context) error {
+			c.Response().Header().Set("Content-Type", "application/json; charset=utf-8")
+			return next(c)
+		}
+	})
+
+	authenticated := router.Group("")
+	authenticated.Use(middleware.JWTMiddleware())
+
+	router.POST("/register", controller.Register)
+	router.POST("/login", controller.Login)
+	router.POST("/refresh", controller.RefreshAccessToken)
+	authenticated.GET("/users", controller.GetAllUsers, middleware.CheckRole("admin"))
 	router.GET("/users/:id", controller.GetUser)
-	router.POST("/users", controller.CreateUser)
 	router.PATCH("/users/:id", controller.UpdateUser)
 	router.DELETE("/users/:id", controller.DeleteUser)
 
@@ -49,14 +76,66 @@ func main() {
 	router.PATCH("/categories/:id", controller.UpdateCategory)
 	router.DELETE("/categories/:id", controller.DeleteCategory)
 
+	router.POST("/registerorganizer", controller.RegisterOrganizer)
+
+	router.POST("/registerorganizer", controller.RegisterOrganizer)
+
+	router.GET("/tickets", controller.GetAllTickets)
+	router.GET("/tickets/:id", controller.GetTicket)
+	router.POST("/tickets", controller.CreateTicket)
+	router.PATCH("/tickets/:id", controller.UpdateTicket)
+	router.DELETE("/tickets/:id", controller.DeleteTicket)
+	authenticated.GET("/tickets/mytickets", controller.GetUserTickets, middleware.CheckRole("user"))
+
+	router.GET("/ticketlisting", controller.GetAllTicketListings)
+	router.GET("/ticketlisting/:id", controller.GetTicketListings)
+	router.POST("/ticketlisting", controller.CreateTicketListings)
+	router.PATCH("/ticketlisting/:id", controller.UpdateTicketListing)
+	router.DELETE("/ticketlisting/:id", controller.DeleteTicketListing)
+	router.GET("/ticketlisting/concert/:id", controller.GetTicketListingByConcertId)
+
 	router.GET("/concerts", controller.GetAllConcerts)
 	router.GET("/concerts/:id", controller.GetConcert)
-	router.POST("/concerts", controller.CreateConcert)
-	router.PATCH("/concerts/:id", controller.UpdateConcert)
-	router.DELETE("/concerts/:id", controller.DeleteConcert)
+	// authenticated.GET("/concerts/:id", controller.GetConcert, middleware.CheckRole("user")) // pour tester les rôles
+	router.POST("/concerts", controller.CreateConcert) // changed to public for testing notifications more easily
+	// authenticated.POST("/concerts", controller.CreateConcert, middleware.CheckRole("organizer", "admin"))
+	authenticated.PATCH("/concerts/:id", controller.UpdateConcert)
+	authenticated.DELETE("/concerts/:id", controller.DeleteConcert)
+	authenticated.GET("/organization/concerts", controller.GetConcertByOrganizationID, middleware.CheckRole("organizer"))
+
+	authenticated.GET("/user/interests", controller.GetUserInterests, middleware.CheckRole("user"))
+	authenticated.POST("/user/interests/:id", controller.AddUserInterest, middleware.CheckRole("user"))
+	authenticated.DELETE("/user/interests/:id", controller.RemoveUserInterest, middleware.CheckRole("user"))
+
+	authenticated.POST("/reservation", controller.CreateReservation, middleware.CheckRole("user"))
+	authenticated.POST("/ticket_listing_reservation/:ticketListingId", controller.CreateTicketListingReservation, middleware.CheckRole("user"))
+
+	authenticated.POST("/create-payment-intent", controller.CreatePaymentIntent, middleware.CheckRole("user"))
 
 	router.GET("/swagger/*", echoSwagger.WrapHandler)
 
-	router.Start(":8080")
+	router.GET("/conversations/:id", controller.GetConversation)
+	router.POST("/conversations", controller.CreateConversation)
 
+	router.POST("/messages", controller.PostMessage)
+
+	// if env == "prod" {
+	// 	// Configuration TLS pour production
+	// 	certFile := "/etc/letsencrypt/live/alexandrevauthier.dev/fullchain.pem"
+	// 	keyFile := "/etc/letsencrypt/live/alexandrevauthier.dev/privkey.pem"
+
+	// 	// Redirection HTTP vers HTTPS
+	// 	go func() {
+	// 		fmt.Println("Starting HTTP server on port 80")
+	// 		router.Pre(echoMiddleware.HTTPSRedirect())
+	// 		router.Start(":80")
+	// 	}()
+
+	// 	fmt.Println("Starting HTTPS server on port 443")
+	// 	router.StartTLS(":443", certFile, keyFile)
+	// } else {
+	// 	// Démarrage du serveur en mode développement
+	// 	router.Start(":8080")
+	// }
+	router.Start(":8080")
 }

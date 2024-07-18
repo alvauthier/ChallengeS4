@@ -4,6 +4,7 @@ import 'package:weezemaster/core/models/interest.dart';
 import 'package:weezemaster/components/user_interest_chip.dart';
 import 'package:weezemaster/core/services/api_services.dart';
 import 'package:weezemaster/core/exceptions/api_exception.dart';
+import 'package:weezemaster/core/services/token_services.dart';
 
 class UserInterestsScreen extends StatefulWidget {
   const UserInterestsScreen({super.key});
@@ -116,6 +117,16 @@ class _UserInterestsScreenState extends State<UserInterestsScreen> {
     return topic.toLowerCase().replaceAll(' ', '_');
   }
 
+  Future<void> clearTokens() async {
+    TokenService tokenService = TokenService();
+    await tokenService.clearTokens();
+  }
+
+  void _logout() async {
+    await clearTokens();
+    Navigator.of(context).pushReplacementNamed('/login');
+  }
+
   @override
   Widget build(BuildContext context) {
     if (isLoading) {
@@ -139,6 +150,15 @@ class _UserInterestsScreenState extends State<UserInterestsScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Centres d\'intérêts'),
+        actions: [
+          TextButton(
+            onPressed: _logout,
+            child: const Text(
+              'Déconnexion',
+              style: TextStyle(color: Colors.red),
+            ),
+          ),
+        ],
       ),
       body: Padding(
         padding: const EdgeInsets.all(10.0),

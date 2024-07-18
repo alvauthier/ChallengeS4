@@ -1,9 +1,13 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
-import 'package:weezemaster/home/blocs/home_bloc.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:weezemaster/home_orga/blocs/home_bloc.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import 'package:weezemaster/concert/concert_screen.dart';
 import 'package:weezemaster/components/search_bar.dart';
+import 'package:weezemaster/login_register_screen.dart';
 
 class OrganizerConcertScreen extends StatefulWidget {
   const OrganizerConcertScreen({super.key});
@@ -16,6 +20,8 @@ class OrganizerConcertScreen extends StatefulWidget {
 class _OrganizerConcertScreenState extends State<OrganizerConcertScreen> {
   final TextEditingController _searchController = TextEditingController();
   List _filteredConcerts = [];
+    final storage = const FlutterSecureStorage();
+
 
   @override
   void initState() {
@@ -36,6 +42,53 @@ class _OrganizerConcertScreenState extends State<OrganizerConcertScreen> {
 
   Future<void> _refreshData(BuildContext context) async {
     context.read<HomeBloc>().add(HomeDataLoaded());
+  }
+
+  Future<String> getUserIdFromJwt() async {
+    String? jwt = await storage.read(key: 'access_token');
+    if (jwt != null) {
+      Map<String, dynamic> decodedToken = _decodeToken(jwt);
+      return decodedToken['id'] as String;
+    } else {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => const LoginRegisterScreen()),
+      );
+      return '';
+    }
+  }
+
+  Map<String, dynamic> _decodeToken(String token) {
+    final parts = token.split('.');
+    if (parts.length != 3) {
+      throw Exception('Invalid token');
+    }
+
+    final payload = _decodeBase64(parts[1]);
+    final payloadMap = json.decode(payload);
+    if (payloadMap is! Map<String, dynamic>) {
+      throw Exception('Invalid payload');
+    }
+
+    return payloadMap;
+  }
+
+  String _decodeBase64(String str) {
+    String output = str.replaceAll('-', '+').replaceAll('_', '/');
+    switch (output.length % 4) {
+      case 0:
+        break;
+      case 2:
+        output += '==';
+        break;
+      case 3:
+        output += '=';
+        break;
+      default:
+        throw Exception('Illegal base64url string!');
+    }
+
+    return utf8.decode(base64Url.decode(output));
   }
 
   String formatDate(String date) {
@@ -124,7 +177,7 @@ class _OrganizerConcertScreenState extends State<OrganizerConcertScreen> {
                         child: Align(
                           alignment: Alignment.centerLeft,
                           child: Text(
-                            '${_filteredConcerts.length} ${_filteredConcerts.length == 1 ? 'concert' : 'concerts'}',
+                            ' ${_filteredConcerts.length == 1 ? 'Mon concert' : ' Mes concerts'}',
                             style: const TextStyle(
                               fontSize: 30,
                               fontFamily: 'Readex Pro',
@@ -138,14 +191,6 @@ class _OrganizerConcertScreenState extends State<OrganizerConcertScreen> {
                           itemBuilder: (context, index) {
                             final concert = _filteredConcerts[index];
                             return GestureDetector(
-                              onTap: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => ConcertScreen(concertId: concert.id),
-                                  ),
-                                );
-                              },
                               child: Padding(
                                 padding: const EdgeInsets.symmetric(vertical: 20.0, horizontal: 10.0),
                                 child: Card(

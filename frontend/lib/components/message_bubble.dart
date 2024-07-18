@@ -4,7 +4,6 @@ class MessageBubble extends StatelessWidget {
   final String authorId;
   final String content;
   final bool isCurrentUser;
-  final String sendAt;
   final bool readed;
 
   const MessageBubble({
@@ -12,7 +11,6 @@ class MessageBubble extends StatelessWidget {
     required this.authorId,
     required this.content,
     required this.isCurrentUser,
-    required this.sendAt,
     required this.readed,
   }) : super(key: key);
 
@@ -53,11 +51,6 @@ class MessageBubble extends StatelessWidget {
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text(
-                sendAt,
-                style: const TextStyle(fontSize: 10, color: Colors.grey),
-              ),
-              const SizedBox(width: 5),
               if (readed)
                 const Icon(
                   Icons.check,

@@ -11,6 +11,8 @@ class Conversation {
   final SellerBuyer seller;
   final String ticketListingId;
   final TicketListing ticketListing;
+  final List messages;
+  final int price;
 
   Conversation({
     required this.id,
@@ -22,6 +24,8 @@ class Conversation {
     required this.seller,
     required this.ticketListingId,
     required this.ticketListing,
+    required this.messages,
+    required this.price,
   });
 
   factory Conversation.fromJson(Map<String, dynamic> json) {
@@ -35,6 +39,8 @@ class Conversation {
       seller: json['Seller'] != null ? SellerBuyer.fromJson(json['Seller']) : SellerBuyer(firstname: '', lastname: ''),
       ticketListingId: json['TicketListingId'],
       ticketListing: TicketListing.fromJson(json['TicketListing']),
+      messages: json['Messages'] ?? [],
+      price: json['Price'] ?? 0,
     );
   }
 }

@@ -1,6 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:weezemaster/core/services/payment_services.dart';
-import 'package:weezemaster/user_interests_screen.dart';
+import 'package:weezemaster/core/services/token_services.dart';
+import 'package:weezemaster/login_register_screen.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:weezemaster/thank_you_screen.dart';
 
 class Ticket {
   final String id;
@@ -38,6 +43,48 @@ class ResaleTicket extends StatelessWidget {
   final Ticket ticket;
 
   const ResaleTicket({super.key, required this.ticket});
+
+  Future<void> updateTicketListingStatus(BuildContext context, String ticketId) async {
+    final tokenService = TokenService();
+    String? jwtToken = await tokenService.getValidAccessToken();
+
+    final body = jsonEncode({
+      'ticketListingId': ticketId,
+    });
+
+    try {
+      final apiUrl = '${dotenv.env['API_PROTOCOL']}://${dotenv.env['API_HOST']}:${dotenv.env['API_PORT']}/ticket_listing_reservation/$ticketId';
+      final response = await http.post(
+        Uri.parse(apiUrl),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $jwtToken',
+        },
+        body: body,
+      );
+
+      if (response.statusCode == 200) {
+        print('Ticket listing purchased');
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Ticket purchased.')),
+        );
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const ThankYouScreen()),
+        );
+      } else {
+        print('Failed to update ticket listing status: ${response.body}');
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Failed to update ticket listing status.')),
+        );
+      }
+    } catch (e) {
+      print('Error updating ticket listing status: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Error updating ticket listing status.')),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -100,12 +147,19 @@ class ResaleTicket extends StatelessWidget {
                         mainAxisAlignment: MainAxisAlignment.end,
                         children: [
                           ElevatedButton(
-                            onPressed: () {
-                              // navigate to user interest screen FOR DEBUG ONLY NOW
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(builder: (context) => UserInterestsScreen()),
-                              );
+                            onPressed: () async {
+                              final tokenService = TokenService();
+                              String? token = await tokenService.getValidAccessToken();
+                              if (token == null) {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => const LoginRegisterScreen(),
+                                  ),
+                                );
+                              } else {
+                                // here we navigate to a new conversation with the reseller
+                              }
                             },
                             style: ElevatedButton.styleFrom(
                               foregroundColor: Colors.white,
@@ -124,27 +178,38 @@ class ResaleTicket extends StatelessWidget {
                           const SizedBox(width: 10),
                           ElevatedButton(
                             onPressed: () async {
-                              final paymentIntentData = await paymentService.createPaymentIntent(ticket.id, 'tl_');
-                              if (paymentIntentData != null) {
-                                try {
-                                  await paymentService.initAndPresentPaymentSheet(
-                                    context,
-                                    paymentIntentData['client_secret'],
-                                  );
+                              final tokenService = TokenService();
+                              String? token = await tokenService.getValidAccessToken();
+                              if (token == null) {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => const LoginRegisterScreen(),
+                                  ),
+                                );
+                              } else {
+                                final paymentIntentData = await paymentService.createPaymentIntent(ticket.id, 'tl_');
+                                if (paymentIntentData != null) {
+                                  try {
+                                    await paymentService.initAndPresentPaymentSheet(
+                                      context,
+                                      paymentIntentData['client_secret'],
+                                    );
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      const SnackBar(content: Text('Paiement réussi')),
+                                    );
+                                    await updateTicketListingStatus(context, ticket.id);
+                                  } catch (e) {
+                                    print('Error presenting payment sheet: $e');
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      const SnackBar(content: Text('Echec du paiement')),
+                                    );
+                                  }
+                                } else {
                                   ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(content: Text('Paiement réussi')),
-                                  );
-                                  // missing proceedToReservation function (need to update the userId in ticket and archive the transaction)
-                                } catch (e) {
-                                  print('Error presenting payment sheet: $e');
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(content: Text('Echec du paiement')),
+                                    const SnackBar(content: Text('Failed to create payment intent')),
                                   );
                                 }
-                              } else {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(content: Text('Failed to create payment intent')),
-                                );
                               }
                             },
                             style: ElevatedButton.styleFrom(

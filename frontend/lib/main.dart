@@ -3,7 +3,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:weezemaster/my_tickets/blocs/my_tickets_bloc.dart';
 import 'package:weezemaster/conversations/conversations_screen.dart';
-import 'package:weezemaster/profile_screen.dart';
 import 'package:flutter_stripe/flutter_stripe.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:flutter/material.dart';
@@ -12,6 +11,7 @@ import 'package:weezemaster/home/home_screen.dart';
 import 'package:weezemaster/register_concert_screen.dart';
 import 'package:weezemaster/home_orga/concert_orga_screen.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:weezemaster/user_interests_screen.dart';
 import 'firebase_options.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'dart:convert';
@@ -61,7 +61,7 @@ class MyApp extends StatelessWidget {
             builder = (BuildContext _) => const ConversationsScreen();
             break;
           case '/profile':
-            builder = (BuildContext _) => const ProfileScreen();
+            builder = (BuildContext _) => const UserInterestsScreen();
             break;
           case '/register-concert':
             builder = (BuildContext _) => const RegisterConcertScreen();
@@ -95,7 +95,7 @@ class _MyScaffoldState extends State<MyScaffold> {
     super.initState();
     getUserRoleFromJwt();
   }
-  
+
   Future<void> getUserRoleFromJwt() async {
     String? jwt = await storage.read(key: 'access_token');
     if (jwt != null) {
@@ -166,7 +166,7 @@ class _MyScaffoldState extends State<MyScaffold> {
     Navigator(
       key: GlobalKey<NavigatorState>(),
       onGenerateRoute: (routeSettings) {
-        return MaterialPageRoute(builder: (context) => const ProfileScreen());
+        return MaterialPageRoute(builder: (context) => const UserInterestsScreen());
       },
     ),
     Navigator(
@@ -189,7 +189,7 @@ class _MyScaffoldState extends State<MyScaffold> {
       body: IndexedStack(
         index: selectedIndex,
         children: userRole == null
-            ? [pages[0],pages[3]] 
+            ? [pages[0],pages[3]]
             : (userRole == 'user'
                 ? pages.sublist(0, 3)
                 : [pages[5],pages[4],pages[3]]),
@@ -275,5 +275,3 @@ class _MyScaffoldState extends State<MyScaffold> {
     );
   }
 }
-
-

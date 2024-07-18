@@ -170,6 +170,7 @@ func GetUserTickets(c echo.Context) error {
 	if err := db.Preload("ConcertCategory").
 		Preload("ConcertCategory.Concert").
 		Preload("ConcertCategory.Category").
+		Preload("TicketListing").
 		Where("user_id = ?", user.ID).Find(&userTickets).Error; err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
 	}

@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:weezemaster/home/home_screen.dart';
-import 'package:weezemaster/profile_screen.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
@@ -80,7 +79,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                 if (_formKey.currentState!.validate()) {
                                   // Process data.
                                   try {
-                                    final apiUrl = 'http://${dotenv.env['API_HOST']}:${dotenv.env['API_PORT']}/login';
+                                    final apiUrl = '${dotenv.env['API_PROTOCOL']}://${dotenv.env['API_HOST']}:${dotenv.env['API_PORT']}/login';
                                     var response = await http.post(
                                       Uri.parse(apiUrl),
                                       headers: <String, String>{

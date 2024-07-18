@@ -30,6 +30,13 @@ import (
 //	@BasePath	/
 
 func main() {
+	// erro := godotenv.Load("../../.env")
+	// if erro != nil {
+	// 	log.Fatalf("Error loading .env file")
+	// }
+
+	// env := os.Getenv("ENVIRONMENT")
+
 	fmt.Println("Starting server...")
 	router := echo.New()
 	database.InitDB()
@@ -101,6 +108,7 @@ func main() {
 	authenticated.DELETE("/user/interests/:id", controller.RemoveUserInterest, middleware.CheckRole("user"))
 
 	authenticated.POST("/reservation", controller.CreateReservation, middleware.CheckRole("user"))
+	authenticated.POST("/ticket_listing_reservation/:ticketListingId", controller.CreateTicketListingReservation, middleware.CheckRole("user"))
 
 	authenticated.POST("/create-payment-intent", controller.CreatePaymentIntent, middleware.CheckRole("user"))
 
@@ -111,6 +119,23 @@ func main() {
 
 	router.POST("/messages", controller.PostMessage)
 
-	router.Start(":8080")
+	// if env == "prod" {
+	// 	// Configuration TLS pour production
+	// 	certFile := "/etc/letsencrypt/live/alexandrevauthier.dev/fullchain.pem"
+	// 	keyFile := "/etc/letsencrypt/live/alexandrevauthier.dev/privkey.pem"
 
+	// 	// Redirection HTTP vers HTTPS
+	// 	go func() {
+	// 		fmt.Println("Starting HTTP server on port 80")
+	// 		router.Pre(echoMiddleware.HTTPSRedirect())
+	// 		router.Start(":80")
+	// 	}()
+
+	// 	fmt.Println("Starting HTTPS server on port 443")
+	// 	router.StartTLS(":443", certFile, keyFile)
+	// } else {
+	// 	// Démarrage du serveur en mode développement
+	// 	router.Start(":8080")
+	// }
+	router.Start(":8080")
 }

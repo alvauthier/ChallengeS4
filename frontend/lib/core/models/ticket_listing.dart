@@ -1,6 +1,6 @@
 class TicketListing {
   final String id;
-  final int price;
+  final double price;
   final String status;
   final DateTime createdAt;
   final DateTime updatedAt;

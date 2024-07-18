@@ -22,7 +22,7 @@ class _UserListState extends State<UserList> {
 
   Future<void> _fetchUsers() async {
     String? jwtToken = await storage.read(key: 'access_token');
-    print('JWT Token: $jwtToken'); // Log the JWT token
+    print('JWT Token: $jwtToken');
     if (jwtToken != null) {
       final response = await http.get(
         Uri.parse('http://127.0.0.1:8080/users'),
@@ -48,39 +48,116 @@ class _UserListState extends State<UserList> {
   }
 
   void _editUser(dynamic user) {
-    // Implémentation de la fonction d'édition
-    print('Edit user: $user');
+    final _formKey = GlobalKey<FormState>();
+    String updatedFirstName = user['Firstname'];
+    String updatedLastName = user['Lastname'];
+
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Edit User'),
+          content: Form(
+            key: _formKey,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: <Widget>[
+                TextFormField(
+                  initialValue: updatedFirstName,
+                  decoration: InputDecoration(labelText: 'First Name'),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Please enter a first name';
+                    }
+                    return null;
+                  },
+                  onSaved: (value) {
+                    updatedFirstName = value!;
+                  },
+                ),
+                TextFormField(
+                  initialValue: updatedLastName,
+                  decoration: InputDecoration(labelText: 'Last Name'),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Please enter a last name';
+                    }
+                    return null;
+                  },
+                  onSaved: (value) {
+                    updatedLastName = value!;
+                  },
+                ),
+              ],
+            ),
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: Text('Cancel'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            TextButton(
+              child: Text('Save'),
+              onPressed: () async {
+                if (_formKey.currentState!.validate()) {
+                  _formKey.currentState!.save();
+                  try {
+                    await _updateUser(user['ID'], updatedFirstName, updatedLastName);
+                    Navigator.of(context).pop();
+                  } catch (e) {
+                    print('Error updating user: $e');
+                  }
+                }
+              },
+            ),
+          ],
+        );
+      },
+    );
   }
 
-  void _deleteUser(dynamic user) async {
-    String? jwtToken = await storage.read(key: 'access_token');
-    if (jwtToken != null) {
-      final response = await http.delete(
-        Uri.parse('http://127.0.0.1:8080/users/${user['id']}'),
-        headers: {
-          'Authorization': 'Bearer $jwtToken',
-          'Content-Type': 'application/json',
-        },
-      );
+  Future<void> _updateUser(String id, String firstName, String lastName) async {
+    try {
+      String? jwtToken = await storage.read(key: 'access_token');
+      if (jwtToken != null) {
+        final url = 'http://127.0.0.1:8080/users/$id';
+        print('Updating user at URL: $url with first name: $firstName and last name: $lastName');
+        final response = await http.patch(
+          Uri.parse(url),
+          headers: {
+            'Authorization': 'Bearer $jwtToken',
+            'Content-Type': 'application/json',
+          },
+          body: json.encode({
+            'Firstname': firstName,
+            'Lastname': lastName,
+            'updatedAt': DateTime.now().toIso8601String(), // Automatically update updatedAt
+          }),
+        );
 
-      print('Delete response status: ${response.statusCode}');
-      print('Delete response body: ${response.body}');
+        print('Update response status: ${response.statusCode}');
+        print('Update response body: ${response.body}');
 
-      if (response.statusCode == 200) {
-        setState(() {
-          users.remove(user);
-        });
+        if (response.statusCode == 200 || response.statusCode == 204) {
+          setState(() {
+            int index = users.indexWhere((user) => user['ID'] == id);
+            if (index != -1) {
+              users[index]['Firstname'] = firstName;
+              users[index]['Lastname'] = lastName;
+              users[index]['updatedAt'] = DateTime.now().toIso8601String();
+            }
+          });
+        } else {
+          print('Failed to update user: ${response.body}');
+        }
       } else {
-        print('Failed to delete user: ${response.body}');
+        print('No JWT Token found');
       }
-    } else {
-      print('No JWT Token found');
+    } catch (e) {
+      print('Error updating user: $e');
     }
-  }
-
-  void _addUser() {
-    // Implémentation de la fonction d'ajout d'un nouvel utilisateur
-    print('Add new user');
   }
 
   @override
@@ -105,19 +182,10 @@ class _UserListState extends State<UserList> {
                   icon: Icon(Icons.edit),
                   onPressed: () => _editUser(user),
                 ),
-                IconButton(
-                  icon: Icon(Icons.delete),
-                  onPressed: () => _deleteUser(user),
-                ),
               ],
             ),
           );
         },
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _addUser,
-        child: Icon(Icons.add),
-        tooltip: 'Add User',
       ),
     );
   }

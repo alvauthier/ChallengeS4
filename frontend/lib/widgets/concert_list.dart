@@ -52,7 +52,7 @@ class _ConcertListState extends State<ConcertList> {
     String updatedName = concert['Name'];
     String updatedDescription = concert['Description'];
     String updatedLocation = concert['Location'];
-    DateTime updatedDate = DateTime.parse(concert['Date']);
+    String updatedDate = concert['Date'];
 
     showDialog(
       context: context,
@@ -61,63 +61,62 @@ class _ConcertListState extends State<ConcertList> {
           title: Text('Edit Concert'),
           content: Form(
             key: _formKey,
-            child: SingleChildScrollView(
-              child: Column(
-                children: [
-                  TextFormField(
-                    initialValue: updatedName,
-                    decoration: InputDecoration(labelText: 'Name'),
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Please enter a name';
-                      }
-                      return null;
-                    },
-                    onSaved: (value) {
-                      updatedName = value!;
-                    },
-                  ),
-                  TextFormField(
-                    initialValue: updatedDescription,
-                    decoration: InputDecoration(labelText: 'Description'),
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Please enter a description';
-                      }
-                      return null;
-                    },
-                    onSaved: (value) {
-                      updatedDescription = value!;
-                    },
-                  ),
-                  TextFormField(
-                    initialValue: updatedLocation,
-                    decoration: InputDecoration(labelText: 'Location'),
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Please enter a location';
-                      }
-                      return null;
-                    },
-                    onSaved: (value) {
-                      updatedLocation = value!;
-                    },
-                  ),
-                  TextFormField(
-                    initialValue: updatedDate.toIso8601String().split('T')[0],
-                    decoration: InputDecoration(labelText: 'Date (YYYY-MM-DD)'),
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Please enter a date';
-                      }
-                      return null;
-                    },
-                    onSaved: (value) {
-                      updatedDate = DateTime.parse(value!);
-                    },
-                  ),
-                ],
-              ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: <Widget>[
+                TextFormField(
+                  initialValue: updatedName,
+                  decoration: InputDecoration(labelText: 'Name'),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Please enter a name';
+                    }
+                    return null;
+                  },
+                  onSaved: (value) {
+                    updatedName = value!;
+                  },
+                ),
+                TextFormField(
+                  initialValue: updatedDescription,
+                  decoration: InputDecoration(labelText: 'Description'),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Please enter a description';
+                    }
+                    return null;
+                  },
+                  onSaved: (value) {
+                    updatedDescription = value!;
+                  },
+                ),
+                TextFormField(
+                  initialValue: updatedLocation,
+                  decoration: InputDecoration(labelText: 'Location'),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Please enter a location';
+                    }
+                    return null;
+                  },
+                  onSaved: (value) {
+                    updatedLocation = value!;
+                  },
+                ),
+                TextFormField(
+                  initialValue: updatedDate,
+                  decoration: InputDecoration(labelText: 'Date (YYYY-MM-DD)'),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Please enter a date';
+                    }
+                    return null;
+                  },
+                  onSaved: (value) {
+                    updatedDate = value!;
+                  },
+                ),
+              ],
             ),
           ),
           actions: <Widget>[
@@ -147,12 +146,14 @@ class _ConcertListState extends State<ConcertList> {
     );
   }
 
-  Future<void> _updateConcert(String id, String name, String description, String location, DateTime date) async {
+  Future<void> _updateConcert(String id, String name, String description, String location, String date) async {
     try {
-      String? jwtToken = await _getValidToken();
+      String? jwtToken = await storage.read(key: 'access_token');
       if (jwtToken != null) {
+        final url = 'http://127.0.0.1:8080/concerts/$id';
+        print('Updating concert at URL: $url with name: $name');
         final response = await http.patch(
-          Uri.parse('http://127.0.0.1:8080/concerts/$id'),
+          Uri.parse(url),
           headers: {
             'Authorization': 'Bearer $jwtToken',
             'Content-Type': 'application/json',
@@ -161,21 +162,21 @@ class _ConcertListState extends State<ConcertList> {
             'Name': name,
             'Description': description,
             'Location': location,
-            'Date': date.toIso8601String(),
+            'Date': date,
           }),
         );
 
         print('Update response status: ${response.statusCode}');
         print('Update response body: ${response.body}');
 
-        if (response.statusCode == 200) {
+        if (response.statusCode == 200 || response.statusCode == 204) {
           setState(() {
             int index = concerts.indexWhere((concert) => concert['ID'] == id);
             if (index != -1) {
               concerts[index]['Name'] = name;
               concerts[index]['Description'] = description;
               concerts[index]['Location'] = location;
-              concerts[index]['Date'] = date.toIso8601String();
+              concerts[index]['Date'] = date;
             }
           });
         } else {
@@ -186,74 +187,6 @@ class _ConcertListState extends State<ConcertList> {
       }
     } catch (e) {
       print('Error updating concert: $e');
-    }
-  }
-
-  Future<void> _deleteConcert(dynamic concert) async {
-    try {
-      String? jwtToken = await _getValidToken();
-      if (jwtToken != null) {
-        final response = await http.delete(
-          Uri.parse('http://127.0.0.1:8080/concerts/${concert['ID']}'),
-          headers: {
-            'Authorization': 'Bearer $jwtToken',
-            'Content-Type': 'application/json',
-          },
-        );
-
-        print('Delete response status: ${response.statusCode}');
-        print('Delete response body: ${response.body}');
-
-        if (response.statusCode == 200 || response.statusCode == 204) {
-          setState(() {
-            concerts.remove(concert);
-          });
-        } else {
-          print('Failed to delete concert: ${response.body}');
-        }
-      } else {
-        print('No JWT Token found');
-      }
-    } catch (e) {
-      print('Error deleting concert: $e');
-    }
-  }
-
-  Future<String?> _getValidToken() async {
-    // Retrieve the token from storage
-    String? jwtToken = await storage.read(key: 'access_token');
-
-    // Check if the token is expired or invalid (this is a placeholder check)
-    // In a real application, you might decode the JWT token and check its expiration date
-    if (jwtToken == null || jwtToken.isEmpty) {
-      // Token is invalid or expired, try to renew it
-      jwtToken = await _renewToken();
-    }
-
-    return jwtToken;
-  }
-
-  Future<String?> _renewToken() async {
-    // Placeholder for token renewal logic
-    // This could involve making a request to a refresh token endpoint
-    // and storing the new token in secure storage
-    print('Renewing token...');
-    // Example logic to get a new token
-    final response = await http.post(
-      Uri.parse('http://127.0.0.1:8080/auth/renew'),
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: json.encode({'refresh_token': 'your_refresh_token_here'}),
-    );
-
-    if (response.statusCode == 200) {
-      final newToken = json.decode(response.body)['access_token'];
-      await storage.write(key: 'access_token', value: newToken);
-      return newToken;
-    } else {
-      print('Failed to renew token: ${response.body}');
-      return null;
     }
   }
 
@@ -273,18 +206,9 @@ class _ConcertListState extends State<ConcertList> {
           return ListTile(
             title: Text(name),
             subtitle: Text(description),
-            trailing: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                IconButton(
-                  icon: Icon(Icons.edit),
-                  onPressed: () => _editConcert(concert),
-                ),
-                IconButton(
-                  icon: Icon(Icons.delete),
-                  onPressed: () => _deleteConcert(concert),
-                ),
-              ],
+            trailing: IconButton(
+              icon: Icon(Icons.edit),
+              onPressed: () => _editConcert(concert),
             ),
           );
         },

@@ -24,32 +24,35 @@ class _UserInterestsScreenState extends State<UserInterestsScreen> {
   void initState() {
     super.initState();
     verifyJwtAndRedirectIfNecessary();
-    fetchInterests();
-    requestNotificationPermission();
-    
-    FirebaseMessaging.instance.getToken().then((token) {
-      print("FCM Token: $token");
-    });
-    FirebaseMessaging.onMessage.listen((RemoteMessage message) {
-      print('Got a message whilst in the foreground here!');
-      print('Message data: ${message.data}');
-
-      if (message.notification != null) {
-        print('Message also contained a notification: ${message.notification}');
-      }
-    });
   }
 
   Future<void> verifyJwtAndRedirectIfNecessary() async {
     final tokenService = TokenService();
     String? token = await tokenService.getValidAccessToken();
     if (token == null) {
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => const LoginRegisterScreen(),
-        ),
-      );
+      if (mounted) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => const LoginRegisterScreen(),
+          ),
+        );
+      }
+    } else {
+      await fetchInterests();
+      requestNotificationPermission();
+      
+      FirebaseMessaging.instance.getToken().then((token) {
+        print("FCM Token: $token");
+      });
+      FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+        print('Got a message whilst in the foreground here!');
+        print('Message data: ${message.data}');
+
+        if (message.notification != null) {
+          print('Message also contained a notification: ${message.notification}');
+        }
+      });
     }
   }
 
@@ -57,21 +60,27 @@ class _UserInterestsScreenState extends State<UserInterestsScreen> {
     try {
       final interests = await ApiServices.getAllInterests();
       final userInterests = await ApiServices.getUserInterests();
-      setState(() {
-        allInterests = interests;
-        this.userInterests = userInterests;
-        isLoading = false;
-      });
+      if (mounted) {
+        setState(() {
+          allInterests = interests;
+          this.userInterests = userInterests;
+          isLoading = false;
+        });
+      }
     } on ApiException catch (e) {
-      setState(() {
-        errorMessage = e.message;
-        isLoading = false;
-      });
+      if (mounted) {
+        setState(() {
+          errorMessage = e.message;
+          isLoading = false;
+        });
+      }
     } catch (e) {
-      setState(() {
-        errorMessage = 'An unknown error occurred';
-        isLoading = false;
-      });
+      if (mounted) {
+        setState(() {
+          errorMessage = 'An unknown error occurred';
+          isLoading = false;
+        });
+      }
     }
   }
 
@@ -101,13 +110,17 @@ class _UserInterestsScreenState extends State<UserInterestsScreen> {
         print('Subscribed from topic: ${sanitizeTopicName(interest.name)}');
       }
     } on ApiException catch (e) {
-      setState(() {
-        errorMessage = e.message;
-      });
+      if (mounted) {
+        setState(() {
+          errorMessage = e.message;
+        });
+      }
     } catch (e) {
-      setState(() {
-        errorMessage = 'An unknown error occurred';
-      });
+      if (mounted) {
+        setState(() {
+          errorMessage = 'An unknown error occurred';
+        });
+      }
     }
   }
 
@@ -139,7 +152,9 @@ class _UserInterestsScreenState extends State<UserInterestsScreen> {
 
   void _logout() async {
     await clearTokens();
-    Navigator.of(context).pushReplacementNamed('/login');
+    if (mounted) {
+      Navigator.of(context).pushReplacementNamed('/login');
+    }
   }
 
   @override

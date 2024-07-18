@@ -5,6 +5,7 @@ import 'package:weezemaster/components/user_interest_chip.dart';
 import 'package:weezemaster/core/services/api_services.dart';
 import 'package:weezemaster/core/exceptions/api_exception.dart';
 import 'package:weezemaster/core/services/token_services.dart';
+import 'package:weezemaster/login_register_screen.dart';
 
 class UserInterestsScreen extends StatefulWidget {
   const UserInterestsScreen({super.key});
@@ -22,6 +23,7 @@ class _UserInterestsScreenState extends State<UserInterestsScreen> {
   @override
   void initState() {
     super.initState();
+    verifyJwtAndRedirectIfNecessary();
     fetchInterests();
     requestNotificationPermission();
     
@@ -36,6 +38,19 @@ class _UserInterestsScreenState extends State<UserInterestsScreen> {
         print('Message also contained a notification: ${message.notification}');
       }
     });
+  }
+
+  Future<void> verifyJwtAndRedirectIfNecessary() async {
+    final tokenService = TokenService();
+    String? token = await tokenService.getValidAccessToken();
+    if (token == null) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => const LoginRegisterScreen(),
+        ),
+      );
+    }
   }
 
   Future<void> fetchInterests() async {

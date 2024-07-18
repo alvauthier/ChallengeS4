@@ -45,6 +45,15 @@ func CreateReservation(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "User not found"})
 	}
 
+	var concertCategory models.ConcertCategory
+	if err := db.Where("id = ?", reqBody.ConcertCategoryId).First(&concertCategory).Error; err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Concert category not found"})
+	}
+
+	if concertCategory.SoldTickets >= concertCategory.AvailableTickets {
+		return c.JSON(http.StatusBadRequest, map[string]string{"error": "No tickets available for this category"})
+	}
+
 	tx := db.Begin()
 	if tx.Error != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to start transaction"})
@@ -61,12 +70,6 @@ func CreateReservation(c echo.Context) error {
 	if err := tx.Create(&ticket).Error; err != nil {
 		tx.Rollback()
 		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to create ticket"})
-	}
-
-	var concertCategory models.ConcertCategory
-	if err := tx.Where("id = ?", reqBody.ConcertCategoryId).First(&concertCategory).Error; err != nil {
-		tx.Rollback()
-		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Concert category not found"})
 	}
 
 	concertCategory.SoldTickets += 1

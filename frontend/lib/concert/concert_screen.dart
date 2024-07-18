@@ -278,12 +278,7 @@ class ConcertScreen extends StatelessWidget {
                         .where((category) => category.availableTickets > category.soldTickets)
                         .toList();
 
-                    // Calcul des tickets restants
-                    int totalRemainingTickets = remainingCategories
-                        .map((category) => category.availableTickets - category.soldTickets)
-                        .reduce((value, element) => value + element);
-
-                    if (totalRemainingTickets == 0) {
+                    if (remainingCategories.isEmpty) {
                       return Center(
                         child: Text(
                           'Places épuisées',

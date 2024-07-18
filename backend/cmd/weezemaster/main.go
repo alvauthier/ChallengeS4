@@ -105,6 +105,9 @@ func main() {
 
 	router.GET("/swagger/*", echoSwagger.WrapHandler)
 
+	router.GET("/conversations/:id", controller.GetConversation)
+	router.POST("/conversations", controller.CreateConversation)
+
 	router.Start(":8080")
 
 }

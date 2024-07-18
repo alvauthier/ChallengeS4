@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -14,22 +16,81 @@ import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'dart:convert';
+import 'widgets/user_list.dart';
+import 'widgets/concert_list.dart';
+import 'widgets/category_list.dart';
+import 'widgets/interest_list.dart';
+import 'package:http/http.dart' as http;
+import 'package:flutter/foundation.dart' show kIsWeb;
 
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
-  await Firebase.initializeApp();
+  if (!kIsWeb) {
+    await Firebase.initializeApp();
+  }
   // Handle background message
+}
+
+Future<String?> simulateLogin() async {
+  try {
+    final apiUrl = kIsWeb
+        ? 'http://127.0.0.1:${dotenv.env['API_PORT']}/login'
+        : 'http://${dotenv.env['API_HOST']}:${dotenv.env['API_PORT']}/login';
+
+    // Log the API URL and credentials being sent
+    print('Attempting to login with URL: $apiUrl');
+    print('Using credentials - Email: admin@user.fr, Password: Testtest1@');
+
+    final response = await http.post(
+      Uri.parse(apiUrl),
+      headers: {
+        'Content-Type': 'application/json; charset=UTF-8',
+      },
+      body: json.encode({
+        'email': 'admin@user.fr', // Utilisation de "email" au lieu de "username"
+        'password': 'Testtest1@',
+      }),
+    );
+
+    print('Login response status: ${response.statusCode}');
+    print('Login response body: ${response.body}');
+
+    if (response.statusCode == 200) {
+      final data = json.decode(response.body) as Map<String, dynamic>;
+      final jwtToken = data['access_token'];
+      const storage = FlutterSecureStorage();
+      await storage.write(key: 'access_token', value: jwtToken);
+      print('JWT Token saved: $jwtToken');
+      return jwtToken;
+    } else {
+      print('Failed to login: ${response.body}');
+      return null;
+    }
+  } on SocketException catch (error) {
+    print('Network error during login: $error');
+    return null;
+  } catch (error) {
+    print('An error occurred during login: $error');
+    return null;
+  }
 }
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await dotenv.load(fileName: '.env');
-  Stripe.publishableKey = dotenv.env['STRIPE_PUBLIC_KEY']!;
-  await Stripe.instance.applySettings();
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
-  FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
-  initializeDateFormatting('fr_FR', null).then((_) => runApp(const MyApp()));
+
+  if (!kIsWeb) {
+    Stripe.publishableKey = dotenv.env['STRIPE_PUBLIC_KEY']!;
+    await Stripe.instance.applySettings();
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    );
+    FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+  }
+
+  initializeDateFormatting('fr_FR', null).then((_) async {
+    await simulateLogin();
+    runApp(const MyApp());
+  });
 }
 
 class MyApp extends StatelessWidget {
@@ -37,37 +98,114 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        useMaterial3: true,
+    if (kIsWeb) {
+      return MaterialApp(
+        debugShowCheckedModeBanner: false,
+        theme: ThemeData(
+          useMaterial3: true,
+        ),
+        home: const AdminDashboard(),
+        initialRoute: '/',
+        onGenerateRoute: (RouteSettings settings) {
+          WidgetBuilder builder;
+          switch (settings.name) {
+            case '/':
+              builder = (BuildContext _) => const AdminDashboard();
+              break;
+            case '/admin/users':
+              builder = (BuildContext _) => const UserList();
+              break;
+            case '/admin/concerts':
+              builder = (BuildContext _) => const ConcertList();
+              break;
+            case '/admin/categories':
+              builder = (BuildContext _) => const CategoryList();
+              break;
+            case '/admin/interests':
+              builder = (BuildContext _) => const InterestList();
+              break;
+            default:
+              throw Exception('Invalid route: ${settings.name}');
+          }
+          return MaterialPageRoute(builder: builder, settings: settings);
+        },
+      );
+    } else {
+      return MaterialApp(
+        debugShowCheckedModeBanner: false,
+        theme: ThemeData(
+          useMaterial3: true,
+        ),
+        home: const MyScaffold(),
+        initialRoute: '/',
+        onGenerateRoute: (RouteSettings settings) {
+          WidgetBuilder builder;
+          switch (settings.name) {
+            case '/':
+              builder = (BuildContext _) => const HomeScreen();
+              break;
+            case '/my-tickets':
+              builder = (BuildContext _) => BlocProvider(
+                create: (context) => MyTicketsBloc()..add(MyTicketsDataLoaded()),
+                child: const MyTicketsScreen(),
+              );
+              break;
+            case '/conversations':
+              builder = (BuildContext _) => const ConversationsScreen();
+              break;
+            case '/profile':
+              builder = (BuildContext _) => const ProfileScreen();
+              break;
+            default:
+              throw Exception('Invalid route: ${settings.name}');
+          }
+          return MaterialPageRoute(builder: builder, settings: settings);
+        },
+      );
+    }
+  }
+}
+
+class AdminDashboard extends StatelessWidget {
+  const AdminDashboard({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Admin Dashboard'),
       ),
-      home: const MyScaffold(),
-      initialRoute: '/',
-      onGenerateRoute: (RouteSettings settings) {
-        WidgetBuilder builder;
-        switch (settings.name) {
-          case '/':
-            builder = (BuildContext _) => const HomeScreen();
-            break;
-          case '/my-tickets':
-            builder = (BuildContext _) => BlocProvider(
-              create: (context) => MyTicketsBloc()..add(MyTicketsDataLoaded()),
-              child: const MyTicketsScreen(),
-            );
-            builder = (BuildContext _) => const MyTicketsScreen();
-            break;
-          case '/conversations':
-            builder = (BuildContext _) => const ConversationsScreen();
-            break;
-          case '/profile':
-            builder = (BuildContext _) => const ProfileScreen();
-            break;
-          default:
-            throw Exception('Invalid route: ${settings.name}');
-        }
-        return MaterialPageRoute(builder: builder, settings: settings);
-      },
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            ElevatedButton(
+              onPressed: () {
+                Navigator.pushNamed(context, '/admin/users');
+              },
+              child: const Text('Manage Users'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.pushNamed(context, '/admin/concerts');
+              },
+              child: const Text('Manage Concerts'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.pushNamed(context, '/admin/categories');
+              },
+              child: const Text('Manage Categories'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.pushNamed(context, '/admin/interests');
+              },
+              child: const Text('Manage Interests'),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
@@ -165,7 +303,7 @@ class _MyScaffoldState extends State<MyScaffold> {
             label: 'Accueil',
           ),
           NavigationDestination(
-            icon: userRole == 'organizer' ? Icon(Icons.event) : Icon(Icons.receipt),
+            icon: userRole == 'organizer' ? const Icon(Icons.event) : const Icon(Icons.receipt),
             label: userRole == 'organizer' ? 'Mes concerts' : 'Mes billets',
           ),
           const NavigationDestination(

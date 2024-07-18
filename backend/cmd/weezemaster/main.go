@@ -11,6 +11,7 @@ import (
 	_ "weezemaster/docs"
 
 	"github.com/labstack/echo/v4"
+	echomiddleware "github.com/labstack/echo/v4/middleware"
 	echoSwagger "github.com/swaggo/echo-swagger"
 )
 
@@ -32,8 +33,20 @@ import (
 func main() {
 	fmt.Println("Starting server...")
 	router := echo.New()
+
+	// Middleware
+	router.Use(echomiddleware.Logger())
+	router.Use(echomiddleware.Recover())
+	router.Use(echomiddleware.CORSWithConfig(echomiddleware.CORSConfig{
+		AllowOrigins: []string{"*"}, // Adjust this in production to specific origins
+		AllowMethods: []string{echo.GET, echo.HEAD, echo.PUT, echo.PATCH, echo.POST, echo.DELETE},
+		AllowHeaders: []string{echo.HeaderOrigin, echo.HeaderContentType, echo.HeaderAccept, echo.HeaderAuthorization},
+	}))
+
+	// Initialize the database
 	database.InitDB()
 
+	// Initialize Firebase
 	err := config.InitFirebase()
 	if err != nil {
 		log.Fatalf("Failed to initialize Firebase: %v", err)
@@ -71,8 +84,6 @@ func main() {
 
 	router.POST("/registerorganizer", controller.RegisterOrganizer)
 
-	router.POST("/registerorganizer", controller.RegisterOrganizer)
-
 	router.GET("/tickets", controller.GetAllTickets)
 	router.GET("/tickets/:id", controller.GetTicket)
 	router.POST("/tickets", controller.CreateTicket)
@@ -89,9 +100,7 @@ func main() {
 
 	router.GET("/concerts", controller.GetAllConcerts)
 	router.GET("/concerts/:id", controller.GetConcert)
-	// authenticated.GET("/concerts/:id", controller.GetConcert, middleware.CheckRole("user")) // pour tester les rôles
-	router.POST("/concerts", controller.CreateConcert) // changed to public for testing notifications more easily
-	// authenticated.POST("/concerts", controller.CreateConcert, middleware.CheckRole("organizer", "admin"))
+	router.POST("/concerts", controller.CreateConcert)
 	authenticated.PATCH("/concerts/:id", controller.UpdateConcert)
 	authenticated.DELETE("/concerts/:id", controller.DeleteConcert)
 
@@ -106,5 +115,4 @@ func main() {
 	router.GET("/swagger/*", echoSwagger.WrapHandler)
 
 	router.Start(":8080")
-
 }

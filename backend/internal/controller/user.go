@@ -1,13 +1,13 @@
 package controller
 
 import (
+	"fmt"
+	"log"
 	"net/http"
 	"time"
 	"weezemaster/internal/config"
 	"weezemaster/internal/database"
 	"weezemaster/internal/models"
-
-	"fmt"
 
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
@@ -163,31 +163,51 @@ func Login(c echo.Context) error {
 
 	var requestBody map[string]string
 	if err := c.Bind(&requestBody); err != nil {
+		log.Printf("Failed to bind request: %v", err)
 		return c.JSON(http.StatusBadRequest, map[string]string{"message": "Invalid request"})
 	}
+
+	// Ajoutez des logs pour vérifier ce qui est reçu
+	log.Printf("Received login request: %v", requestBody)
 
 	email := requestBody["email"]
 	password := requestBody["password"]
 
+	// Ajoutez des logs pour vérifier les valeurs extraites
+	log.Printf("Login attempt for email: %s", email)
+	log.Printf("Password provided: %s", password)
+
 	var user models.User
 	if err := db.Where("email = ?", email).First(&user).Error; err != nil {
+		log.Printf("User not found: %s", email)
 		return c.JSON(http.StatusUnauthorized, map[string]string{"message": "Invalid credentials"})
 	}
+
+	log.Printf("User found: %s", user.Email)
+	log.Printf("Stored password hash: %s", user.Password)
 
 	err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password))
 	if err != nil {
+		log.Printf("Invalid password for user: %s", user.Email)
 		return c.JSON(http.StatusUnauthorized, map[string]string{"message": "Invalid credentials"})
 	}
 
+	log.Printf("Password match for user: %s", user.Email)
+
 	accessToken, err := createAccessToken(user.ID, user.Email, user.Role)
 	if err != nil {
+		log.Printf("Failed to generate access token for user: %s, error: %v", user.Email, err)
 		return c.JSON(http.StatusInternalServerError, map[string]string{"message": err.Error()})
 	}
 
 	refreshToken, err := createRefreshToken(user.ID, user.Email, user.Role)
 	if err != nil {
+		log.Printf("Failed to generate refresh token for user: %s, error: %v", user.Email, err)
 		return c.JSON(http.StatusInternalServerError, map[string]string{"message": err.Error()})
 	}
+
+	log.Printf("Generated tokens for user: %s", user.Email)
+
 	return c.JSON(http.StatusOK, map[string]string{
 		"access_token":  accessToken,
 		"refresh_token": refreshToken,
@@ -293,7 +313,6 @@ func createAccessToken(id uuid.UUID, email, role string) (string, error) {
 		return "", err
 	}
 
-	// fmt.Println(tokenString)
 	return tokenString, nil
 }
 
@@ -304,9 +323,8 @@ func createRefreshToken(id uuid.UUID, email, role string) (string, error) {
 			"email": email,
 			"role":  role,
 			"exp":   time.Now().Add(time.Hour * 24 * 30).Unix(),
-			// "exp": time.Now().Add(time.Minute * 2).Unix(), // 2 minutes pour les tests
-			"iat": time.Now().Unix(),
-			"jti": generateJTI(),
+			"iat":   time.Now().Unix(),
+			"jti":   generateJTI(),
 		})
 
 	tokenString, err := token.SignedString(config.SecretKey)

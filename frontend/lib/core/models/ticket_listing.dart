@@ -16,7 +16,7 @@ class TicketListing {
   factory TicketListing.fromJson(Map<String, dynamic> json) {
     return TicketListing(
       id: json['ID'],
-      price: json['Price'],
+      price: (json['Price'] as num).toDouble(),
       status: json['Status'],
       createdAt: DateTime.parse(json['CreatedAt']),
       updatedAt: DateTime.parse(json['UpdatedAt']),

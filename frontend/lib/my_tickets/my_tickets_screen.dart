@@ -110,6 +110,36 @@ class MyTicketsScreenState extends State<MyTicketsScreen> {
     }
   }
 
+  Future<void> cancelTicketListing(String ticketListingId) async {
+    final tokenService = TokenService();
+    String? jwtToken = await tokenService.getValidAccessToken();
+
+    final apiUrl =
+        '${dotenv.env['API_PROTOCOL']}://${dotenv.env['API_HOST']}:${dotenv.env['API_PORT']}/ticketlisting/$ticketListingId';
+
+    final response = await http.delete(
+      Uri.parse(apiUrl),
+      headers: {
+        'Authorization': 'Bearer $jwtToken',
+      },
+    );
+
+    if (response.statusCode == 204) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Annulation de la mise en vente réussie !'),
+        ),
+      );
+      context.read<MyTicketsBloc>().add(MyTicketsDataLoaded());
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Erreur lors de l\'annulation de la mise en vente.'),
+        ),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
@@ -146,6 +176,7 @@ class MyTicketsScreenState extends State<MyTicketsScreen> {
                                 onPressed: () {
                                   // Implement cancellation logic
                                   // _cancelResale(ticket.ticketListing.id);
+                                  cancelTicketListing(ticket.ticketListing!.id);
                                 },
                                 style: ElevatedButton.styleFrom(
                                   foregroundColor: Colors.white,

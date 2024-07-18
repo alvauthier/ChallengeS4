@@ -172,10 +172,9 @@ class MyTicketsScreenState extends State<MyTicketsScreen> {
 
                           Widget actionButton;
                           if (ticket.ticketListing != null) {
+                            if (ticket.ticketListing!.status == 'available'){
                               actionButton = ElevatedButton(
                                 onPressed: () {
-                                  // Implement cancellation logic
-                                  // _cancelResale(ticket.ticketListing.id);
                                   cancelTicketListing(ticket.ticketListing!.id);
                                 },
                                 style: ElevatedButton.styleFrom(
@@ -190,10 +189,28 @@ class MyTicketsScreenState extends State<MyTicketsScreen> {
                                   style: TextStyle(fontFamily: 'Readex Pro'),
                                 ),
                               );
+                            }
+                            else {
+                              actionButton = ElevatedButton(
+                              onPressed: () {
+                                _showResaleDialog(context, ticket);
+                              },
+                              style: ElevatedButton.styleFrom(
+                                foregroundColor: Colors.white,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(6.0),
+                                ),
+                                backgroundColor: Colors.deepOrange,
+                              ),
+                              child: const Text(
+                                'Revendre',
+                                style: TextStyle(fontFamily: 'Readex Pro'),
+                              ),
+                            );
+                            }
                           } else {
                             actionButton = ElevatedButton(
                               onPressed: () {
-                                // Handle action for tickets with TicketListing null
                                 _showResaleDialog(context, ticket);
                               },
                               style: ElevatedButton.styleFrom(
@@ -218,7 +235,7 @@ class MyTicketsScreenState extends State<MyTicketsScreen> {
                                 children: [
                                   Text(category.name),
                                   Text('${concert.location} - ${formatDate(concert.date)}'),
-                                  if (ticket.ticketListing != null)
+                                  if (ticket.ticketListing != null && ticket.ticketListing!.status == 'available')
                                     const Text(
                                       'Proposé à la revente',
                                       style: TextStyle(color: Colors.green),

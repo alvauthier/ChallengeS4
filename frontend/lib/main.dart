@@ -3,7 +3,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:weezemaster/my_tickets/blocs/my_tickets_bloc.dart';
 import 'package:weezemaster/conversations/conversations_screen.dart';
-import 'package:weezemaster/profile_screen.dart';
 import 'package:flutter_stripe/flutter_stripe.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:flutter/material.dart';

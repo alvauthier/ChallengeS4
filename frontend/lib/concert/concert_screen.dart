@@ -63,12 +63,13 @@ class ConcertScreen extends StatelessWidget {
                             resaleTickets.add(
                               {
                                 'reseller': {
+                                  'id': ticket.user.id,
                                   'name': '${ticket.user.firstname} ${ticket.user.lastname}',
                                   'avatar': 'https://thispersondoesnotexist.com/',
                                 },
                                 'category': concertCategory.category.name,
                                 'price': ticket.ticketListing!.price.toStringAsFixed(2),
-                                'id': ticket.ticketListing!.id.toString(),
+                                'id': ticket.ticketListing!.id.toString()
                               }
                             );
                           }

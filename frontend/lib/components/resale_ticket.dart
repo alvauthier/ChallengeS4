@@ -6,6 +6,9 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:weezemaster/thank_you_screen.dart';
+import 'package:weezemaster/core/services/api_services.dart';
+
+import '../chat.dart';
 
 class Ticket {
   final String id;
@@ -28,11 +31,13 @@ class Ticket {
 class Reseller {
   final String avatar;
   final String name;
+  final String id;
 
-  Reseller({required this.avatar, required this.name});
+  Reseller({required this.avatar, required this.name, required this.id});
 
   factory Reseller.fromMap(Map<String, dynamic> map) {
     return Reseller(
+      id: map['id'] as String,
       avatar: map['avatar'] as String,
       name: map['name'] as String,
     );
@@ -158,7 +163,39 @@ class ResaleTicket extends StatelessWidget {
                                   ),
                                 );
                               } else {
-                                // here we navigate to a new conversation with the reseller
+                                final parts = token.split('.');
+                                if (parts.length != 3) {
+                                  throw Exception('Invalid token');
+                                }
+
+                                String output = parts[1].replaceAll('-', '+').replaceAll('_', '/');
+                                switch (output.length % 4) {
+                                  case 0:
+                                    break;
+                                  case 2:
+                                    output += '==';
+                                    break;
+                                  case 3:
+                                    output += '=';
+                                    break;
+                                  default:
+                                    throw Exception('Illegal base64url string!"');
+                                }
+
+                                String userId = json.decode(utf8.decode(base64.decode(output)))['id'];
+
+                                String conversationId = await ApiServices.postConversation(
+                                  userId,
+                                  ticket.reseller.id,
+                                  ticket.id
+                                );
+
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => ChatScreen(conversationId: conversationId),
+                                  ),
+                                );
                               }
                             },
                             style: ElevatedButton.styleFrom(

@@ -344,4 +344,30 @@ class ApiServices {
       throw ApiException(message: 'Unknown error occurred while sending message');
     }
   }
+
+  static Future<String> postConversation(String buyerId, String sellerId, String ticketListingId) async {
+    final tokenService = TokenService();
+    String? jwtToken = await tokenService.getValidAccessToken();
+    final apiUrl = 'http://${dotenv.env['API_HOST']}:${dotenv.env['API_PORT']}/conversations';
+    final response = await http.post(
+      Uri.parse(apiUrl),
+      headers: {
+        'Accept': 'application/json; charset=UTF-8',
+        'Authorization': 'Bearer $jwtToken',
+        'Content-Type': 'application/json',
+      },
+      body: json.encode({
+        'buyer_id': buyerId,
+        'seller_id': sellerId,
+        'ticket_listing_id': ticketListingId,
+      }),
+    );
+
+    if (response.statusCode < 200 || response.statusCode >= 300) {
+      throw ApiException(message: 'Failed to create conversation');
+    }
+
+    final data = json.decode(response.body);
+    return data['ID'];
+  }
 }

@@ -7,7 +7,6 @@ import 'package:weezemaster/core/services/token_services.dart';
 import 'package:weezemaster/login_register_screen.dart';
 import 'package:intl/intl.dart';
 import 'package:weezemaster/components/resale_ticket.dart';
-import 'package:weezemaster/components/organiser_widget.dart';
 import 'package:weezemaster/components/interest_chip.dart';
 
 class ConcertScreen extends StatelessWidget {

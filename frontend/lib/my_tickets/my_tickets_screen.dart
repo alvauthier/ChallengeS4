@@ -9,13 +9,15 @@ import 'package:weezemaster/my_tickets/blocs/my_tickets_bloc.dart';
 import 'package:http/http.dart' as http;
 
 class MyTicketsScreen extends StatefulWidget {
-  const MyTicketsScreen({super.key});
+  const MyTicketsScreen({Key? key}) : super(key: key);
 
   @override
   State<MyTicketsScreen> createState() => MyTicketsScreenState();
 }
 
 class MyTicketsScreenState extends State<MyTicketsScreen> {
+  final TextEditingController _priceController = TextEditingController();
+
   @override
   void initState() {
     super.initState();
@@ -29,7 +31,7 @@ class MyTicketsScreenState extends State<MyTicketsScreen> {
   }
 
   void _showResaleDialog(BuildContext context, ticket) {
-    final TextEditingController _priceController = TextEditingController();
+    _priceController.text = '';
     final maxPrice = ticket.concertCategory.price;
 
     showDialog(
@@ -41,8 +43,8 @@ class MyTicketsScreenState extends State<MyTicketsScreen> {
             controller: _priceController,
             keyboardType: TextInputType.number,
             decoration: InputDecoration(
-            hintText: 'Entrez le prix (max ${maxPrice.toStringAsFixed(2)} €)',
-          ),
+              hintText: 'Entrez le prix (max ${maxPrice.toStringAsFixed(2)} €)',
+            ),
           ),
           actions: <Widget>[
             TextButton(
@@ -59,7 +61,6 @@ class MyTicketsScreenState extends State<MyTicketsScreen> {
                   await _resellTicket(ticket.id, enteredPrice);
                   Navigator.of(context).pop();
                 } else {
-                  // Show error message if the price is invalid
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(
                       content: Text('Le prix de revente ne peut pas dépasser le prix d\'achat.'),
@@ -78,7 +79,8 @@ class MyTicketsScreenState extends State<MyTicketsScreen> {
     final tokenService = TokenService();
     String? jwtToken = await tokenService.getValidAccessToken();
 
-    final apiUrl = '${dotenv.env['API_PROTOCOL']}://${dotenv.env['API_HOST']}:${dotenv.env['API_PORT']}/ticketlisting';
+    final apiUrl =
+        '${dotenv.env['API_PROTOCOL']}://${dotenv.env['API_HOST']}:${dotenv.env['API_PORT']}/ticketlisting';
 
     final response = await http.post(
       Uri.parse(apiUrl),
@@ -93,16 +95,13 @@ class MyTicketsScreenState extends State<MyTicketsScreen> {
     );
 
     if (response.statusCode == 201) {
-      // Handle successful listing
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Ticket mis en vente avec succès!'),
         ),
       );
-      // Refresh the ticket list
       context.read<MyTicketsBloc>().add(MyTicketsDataLoaded());
     } else {
-      // Handle error
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Erreur lors de la mise en vente du ticket.'),
@@ -141,6 +140,45 @@ class MyTicketsScreenState extends State<MyTicketsScreen> {
                           final concert = concertCategory.concert;
                           final category = concertCategory.category;
 
+                          Widget actionButton;
+                          if (ticket.ticketListing != null) {
+                              actionButton = ElevatedButton(
+                                onPressed: () {
+                                  // Implement cancellation logic
+                                  // _cancelResale(ticket.ticketListing.id);
+                                },
+                                style: ElevatedButton.styleFrom(
+                                  foregroundColor: Colors.white,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(6.0),
+                                  ),
+                                  backgroundColor: Colors.orange,
+                                ),
+                                child: const Text(
+                                  'Annuler revente',
+                                  style: TextStyle(fontFamily: 'Readex Pro'),
+                                ),
+                              );
+                          } else {
+                            actionButton = ElevatedButton(
+                              onPressed: () {
+                                // Handle action for tickets with TicketListing null
+                                _showResaleDialog(context, ticket);
+                              },
+                              style: ElevatedButton.styleFrom(
+                                foregroundColor: Colors.white,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(6.0),
+                                ),
+                                backgroundColor: Colors.deepOrange,
+                              ),
+                              child: const Text(
+                                'Revendre',
+                                style: TextStyle(fontFamily: 'Readex Pro'),
+                              ),
+                            );
+                          }
+
                           return Card(
                             child: ListTile(
                               title: Text(concert.name),
@@ -149,24 +187,14 @@ class MyTicketsScreenState extends State<MyTicketsScreen> {
                                 children: [
                                   Text(category.name),
                                   Text('${concert.location} - ${formatDate(concert.date)}'),
+                                  if (ticket.ticketListing != null)
+                                    const Text(
+                                      'Proposé à la revente',
+                                      style: TextStyle(color: Colors.green),
+                                    ),
                                 ],
                               ),
-                              trailing: ElevatedButton(
-                                onPressed: () => _showResaleDialog(context, ticket),
-                                style: ElevatedButton.styleFrom(
-                                  foregroundColor: Colors.white,
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(6.0),
-                                  ),
-                                  backgroundColor: Colors.deepOrange,
-                                ),
-                                child: const Text(
-                                  'Revendre',
-                                  style: TextStyle(
-                                      fontFamily: 'Readex Pro'
-                                  ),
-                                ),
-                              ),
+                              trailing: actionButton,
                             ),
                           );
                         },

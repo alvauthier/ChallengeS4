@@ -55,6 +55,21 @@ func GetConcert(c echo.Context) error {
 	return c.JSON(http.StatusOK, concert)
 }
 
+type RequestPayloadConcert struct {
+	Name          string `json:"name"`
+	Image         string `json:"image"`
+	Description   string `json:"description"`
+	Location      string `json:"location"`
+	Date          string `json:"date"`
+	UserID        string `json:"userId"`
+	InterestIDs   []int  `json:"InterestIDs"`
+	CategoriesIDs []struct {
+		ID     int     `json:"id"`
+		Places int     `json:"places"`
+		Price  float64 `json:"price"`
+	} `json:"CategoriesIDs"`
+}
+
 // @Summary		Créé un concert
 // @Description	Créé un concert
 // @ID				create-concert
@@ -65,47 +80,74 @@ func GetConcert(c echo.Context) error {
 func CreateConcert(c echo.Context) error {
 	db := database.GetDB()
 
-	// Structure pour lier les champs et récupérer les InterestIDs
-	var input struct {
-		Name           string    `json:"name"`
-		Description    string    `json:"description"`
-		Location       string    `json:"location"`
-		Date           time.Time `json:"date"`
-		OrganizationID uuid.UUID `json:"OrganizationID"`
-		InterestIDs    []int     `json:"InterestIDs"`
-	}
+	var input RequestPayloadConcert
 
-	// Bind les données d'entrée à la structure
 	if err := c.Bind(&input); err != nil {
+		fmt.Println("3")
 		return echo.NewHTTPError(http.StatusBadRequest, "Failed to bind input: "+err.Error())
 	}
 
+	date, _ := time.Parse("2006-01-02", input.Date)
+	fmt.Println(date)
+
+	user := &models.User{}
+	if err := db.Where("id = ?", input.UserID).First(user).Error; err != nil {
+		return echo.NewHTTPError(http.StatusNotFound, "User not found")
+	}
 	// Créer un nouvel objet Concert
-	concert := &models.Concert{
+	concert := models.Concert{
 		ID:             uuid.New(),
 		Name:           input.Name,
 		Description:    input.Description,
 		Location:       input.Location,
-		Date:           input.Date,
-		OrganizationId: input.OrganizationID,
+		Date:           date,
+		OrganizationId: user.OrganizationId,
 	}
 
 	// Récupérer les objets Interest correspondant aux IDs
 	var interests []models.Interest
 	if len(input.InterestIDs) > 0 {
-		if err := db.Where("id IN (?)", input.InterestIDs).Find(&interests).Error; err != nil {
+		if err := db.Where("id IN ?", input.InterestIDs).Find(&interests).Error; err != nil {
 			return echo.NewHTTPError(http.StatusInternalServerError, "Failed to find interests: "+err.Error())
 		}
 		concert.Interests = interests
 	}
 
+	// Gérer les catégories
+	var concertCategories []models.ConcertCategory
+	for _, cat := range input.CategoriesIDs {
+		category := models.ConcertCategory{
+			ID:               uuid.New(), // Exemple pour le nom de la catégorie
+			ConcertId:        concert.ID,
+			CategoryId:       cat.ID,
+			Price:            cat.Price,
+			AvailableTickets: cat.Places,
+		}
+		concertCategories = append(concertCategories, category)
+	}
 	// Créer le concert avec les associations
 	if err := db.Create(&concert).Error; err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, "Failed to create concert: "+err.Error())
 	}
 
+	// Enregistrer les catégories associées au concert
+	if err := db.Create(&concertCategories).Error; err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, "Failed to create concert categories: "+err.Error())
+	}
+
+	// Gérer l'image
+	/*if input.Image != "" {
+		// Assuming a function saveBase64Image exists to handle image saving
+		imagePath, err := saveBase64Image(input.Image)
+		if err != nil {
+			return echo.NewHTTPError(http.StatusInternalServerError, "Failed to save image: "+err.Error())
+		}
+		// Enregistrer le chemin de l'image dans la base de données
+		concert.image = imagePath
+	}*/
+
 	// Envoyer des notifications aux sujets correspondant aux centres d'intérêt
-	for _, interest := range interests {
+	/*for _, interest := range interests {
 		data := map[string]string{
 			"concert_id": concert.ID.String(),
 			"name":       concert.Name,
@@ -115,15 +157,19 @@ func CreateConcert(c echo.Context) error {
 			"body":  fmt.Sprintf("Le concert \"%s\" vient d'être ajouté et pourrait vous plaire. Réservez vos places dès maintenant !", concert.Name),
 		}
 
-		fmt.Printf("Sending notification for interest %s\n", sanitizeTopicName(interest.Name))
+		fmt.Printf("Sending notification for interest %s\n", interest.Name)
 		topic := sanitizeTopicName(interest.Name) // Utiliser le nom du centre d'intérêt comme sujet
 		err := SendFCMNotification(topic, data, notification)
 		if err != nil {
 			fmt.Printf("Failed to send notification for interest %s: %v\n", interest.Name, err)
 		}
-	}
-
-	return c.JSON(http.StatusOK, concert)
+	}*/
+	fmt.Println("Concert created")
+	return c.JSON(http.StatusOK, map[string]interface{}{
+		"concert":    concert,
+		"categories": concertCategories,
+		"interests":  interests,
+	})
 }
 
 // @Summary		Modifie un concert

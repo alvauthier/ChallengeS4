@@ -8,6 +8,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:weezemaster/core/models/category.dart';
 import 'package:weezemaster/core/models/interest.dart';
 import 'package:weezemaster/core/services/api_services.dart';
+import 'package:weezemaster/core/services/token_services.dart';
 import 'package:weezemaster/login_register_screen.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
@@ -330,11 +331,14 @@ Future<void> _fetchCategories() async {
                                   });
                                   if (_formKey.currentState!.validate()) {
                                     try {
+                                      final tokenService = TokenService();
+                                      String? jwtToken = await tokenService.getValidAccessToken();
                                       String userId = await getUserIdFromJwt();
                                       var response = await http.post(
                                         Uri.parse('http://${dotenv.env['API_HOST']}${dotenv.env['API_PORT']}/concerts'),
                                         headers: <String, String>{
                                           'Content-Type': 'application/json; charset=UTF-8',
+                                          'Authorization': 'Bearer $jwtToken', // HOT FIX : ajout du jwt manquant pour la création de concert...
                                         },
                                         body: jsonEncode(<String, dynamic>{
                                           'name': _nameController.text,

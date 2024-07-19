@@ -60,48 +60,44 @@ func main() {
 	router.POST("/login", controller.Login)
 	router.POST("/refresh", controller.RefreshAccessToken)
 	authenticated.GET("/users", controller.GetAllUsers, middleware.CheckRole("admin"))
-	router.GET("/users/:id", controller.GetUser)
-	router.PATCH("/users/:id", controller.UpdateUser)
-	router.DELETE("/users/:id", controller.DeleteUser)
+	authenticated.GET("/users/:id", controller.GetUser, middleware.CheckRole("admin"))
+	authenticated.PATCH("/users/:id", controller.UpdateUser, middleware.CheckRole("admin"))
+	authenticated.DELETE("/users/:id", controller.DeleteUser, middleware.CheckRole("admin"))
 
-	router.GET("/interests", controller.GetAllInterests)
-	router.GET("/interests/:id", controller.GetInterest)
-	router.POST("/interests", controller.CreateInterest)
-	router.PATCH("/interests/:id", controller.UpdateInterest)
-	router.DELETE("/interests/:id", controller.DeleteInterest)
+	authenticated.GET("/interests", controller.GetAllInterests, middleware.CheckRole("user", "organizer", "admin"))
+	authenticated.GET("/interests/:id", controller.GetInterest, middleware.CheckRole("admin"))
+	authenticated.POST("/interests", controller.CreateInterest, middleware.CheckRole("admin"))
+	authenticated.PATCH("/interests/:id", controller.UpdateInterest, middleware.CheckRole("admin"))
+	authenticated.DELETE("/interests/:id", controller.DeleteInterest, middleware.CheckRole("admin"))
 
-	router.GET("/categories", controller.GetAllCategories)
-	router.GET("/categories/:id", controller.GetCategory)
-	router.POST("/categories", controller.CreateCategory)
-	router.PATCH("/categories/:id", controller.UpdateCategory)
-	router.DELETE("/categories/:id", controller.DeleteCategory)
-
-	router.POST("/registerorganizer", controller.RegisterOrganizer)
+	authenticated.GET("/categories", controller.GetAllCategories, middleware.CheckRole("user", "organizer", "admin"))
+	authenticated.GET("/categories/:id", controller.GetCategory, middleware.CheckRole("admin"))
+	authenticated.POST("/categories", controller.CreateCategory, middleware.CheckRole("admin"))
+	authenticated.PATCH("/categories/:id", controller.UpdateCategory, middleware.CheckRole("admin"))
+	authenticated.DELETE("/categories/:id", controller.DeleteCategory, middleware.CheckRole("admin"))
 
 	router.POST("/registerorganizer", controller.RegisterOrganizer)
 
-	router.GET("/tickets", controller.GetAllTickets)
-	router.GET("/tickets/:id", controller.GetTicket)
-	router.POST("/tickets", controller.CreateTicket)
-	router.PATCH("/tickets/:id", controller.UpdateTicket)
-	router.DELETE("/tickets/:id", controller.DeleteTicket)
+	authenticated.GET("/tickets", controller.GetAllTickets, middleware.CheckRole("admin"))
+	authenticated.GET("/tickets/:id", controller.GetTicket, middleware.CheckRole("admin"))
+	authenticated.POST("/tickets", controller.CreateTicket, middleware.CheckRole("admin"))
+	authenticated.PATCH("/tickets/:id", controller.UpdateTicket, middleware.CheckRole("admin"))
+	authenticated.DELETE("/tickets/:id", controller.DeleteTicket, middleware.CheckRole("admin"))
 	authenticated.GET("/tickets/mytickets", controller.GetUserTickets, middleware.CheckRole("user"))
 
-	router.GET("/ticketlisting", controller.GetAllTicketListings)
-	router.GET("/ticketlisting/:id", controller.GetTicketListings)
-	router.POST("/ticketlisting", controller.CreateTicketListings)
-	router.PATCH("/ticketlisting/:id", controller.UpdateTicketListing)
-	router.DELETE("/ticketlisting/:id", controller.DeleteTicketListing)
-	router.GET("/ticketlisting/concert/:id", controller.GetTicketListingByConcertId)
+	authenticated.GET("/ticketlisting", controller.GetAllTicketListings, middleware.CheckRole("admin"))
+	authenticated.GET("/ticketlisting/:id", controller.GetTicketListings, middleware.CheckRole("admin"))
+	authenticated.POST("/ticketlisting", controller.CreateTicketListings, middleware.CheckRole("user"))
+	authenticated.PATCH("/ticketlisting/:id", controller.UpdateTicketListing, middleware.CheckRole("user", "admin"))
+	authenticated.DELETE("/ticketlisting/:id", controller.DeleteTicketListing, middleware.CheckRole("user"))
+	authenticated.GET("/ticketlisting/concert/:id", controller.GetTicketListingByConcertId, middleware.CheckRole("user", "organizer", "admin"))
 
 	router.GET("/concerts", controller.GetAllConcerts)
 	router.GET("/concerts/:id", controller.GetConcert)
-	// authenticated.GET("/concerts/:id", controller.GetConcert, middleware.CheckRole("user")) // pour tester les rôles
-	router.POST("/concerts", controller.CreateConcert) // changed to public for testing notifications more easily
-	// authenticated.POST("/concerts", controller.CreateConcert, middleware.CheckRole("organizer", "admin"))
-	authenticated.PATCH("/concerts/:id", controller.UpdateConcert)
-	authenticated.DELETE("/concerts/:id", controller.DeleteConcert)
-	authenticated.GET("/organization/concerts", controller.GetConcertByOrganizationID, middleware.CheckRole("organizer"))
+	authenticated.POST("/concerts", controller.CreateConcert, middleware.CheckRole("organizer", "admin"))
+	authenticated.PATCH("/concerts/:id", controller.UpdateConcert, middleware.CheckRole("organizer", "admin"))
+	authenticated.DELETE("/concerts/:id", controller.DeleteConcert, middleware.CheckRole("organizer", "admin"))
+	authenticated.GET("/organization/concerts", controller.GetConcertByOrganizationID, middleware.CheckRole("organizer", "admin"))
 
 	authenticated.GET("/user/interests", controller.GetUserInterests, middleware.CheckRole("user"))
 	authenticated.POST("/user/interests/:id", controller.AddUserInterest, middleware.CheckRole("user"))
@@ -114,10 +110,10 @@ func main() {
 
 	router.GET("/swagger/*", echoSwagger.WrapHandler)
 
-	router.GET("/conversations/:id", controller.GetConversation)
-	router.POST("/conversations", controller.CreateConversation)
+	authenticated.GET("/conversations/:id", controller.GetConversation, middleware.CheckRole("user", "organizer", "admin"))
+	authenticated.POST("/conversations", controller.CreateConversation, middleware.CheckRole("user", "organizer", "admin"))
 
-	router.POST("/messages", controller.PostMessage)
+	authenticated.POST("/messages", controller.PostMessage, middleware.CheckRole("user", "organizer", "admin"))
 
 	// if env == "prod" {
 	// 	// Configuration TLS pour production

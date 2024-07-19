@@ -1,4 +1,5 @@
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:weezemaster/my_tickets/blocs/my_tickets_bloc.dart';
@@ -31,6 +32,10 @@ void main() async {
   );
   FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
   initializeDateFormatting('fr_FR', null).then((_) => runApp(const MyApp()));
+
+  if (kReleaseMode) {
+    debugPrint = (String? message, {int? wrapWidth}) {};
+  }
 }
 
 class MyApp extends StatelessWidget {
@@ -82,10 +87,10 @@ class MyScaffold extends StatefulWidget {
   const MyScaffold({super.key});
 
   @override
-  _MyScaffoldState createState() => _MyScaffoldState();
+  MyScaffoldState createState() => MyScaffoldState();
 }
 
-class _MyScaffoldState extends State<MyScaffold> {
+class MyScaffoldState extends State<MyScaffold> {
   int selectedIndex = 0;
   final storage = const FlutterSecureStorage();
   String? userRole;

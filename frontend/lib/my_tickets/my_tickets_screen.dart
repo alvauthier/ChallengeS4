@@ -9,7 +9,7 @@ import 'package:weezemaster/my_tickets/blocs/my_tickets_bloc.dart';
 import 'package:http/http.dart' as http;
 
 class MyTicketsScreen extends StatefulWidget {
-  const MyTicketsScreen({Key? key}) : super(key: key);
+  const MyTicketsScreen({super.key});
 
   @override
   State<MyTicketsScreen> createState() => MyTicketsScreenState();
@@ -80,7 +80,7 @@ class MyTicketsScreenState extends State<MyTicketsScreen> {
     String? jwtToken = await tokenService.getValidAccessToken();
 
     final apiUrl =
-        '${dotenv.env['API_PROTOCOL']}://${dotenv.env['API_HOST']}:${dotenv.env['API_PORT']}/ticketlisting';
+        '${dotenv.env['API_PROTOCOL']}://${dotenv.env['API_HOST']}${dotenv.env['API_PORT']}/ticketlisting';
 
     final response = await http.post(
       Uri.parse(apiUrl),
@@ -95,18 +95,22 @@ class MyTicketsScreenState extends State<MyTicketsScreen> {
     );
 
     if (response.statusCode == 201) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Ticket mis en vente avec succès!'),
-        ),
-      );
-      context.read<MyTicketsBloc>().add(MyTicketsDataLoaded());
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Ticket mis en vente avec succès!'),
+          ),
+        );
+        context.read<MyTicketsBloc>().add(MyTicketsDataLoaded());
+      }
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Erreur lors de la mise en vente du ticket.'),
-        ),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Erreur lors de la mise en vente du ticket.'),
+          ),
+        );
+      }
     }
   }
 
@@ -115,7 +119,7 @@ class MyTicketsScreenState extends State<MyTicketsScreen> {
     String? jwtToken = await tokenService.getValidAccessToken();
 
     final apiUrl =
-        '${dotenv.env['API_PROTOCOL']}://${dotenv.env['API_HOST']}:${dotenv.env['API_PORT']}/ticketlisting/$ticketListingId';
+        '${dotenv.env['API_PROTOCOL']}://${dotenv.env['API_HOST']}${dotenv.env['API_PORT']}/ticketlisting/$ticketListingId';
 
     final response = await http.delete(
       Uri.parse(apiUrl),
@@ -125,18 +129,22 @@ class MyTicketsScreenState extends State<MyTicketsScreen> {
     );
 
     if (response.statusCode == 204) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Annulation de la mise en vente réussie !'),
-        ),
-      );
-      context.read<MyTicketsBloc>().add(MyTicketsDataLoaded());
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Annulation de la mise en vente réussie !'),
+          ),
+        );
+        context.read<MyTicketsBloc>().add(MyTicketsDataLoaded());
+      }
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Erreur lors de l\'annulation de la mise en vente.'),
-        ),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Erreur lors de l\'annulation de la mise en vente.'),
+          ),
+        );
+      }
     }
   }
 

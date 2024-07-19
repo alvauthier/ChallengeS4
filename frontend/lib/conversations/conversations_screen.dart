@@ -4,7 +4,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import 'dart:convert';
 import '../login_register_screen.dart';
-import 'package:weezemaster/register_concert_screen.dart';
 import 'package:weezemaster/chat.dart';
 import 'package:weezemaster/core/services/token_services.dart';
 
@@ -26,7 +25,7 @@ class ConversationsScreenState extends State<ConversationsScreen> {
     String? jwt = await tokenService.getValidAccessToken();
     if (jwt != null) {
       Map<String, dynamic> decodedToken = _decodeToken(jwt);
-      print(decodedToken['id']);
+      debugPrint(decodedToken['id']);
       return decodedToken['id'] as String;
     } else {
       Navigator.pushReplacement(

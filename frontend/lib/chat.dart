@@ -11,13 +11,13 @@ import 'package:weezemaster/core/services/api_services.dart';
 class ChatScreen extends StatefulWidget {
   final String conversationId;
 
-  const ChatScreen({Key? key, required this.conversationId}) : super(key: key);
+  const ChatScreen({super.key, required this.conversationId});
 
   @override
-  _ChatScreenState createState() => _ChatScreenState();
+  ChatScreenState createState() => ChatScreenState();
 }
 
-class _ChatScreenState extends State<ChatScreen> {
+class ChatScreenState extends State<ChatScreen> {
   final otherUser = "Michelle Obama";
   late String buyerId = "";
   late Map<String, String> ticket = {
@@ -47,10 +47,12 @@ class _ChatScreenState extends State<ChatScreen> {
         userId = decodedToken['id'] as String;
       });
     } else {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => const LoginRegisterScreen()),
-      );
+      if (mounted) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const LoginRegisterScreen()),
+        );
+      }
     }
   }
 
@@ -114,7 +116,7 @@ class _ChatScreenState extends State<ChatScreen> {
         });
       } catch (e) {
         // Handle error or show a message to the user
-        print("Failed to fetch conversation: $e");
+        debugPrint("Failed to fetch conversation: $e");
       }
     }
   }
@@ -129,7 +131,7 @@ class _ChatScreenState extends State<ChatScreen> {
       await ApiServices.sendMessage(widget.conversationId, content);
       _fetchConversation();
     } catch (e) {
-      print("Failed to send message: $e");
+      debugPrint("Failed to send message: $e");
     }
 
     _controller.clear();
@@ -139,14 +141,14 @@ class _ChatScreenState extends State<ChatScreen> {
     showDialog(
       context: context,
       builder: (BuildContext context) {
-        final TextEditingController _priceController = TextEditingController(text: ticket["price"]);
+        final TextEditingController priceController = TextEditingController(text: ticket["price"]);
         return AlertDialog(
           title: const Text(
               'Nouveau prix',
               style: TextStyle(fontFamily: 'Readex Pro', fontWeight: FontWeight.bold),
           ),
           content: TextField(
-            controller: _priceController,
+            controller: priceController,
             keyboardType: TextInputType.number,
             inputFormatters: [
               FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d{0,2}')),
@@ -184,7 +186,7 @@ class _ChatScreenState extends State<ChatScreen> {
                 Expanded(
                   child: ElevatedButton(
                     onPressed: () {
-                      final newPrice = _priceController.text;
+                      final newPrice = priceController.text;
                       if (newPrice.isNotEmpty) {
                         setState(() {
                           ticket["price"] = newPrice;

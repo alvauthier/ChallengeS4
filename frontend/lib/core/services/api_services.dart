@@ -22,7 +22,7 @@ class ApiServices {
     try {
       final tokenService = TokenService();
       String? jwtToken = await tokenService.getValidAccessToken();
-      final apiUrl = '${dotenv.env['API_PROTOCOL']}://${dotenv.env['API_HOST']}:${dotenv.env['API_PORT']}/concerts';
+      final apiUrl = '${dotenv.env['API_PROTOCOL']}://${dotenv.env['API_HOST']}${dotenv.env['API_PORT']}/concerts';
       final response = await http.get(
         Uri.parse(apiUrl),
         headers: {
@@ -50,7 +50,7 @@ class ApiServices {
     try {
       final tokenService = TokenService();
       String? jwtToken = await tokenService.getAccessToken();
-      final apiUrl = '${dotenv.env['API_PROTOCOL']}://${dotenv.env['API_HOST']}:${dotenv.env['API_PORT']}/concerts/$id';
+      final apiUrl = '${dotenv.env['API_PROTOCOL']}://${dotenv.env['API_HOST']}${dotenv.env['API_PORT']}/concerts/$id';
       final response = await http.get(
         Uri.parse(apiUrl),
         headers: {
@@ -78,7 +78,7 @@ class ApiServices {
     try {
       final tokenService = TokenService();
       String? jwtToken = await tokenService.getValidAccessToken();
-      final apiUrl = '${dotenv.env['API_PROTOCOL']}://${dotenv.env['API_HOST']}:${dotenv.env['API_PORT']}/organization/concerts';
+      final apiUrl = '${dotenv.env['API_PROTOCOL']}://${dotenv.env['API_HOST']}${dotenv.env['API_PORT']}/organization/concerts';
       final response = await http.get(
         Uri.parse(apiUrl),
         headers: {
@@ -106,7 +106,7 @@ class ApiServices {
     try {
       final tokenService = TokenService();
       String? jwtToken = await tokenService.getValidAccessToken();
-      final apiUrl = '${dotenv.env['API_PROTOCOL']}://${dotenv.env['API_HOST']}:${dotenv.env['API_PORT']}/interests';
+      final apiUrl = '${dotenv.env['API_PROTOCOL']}://${dotenv.env['API_HOST']}${dotenv.env['API_PORT']}/interests';
       final response = await http.get(
         Uri.parse(apiUrl),
         headers: {
@@ -133,7 +133,7 @@ class ApiServices {
     try {
       final tokenService = TokenService();
       String? jwtToken = await tokenService.getValidAccessToken();
-      final apiUrl = '${dotenv.env['API_PROTOCOL']}://${dotenv.env['API_HOST']}:${dotenv.env['API_PORT']}/user/interests';
+      final apiUrl = '${dotenv.env['API_PROTOCOL']}://${dotenv.env['API_HOST']}${dotenv.env['API_PORT']}/user/interests';
       final response = await http.get(
         Uri.parse(apiUrl),
         headers: {
@@ -160,7 +160,7 @@ class ApiServices {
     try {
       final tokenService = TokenService();
       String? jwtToken = await tokenService.getValidAccessToken();
-      final apiUrl = '${dotenv.env['API_PROTOCOL']}://${dotenv.env['API_HOST']}:${dotenv.env['API_PORT']}/user/interests/$interestId';
+      final apiUrl = '${dotenv.env['API_PROTOCOL']}://${dotenv.env['API_HOST']}${dotenv.env['API_PORT']}/user/interests/$interestId';
       final response = await http.post(
         Uri.parse(apiUrl),
         headers: {
@@ -184,7 +184,7 @@ class ApiServices {
     try {
       final tokenService = TokenService();
       String? jwtToken = await tokenService.getValidAccessToken();
-      final apiUrl = '${dotenv.env['API_PROTOCOL']}://${dotenv.env['API_HOST']}:${dotenv.env['API_PORT']}/user/interests/$interestId';
+      final apiUrl = '${dotenv.env['API_PROTOCOL']}://${dotenv.env['API_HOST']}${dotenv.env['API_PORT']}/user/interests/$interestId';
       final response = await http.delete(
         Uri.parse(apiUrl),
         headers: {
@@ -208,7 +208,7 @@ class ApiServices {
     try {
       final tokenService = TokenService();
       String? jwtToken = await tokenService.getValidAccessToken();
-      final apiUrl = '${dotenv.env['API_PROTOCOL']}://${dotenv.env['API_HOST']}:${dotenv.env['API_PORT']}/users/$id';
+      final apiUrl = '${dotenv.env['API_PROTOCOL']}://${dotenv.env['API_HOST']}${dotenv.env['API_PORT']}/users/$id';
       final response = await http.get(
         Uri.parse(apiUrl),
         headers: {
@@ -236,7 +236,7 @@ class ApiServices {
     try {
       final tokenService = TokenService();
       String? jwtToken = await tokenService.getValidAccessToken();
-      final apiUrl = '${dotenv.env['API_PROTOCOL']}://${dotenv.env['API_HOST']}:${dotenv.env['API_PORT']}/categories';
+      final apiUrl = '${dotenv.env['API_PROTOCOL']}://${dotenv.env['API_HOST']}${dotenv.env['API_PORT']}/categories';
       final response = await http.get(
         Uri.parse(apiUrl),
         headers: {
@@ -265,7 +265,7 @@ class ApiServices {
     try {
       final tokenService = TokenService();
       String? jwtToken = await tokenService.getValidAccessToken();
-      final apiUrl = '${dotenv.env['API_PROTOCOL']}://${dotenv.env['API_HOST']}:${dotenv.env['API_PORT']}/tickets/mytickets';
+      final apiUrl = '${dotenv.env['API_PROTOCOL']}://${dotenv.env['API_HOST']}${dotenv.env['API_PORT']}/tickets/mytickets';
       final response = await http.get(
         Uri.parse(apiUrl),
         headers: {
@@ -293,7 +293,7 @@ class ApiServices {
     try {
       final tokenService = TokenService();
       String? jwtToken = await tokenService.getValidAccessToken();
-      final apiUrl = 'http://${dotenv.env['API_HOST']}:${dotenv.env['API_PORT']}/conversations/$conversationId';
+      final apiUrl = 'http://${dotenv.env['API_HOST']}${dotenv.env['API_PORT']}/conversations/$conversationId';
       final response = await http.get(
         Uri.parse(apiUrl),
         headers: {
@@ -308,7 +308,7 @@ class ApiServices {
 
       final data = json.decode(response.body) as Map<String, dynamic>;
       return Conversation.fromJson(data); // Assuming you have a fromJson method to parse the conversation
-    } on SocketException catch (error) {
+    } on SocketException {
       throw ApiException(message: 'Network error');
     } catch (error) {
       throw ApiException(message: 'Unknown error occurred while fetching conversation');
@@ -319,7 +319,7 @@ class ApiServices {
     try {
       final tokenService = TokenService();
       String? jwtToken = await tokenService.getValidAccessToken();
-      final apiUrl = 'http://${dotenv.env['API_HOST']}:${dotenv.env['API_PORT']}/messages';
+      final apiUrl = 'http://${dotenv.env['API_HOST']}${dotenv.env['API_PORT']}/messages';
       final response = await http.post(
         Uri.parse(apiUrl),
         headers: {
@@ -338,7 +338,7 @@ class ApiServices {
       if (response.statusCode < 200 || response.statusCode >= 300) {
         throw ApiException(message: 'Failed to send message');
       }
-    } on SocketException catch (error) {
+    } on SocketException {
       throw ApiException(message: 'Network error');
     } catch (error) {
       throw ApiException(message: 'Unknown error occurred while sending message');
@@ -348,7 +348,7 @@ class ApiServices {
   static Future<String> postConversation(String buyerId, String sellerId, String ticketListingId) async {
     final tokenService = TokenService();
     String? jwtToken = await tokenService.getValidAccessToken();
-    final apiUrl = 'http://${dotenv.env['API_HOST']}:${dotenv.env['API_PORT']}/conversations';
+    final apiUrl = 'http://${dotenv.env['API_HOST']}${dotenv.env['API_PORT']}/conversations';
     final response = await http.post(
       Uri.parse(apiUrl),
       headers: {

@@ -58,7 +58,7 @@ class ResaleTicket extends StatelessWidget {
     });
 
     try {
-      final apiUrl = '${dotenv.env['API_PROTOCOL']}://${dotenv.env['API_HOST']}:${dotenv.env['API_PORT']}/ticket_listing_reservation/$ticketId';
+      final apiUrl = '${dotenv.env['API_PROTOCOL']}://${dotenv.env['API_HOST']}${dotenv.env['API_PORT']}/ticket_listing_reservation/$ticketId';
       final response = await http.post(
         Uri.parse(apiUrl),
         headers: {
@@ -69,7 +69,7 @@ class ResaleTicket extends StatelessWidget {
       );
 
       if (response.statusCode == 200) {
-        print('Ticket listing purchased');
+        debugPrint('Ticket listing purchased');
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Ticket purchased.')),
         );
@@ -78,13 +78,13 @@ class ResaleTicket extends StatelessWidget {
           MaterialPageRoute(builder: (context) => const ThankYouScreen()),
         );
       } else {
-        print('Failed to update ticket listing status: ${response.body}');
+        debugPrint('Failed to update ticket listing status: ${response.body}');
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Failed to update ticket listing status.')),
         );
       }
     } catch (e) {
-      print('Error updating ticket listing status: $e');
+      debugPrint('Error updating ticket listing status: $e');
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Error updating ticket listing status.')),
       );
@@ -237,7 +237,7 @@ class ResaleTicket extends StatelessWidget {
                                     );
                                     await updateTicketListingStatus(context, ticket.id);
                                   } catch (e) {
-                                    print('Error presenting payment sheet: $e');
+                                    debugPrint('Error presenting payment sheet: $e');
                                     ScaffoldMessenger.of(context).showSnackBar(
                                       const SnackBar(content: Text('Echec du paiement')),
                                     );

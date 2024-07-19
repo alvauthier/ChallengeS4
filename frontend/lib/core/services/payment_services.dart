@@ -8,7 +8,7 @@ import 'package:flutter_stripe/flutter_stripe.dart' as stripe;
 class PaymentService {
   Future<Map<String, dynamic>?> createPaymentIntent(String id, String prefix) async {
     final String prefixedId = "$prefix$id";
-    final apiUrl = '${dotenv.env['API_PROTOCOL']}://${dotenv.env['API_HOST']}:${dotenv.env['API_PORT']}/create-payment-intent';
+    final apiUrl = '${dotenv.env['API_PROTOCOL']}://${dotenv.env['API_HOST']}${dotenv.env['API_PORT']}/create-payment-intent';
     final url = Uri.parse(apiUrl);
     final tokenService = TokenService();
     String? jwtToken = await tokenService.getValidAccessToken();
@@ -23,7 +23,7 @@ class PaymentService {
     if (response.statusCode == 200) {
       return json.decode(response.body);
     } else {
-      print('Failed to create payment intent: ${response.body}');
+      debugPrint('Failed to create payment intent: ${response.body}');
       return null;
     }
   }

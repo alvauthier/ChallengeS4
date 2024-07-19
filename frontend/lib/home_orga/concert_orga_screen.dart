@@ -5,7 +5,6 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:weezemaster/home_orga/blocs/home_bloc.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
-import 'package:weezemaster/concert/concert_screen.dart';
 import 'package:weezemaster/components/search_bar.dart';
 import 'package:weezemaster/login_register_screen.dart';
 
@@ -13,11 +12,11 @@ class OrganizerConcertScreen extends StatefulWidget {
   const OrganizerConcertScreen({super.key});
 
   @override
-  _OrganizerConcertScreenState createState() => _OrganizerConcertScreenState();
+  OrganizerConcertScreenState createState() => OrganizerConcertScreenState();
 }
 
 
-class _OrganizerConcertScreenState extends State<OrganizerConcertScreen> {
+class OrganizerConcertScreenState extends State<OrganizerConcertScreen> {
   final TextEditingController _searchController = TextEditingController();
   List _filteredConcerts = [];
     final storage = const FlutterSecureStorage();

@@ -13,10 +13,10 @@ class BookingScreen extends StatefulWidget {
   const BookingScreen({super.key, required this.concertCategories});
 
   @override
-  _BookingScreenState createState() => _BookingScreenState();
+  BookingScreenState createState() => BookingScreenState();
 }
 
-class _BookingScreenState extends State<BookingScreen> {
+class BookingScreenState extends State<BookingScreen> {
   final storage = const FlutterSecureStorage();
   String? selectedCategory;
 
@@ -35,7 +35,7 @@ class _BookingScreenState extends State<BookingScreen> {
     try {
       final tokenService = TokenService();
       String? jwtToken = await tokenService.getValidAccessToken();
-      final apiUrl = '${dotenv.env['API_PROTOCOL']}://${dotenv.env['API_HOST']}:${dotenv.env['API_PORT']}/reservation';
+      final apiUrl = '${dotenv.env['API_PROTOCOL']}://${dotenv.env['API_HOST']}${dotenv.env['API_PORT']}/reservation';
       final response = await http.post(
         Uri.parse(apiUrl),
         headers: {
@@ -46,25 +46,31 @@ class _BookingScreenState extends State<BookingScreen> {
       );
 
       if (response.statusCode == 200) {
-        print('Réservation réussie');
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Réservation réussie.')),
-        );
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => const ThankYouScreen()),
-        );
+        debugPrint('Réservation réussie');
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Réservation réussie.')),
+          );
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => const ThankYouScreen()),
+          );
+        }
       } else {
-        print('Erreur lors de la réservation: ${response.body}');
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Une erreur est survenue lors de la réservation. Veuillez réessayer.')),
-        );
+        debugPrint('Erreur lors de la réservation: ${response.body}');
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Une erreur est survenue lors de la réservation. Veuillez réessayer.')),
+          );
+        }
       }
     } catch (e) {
-      print('Erreur lors de la connexion au serveur: $e');
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Erreur lors de la connexion au serveur. Veuillez réessayer.')),
-      );
+      debugPrint('Erreur lors de la connexion au serveur: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Erreur lors de la connexion au serveur. Veuillez réessayer.')),
+        );
+      }
     }
   }
 
@@ -164,7 +170,7 @@ class _BookingScreenState extends State<BookingScreen> {
                         );
                         await proceedToReservation();
                       } catch (e) {
-                        print('Error presenting payment sheet: $e');
+                        debugPrint('Error presenting payment sheet: $e');
                         ScaffoldMessenger.of(context).showSnackBar(
                           const SnackBar(content: Text('Echec du paiement')),
                         );

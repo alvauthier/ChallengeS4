@@ -35,7 +35,7 @@ Pour consulter le Swagger, ouvrez votre navigateur et accédez à l'URL suivante
 2. Exécutez la commande `flutter pub get` puis `flutter run`.
 
 # Contributions
-- Alexandre VAUTHIER (@alvauthier) :  
+Alexandre VAUTHIER (@alvauthier) :  
 Back-end :  
 - quasiment tous les controllers (category, concert, interest, notification, payment, reservation, ticket, ticketlisting, user)
 - middleware
@@ -57,7 +57,7 @@ Frontend :
 - Quelques améliorations sur la page d'un concert
 - Relier les pages du frontend avec les données issues de l'API
 
-- Melvin COURANT (@melvincourant) :
+Melvin COURANT (@melvincourant) :
 Back-end :
 - controller message
 - controller conversation

@@ -4,13 +4,13 @@ import 'package:weezemaster/login_register_screen.dart';
 import 'dart:convert';
 
 class ProfileScreen extends StatefulWidget {
-  const ProfileScreen({Key? key}) : super(key: key);
+  const ProfileScreen({super.key});
 
   @override
-  _ProfileScreenState createState() => _ProfileScreenState();
+  ProfileScreenState createState() => ProfileScreenState();
 }
 
-class _ProfileScreenState extends State<ProfileScreen> {
+class ProfileScreenState extends State<ProfileScreen> {
   final storage = const FlutterSecureStorage();
   String? email;
 
@@ -26,7 +26,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     if (jwt == null) {
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => LoginRegisterScreen()),
+        MaterialPageRoute(builder: (context) => const LoginRegisterScreen()),
       );
     } else {
       getEmailFromJwt();
@@ -84,7 +84,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Profile Screen'),
+        title: const Text('Profile Screen'),
       ),
       body: Center(
         child: Text('Bonjour $email'),

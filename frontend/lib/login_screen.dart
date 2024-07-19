@@ -9,10 +9,10 @@ class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
 
   @override
-  _LoginScreenState createState() => _LoginScreenState();
+  LoginScreenState createState() => LoginScreenState();
 }
 
-class _LoginScreenState extends State<LoginScreen> {
+class LoginScreenState extends State<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
@@ -72,7 +72,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         ),
                         Padding(
                           padding: const EdgeInsets.only(top: 15.0),
-                          child: Container(
+                          child: SizedBox(
                             width: double.infinity,
                             child: ElevatedButton(
                               onPressed: () async {
@@ -95,7 +95,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                         content: Text(response.statusCode == 200
                                             ? 'Connexion réussie'
                                             : 'Email et/ou mot de passe incorrects'),
-                                        duration: Duration(seconds: 2),
+                                        duration: const Duration(seconds: 2),
                                       ),
                                     );
                                     if (response.statusCode == 200) {
@@ -108,7 +108,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                       // Navigator.pop(context);
                                       Navigator.push(
                                         context,
-                                        MaterialPageRoute(builder: (context) => HomeScreen()),
+                                        MaterialPageRoute(builder: (context) => const HomeScreen()),
                                       );
                                     }
                                   } catch (e) {

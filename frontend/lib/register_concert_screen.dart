@@ -12,13 +12,13 @@ import 'package:weezemaster/login_register_screen.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class RegisterConcertScreen extends StatefulWidget {
-  const RegisterConcertScreen({Key? key}) : super(key: key);
+  const RegisterConcertScreen({super.key});
 
   @override
-  _RegisterConcertScreenState createState() => _RegisterConcertScreenState();
+  RegisterConcertScreenState createState() => RegisterConcertScreenState();
 }
 
-class _RegisterConcertScreenState extends State<RegisterConcertScreen> {
+class RegisterConcertScreenState extends State<RegisterConcertScreen> {
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
   final _descriptionController = TextEditingController();
@@ -97,10 +97,12 @@ Future<void> _fetchCategories() async {
       Map<String, dynamic> decodedToken = _decodeToken(jwt);
       return decodedToken['id'] as String;
     } else {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => const LoginRegisterScreen()),
-      );
+      if (mounted) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const LoginRegisterScreen()),
+        );
+      }
       return '';
     }
   }
@@ -282,7 +284,7 @@ Future<void> _fetchCategories() async {
                                   ),
                               ],
                             );
-                          }).toList(),
+                          }),
 
                           const SizedBox(height: 20),
                           const Text(
@@ -306,10 +308,10 @@ Future<void> _fetchCategories() async {
                           ),
                           Padding(
                             padding: const EdgeInsets.only(top: 15.0),
-                            child: Container(
+                            child: SizedBox(
                               width: double.infinity,
                               child: ElevatedButton(
-                               onPressed: () async {
+                                onPressed: () async {
                                   List<Map<String, dynamic>> tabCategories = [];
                                   selectedCategories.forEach((id, selected) {
                                     if (selected) {

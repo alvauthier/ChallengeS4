@@ -11,10 +11,10 @@ class UserInterestsScreen extends StatefulWidget {
   const UserInterestsScreen({super.key});
 
   @override
-  _UserInterestsScreenState createState() => _UserInterestsScreenState();
+  UserInterestsScreenState createState() => UserInterestsScreenState();
 }
 
-class _UserInterestsScreenState extends State<UserInterestsScreen> {
+class UserInterestsScreenState extends State<UserInterestsScreen> {
   List<Interest> allInterests = [];
   List<Interest> userInterests = [];
   bool isLoading = true;
@@ -43,14 +43,14 @@ class _UserInterestsScreenState extends State<UserInterestsScreen> {
       requestNotificationPermission();
       
       FirebaseMessaging.instance.getToken().then((token) {
-        print("FCM Token: $token");
+        debugPrint("FCM Token: $token");
       });
       FirebaseMessaging.onMessage.listen((RemoteMessage message) {
-        print('Got a message whilst in the foreground here!');
-        print('Message data: ${message.data}');
+        debugPrint('Got a message whilst in the foreground here!');
+        debugPrint('Message data: ${message.data}');
 
         if (message.notification != null) {
-          print('Message also contained a notification: ${message.notification}');
+          debugPrint('Message also contained a notification: ${message.notification}');
         }
       });
     }
@@ -103,11 +103,11 @@ class _UserInterestsScreenState extends State<UserInterestsScreen> {
       if (isSelected) {
         await ApiServices.removeUserInterest(interest.id);
         await FirebaseMessaging.instance.unsubscribeFromTopic(sanitizeTopicName(interest.name));
-        print('Unsubscribed from topic: ${sanitizeTopicName(interest.name)}');
+        debugPrint('Unsubscribed from topic: ${sanitizeTopicName(interest.name)}');
       } else {
         await ApiServices.addUserInterest(interest.id);
         await FirebaseMessaging.instance.subscribeToTopic(sanitizeTopicName(interest.name));
-        print('Subscribed from topic: ${sanitizeTopicName(interest.name)}');
+        debugPrint('Subscribed from topic: ${sanitizeTopicName(interest.name)}');
       }
     } on ApiException catch (e) {
       if (mounted) {
@@ -133,11 +133,11 @@ class _UserInterestsScreenState extends State<UserInterestsScreen> {
     );
 
     if (settings.authorizationStatus == AuthorizationStatus.authorized) {
-      print('User granted permission');
+      debugPrint('User granted permission');
     } else if (settings.authorizationStatus == AuthorizationStatus.provisional) {
-      print('User granted provisional permission');
+      debugPrint('User granted provisional permission');
     } else {
-      print('User declined or has not accepted permission');
+      debugPrint('User declined or has not accepted permission');
     }
   }
 

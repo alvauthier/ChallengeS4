@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'dart:convert';
@@ -27,19 +28,19 @@ class TokenService {
   }
 
   Future<bool> refreshToken() async {
-    // print('Refreshing token...');
+    // debugPrint('Refreshing token...');
     final refreshToken = await _storage.read(key: _refreshTokenKey);
     if (refreshToken == null) {
-      print('No refresh token found');
+      debugPrint('No refresh token found');
       return false;
     }
 
     if (JwtDecoder.isExpired(refreshToken)) {
-      print('Refresh token expired');
+      debugPrint('Refresh token expired');
       return false;
     }
 
-    print('Refresh token found: $refreshToken');
+    debugPrint('Refresh token found: $refreshToken');
 
     final response = await http.post(
       Uri.parse(_refreshUrl),
@@ -51,7 +52,7 @@ class TokenService {
     );
 
     if (response.statusCode == 200) {
-      print("Token refreshed successfully");
+      debugPrint("Token refreshed successfully");
       final data = jsonDecode(response.body);
       await setAccessToken(data['access_token']);
       return true;
@@ -65,10 +66,10 @@ class TokenService {
   }
 
   Future<String?> getValidAccessToken() async {
-    print('Getting valid access token...');
+    debugPrint('Getting valid access token...');
     String? accessToken = await getAccessToken();
     if (accessToken == null || JwtDecoder.isExpired(accessToken)) {
-      print('Access token expired, Generating a new one...');
+      debugPrint('Access token expired, Generating a new one...');
       bool success = await refreshToken();
       if (success) {
         accessToken = await getAccessToken();

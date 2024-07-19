@@ -23,7 +23,7 @@ class PaymentService {
     if (response.statusCode == 200) {
       return json.decode(response.body);
     } else {
-      print('Failed to create payment intent: ${response.body}');
+      debugPrint('Failed to create payment intent: ${response.body}');
       return null;
     }
   }

@@ -7,10 +7,10 @@ class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
 
   @override
-  _RegisterScreenState createState() => _RegisterScreenState();
+  RegisterScreenState createState() => RegisterScreenState();
 }
 
-class _RegisterScreenState extends State<RegisterScreen> {
+class RegisterScreenState extends State<RegisterScreen> {
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
@@ -115,7 +115,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         ),
                         Padding(
                           padding: const EdgeInsets.only(top: 15.0),
-                          child: Container(
+                          child: SizedBox(
                             width: double.infinity,
                             child: ElevatedButton(
                               onPressed: () async {
@@ -140,7 +140,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                         content: Text(response.statusCode == 201
                                             ? 'Inscription réussie'
                                             : 'Erreur lors de l\'inscription'),
-                                        duration: Duration(seconds: 5),
+                                        duration: const Duration(seconds: 5),
                                       ),
                                     );
                                     if (response.statusCode == 201) {

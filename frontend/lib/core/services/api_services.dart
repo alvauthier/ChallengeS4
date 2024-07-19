@@ -308,7 +308,7 @@ class ApiServices {
 
       final data = json.decode(response.body) as Map<String, dynamic>;
       return Conversation.fromJson(data); // Assuming you have a fromJson method to parse the conversation
-    } on SocketException catch (error) {
+    } on SocketException {
       throw ApiException(message: 'Network error');
     } catch (error) {
       throw ApiException(message: 'Unknown error occurred while fetching conversation');
@@ -338,7 +338,7 @@ class ApiServices {
       if (response.statusCode < 200 || response.statusCode >= 300) {
         throw ApiException(message: 'Failed to send message');
       }
-    } on SocketException catch (error) {
+    } on SocketException {
       throw ApiException(message: 'Network error');
     } catch (error) {
       throw ApiException(message: 'Unknown error occurred while sending message');

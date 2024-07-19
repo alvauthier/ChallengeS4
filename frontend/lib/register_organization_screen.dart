@@ -7,10 +7,10 @@ class RegisterOrganisationScreen extends StatefulWidget {
   const RegisterOrganisationScreen({super.key});
 
   @override
-  _RegisterOrganisationScreenState createState() => _RegisterOrganisationScreenState();
+  RegisterOrganisationScreenState createState() => RegisterOrganisationScreenState();
 }
 
-class _RegisterOrganisationScreenState extends State<RegisterOrganisationScreen> {
+class RegisterOrganisationScreenState extends State<RegisterOrganisationScreen> {
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
@@ -141,7 +141,7 @@ class _RegisterOrganisationScreenState extends State<RegisterOrganisationScreen>
                         ),
                         Padding(
                           padding: const EdgeInsets.only(top: 15.0),
-                          child: Container(
+                          child: SizedBox(
                             width: double.infinity,
                             child: ElevatedButton(
                               onPressed: () async {
@@ -167,7 +167,7 @@ class _RegisterOrganisationScreenState extends State<RegisterOrganisationScreen>
                                         content: Text(response.statusCode == 201
                                             ? 'Inscription réussie'
                                             : 'Erreur lors de l\'inscription'),
-                                        duration: Duration(seconds: 5),
+                                        duration: const Duration(seconds: 5),
                                       ),
                                     );
                                     if (response.statusCode == 201) {

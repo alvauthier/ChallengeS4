@@ -10,8 +10,8 @@ class UserInterestChip extends StatelessWidget {
     required this.interest,
     required this.isSelected,
     required this.onSelected,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context) {

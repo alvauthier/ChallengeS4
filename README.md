@@ -56,3 +56,16 @@ Frontend :
 - Notifications
 - Quelques améliorations sur la page d'un concert
 - Relier les pages du frontend avec les données issues de l'API
+
+- Melvin COURANT (@melvincourant) :
+Back-end :
+- controller message
+- controller conversation
+- changement de certains controllers pour le preload d'informations
+Frontend :
+- design global
+- page d'accueil
+- page d'un concert
+- page des tickets de l'utilisateur
+- chat
+- première version de la barre de navigation

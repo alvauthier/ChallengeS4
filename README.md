@@ -69,3 +69,4 @@ Frontend :
 - page des tickets de l'utilisateur
 - chat
 - première version de la barre de navigation
+- page d'achat d'un ticket

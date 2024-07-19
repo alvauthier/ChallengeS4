@@ -70,3 +70,8 @@ Frontend :
 - chat
 - première version de la barre de navigation
 - page d'achat d'un ticket
+
+Hervé COUSIN (@Koboil): 
+- Panel Administrateur
+- Chat (avec websocket et donc temps réel)
+- Redirection de base sur la navbar

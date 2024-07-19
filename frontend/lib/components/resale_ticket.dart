@@ -58,7 +58,7 @@ class ResaleTicket extends StatelessWidget {
     });
 
     try {
-      final apiUrl = '${dotenv.env['API_PROTOCOL']}://${dotenv.env['API_HOST']}:${dotenv.env['API_PORT']}/ticket_listing_reservation/$ticketId';
+      final apiUrl = '${dotenv.env['API_PROTOCOL']}://${dotenv.env['API_HOST']}${dotenv.env['API_PORT']}/ticket_listing_reservation/$ticketId';
       final response = await http.post(
         Uri.parse(apiUrl),
         headers: {

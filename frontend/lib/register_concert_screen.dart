@@ -332,7 +332,7 @@ Future<void> _fetchCategories() async {
                                     try {
                                       String userId = await getUserIdFromJwt();
                                       var response = await http.post(
-                                        Uri.parse('http://${dotenv.env['API_HOST']}:${dotenv.env['API_PORT']}/concerts'),
+                                        Uri.parse('http://${dotenv.env['API_HOST']}${dotenv.env['API_PORT']}/concerts'),
                                         headers: <String, String>{
                                           'Content-Type': 'application/json; charset=UTF-8',
                                         },

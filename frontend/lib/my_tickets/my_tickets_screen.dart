@@ -80,7 +80,7 @@ class MyTicketsScreenState extends State<MyTicketsScreen> {
     String? jwtToken = await tokenService.getValidAccessToken();
 
     final apiUrl =
-        '${dotenv.env['API_PROTOCOL']}://${dotenv.env['API_HOST']}:${dotenv.env['API_PORT']}/ticketlisting';
+        '${dotenv.env['API_PROTOCOL']}://${dotenv.env['API_HOST']}${dotenv.env['API_PORT']}/ticketlisting';
 
     final response = await http.post(
       Uri.parse(apiUrl),
@@ -119,7 +119,7 @@ class MyTicketsScreenState extends State<MyTicketsScreen> {
     String? jwtToken = await tokenService.getValidAccessToken();
 
     final apiUrl =
-        '${dotenv.env['API_PROTOCOL']}://${dotenv.env['API_HOST']}:${dotenv.env['API_PORT']}/ticketlisting/$ticketListingId';
+        '${dotenv.env['API_PROTOCOL']}://${dotenv.env['API_HOST']}${dotenv.env['API_PORT']}/ticketlisting/$ticketListingId';
 
     final response = await http.delete(
       Uri.parse(apiUrl),

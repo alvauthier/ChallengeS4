@@ -122,7 +122,7 @@ class RegisterScreenState extends State<RegisterScreen> {
                                 if (_formKey.currentState!.validate()) {
                                   // Process data.
                                   try {
-                                    final apiUrl = '${dotenv.env['API_PROTOCOL']}://${dotenv.env['API_HOST']}:${dotenv.env['API_PORT']}/register';
+                                    final apiUrl = '${dotenv.env['API_PROTOCOL']}://${dotenv.env['API_HOST']}${dotenv.env['API_PORT']}/register';
                                     var response = await http.post(
                                       Uri.parse(apiUrl),
                                       headers: <String, String>{

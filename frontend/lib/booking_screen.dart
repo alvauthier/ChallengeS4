@@ -35,7 +35,7 @@ class BookingScreenState extends State<BookingScreen> {
     try {
       final tokenService = TokenService();
       String? jwtToken = await tokenService.getValidAccessToken();
-      final apiUrl = '${dotenv.env['API_PROTOCOL']}://${dotenv.env['API_HOST']}:${dotenv.env['API_PORT']}/reservation';
+      final apiUrl = '${dotenv.env['API_PROTOCOL']}://${dotenv.env['API_HOST']}${dotenv.env['API_PORT']}/reservation';
       final response = await http.post(
         Uri.parse(apiUrl),
         headers: {

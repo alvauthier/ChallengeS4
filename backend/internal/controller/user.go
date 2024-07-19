@@ -57,6 +57,13 @@ func GetUser(c echo.Context) error {
 	return c.JSON(http.StatusOK, user)
 }
 
+type RegisterRequest struct {
+	Email     string `json:"email"`
+	Password  string `json:"password"`
+	Firstname string `json:"firstname"`
+	Lastname  string `json:"lastname"`
+}
+
 // @Summary		Créé un utilisateur
 // @Description	Créé un utilisateur
 // @ID				create-user
@@ -67,14 +74,20 @@ func GetUser(c echo.Context) error {
 func Register(c echo.Context) error {
 	db := database.GetDB()
 
-	user := new(models.User)
-	if err := c.Bind(user); err != nil {
+	req := new(RegisterRequest)
+	if err := c.Bind(req); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
-	user.ID = uuid.New()
+	user := &models.User{
+		ID:        uuid.New(),
+		Email:     req.Email,
+		Firstname: req.Firstname,
+		Lastname:  req.Lastname,
+		Role:      "user",
+	}
 
-	hashedPassword, err := HashPassword(user.Password)
+	hashedPassword, err := HashPassword(req.Password)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
@@ -84,6 +97,7 @@ func Register(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
+	user.Password = ""
 	return c.JSON(http.StatusCreated, user)
 }
 

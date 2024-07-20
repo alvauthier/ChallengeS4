@@ -75,3 +75,9 @@ Hervé COUSIN (@Koboil):
 - Panel Administrateur
 - Chat (avec websocket et donc temps réel)
 - Redirection de base sur la navbar
+
+SOBASTO Robin (@RobinSob94)
+- gestion de l'organisateur avec création compte orga
+- création des concerts
+- page mes concerts de l'organisateur
+- navbar celons qui est connecté

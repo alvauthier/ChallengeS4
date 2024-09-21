@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"crypto/rand"
 	"net/http"
 	"time"
 	"weezemaster/internal/config"
@@ -12,6 +13,7 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
+	"github.com/resend/resend-go/v2"
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
 )
@@ -393,4 +395,162 @@ func RefreshAccessToken(c echo.Context) error {
 	return c.JSON(http.StatusOK, map[string]string{
 		"access_token": accessToken,
 	})
+}
+
+const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+
+func generateResetCode(nb int) string {
+	b := make([]byte, nb)
+	_, err := rand.Read(b)
+	if err != nil {
+		return ""
+	}
+
+	for i := 0; i < len(b); i++ {
+		b[i] = charset[b[i]%byte(len(charset))]
+	}
+
+	return string(b)
+}
+
+type ForgotPasswordRequest struct {
+	Email string `json:"email"`
+}
+
+func EmailForgotPassword(c echo.Context) error {
+	req := new(ForgotPasswordRequest)
+	if err := c.Bind(req); err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]string{"message": "Invalid request"})
+	}
+
+	email := req.Email
+
+	if email == "" {
+		return c.JSON(http.StatusBadRequest, map[string]string{"message": "Invalid email"})
+	}
+
+	db := database.GetDB()
+
+	var user models.User
+	if err := db.Where("email = ?", email).First(&user).Error; err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return c.JSON(http.StatusOK, map[string]string{"message": "Ok"})
+		}
+		return c.JSON(http.StatusInternalServerError, map[string]string{"message": err.Error()})
+	}
+
+	resetCode := generateResetCode(10)
+	user.ResetCode = resetCode
+	user.ResetCodeExpiration = time.Now().Add(time.Minute * 15)
+
+	if err := db.Model(&user).Updates(user).Error; err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{"message": err.Error()})
+	}
+
+	client := resend.NewClient(config.ResendApiKey)
+
+	params := &resend.SendEmailRequest{
+		From: config.ContactEmail,
+		To:   []string{email},
+		Html: `<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Réinitialisation de mot de passe</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        background-color: #f4f4f4;
+        margin: 0;
+        padding: 0;
+      }
+      .email-container {
+        max-width: 600px;
+        margin: 0 auto;
+        background-color: #ffffff;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      }
+      h1 {
+        text-align: center;
+      }
+      h2 {
+        color: #333333;
+      }
+      p {
+        font-size: 16px;
+        color: #555555;
+        line-height: 1.5;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Weezemaster</h1>
+    <div class="email-container">
+      <h2>Réinitialisation de mot de passe</h2>
+      <p>Bonjour,</p>
+      <p>Vous pouvez réinitialiser votre mot de passe à l'aide du code suivant : <strong>XXXXX</strong>. </p>
+      <p>À bientôt sur <strong>Weezemaster</strong>. </p>
+      <p>Si vous n'avez pas demandé cette réinitialisation, veuillez ignorer cet email.</p>
+    </div>
+  </body>
+</html>`,
+		Subject: "Weezemaster - Mot de passe oublié",
+	}
+
+	_, err := client.Emails.Send(params)
+	if err != nil {
+		fmt.Println(err.Error())
+	}
+
+	return c.JSON(http.StatusOK, map[string]string{"message": "Ok"})
+}
+
+func ResetPassword(c echo.Context) error {
+	var requestBody map[string]string
+	if err := c.Bind(&requestBody); err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]string{"message": "Invalid request"})
+	}
+
+	resetCode := requestBody["reset_code"]
+	newPassword := requestBody["new_password"]
+
+	if resetCode == "" || newPassword == "" {
+		return c.JSON(http.StatusBadRequest, map[string]string{"message": "Invalid request"})
+	}
+
+	db := database.GetDB()
+
+	var user models.User
+	if err := db.Where("reset_code = ?", resetCode).First(&user).Error; err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return c.JSON(http.StatusNotFound, map[string]string{"message": "User not found"})
+		}
+		return c.JSON(http.StatusInternalServerError, map[string]string{"message": err.Error()})
+	}
+
+	// if user.ResetCode != resetCode {
+	// 	return c.JSON(http.StatusUnauthorized, map[string]string{"message": "Invalid reset code"})
+	// }
+
+	if user.ResetCodeExpiration.Before(time.Now()) {
+		return c.JSON(http.StatusUnauthorized, map[string]string{"message": "Reset code expired"})
+	}
+
+	hashedPassword, err := HashPassword(newPassword)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{"message": err.Error()})
+	}
+
+	user.Password = hashedPassword
+	user.ResetCode = ""
+	user.ResetCodeExpiration = time.Time{}
+
+	if err := db.Model(&user).Select("Password", "ResetCode", "ResetCodeExpiration").Updates(user).Error; err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{"message": "Error updating user"})
+	}
+
+	return c.JSON(http.StatusOK, map[string]string{"message": "Password updated successfully"})
 }

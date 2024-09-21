@@ -45,4 +45,6 @@ type User struct {
 	Messages              []Message      `gorm:"foreignKey:AuthorId"`
 	SalesAsBuyer          []Sale         `gorm:"foreignKey:BuyerId"`
 	SalesAsSeller         []Sale         `gorm:"foreignKey:SellerId"`
+	ResetCode             string         `json:"-"`
+	ResetCodeExpiration   time.Time
 }

@@ -60,6 +60,7 @@ func main() {
 	router.POST("/login", controller.Login)
 	router.POST("/refresh", controller.RefreshAccessToken)
 	router.POST("/forgot-password", controller.EmailForgotPassword)
+	router.POST("/reset-password", controller.ResetPassword)
 	authenticated.GET("/users", controller.GetAllUsers, middleware.CheckRole("admin"))
 	authenticated.GET("/users/:id", controller.GetUser, middleware.CheckRole("admin"))
 	authenticated.PATCH("/users/:id", controller.UpdateUser, middleware.CheckRole("admin"))

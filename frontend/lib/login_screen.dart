@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:weezemaster/forgot_password_screen.dart';
 import 'package:weezemaster/home/home_screen.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -124,7 +125,14 @@ class LoginScreenState extends State<LoginScreen> {
                               child: const Text('Se connecter'),
                             ),
                           ),
-                        )
+                        ),
+                        TextButton(onPressed: ()
+                        {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (context) => const ForgotPasswordScreen()),
+                          );
+                        }, child: const Text('Mot de passe oublié ? Cliquez ici')),
                       ],
                     ),
                   ),

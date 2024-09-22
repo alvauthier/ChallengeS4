@@ -12,7 +12,15 @@ import 'package:weezemaster/core/services/token_services.dart';
 import 'package:weezemaster/login_register_screen.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
+import 'components/adaptive_navigation_bar.dart';
+
 class RegisterConcertScreen extends StatefulWidget {
+  static const String routeName = '/register-concert';
+
+  static navigateTo(BuildContext context) {
+    Navigator.of(context).pushNamed(routeName);
+  }
+
   const RegisterConcertScreen({super.key});
 
   @override
@@ -99,10 +107,7 @@ Future<void> _fetchCategories() async {
       return decodedToken['id'] as String;
     } else {
       if (mounted) {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => const LoginRegisterScreen()),
-        );
+        LoginRegisterScreen.navigateTo(context);
       }
       return '';
     }
@@ -386,6 +391,7 @@ Future<void> _fetchCategories() async {
           ),
         ],
       ),
+      bottomNavigationBar: const AdaptiveNavigationBar(),
     );
   }
 }

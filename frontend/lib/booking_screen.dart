@@ -8,7 +8,15 @@ import 'package:weezemaster/thank_you_screen.dart';
 import 'package:http/http.dart' as http;
 import 'package:weezemaster/core/services/payment_services.dart';
 
+import 'components/adaptive_navigation_bar.dart';
+
 class BookingScreen extends StatefulWidget {
+  static const String routeName = '/booking';
+
+  static Future<dynamic> navigateTo(BuildContext context, {required List concertCategories}) async {
+    return Navigator.of(context).pushNamed(routeName, arguments: concertCategories);
+  }
+
   final List<ConcertCategory> concertCategories;
   const BookingScreen({super.key, required this.concertCategories});
 
@@ -51,10 +59,7 @@ class BookingScreenState extends State<BookingScreen> {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text('Réservation réussie.')),
           );
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (context) => const ThankYouScreen()),
-          );
+          ThankYouScreen.navigateTo(context);
         }
       } else {
         debugPrint('Erreur lors de la réservation: ${response.body}');
@@ -142,61 +147,65 @@ class BookingScreenState extends State<BookingScreen> {
               onPressed: () => Navigator.pop(context),
             ),
           ),
-        ],
-      ),
-      bottomNavigationBar: BottomAppBar(
-        child: Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: ElevatedButton(
-            onPressed: selectedCategory == null
-                ? null
-                : () async {
-                    if (selectedCategory == null) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Veuillez sélectionner une catégorie de billet.')),
-                      );
-                      return;
-                    }
+          Positioned(
+            left: 0,
+            right: 0,
+            bottom: 0,
+            child: Container(
+              padding: const EdgeInsets.all(8.0),
+              child: ElevatedButton(
+                onPressed: selectedCategory == null
+                    ? null
+                    : () async {
+                  if (selectedCategory == null) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Veuillez sélectionner une catégorie de billet.')),
+                    );
+                    return;
+                  }
 
-                    final paymentIntentData = await paymentService.createPaymentIntent(selectedCategory!, 'cc_');
-                    if (paymentIntentData != null) {
-                      try {
-                        await paymentService.initAndPresentPaymentSheet(
-                          context,
-                          paymentIntentData['client_secret'],
-                        );
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('Paiement réussi')),
-                        );
-                        await proceedToReservation();
-                      } catch (e) {
-                        debugPrint('Error presenting payment sheet: $e');
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('Echec du paiement')),
-                        );
-                      }
-                    } else {
+                  final paymentIntentData = await paymentService.createPaymentIntent(selectedCategory!, 'cc_');
+                  if (paymentIntentData != null) {
+                    try {
+                      await paymentService.initAndPresentPaymentSheet(
+                        context,
+                        paymentIntentData['client_secret'],
+                      );
                       ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Failed to create payment intent')),
+                        const SnackBar(content: Text('Paiement réussi')),
+                      );
+                      await proceedToReservation();
+                    } catch (e) {
+                      debugPrint('Error presenting payment sheet: $e');
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Echec du paiement')),
                       );
                     }
-                  },
-            style: ElevatedButton.styleFrom(
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(6.0),
-              ),
-              backgroundColor: selectedCategory == null ? Colors.grey : Colors.deepOrange,
-            ),
-            child: Text(
-              'Procéder au paiement',
-              style: TextStyle(
-                fontFamily: 'Readex Pro',
-                color: selectedCategory == null ? Colors.black : Colors.white,
+                  } else {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Failed to create payment intent')),
+                    );
+                  }
+                },
+                style: ElevatedButton.styleFrom(
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(6.0),
+                  ),
+                  backgroundColor: selectedCategory == null ? Colors.grey : Colors.deepOrange,
+                ),
+                child: Text(
+                  'Procéder au paiement',
+                  style: TextStyle(
+                    fontFamily: 'Readex Pro',
+                    color: selectedCategory == null ? Colors.black : Colors.white,
+                  ),
+                ),
               ),
             ),
           ),
-        ),
+        ],
       ),
+      bottomNavigationBar: const AdaptiveNavigationBar(),
     );
   }
 }

@@ -3,8 +3,16 @@ import 'package:weezemaster/login_screen.dart';
 import 'package:weezemaster/register_screen.dart';
 import 'package:weezemaster/register_organization_screen.dart';
 
+import 'components/adaptive_navigation_bar.dart';
+
 
 class LoginRegisterScreen extends StatelessWidget {
+  static const String routeName = '/login-register';
+
+  static navigateTo(BuildContext context) {
+    Navigator.of(context).pushNamed(routeName);
+  }
+
   const LoginRegisterScreen({super.key});
 
   @override
@@ -37,21 +45,21 @@ class LoginRegisterScreen extends StatelessWidget {
                     children: <Widget>[
                       ElevatedButton(
                         onPressed: () {
-                          Navigator.push(context, MaterialPageRoute(builder: (context) => const LoginScreen()));
+                          LoginScreen.navigateTo(context);
                         },
                         child: const Text('Se connecter'),
                       ),
                       const SizedBox(height: 20),
                       ElevatedButton(
                         onPressed: () {
-                          Navigator.push(context, MaterialPageRoute(builder: (context) => const RegisterScreen()));
+                          RegisterScreen.navigateTo(context);
                         },
                         child: const Text('Créer un compte'),
                       ),
                       const SizedBox(height: 20),
                       ElevatedButton(
                         onPressed: () {
-                          Navigator.push(context, MaterialPageRoute(builder: (context) => const RegisterOrganisationScreen()));
+                         RegisterOrganisationScreen.navigateTo(context);
                         },
                         child: const Text('Créer un compte d\'organisation'),
                       ),
@@ -63,6 +71,7 @@ class LoginRegisterScreen extends StatelessWidget {
           ),
         ],
       ),
+      bottomNavigationBar: const AdaptiveNavigationBar(),
     );
   }
 }

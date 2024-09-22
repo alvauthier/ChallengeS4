@@ -3,7 +3,15 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:weezemaster/login_register_screen.dart';
 import 'dart:convert';
 
+import 'components/adaptive_navigation_bar.dart';
+
 class ProfileScreen extends StatefulWidget {
+  static const String routeName = '/profile';
+
+  static navigateTo(BuildContext context) {
+    Navigator.of(context).pushNamed(routeName);
+  }
+
   const ProfileScreen({super.key});
 
   @override
@@ -21,13 +29,10 @@ class ProfileScreenState extends State<ProfileScreen> {
   }
 
   Future<void> verifyJwtAndRedirectIfNecessary() async {
-    String? jwt = await storage.read(key: 'token');
+    String? jwt = await storage.read(key: 'access_token');
     // if (jwt == null || !_isTokenValid(jwt)) {
     if (jwt == null) {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => const LoginRegisterScreen()),
-      );
+      LoginRegisterScreen.navigateTo(context);
     } else {
       getEmailFromJwt();
     }
@@ -38,7 +43,7 @@ class ProfileScreenState extends State<ProfileScreen> {
   // }
 
   Future<void> getEmailFromJwt() async {
-    String? jwt = await storage.read(key: 'token');
+    String? jwt = await storage.read(key: 'access_token');
     if (jwt != null) {
       Map<String, dynamic> decodedToken = _decodeToken(jwt);
       setState(() {
@@ -89,6 +94,7 @@ class ProfileScreenState extends State<ProfileScreen> {
       body: Center(
         child: Text('Bonjour $email'),
       ),
+      bottomNavigationBar: const AdaptiveNavigationBar(),
     );
   }
 }

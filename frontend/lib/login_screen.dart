@@ -6,7 +6,15 @@ import 'package:weezemaster/home/home_screen.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
+import 'components/adaptive_navigation_bar.dart';
+
 class LoginScreen extends StatefulWidget {
+  static const String routeName = '/login';
+
+  static navigateTo(BuildContext context) {
+    Navigator.of(context).pushNamed(routeName);
+  }
+
   const LoginScreen({super.key});
 
   @override
@@ -105,12 +113,7 @@ class LoginScreenState extends State<LoginScreen> {
                                       final String refreshToken = responseData['refresh_token'];
                                       await storage.write(key: 'access_token', value: accessToken);
                                       await storage.write(key: 'refresh_token', value: refreshToken);
-                                      // Navigator.pop(context);
-                                      // Navigator.pop(context);
-                                      Navigator.push(
-                                        context,
-                                        MaterialPageRoute(builder: (context) => const HomeScreen()),
-                                      );
+                                      Navigator.pushNamed(context, '/');
                                     }
                                   } catch (e) {
                                     ScaffoldMessenger.of(context).showSnackBar(
@@ -142,6 +145,7 @@ class LoginScreenState extends State<LoginScreen> {
           ),
         ],
       ),
+      bottomNavigationBar: const AdaptiveNavigationBar(),
     );
   }
 }

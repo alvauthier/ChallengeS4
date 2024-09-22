@@ -4,6 +4,7 @@ import 'package:weezemaster/booking_screen.dart';
 import 'package:weezemaster/chat.dart';
 import 'package:weezemaster/concert/concert_screen.dart';
 import 'package:weezemaster/conversations/conversations_screen.dart';
+import 'package:weezemaster/forgot_password_screen.dart';
 import 'package:weezemaster/home/home_screen.dart';
 import 'package:weezemaster/login_register_screen.dart';
 import 'package:weezemaster/login_screen.dart';
@@ -11,6 +12,7 @@ import 'package:weezemaster/my_tickets/my_tickets_screen.dart';
 import 'package:weezemaster/profile_screen.dart';
 import 'package:weezemaster/register_concert_screen.dart';
 import 'package:weezemaster/register_screen.dart';
+import 'package:weezemaster/reset_password_screen.dart';
 import 'package:weezemaster/thank_you_screen.dart';
 import 'package:weezemaster/core/models/concert_category.dart';
 import 'package:weezemaster/user_interests_screen.dart';
@@ -34,6 +36,8 @@ class App extends StatelessWidget {
         ThankYouScreen.routeName: (context) => const ThankYouScreen(),
         RegisterConcertScreen.routeName: (context) => const RegisterConcertScreen(),
         UserInterestsScreen.routeName: (context) => const UserInterestsScreen(),
+        ForgotPasswordScreen.routeName: (context) => const ForgotPasswordScreen(),
+        ResetPasswordScreen.routeName: (context) => const ResetPasswordScreen(),
       },
       onGenerateRoute: (settings) {
         final args = settings.arguments;

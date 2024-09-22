@@ -39,12 +39,7 @@ class UserInterestsScreenState extends State<UserInterestsScreen> {
     String? token = await tokenService.getValidAccessToken();
     if (token == null) {
       if (mounted) {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-            builder: (context) => const LoginRegisterScreen(),
-          ),
-        );
+        LoginRegisterScreen.navigateTo(context);
       }
     } else {
       await fetchInterests();

@@ -1,9 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
+import 'package:weezemaster/login_screen.dart';
 import 'dart:convert';
 
+import 'components/adaptive_navigation_bar.dart';
+
 class ResetPasswordScreen extends StatefulWidget {
+  static const String routeName = '/reset-password';
+
+  static navigateTo(BuildContext context) {
+    Navigator.of(context).pushNamed(routeName);
+  }
+
   const ResetPasswordScreen({super.key});
 
   @override
@@ -55,8 +64,7 @@ class ResetPasswordScreenState extends State<ResetPasswordScreen> {
         );
 
         if (response.statusCode == 200) {
-          // Redirige vers la page de connexion après succès
-          Navigator.pushReplacementNamed(context, '/login');
+          LoginScreen.navigateTo(context);
         }
       } catch (e) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -127,6 +135,7 @@ class ResetPasswordScreenState extends State<ResetPasswordScreen> {
           ),
         ),
       ),
+      bottomNavigationBar: const AdaptiveNavigationBar(),
     );
   }
 }

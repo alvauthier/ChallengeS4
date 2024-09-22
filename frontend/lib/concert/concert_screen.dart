@@ -9,10 +9,18 @@ import 'package:intl/intl.dart';
 import 'package:weezemaster/components/resale_ticket.dart';
 import 'package:weezemaster/components/interest_chip.dart';
 
-class ConcertScreen extends StatelessWidget {
-  final String concertId;
+import '../components/adaptive_navigation_bar.dart';
 
-  const ConcertScreen({super.key, required this.concertId});
+class ConcertScreen extends StatelessWidget {
+  static const String routeName = '/concert';
+
+  static Future<dynamic> navigateTo(BuildContext context, {required String id}) async {
+    return Navigator.of(context).pushNamed(routeName, arguments: id);
+  }
+
+  final String id;
+
+  const ConcertScreen({super.key, required this.id});
 
   String formatDate(String date) {
     DateTime dateTime = DateTime.parse(date);
@@ -23,7 +31,7 @@ class ConcertScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (context) => ConcertBloc()..add(ConcertDataLoaded(concertId: concertId)),
+      create: (context) => ConcertBloc()..add(ConcertDataLoaded(concertId: id)),
       child: SafeArea(
         child: Scaffold(
           backgroundColor: Colors.white,
@@ -61,16 +69,16 @@ class ConcertScreen extends StatelessWidget {
                         for (var ticket in concertCategory.tickets) {
                           if (ticket.ticketListing != null && ticket.ticketListing!.status == 'available') {
                             resaleTickets.add(
-                              {
-                                'reseller': {
-                                  'id': ticket.user.id,
-                                  'name': '${ticket.user.firstname} ${ticket.user.lastname}',
-                                  'avatar': 'https://thispersondoesnotexist.com/',
-                                },
-                                'category': concertCategory.category.name,
-                                'price': ticket.ticketListing!.price.toStringAsFixed(2),
-                                'id': ticket.ticketListing!.id.toString()
-                              }
+                                {
+                                  'reseller': {
+                                    'id': ticket.user.id,
+                                    'name': '${ticket.user.firstname} ${ticket.user.lastname}',
+                                    'avatar': 'https://thispersondoesnotexist.com/',
+                                  },
+                                  'category': concertCategory.category.name,
+                                  'price': ticket.ticketListing!.price.toStringAsFixed(2),
+                                  'id': ticket.ticketListing!.id.toString()
+                                }
                             );
                           }
                         }
@@ -81,198 +89,6 @@ class ConcertScreen extends StatelessWidget {
                         ? (resaleTickets..shuffle()).take(2).toList()
                         : resaleTickets;
 
-                    return SingleChildScrollView(
-                      child: Column(
-                        children: <Widget>[
-                          Image.network(
-                            'https://picsum.photos/seed/picsum/800/400',
-                            width: double.infinity,
-                            height: 200,
-                            fit: BoxFit.cover,
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.only(top: 30.0, right: 10.0, left: 10.0),
-                            child: Align(
-                              alignment: Alignment.centerLeft,
-                              child: Text(
-                                formatDate(state.concert.date),
-                                style: const TextStyle(
-                                  fontSize: 20,
-                                  fontFamily: 'Readex Pro',
-                                ),
-                              ),
-                            ),
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.only(top: 15.0, right: 10.0, left: 10.0),
-                            child: Align(
-                              alignment: Alignment.centerLeft,
-                              child: Text(
-                                state.concert.name,
-                                style: const TextStyle(
-                                  fontSize: 30,
-                                  fontFamily: 'Readex Pro',
-                                  fontWeight: FontWeight.w700,
-                                ),
-                              ),
-                            ),
-                          ),
-                          ListTile(
-                            leading: const Icon(Icons.location_on),
-                            title: Text(
-                              state.concert.location,
-                              style: const TextStyle(
-                                fontFamily: 'Readex Pro',
-                              ),
-                            ),
-                          ),
-                          ListTile(
-                            leading: const Icon(Icons.event_seat),
-                            title: Text(
-                              '$totalRemainingTickets places restantes',
-                              style: const TextStyle(
-                                fontFamily: 'Readex Pro',
-                              ),
-                            ),
-                          ),
-                          ListTile(
-                            leading: const Icon(Icons.event),
-                            title: Text(
-                              'Organisé par ${state.concert.organization.name}',
-                              style: const TextStyle(
-                                fontFamily: 'Readex Pro',
-                              ),
-                            ),
-                          ),
-                          const Divider(),
-                          const Padding(
-                            padding: EdgeInsets.only(top: 20.0, right: 10.0, left: 10.0),
-                            child: Align(
-                              alignment: Alignment.centerLeft,
-                              child: Text(
-                                'À propos de cet événement',
-                                style: TextStyle(
-                                  fontSize: 25,
-                                  fontFamily: 'Readex Pro',
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                            ),
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.only(top: 10.0, right: 10.0, left: 10.0),
-                            child: Align(
-                              alignment: Alignment.topLeft,
-                              child: Wrap(
-                                spacing: 10.0,
-                                runSpacing: 5.0,
-                                alignment: WrapAlignment.start,
-                                children: state.concert.interests
-                                    .map((interest) => InterestChip(interest: interest))
-                                    .toList(),
-                              ),
-                            ),
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.only(top: 10.0, right: 10.0, left: 10.0, bottom: 20.0),
-                            child: Align(
-                              alignment: Alignment.centerLeft,
-                              child: Text(
-                                state.concert.description,
-                                style: const TextStyle(
-                                  fontSize: 16,
-                                  color: Colors.grey,
-                                  fontFamily: 'Readex Pro',
-                                ),
-                              ),
-                            ),
-                          ),
-                          const Divider(),
-                          const Padding(
-                            padding: EdgeInsets.only(top: 20.0, right: 10.0, left: 10.0),
-                            child: Align(
-                              alignment: Alignment.centerLeft,
-                              child: Text(
-                                'Tickets disponibles à la revente',
-                                style: TextStyle(
-                                  fontSize: 25,
-                                  fontFamily: 'Readex Pro',
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                            ),
-                          ),
-                          if (resaleTickets.isEmpty)
-                            const Padding(
-                              padding: EdgeInsets.all(10.0),
-                              child: Align(
-                                alignment: Alignment.centerLeft,
-                                child: Text(
-                                  "Il n'y a actuellement pas de tickets disponibles à la revente.",
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                    color: Colors.grey,
-                                    fontFamily: 'Readex Pro',
-                                  ),
-                                ),
-                              ),
-                            ),
-                          if (resaleTickets.isNotEmpty)
-                            for (var resaleTicket in selectedResaleTickets)
-                              ResaleTicket(ticket: Ticket.fromMap(resaleTicket)),
-                          if (resaleTickets.length > 2)
-                            ElevatedButton(
-                              onPressed: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => ResaleTicketsScreen(resaleTickets: resaleTickets),
-                                  ),
-                                );
-                              },
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.deepOrange,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(6.0),
-                                ),
-                              ),
-                              child: const Text(
-                                'Consulter toutes les reventes',
-                                style: TextStyle(
-                                  fontFamily: 'Readex Pro',
-                                  color: Colors.white,
-                                ),
-                              ),
-                            ),
-                        ],
-                      ),
-                    );
-                  } else {
-                    return const Center(
-                      child: Text(
-                        'État inattendu',
-                        style: TextStyle(color: Colors.red),
-                      ),
-                    );
-                  }
-                },
-              ),
-              Positioned(
-                top: 10.0,
-                left: 10.0,
-                child: FloatingActionButton(
-                  child: const Icon(Icons.arrow_back),
-                  onPressed: () => Navigator.pop(context),
-                ),
-              ),
-            ],
-          ),
-          bottomNavigationBar: BottomAppBar(
-            child: Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: BlocBuilder<ConcertBloc, ConcertState>(
-                builder: (context, state) {
-                  if (state is ConcertDataLoadingSuccess) {
                     // Filtrer les catégories avec des tickets restants
                     var remainingCategories = state.concert.concertCategories
                         .where((category) => category.availableTickets > category.soldTickets)
@@ -304,51 +120,223 @@ class ConcertScreen extends StatelessWidget {
                       priceText = '${minPrice.toStringAsFixed(2)} €';
                     }
 
-                    return Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: <Widget>[
-                        Text(
-                          priceText,
-                          style: const TextStyle(
-                            fontSize: 20,
-                            fontFamily: 'Readex Pro',
-                            fontWeight: FontWeight.w600,
+                    return Stack(
+                      children: [
+                        SingleChildScrollView(
+                          child: Column(
+                            children: <Widget>[
+                              Image.network(
+                                'https://picsum.photos/seed/picsum/800/400',
+                                width: double.infinity,
+                                height: 200,
+                                fit: BoxFit.cover,
+                              ),
+                              Padding(
+                                padding: const EdgeInsets.only(top: 30.0, right: 10.0, left: 10.0),
+                                child: Align(
+                                  alignment: Alignment.centerLeft,
+                                  child: Text(
+                                    formatDate(state.concert.date),
+                                    style: const TextStyle(
+                                      fontSize: 20,
+                                      fontFamily: 'Readex Pro',
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              Padding(
+                                padding: const EdgeInsets.only(top: 15.0, right: 10.0, left: 10.0),
+                                child: Align(
+                                  alignment: Alignment.centerLeft,
+                                  child: Text(
+                                    state.concert.name,
+                                    style: const TextStyle(
+                                      fontSize: 30,
+                                      fontFamily: 'Readex Pro',
+                                      fontWeight: FontWeight.w700,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              ListTile(
+                                leading: const Icon(Icons.location_on),
+                                title: Text(
+                                  state.concert.location,
+                                  style: const TextStyle(
+                                    fontFamily: 'Readex Pro',
+                                  ),
+                                ),
+                              ),
+                              ListTile(
+                                leading: const Icon(Icons.event_seat),
+                                title: Text(
+                                  '$totalRemainingTickets places restantes',
+                                  style: const TextStyle(
+                                    fontFamily: 'Readex Pro',
+                                  ),
+                                ),
+                              ),
+                              ListTile(
+                                leading: const Icon(Icons.event),
+                                title: Text(
+                                  'Organisé par ${state.concert.organization.name}',
+                                  style: const TextStyle(
+                                    fontFamily: 'Readex Pro',
+                                  ),
+                                ),
+                              ),
+                              const Divider(),
+                              const Padding(
+                                padding: EdgeInsets.only(top: 20.0, right: 10.0, left: 10.0),
+                                child: Align(
+                                  alignment: Alignment.centerLeft,
+                                  child: Text(
+                                    'À propos de cet événement',
+                                    style: TextStyle(
+                                      fontSize: 25,
+                                      fontFamily: 'Readex Pro',
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              Padding(
+                                padding: const EdgeInsets.only(top: 10.0, right: 10.0, left: 10.0),
+                                child: Align(
+                                  alignment: Alignment.topLeft,
+                                  child: Wrap(
+                                    spacing: 10.0,
+                                    runSpacing: 5.0,
+                                    alignment: WrapAlignment.start,
+                                    children: state.concert.interests
+                                        .map((interest) => InterestChip(interest: interest))
+                                        .toList(),
+                                  ),
+                                ),
+                              ),
+                              Padding(
+                                padding: const EdgeInsets.only(top: 10.0, right: 10.0, left: 10.0, bottom: 20.0),
+                                child: Align(
+                                  alignment: Alignment.centerLeft,
+                                  child: Text(
+                                    state.concert.description,
+                                    style: const TextStyle(
+                                      fontSize: 16,
+                                      color: Colors.grey,
+                                      fontFamily: 'Readex Pro',
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              const Divider(),
+                              const Padding(
+                                padding: EdgeInsets.only(top: 20.0, right: 10.0, left: 10.0),
+                                child: Align(
+                                  alignment: Alignment.centerLeft,
+                                  child: Text(
+                                    'Tickets disponibles à la revente',
+                                    style: TextStyle(
+                                      fontSize: 25,
+                                      fontFamily: 'Readex Pro',
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              if (resaleTickets.isEmpty)
+                                const Padding(
+                                  padding: EdgeInsets.all(10.0),
+                                  child: Align(
+                                    alignment: Alignment.centerLeft,
+                                    child: Text(
+                                      "Il n'y a actuellement pas de tickets disponibles à la revente.",
+                                      style: TextStyle(
+                                        fontSize: 16,
+                                        color: Colors.grey,
+                                        fontFamily: 'Readex Pro',
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              if (resaleTickets.isNotEmpty)
+                                for (var resaleTicket in selectedResaleTickets)
+                                  ResaleTicket(ticket: Ticket.fromMap(resaleTicket)),
+                              if (resaleTickets.length > 2)
+                                ElevatedButton(
+                                  onPressed: () {
+                                    ResaleTicketsScreen.navigateTo(context, resaleTickets: resaleTickets);
+                                  },
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: Colors.deepOrange,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(6.0),
+                                    ),
+                                  ),
+                                  child: const Text(
+                                    'Consulter toutes les reventes',
+                                    style: TextStyle(
+                                      fontFamily: 'Readex Pro',
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                ),
+                            ],
                           ),
                         ),
-                        SizedBox(
-                          width: 150,
-                          child: ElevatedButton(
-                            onPressed: () async {
-                              final tokenService = TokenService();
-                              String? token = await tokenService.getValidAccessToken();
-                              if (token == null) {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => const LoginRegisterScreen(),
-                                  ),
-                                );
-                              } else {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => BookingScreen(concertCategories: state.concert.concertCategories),
-                                  ),
-                                );
-                              }
-                            },
-                            style: ElevatedButton.styleFrom(
-                              foregroundColor: Colors.white,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(6.0),
+                        Positioned(
+                          left: 0,
+                          right: 0,
+                          bottom: 0,
+                          child: Container(
+                            padding: const EdgeInsets.all(8.0),
+                            decoration: const BoxDecoration(
+                              border: Border(
+                                top: BorderSide(
+                                  color: Colors.grey,
+                                  width: 1.0,
+                                ),
                               ),
-                              backgroundColor: Colors.deepOrange,
+                              color: Colors.white,
                             ),
-                            child: const Text(
-                              'Réserver',
-                              style: TextStyle(
-                                fontFamily: 'Readex Pro',
-                              ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: <Widget>[
+                                Text(
+                                  priceText,
+                                  style: const TextStyle(
+                                    fontSize: 20,
+                                    fontFamily: 'Readex Pro',
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                                SizedBox(
+                                  width: 150,
+                                  child: ElevatedButton(
+                                    onPressed: () async {
+                                      final tokenService = TokenService();
+                                      String? token = await tokenService.getValidAccessToken();
+                                      if (token == null) {
+                                        LoginRegisterScreen.navigateTo(context);
+                                      } else {
+                                        BookingScreen.navigateTo(context, concertCategories: state.concert.concertCategories);
+                                      }
+                                    },
+                                    style: ElevatedButton.styleFrom(
+                                      foregroundColor: Colors.white,
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(6.0),
+                                      ),
+                                      backgroundColor: Colors.deepOrange,
+                                    ),
+                                    child: const Text(
+                                      'Réserver',
+                                      style: TextStyle(
+                                        fontFamily: 'Readex Pro',
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
                         ),
@@ -356,11 +344,25 @@ class ConcertScreen extends StatelessWidget {
                     );
                   }
 
-                  return const SizedBox();
+                  return const Center(
+                    child: Text(
+                      'État inattendu',
+                      style: TextStyle(color: Colors.red),
+                    ),
+                  );
                 },
               ),
-            ),
+              Positioned(
+                top: 10.0,
+                left: 10.0,
+                child: FloatingActionButton(
+                  child: const Icon(Icons.arrow_back),
+                  onPressed: () => Navigator.pushNamed(context, '/'),
+                ),
+              ),
+            ],
           ),
+          bottomNavigationBar: const AdaptiveNavigationBar(),
         ),
       ),
     );

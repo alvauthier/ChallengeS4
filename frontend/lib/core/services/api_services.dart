@@ -13,8 +13,7 @@ import 'package:weezemaster/core/models/ticket.dart';
 import 'package:weezemaster/core/services/token_services.dart';
 import 'package:http/http.dart' as http;
 import 'package:weezemaster/core/models/user.dart';
-
-import '../models/conversation.dart';
+import 'package:weezemaster/core/models/conversation.dart';
 
 class ApiServices {
   static const storage = FlutterSecureStorage();

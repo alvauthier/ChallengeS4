@@ -3,15 +3,22 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:intl/intl.dart';
+import 'components/adaptive_navigation_bar.dart';
 import 'components/message_bubble.dart';
 import 'login_register_screen.dart';
 import 'components/ticket_details.dart';
 import 'package:weezemaster/core/services/api_services.dart';
 
 class ChatScreen extends StatefulWidget {
-  final String conversationId;
+  static const String routeName = '/chat';
 
-  const ChatScreen({super.key, required this.conversationId});
+  static Future<dynamic> navigateTo(BuildContext context, {required String id}) async {
+    return Navigator.of(context).pushNamed(routeName, arguments: id);
+  }
+
+  final String id;
+
+  const ChatScreen({super.key, required this.id});
 
   @override
   ChatScreenState createState() => ChatScreenState();
@@ -48,10 +55,7 @@ class ChatScreenState extends State<ChatScreen> {
       });
     } else {
       if (mounted) {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => const LoginRegisterScreen()),
-        );
+        LoginRegisterScreen.navigateTo(context);
       }
     }
   }
@@ -96,9 +100,9 @@ class ChatScreenState extends State<ChatScreen> {
   }
 
   Future<void> _fetchConversation() async {
-    if (widget.conversationId.isNotEmpty) {
+    if (widget.id.isNotEmpty) {
       try {
-        final conversation = await ApiServices.getConversation(widget.conversationId);
+        final conversation = await ApiServices.getConversation(widget.id);
         setState(() {
           messages = conversation.messages.map((message) => {
             "authorId": message['AuthorId'], // Changed from AuthorId to authorId
@@ -128,7 +132,7 @@ class ChatScreenState extends State<ChatScreen> {
     }
 
     try {
-      await ApiServices.sendMessage(widget.conversationId, content);
+      await ApiServices.sendMessage(widget.id, content);
       _fetchConversation();
     } catch (e) {
       debugPrint("Failed to send message: $e");
@@ -298,7 +302,8 @@ class ChatScreenState extends State<ChatScreen> {
             ),
           ],
         ),
-      )
+      ),
+      bottomNavigationBar: const AdaptiveNavigationBar(),
     );
   }
 }

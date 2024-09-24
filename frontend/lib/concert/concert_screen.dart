@@ -8,6 +8,7 @@ import 'package:weezemaster/login_register_screen.dart';
 import 'package:intl/intl.dart';
 import 'package:weezemaster/components/resale_ticket.dart';
 import 'package:weezemaster/components/interest_chip.dart';
+import 'package:weezemaster/translation.dart';
 
 class ConcertScreen extends StatelessWidget {
   final String concertId;
@@ -129,7 +130,7 @@ class ConcertScreen extends StatelessWidget {
                           ListTile(
                             leading: const Icon(Icons.event_seat),
                             title: Text(
-                              '$totalRemainingTickets places restantes',
+                                '$totalRemainingTickets ${translate(context)!.remaining_tickets}',
                               style: const TextStyle(
                                 fontFamily: 'Readex Pro',
                               ),
@@ -138,20 +139,20 @@ class ConcertScreen extends StatelessWidget {
                           ListTile(
                             leading: const Icon(Icons.event),
                             title: Text(
-                              'Organisé par ${state.concert.organization.name}',
+                              '${translate(context)!.organized_by} ${state.concert.organization.name}',
                               style: const TextStyle(
                                 fontFamily: 'Readex Pro',
                               ),
                             ),
                           ),
                           const Divider(),
-                          const Padding(
+                          Padding(
                             padding: EdgeInsets.only(top: 20.0, right: 10.0, left: 10.0),
                             child: Align(
                               alignment: Alignment.centerLeft,
                               child: Text(
-                                'À propos de cet événement',
-                                style: TextStyle(
+                                translate(context)!.about_event,
+                                style: const TextStyle(
                                   fontSize: 25,
                                   fontFamily: 'Readex Pro',
                                   fontWeight: FontWeight.w600,
@@ -188,13 +189,13 @@ class ConcertScreen extends StatelessWidget {
                             ),
                           ),
                           const Divider(),
-                          const Padding(
+                          Padding(
                             padding: EdgeInsets.only(top: 20.0, right: 10.0, left: 10.0),
                             child: Align(
                               alignment: Alignment.centerLeft,
                               child: Text(
-                                'Tickets disponibles à la revente',
-                                style: TextStyle(
+                                translate(context)!.tickets_available_resale,
+                                style: const TextStyle(
                                   fontSize: 25,
                                   fontFamily: 'Readex Pro',
                                   fontWeight: FontWeight.w600,
@@ -203,13 +204,13 @@ class ConcertScreen extends StatelessWidget {
                             ),
                           ),
                           if (resaleTickets.isEmpty)
-                            const Padding(
+                            Padding(
                               padding: EdgeInsets.all(10.0),
                               child: Align(
                                 alignment: Alignment.centerLeft,
                                 child: Text(
-                                  "Il n'y a actuellement pas de tickets disponibles à la revente.",
-                                  style: TextStyle(
+                                  translate(context)!.no_tickets_resale,
+                                  style: const TextStyle(
                                     fontSize: 16,
                                     color: Colors.grey,
                                     fontFamily: 'Readex Pro',
@@ -236,9 +237,9 @@ class ConcertScreen extends StatelessWidget {
                                   borderRadius: BorderRadius.circular(6.0),
                                 ),
                               ),
-                              child: const Text(
-                                'Consulter toutes les reventes',
-                                style: TextStyle(
+                              child: Text(
+                                translate(context)!.view_all_resales,
+                                style: const TextStyle(
                                   fontFamily: 'Readex Pro',
                                   color: Colors.white,
                                 ),
@@ -248,10 +249,10 @@ class ConcertScreen extends StatelessWidget {
                       ),
                     );
                   } else {
-                    return const Center(
+                    return Center(
                       child: Text(
-                        'État inattendu',
-                        style: TextStyle(color: Colors.red),
+                        translate(context)!.generic_error,
+                        style: const TextStyle(color: Colors.red),
                       ),
                     );
                   }
@@ -281,7 +282,7 @@ class ConcertScreen extends StatelessWidget {
                     if (remainingCategories.isEmpty) {
                       return Center(
                         child: Text(
-                          'Places épuisées',
+                          translate(context)!.sold_out,
                           style: TextStyle(
                             fontSize: 20,
                             fontFamily: 'Readex Pro',
@@ -344,9 +345,9 @@ class ConcertScreen extends StatelessWidget {
                               ),
                               backgroundColor: Colors.deepOrange,
                             ),
-                            child: const Text(
-                              'Réserver',
-                              style: TextStyle(
+                            child: Text(
+                              translate(context)!.book,
+                              style: const TextStyle(
                                 fontFamily: 'Readex Pro',
                               ),
                             ),

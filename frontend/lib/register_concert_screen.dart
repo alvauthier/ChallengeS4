@@ -11,6 +11,7 @@ import 'package:weezemaster/core/services/api_services.dart';
 import 'package:weezemaster/core/services/token_services.dart';
 import 'package:weezemaster/login_register_screen.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:weezemaster/translation.dart';
 
 class RegisterConcertScreen extends StatefulWidget {
   const RegisterConcertScreen({super.key});
@@ -149,7 +150,7 @@ Future<void> _fetchCategories() async {
           Column(
             children: <Widget>[
               AppBar(
-                title: const Text('Créer un concert'),
+                title: Text(translate(context)!.create_a_concert),
                 elevation: 0,
               ),
               Expanded(
@@ -179,36 +180,36 @@ Future<void> _fetchCategories() async {
                           const SizedBox(height: 20),
                           TextFormField(
                             controller: _nameController,
-                            decoration: const InputDecoration(
-                              labelText: 'Nom du concert',
+                            decoration: InputDecoration(
+                              labelText: translate(context)!.concert_name,
                             ),
                             validator: (value) {
                               if (value == null || value.isEmpty) {
-                                return 'Veuillez entrer le nom du concert';
+                                return translate(context)!.concert_name_empty;
                               }
                               return null;
                             },
                           ),
                           TextFormField(
                             controller: _descriptionController,
-                            decoration: const InputDecoration(
-                              labelText: 'Description du concert',
+                            decoration: InputDecoration(
+                              labelText: translate(context)!.concert_description,
                             ),
                             validator: (value) {
                               if (value == null || value.isEmpty) {
-                                return 'Veuillez entrer la description du concert';
+                                return translate(context)!.concert_description_empty;
                               }
                               return null;
                             },
                           ),
                           TextFormField(
                             controller: _cityController,
-                            decoration: const InputDecoration(
-                              labelText: 'Ville',
+                            decoration: InputDecoration(
+                              labelText: translate(context)!.location,
                             ),
                             validator: (value) {
                               if (value == null || value.isEmpty) {
-                                return 'Veuillez entrer la ville';
+                                return translate(context)!.location_empty;
                               }
                               return null;
                             },
@@ -219,20 +220,20 @@ Future<void> _fetchCategories() async {
                               Expanded(
                                 child: Text(
                                   _selectedDate == null
-                                      ? 'Pas de date sélectionnée'
+                                      ? translate(context)!.select_date_empty
                                       : 'Date: ${_selectedDate!.toLocal().toIso8601String().split('T')[0]}',
                                 ),
                               ),
                               ElevatedButton(
                                 onPressed: () => _selectDate(context),
-                                child: const Text('Sélectionner date'),
+                                child: Text(translate(context)!.select_date),
                               ),
                             ],
                           ),
                           const SizedBox(height: 20),
-                          const Text(
-                            'Catégories de billet',
-                            style: TextStyle(fontWeight: FontWeight.bold),
+                          Text(
+                            translate(context)!.ticket_categories,
+                            style: const TextStyle(fontWeight: FontWeight.bold),
                           ),
                           ...categories.map((category) {
                             return Column(
@@ -252,14 +253,14 @@ Future<void> _fetchCategories() async {
                                       TextFormField(
                                         controller: _categoriesController[category.id],
                                         decoration: InputDecoration(
-                                          labelText: 'Nombre de places pour ${category.name}',
+                                          labelText: '${translate(context)!.number_of_tickets_for} ${category.name}',
                                         ),
                                         validator: (value) {
                                           if (value == null || value.isEmpty) {
-                                            return 'Veuillez entrer le nombre de places pour ${category.name}';
+                                            return '${translate(context)!.number_of_tickets_for_empty} ${category.name}';
                                           }
                                           if (int.tryParse(value) == null) {
-                                            return 'Veuillez entrer un nombre valide';
+                                            return translate(context)!.number_invalid;
                                           }
                                           return null;
                                         },
@@ -268,14 +269,14 @@ Future<void> _fetchCategories() async {
                                       TextFormField(
                                         controller: _pricesController[category.id],
                                         decoration: InputDecoration(
-                                          labelText: 'Prix des places pour ${category.name}',
+                                          labelText: '${translate(context)!.tickets_prices_for} ${category.name}',
                                         ),
                                         validator: (value) {
                                           if (value == null || value.isEmpty) {
-                                            return 'Veuillez entrer le prix des places pour ${category.name}';
+                                            return '${translate(context)!.tickets_prices_for_empty} ${category.name}';
                                           }
                                           if (double.tryParse(value) == null) {
-                                            return 'Veuillez entrer un prix valide';
+                                            return translate(context)!.price_invalid;
                                           }
                                           return null;
                                         },
@@ -288,9 +289,9 @@ Future<void> _fetchCategories() async {
                           }),
 
                           const SizedBox(height: 20),
-                          const Text(
-                            'Intérêts',
-                            style: TextStyle(fontWeight: FontWeight.bold),
+                          Text(
+                            translate(context)!.interests,
+                            style: const TextStyle(fontWeight: FontWeight.bold),
                           ),
                           Wrap(
                             spacing: 10,
@@ -354,8 +355,8 @@ Future<void> _fetchCategories() async {
                                       ScaffoldMessenger.of(context).showSnackBar(
                                         SnackBar(
                                           content: Text(response.statusCode == 200
-                                              ? 'Création réussie'
-                                              : 'Erreur lors de la création'),
+                                              ? translate(context)!.create_concert_success
+                                              : translate(context)!.create_concert_failed),
                                           duration: const Duration(seconds: 5),
                                         ),
                                       );
@@ -364,15 +365,15 @@ Future<void> _fetchCategories() async {
                                       }
                                     } catch (e) {
                                       ScaffoldMessenger.of(context).showSnackBar(
-                                        const SnackBar(
-                                          content: Text('Une erreur est survenue. Veuillez vérifier votre connexion internet ou réessayer plus tard.'),
-                                          duration: Duration(seconds: 5),
+                                        SnackBar(
+                                          content: Text(translate(context)!.generic_error),
+                                          duration: const Duration(seconds: 5),
                                         ),
                                       );
                                     }
                                   }
                                 },
-                                child: const Text('Créer le concert'),
+                                child: Text(translate(context)!.create_the_concert),
                               ),
                             ),
                           ),

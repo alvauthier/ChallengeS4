@@ -12,10 +12,13 @@ import 'package:weezemaster/home/home_screen.dart';
 import 'package:weezemaster/register_concert_screen.dart';
 import 'package:weezemaster/home_orga/concert_orga_screen.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:weezemaster/translation.dart';
 import 'package:weezemaster/user_interests_screen.dart';
 import 'firebase_options.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'dart:convert';
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   await Firebase.initializeApp();
@@ -79,6 +82,16 @@ class MyApp extends StatelessWidget {
         }
         return MaterialPageRoute(builder: builder, settings: settings);
       },
+      localizationsDelegates: [
+        AppLocalizations.delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      supportedLocales: const [
+        Locale('en'),
+        Locale('fr'),
+      ],
     );
   }
 }
@@ -208,14 +221,14 @@ class MyScaffoldState extends State<MyScaffold> {
   Widget _buildNavBarUnauthenticated() {
     return NavigationBar(
       selectedIndex: selectedIndex,
-      destinations: const <Widget>[
+      destinations: <Widget>[
         NavigationDestination(
-          icon: Icon(Icons.home),
-          label: 'Accueil',
+          icon: const Icon(Icons.home),
+          label: translate(context)!.home,
         ),
         NavigationDestination(
-          icon: Icon(Icons.login),
-          label: 'Se connecter',
+          icon: const Icon(Icons.login),
+          label: translate(context)!.login,
         ),
       ],
       onDestinationSelected: (index) {
@@ -229,22 +242,22 @@ class MyScaffoldState extends State<MyScaffold> {
   Widget _buildNavBarUser() {
     return NavigationBar(
       selectedIndex: selectedIndex,
-      destinations: const <Widget>[
+      destinations: <Widget>[
         NavigationDestination(
-          icon: Icon(Icons.home),
-          label: 'Accueil',
+          icon: const Icon(Icons.home),
+          label: translate(context)!.home,
         ),
         NavigationDestination(
-          icon: Icon(Icons.receipt),
-          label: 'Mes billets',
+          icon: const Icon(Icons.receipt),
+          label: translate(context)!.my_tickets,
         ),
         NavigationDestination(
-          icon: Icon(Icons.message),
-          label: 'Mes messages',
+          icon: const Icon(Icons.message),
+          label: translate(context)!.my_messages,
         ),
         NavigationDestination(
-          icon: Icon(Icons.person),
-          label: 'Mon profil',
+          icon: const Icon(Icons.person),
+          label: translate(context)!.my_profile,
         ),
       ],
       onDestinationSelected: (index) {
@@ -258,18 +271,18 @@ class MyScaffoldState extends State<MyScaffold> {
   Widget _buildNavBarOrganizer() {
     return NavigationBar(
       selectedIndex: selectedIndex,
-      destinations: const <Widget>[
+      destinations: <Widget>[
         NavigationDestination(
-          icon: Icon(Icons.event),
-          label: 'Mes concerts',
+          icon: const Icon(Icons.event),
+          label: translate(context)!.my_concerts,
         ),
         NavigationDestination(
-          icon: Icon(Icons.add),
-          label: 'Créer un concert',
+          icon: const Icon(Icons.add),
+          label: translate(context)!.create_a_concert,
         ),
         NavigationDestination(
-          icon: Icon(Icons.person),
-          label: 'Mon profil',
+          icon: const Icon(Icons.person),
+          label: translate(context)!.my_profile,
         ),
       ],
       onDestinationSelected: (index) {

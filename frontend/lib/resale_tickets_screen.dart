@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:weezemaster/components/resale_ticket.dart';
+import 'package:weezemaster/translation.dart';
 
 class ResaleTicketsScreen extends StatelessWidget {
   final List resaleTickets;
@@ -10,7 +11,7 @@ class ResaleTicketsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Tous les tickets à la revente'),
+        title: Text(translate(context)!.all_tickets_resale),
       ),
       body: ListView.builder(
         itemCount: resaleTickets.length,

@@ -3,6 +3,8 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
+import 'package:weezemaster/translation.dart';
+
 class RegisterOrganisationScreen extends StatefulWidget {
   const RegisterOrganisationScreen({super.key});
 
@@ -33,8 +35,8 @@ class RegisterOrganisationScreenState extends State<RegisterOrganisationScreen> 
           Column(
             children: <Widget>[
               AppBar(
-                title: const Text(
-                  'S\'inscrire',
+                title: Text(
+                  translate(context)!.register,
                 ),
                 elevation: 0,
               ),
@@ -48,93 +50,93 @@ class RegisterOrganisationScreenState extends State<RegisterOrganisationScreen> 
                       children: <Widget>[
                         TextFormField(
                           controller: _organameController,
-                          decoration: const InputDecoration(
-                            labelText: 'Nom de l\'organisation',
+                          decoration: InputDecoration(
+                            labelText: translate(context)!.organization_name,
                           ),
                           validator: (value) {
                             if (value == null || value.isEmpty) {
-                              return 'Veuillez entrer le nom de l\'organisation';
+                              return translate(context)!.organization_name_empty;
                             }
                             return null;
                           },
                         ),
                         TextFormField(
                           controller: _orgadescriController,
-                          decoration: const InputDecoration(
-                            labelText: 'Description de l\'organisation',
+                          decoration: InputDecoration(
+                            labelText: translate(context)!.organization_description,
                           ),
                           validator: (value) {
                             if (value == null || value.isEmpty) {
-                              return 'Veuillez entrer la Description de l\'organisation';
+                              return translate(context)!.organization_description_empty;
                             }
                             return null;
                           },
                         ),
                         TextFormField(
                           controller: _firstnameController,
-                          decoration: const InputDecoration(
-                            labelText: 'Prénom',
+                          decoration: InputDecoration(
+                            labelText: translate(context)!.firstname,
                           ),
                           validator: (value) {
                             if (value == null || value.isEmpty) {
-                              return 'Veuillez entrer votre prénom';
+                              return translate(context)!.firstname_empty;
                             }
                             return null;
                           },
                         ),
                         TextFormField(
                           controller: _lastnameController,
-                          decoration: const InputDecoration(
-                            labelText: 'Nom',
+                          decoration: InputDecoration(
+                            labelText: translate(context)!.lastname,
                           ),
                           validator: (value) {
                             if (value == null || value.isEmpty) {
-                              return 'Veuillez entrer votre nom';
+                              return translate(context)!.lastname_empty;
                             }
                             return null;
                           },
                         ),
                         TextFormField(
                           controller: _emailController,
-                          decoration: const InputDecoration(
-                            labelText: 'Email',
+                          decoration: InputDecoration(
+                            labelText: translate(context)!.email,
                           ),
                           validator: (value) {
                             if (value == null || value.isEmpty) {
-                              return 'Veuillez entrer votre email';
+                              return translate(context)!.email_empty;
                             } else if (!emailRegExp.hasMatch(value)) {
-                              return 'Veuillez entrer un email valide';
+                              return translate(context)!.email_invalid;
                             }
                             return null;
                           },
                         ),
                         TextFormField(
                           controller: _passwordController,
-                          decoration: const InputDecoration(
-                            labelText: 'Mot de passe',
+                          decoration: InputDecoration(
+                            labelText: translate(context)!.password,
                           ),
                           obscureText: true,
                           validator: (value) {
                             if (value == null || value.isEmpty) {
-                              return 'Veuillez entrer votre mot de passe';
+                              return translate(context)!.password_empty;
                             } else if (!passwordRegExp.hasMatch(value)) {
-                              return 'Le mot de passe doit contenir au moins 8 caractères, dont une majuscule, une minuscule, un chiffre et un caractère spécial';
+                              return translate(context)!.password_invalid;
                             }
                             return null;
                           },
                         ),
                         TextFormField(
                           controller: _confirmPasswordController,
-                          decoration: const InputDecoration(
-                            labelText: 'Confirmer le mot de passe',
+                          decoration: InputDecoration(
+                            labelText: translate(context)!.confirm_password,
                           ),
                           obscureText: true,
                           validator: (value) {
                             if (value == null || value.isEmpty) {
-                              return 'Veuillez confirmer votre mot de passe';
+                              return translate(context)!.confirm_password_empty;
                             }
                             if (value != _passwordController.text) {
-                              return 'Les mots de passe ne correspondent pas';
+                              return translate(context)!.password_no_match;
                             }
                             return null;
                           },
@@ -165,8 +167,8 @@ class RegisterOrganisationScreenState extends State<RegisterOrganisationScreen> 
                                     ScaffoldMessenger.of(context).showSnackBar(
                                       SnackBar(
                                         content: Text(response.statusCode == 201
-                                            ? 'Inscription réussie'
-                                            : 'Erreur lors de l\'inscription'),
+                                            ? translate(context)!.register_success
+                                            : translate(context)!.register_failed),
                                         duration: const Duration(seconds: 5),
                                       ),
                                     );
@@ -175,15 +177,15 @@ class RegisterOrganisationScreenState extends State<RegisterOrganisationScreen> 
                                     }
                                   } catch (e) {
                                     ScaffoldMessenger.of(context).showSnackBar(
-                                      const SnackBar(
-                                        content: Text('Une erreur est survenue. Veuillez vérifier votre connexion internet ou réessayer plus tard.'),
+                                      SnackBar(
+                                        content: Text(translate(context)!.generic_error),
                                         duration: Duration(seconds: 5),
                                       ),
                                     );
                                   }
                                 }
                               },
-                              child: const Text('S\'inscrire'),
+                              child: Text(translate(context)!.register),
                             ),
                           ),
                         )

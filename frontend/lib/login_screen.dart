@@ -6,6 +6,8 @@ import 'package:weezemaster/home/home_screen.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
+import 'package:weezemaster/translation.dart';
+
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
 
@@ -31,8 +33,8 @@ class LoginScreenState extends State<LoginScreen> {
           Column(
             children: <Widget>[
               AppBar(
-                title: const Text(
-                  'Se connecter',
+                title: Text(
+                  translate(context)!.login,
                 ),
                 elevation: 0,
               ),
@@ -46,27 +48,27 @@ class LoginScreenState extends State<LoginScreen> {
                       children: <Widget>[
                         TextFormField(
                           controller: _emailController,
-                          decoration: const InputDecoration(
-                            labelText: 'Email',
+                          decoration: InputDecoration(
+                            labelText: translate(context)!.email,
                           ),
                           validator: (value) {
                             if (value == null || value.isEmpty) {
-                              return 'Veuillez entrer votre email';
+                              return translate(context)!.email_empty;
                             } else if (!emailRegExp.hasMatch(value)) {
-                              return 'Veuillez entrer un email valide';
+                              return translate(context)!.email_invalid;
                             }
                             return null;
                           },
                         ),
                         TextFormField(
                           controller: _passwordController,
-                          decoration: const InputDecoration(
-                            labelText: 'Mot de passe',
+                          decoration: InputDecoration(
+                            labelText: translate(context)!.password,
                           ),
                           obscureText: true,
                           validator: (value) {
                             if (value == null || value.isEmpty) {
-                              return 'Veuillez entrer votre mot de passe';
+                              return translate(context)!.password_empty;
                             }
                             return null;
                           },
@@ -94,8 +96,8 @@ class LoginScreenState extends State<LoginScreen> {
                                     ScaffoldMessenger.of(context).showSnackBar(
                                       SnackBar(
                                         content: Text(response.statusCode == 200
-                                            ? 'Connexion réussie'
-                                            : 'Email et/ou mot de passe incorrects'),
+                                            ? translate(context)!.login_success
+                                            : translate(context)!.login_failed),
                                         duration: const Duration(seconds: 2),
                                       ),
                                     );
@@ -114,15 +116,15 @@ class LoginScreenState extends State<LoginScreen> {
                                     }
                                   } catch (e) {
                                     ScaffoldMessenger.of(context).showSnackBar(
-                                      const SnackBar(
-                                        content: Text('Une erreur est survenue. Veuillez vérifier votre connexion internet ou réessayer plus tard.'),
+                                      SnackBar(
+                                        content: Text(translate(context)!.generic_error),
                                         duration: Duration(seconds: 2),
                                       ),
                                     );
                                   }
                                 }
                               },
-                              child: const Text('Se connecter'),
+                              child: Text(translate(context)!.login),
                             ),
                           ),
                         ),
@@ -132,7 +134,7 @@ class LoginScreenState extends State<LoginScreen> {
                             context,
                             MaterialPageRoute(builder: (context) => const ForgotPasswordScreen()),
                           );
-                        }, child: const Text('Mot de passe oublié ? Cliquez ici')),
+                        }, child: Text(translate(context)!.forgot_password)),
                       ],
                     ),
                   ),

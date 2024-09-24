@@ -7,6 +7,7 @@ import 'package:weezemaster/core/services/token_services.dart';
 import 'package:weezemaster/thank_you_screen.dart';
 import 'package:http/http.dart' as http;
 import 'package:weezemaster/core/services/payment_services.dart';
+import 'package:weezemaster/translation.dart';
 
 class BookingScreen extends StatefulWidget {
   final List<ConcertCategory> concertCategories;
@@ -23,7 +24,7 @@ class BookingScreenState extends State<BookingScreen> {
   Future<void> proceedToReservation() async {
     if (selectedCategory == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Veuillez sélectionner une catégorie de billet.')),
+        SnackBar(content: Text(translate(context)!.choose_category_empty)),
       );
       return;
     }
@@ -49,7 +50,7 @@ class BookingScreenState extends State<BookingScreen> {
         debugPrint('Réservation réussie');
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Réservation réussie.')),
+            SnackBar(content: Text(translate(context)!.booking_success)),
           );
           Navigator.pushReplacement(
             context,
@@ -60,7 +61,7 @@ class BookingScreenState extends State<BookingScreen> {
         debugPrint('Erreur lors de la réservation: ${response.body}');
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Une erreur est survenue lors de la réservation. Veuillez réessayer.')),
+            SnackBar(content: Text(translate(context)!.booking_failed)),
           );
         }
       }
@@ -68,7 +69,7 @@ class BookingScreenState extends State<BookingScreen> {
       debugPrint('Erreur lors de la connexion au serveur: $e');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Erreur lors de la connexion au serveur. Veuillez réessayer.')),
+          SnackBar(content: Text(translate(context)!.generic_error)),
         );
       }
     }
@@ -84,11 +85,11 @@ class BookingScreenState extends State<BookingScreen> {
         children: [
           Column(
             children: [
-              const Padding(
-                padding: EdgeInsets.only(top: 80.0, bottom: 20.0),
+              Padding(
+                padding: const EdgeInsets.only(top: 80.0, bottom: 20.0),
                 child: Text(
-                  'Choisissez votre catégorie de billets',
-                  style: TextStyle(
+                  translate(context)!.choose_category,
+                  style: const TextStyle(
                     fontSize: 20,
                     fontFamily: 'Readex Pro',
                     fontWeight: FontWeight.w600,
@@ -118,7 +119,7 @@ class BookingScreenState extends State<BookingScreen> {
                             ),
                           ],
                         ),
-                        subtitle: Text('Nombre de tickets restants: $remainingTickets'),
+                        subtitle: Text('${translate(context)!.number_tickets_remaining} $remainingTickets'),
                         value: concertCategory.id,
                         groupValue: selectedCategory,
                         onChanged: isSoldOut ? null : (String? value) {
@@ -153,7 +154,7 @@ class BookingScreenState extends State<BookingScreen> {
                 : () async {
                     if (selectedCategory == null) {
                       ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Veuillez sélectionner une catégorie de billet.')),
+                        SnackBar(content: Text(translate(context)!.choose_category_empty)),
                       );
                       return;
                     }
@@ -166,18 +167,18 @@ class BookingScreenState extends State<BookingScreen> {
                           paymentIntentData['client_secret'],
                         );
                         ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('Paiement réussi')),
+                          SnackBar(content: Text(translate(context)!.payment_success)),
                         );
                         await proceedToReservation();
                       } catch (e) {
                         debugPrint('Error presenting payment sheet: $e');
                         ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('Echec du paiement')),
+                          SnackBar(content: Text(translate(context)!.payment_failed)),
                         );
                       }
                     } else {
                       ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Failed to create payment intent')),
+                        SnackBar(content: Text(translate(context)!.payment_error)),
                       );
                     }
                   },
@@ -188,7 +189,7 @@ class BookingScreenState extends State<BookingScreen> {
               backgroundColor: selectedCategory == null ? Colors.grey : Colors.deepOrange,
             ),
             child: Text(
-              'Procéder au paiement',
+              translate(context)!.proceed_payment,
               style: TextStyle(
                 fontFamily: 'Readex Pro',
                 color: selectedCategory == null ? Colors.black : Colors.white,

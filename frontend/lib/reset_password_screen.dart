@@ -3,6 +3,8 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
+import 'package:weezemaster/translation.dart';
+
 class ResetPasswordScreen extends StatefulWidget {
   const ResetPasswordScreen({super.key});
 
@@ -48,20 +50,19 @@ class ResetPasswordScreenState extends State<ResetPasswordScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(response.statusCode == 200
-                ? 'Mot de passe réinitialisé avec succès'
-                : 'Code de réinitialisation invalide ou expiré'),
+                ? translate(context)!.reset_password_success
+                : translate(context)!.reset_password_failed),
             duration: const Duration(seconds: 2),
           ),
         );
 
         if (response.statusCode == 200) {
-          // Redirige vers la page de connexion après succès
           Navigator.pushReplacementNamed(context, '/login');
         }
       } catch (e) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Une erreur est survenue. Veuillez réessayer plus tard.'),
+          SnackBar(
+            content: Text(translate(context)!.generic_error),
             duration: Duration(seconds: 2),
           ),
         );
@@ -77,7 +78,7 @@ class ResetPasswordScreenState extends State<ResetPasswordScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Réinitialiser le mot de passe'),
+        title: Text(translate(context)!.reset_password),
       ),
       body: Padding(
         padding: const EdgeInsets.all(20),
@@ -88,27 +89,27 @@ class ResetPasswordScreenState extends State<ResetPasswordScreen> {
             children: <Widget>[
               TextFormField(
                 controller: _resetCodeController,
-                decoration: const InputDecoration(
-                  labelText: 'Code de réinitialisation',
+                decoration: InputDecoration(
+                  labelText: translate(context)!.reset_code,
                 ),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return 'Veuillez entrer le code de réinitialisation';
+                    return translate(context)!.reset_code_empty;
                   }
                   return null;
                 },
               ),
               TextFormField(
                 controller: _newPasswordController,
-                decoration: const InputDecoration(
-                  labelText: 'Nouveau mot de passe',
+                decoration: InputDecoration(
+                  labelText: translate(context)!.new_password,
                 ),
                 obscureText: true,
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return 'Veuillez entrer un nouveau mot de passe';
+                    return translate(context)!.password_empty;
                   } else if (!passwordRegExp.hasMatch(value)) {
-                    return 'Le mot de passe doit contenir au moins 8 caractères, dont une majuscule, une minuscule, un chiffre et un caractère spécial';
+                    return translate(context)!.password_invalid;
                   }
                   return null;
                 },
@@ -120,7 +121,7 @@ class ResetPasswordScreenState extends State<ResetPasswordScreen> {
                   onPressed: _isLoading ? null : resetPassword,
                   child: _isLoading
                       ? const CircularProgressIndicator()
-                      : const Text('Réinitialiser le mot de passe'),
+                      : Text(translate(context)!.reset_password),
                 ),
               ),
             ],

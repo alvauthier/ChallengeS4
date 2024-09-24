@@ -491,7 +491,8 @@ func EmailForgotPassword(c echo.Context) error {
     <div class="email-container">
       <h2>Réinitialisation de mot de passe</h2>
       <p>Bonjour,</p>
-      <p>Vous pouvez réinitialiser votre mot de passe à l'aide du code suivant : <strong>XXXXX</strong>. </p>
+      <p>Vous pouvez réinitialiser votre mot de passe à l'aide du code suivant : <strong>` + resetCode + `</strong>. </p>
+	  <p>Ce code est valable pendant 15 minutes.</p>
       <p>À bientôt sur <strong>Weezemaster</strong>. </p>
       <p>Si vous n'avez pas demandé cette réinitialisation, veuillez ignorer cet email.</p>
     </div>

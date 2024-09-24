@@ -7,6 +7,7 @@ import 'dart:convert';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:weezemaster/thank_you_screen.dart';
 import 'package:weezemaster/core/services/api_services.dart';
+import 'package:weezemaster/translation.dart';
 
 import 'package:weezemaster/chat.dart';
 
@@ -191,9 +192,9 @@ class ResaleTicket extends StatelessWidget {
                                 borderRadius: BorderRadius.circular(6.0),
                               ),
                             ),
-                            child: const Text(
-                              'Négocier',
-                              style: TextStyle(
+                            child: Text(
+                              translate(context)!.contact,
+                              style: const TextStyle(
                                 fontFamily: 'Readex Pro',
                                 color: Colors.black
                               )
@@ -238,9 +239,9 @@ class ResaleTicket extends StatelessWidget {
                               ),
                               backgroundColor: Colors.deepOrange,
                             ),
-                            child: const Text(
-                              'Acheter',
-                              style: TextStyle(
+                            child: Text(
+                              translate(context)!.buy,
+                              style: const TextStyle(
                                   fontFamily: 'Readex Pro'
                               )
                             ),

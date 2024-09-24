@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import 'package:weezemaster/concert/concert_screen.dart';
 import 'package:weezemaster/components/search_bar.dart';
+import 'package:weezemaster/translation.dart';
 import 'package:weezemaster/user_interests_screen.dart';
 import 'package:weezemaster/components/adaptive_navigation_bar.dart';
 
@@ -72,11 +73,11 @@ class HomeScreenState extends State<HomeScreen> {
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: <Widget>[
                             Image.asset('assets/no_internet.png', width: 100, height: 100),
-                            const Padding(
-                              padding: EdgeInsets.only(top: 20),
+                            Padding(
+                              padding: const EdgeInsets.only(top: 20),
                               child: Text(
-                                'Une erreur est survenue. Veuillez vérifier votre connexion internet ou réessayer plus tard.',
-                                style: TextStyle(fontSize: 16),
+                                translate(context)!.generic_error,
+                                style: const TextStyle(fontSize: 16),
                                 textAlign: TextAlign.center,
                               ),
                             ),
@@ -84,7 +85,7 @@ class HomeScreenState extends State<HomeScreen> {
                               onPressed: () {
                                 context.read<HomeBloc>().add(HomeDataLoaded());
                               },
-                              child: const Text('Réessayer'),
+                              child: Text(translate(context)!.retry),
                             ),
                           ],
                         ),

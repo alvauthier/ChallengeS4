@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:weezemaster/translation.dart';
 
 import 'components/adaptive_navigation_bar.dart';
 
@@ -22,18 +23,18 @@ class ThankYouScreen extends StatelessWidget {
             children: <Widget>[
               Image.asset('assets/thanks.gif'),
               const SizedBox(height:70),
-              const Text(
-                'Merci pour votre achat !',
-                style: TextStyle(
+              Text(
+                translate(context)!.thanks,
+                style: const TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.bold,
                 ),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 20),
-              const Text(
-                'Nous espérons que vous apprécierez votre concert.',
-                style: TextStyle(fontSize: 16),
+              Text(
+                translate(context)!.thanks_message,
+                style: const TextStyle(fontSize: 16),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 40),
@@ -41,7 +42,7 @@ class ThankYouScreen extends StatelessWidget {
                 onPressed: () {
                   Navigator.of(context).popUntil((route) => route.isFirst);
                 },
-                child: const Text('Retour à l\'accueil'),
+                child: Text(translate(context)!.back_home),
               ),
             ],
           ),

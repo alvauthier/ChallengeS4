@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:weezemaster/login_screen.dart';
 import 'package:weezemaster/register_screen.dart';
 import 'package:weezemaster/register_organization_screen.dart';
+import 'package:weezemaster/translation.dart';
 
 import 'components/adaptive_navigation_bar.dart';
 
@@ -31,9 +32,9 @@ class LoginRegisterScreen extends StatelessWidget {
           Column(
             children: <Widget>[
               AppBar(
-                title: const Text(
-                  'Bienvenue sur Weezemaster !',
-                  style: TextStyle(color: Colors.white),
+                title: Text(
+                  translate(context)!.welcome,
+                  style: const TextStyle(color: Colors.white),
                 ),
                 backgroundColor: Colors.transparent,
                 elevation: 0,
@@ -47,21 +48,21 @@ class LoginRegisterScreen extends StatelessWidget {
                         onPressed: () {
                           LoginScreen.navigateTo(context);
                         },
-                        child: const Text('Se connecter'),
+                        child: Text(translate(context)!.login),
                       ),
                       const SizedBox(height: 20),
                       ElevatedButton(
                         onPressed: () {
                           RegisterScreen.navigateTo(context);
                         },
-                        child: const Text('Créer un compte'),
+                        child: Text(translate(context)!.create_account),
                       ),
                       const SizedBox(height: 20),
                       ElevatedButton(
                         onPressed: () {
                          RegisterOrganisationScreen.navigateTo(context);
                         },
-                        child: const Text('Créer un compte d\'organisation'),
+                        child: Text(translate(context)!.create_organization_account),
                       ),
                     ],
                   ),

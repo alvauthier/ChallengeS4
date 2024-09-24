@@ -4,6 +4,7 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 
 import 'package:weezemaster/reset_password_screen.dart';
+import 'package:weezemaster/translation.dart';
 
 class ForgotPasswordScreen extends StatefulWidget {
   static const String routeName = '/forgot-password';
@@ -53,8 +54,8 @@ class ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(response.statusCode == 200
-                ? 'Si votre adresse email existe, code de réinitialisation envoyé'
-                : 'Erreur lors de l\'envoi, veuillez réessayer ultérieurement'),
+                ? translate(context)!.forgot_password_success
+                : translate(context)!.forgot_password_failed),
             duration: const Duration(seconds: 2),
           ),
         );
@@ -64,8 +65,8 @@ class ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
         }
       } catch (e) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Une erreur est survenue. Veuillez réessayer plus tard.'),
+          SnackBar(
+            content: Text(translate(context)!.generic_error),
             duration: Duration(seconds: 2),
           ),
         );
@@ -81,7 +82,7 @@ class ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Mot de passe oublié'),
+        title: Text(translate(context)!.forgot_password_title),
       ),
       body: Padding(
         padding: const EdgeInsets.all(20),
@@ -92,14 +93,14 @@ class ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
             children: <Widget>[
               TextFormField(
                 controller: _emailController,
-                decoration: const InputDecoration(
-                  labelText: 'Email',
+                decoration: InputDecoration(
+                  labelText: translate(context)!.email,
                 ),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return 'Veuillez entrer votre adresse email';
+                    return translate(context)!.email_empty;
                   } else if (!emailRegExp.hasMatch(value)) {
-                    return 'Veuillez entrer une adresse email valide';
+                    return translate(context)!.email_invalid;
                   }
                   return null;
                 },
@@ -111,7 +112,7 @@ class ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                   onPressed: _isLoading ? null : sendResetCode,
                   child: _isLoading
                       ? const CircularProgressIndicator()
-                      : const Text('Envoyer un code'),
+                      : Text(translate(context)!.send_code),
                 ),
               ),
             ],

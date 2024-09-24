@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:weezemaster/translation.dart';
 
 class CustomSearchBar extends StatelessWidget {
   final TextEditingController controller;
@@ -18,7 +19,7 @@ class CustomSearchBar extends StatelessWidget {
         controller: controller,
         onChanged: onChanged,
         decoration: InputDecoration(
-          hintText: 'Rechercher...',
+          hintText: translate(context)!.search,
           prefixIcon: const Icon(Icons.search),
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(10),

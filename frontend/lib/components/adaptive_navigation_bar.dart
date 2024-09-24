@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'dart:convert';
 
+import 'package:weezemaster/translation.dart';
+
 class AdaptiveNavigationBar extends StatefulWidget {
   const AdaptiveNavigationBar({super.key});
 
@@ -68,48 +70,48 @@ class _AdaptiveNavigationBarState extends State<AdaptiveNavigationBar> {
     List<NavigationDestination> items;
 
     if (userRole == 'user') {
-      items = const <NavigationDestination>[
+      items = <NavigationDestination>[
         NavigationDestination(
-          icon: Icon(Icons.home),
-          label: 'Accueil',
+          icon: const Icon(Icons.home),
+          label: translate(context)!.home,
         ),
         NavigationDestination(
-          icon: Icon(Icons.receipt),
-          label: 'Mes billets',
+          icon: const Icon(Icons.receipt),
+          label: translate(context)!.my_tickets,
         ),
         NavigationDestination(
-          icon: Icon(Icons.message),
-          label: 'Mes messages',
+          icon: const Icon(Icons.message),
+          label: translate(context)!.my_messages,
         ),
         NavigationDestination(
-          icon: Icon(Icons.person),
-          label: 'Mon profil',
+          icon: const Icon(Icons.person),
+          label: translate(context)!.my_profile,
         ),
       ];
     } else if(userRole == 'organizer') {
-      items = const <NavigationDestination>[
+      items = <NavigationDestination>[
         NavigationDestination(
-          icon: Icon(Icons.event),
-          label: 'Mes concerts',
+          icon: const Icon(Icons.event),
+          label: translate(context)!.my_concerts,
         ),
         NavigationDestination(
-          icon: Icon(Icons.add),
-          label: 'Créer un concert',
+          icon: const Icon(Icons.add),
+          label: translate(context)!.create_a_concert,
         ),
         NavigationDestination(
-          icon: Icon(Icons.person),
-          label: 'Mon profil',
+          icon: const Icon(Icons.person),
+          label: translate(context)!.my_profile,
         ),
       ];
     } else {
-      items = const <NavigationDestination>[
+      items = <NavigationDestination>[
         NavigationDestination(
-          icon: Icon(Icons.home),
-          label: 'Accueil',
+          icon: const Icon(Icons.home),
+          label: translate(context)!.home,
         ),
         NavigationDestination(
-          icon: Icon(Icons.login),
-          label: 'Se connecter',
+          icon: const Icon(Icons.login),
+          label: translate(context)!.login,
         ),
       ];
     }

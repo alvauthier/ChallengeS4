@@ -1,7 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:weezemaster/translation.dart';
 
+import 'components/adaptive_navigation_bar.dart';
+
 class ThankYouScreen extends StatelessWidget {
+  static const String routeName = '/thank-you';
+
+  static navigateTo(BuildContext context) {
+    Navigator.of(context).pushNamed(routeName);
+  }
+
   const ThankYouScreen({super.key});
 
   @override
@@ -40,6 +48,7 @@ class ThankYouScreen extends StatelessWidget {
           ),
         ),
       ),
+      bottomNavigationBar: const AdaptiveNavigationBar(),
     );
   }
 }

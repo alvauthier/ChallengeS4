@@ -3,9 +3,17 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
+import 'components/adaptive_navigation_bar.dart';
+
 import 'package:weezemaster/translation.dart';
 
 class RegisterScreen extends StatefulWidget {
+  static const String routeName = '/register';
+
+  static navigateTo(BuildContext context) {
+    Navigator.of(context).pushNamed(routeName);
+  }
+
   const RegisterScreen({super.key});
 
   @override
@@ -146,7 +154,7 @@ class RegisterScreenState extends State<RegisterScreen> {
                                       ),
                                     );
                                     if (response.statusCode == 201) {
-                                      Navigator.pop(context);
+                                      Navigator.pushNamed(context, '/');
                                     }
                                   } catch (e) {
                                     ScaffoldMessenger.of(context).showSnackBar(
@@ -171,6 +179,7 @@ class RegisterScreenState extends State<RegisterScreen> {
           ),
         ],
       ),
+      bottomNavigationBar: const AdaptiveNavigationBar(),
     );
   }
 }

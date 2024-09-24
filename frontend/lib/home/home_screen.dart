@@ -6,6 +6,7 @@ import 'package:weezemaster/concert/concert_screen.dart';
 import 'package:weezemaster/components/search_bar.dart';
 import 'package:weezemaster/translation.dart';
 import 'package:weezemaster/user_interests_screen.dart';
+import 'package:weezemaster/components/adaptive_navigation_bar.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -140,12 +141,7 @@ class HomeScreenState extends State<HomeScreen> {
                             final concert = _filteredConcerts[index];
                             return GestureDetector(
                               onTap: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => ConcertScreen(concertId: concert.id),
-                                  ),
-                                );
+                                ConcertScreen.navigateTo(context, id: concert.id);
                               },
                               child: Padding(
                                 padding: const EdgeInsets.symmetric(vertical: 20.0, horizontal: 10.0),
@@ -219,7 +215,7 @@ class HomeScreenState extends State<HomeScreen> {
           ),
           floatingActionButton: FloatingActionButton(
             onPressed: () {
-              Navigator.push(context, MaterialPageRoute(builder: (context) => const UserInterestsScreen()));
+              UserInterestsScreen.navigateTo(context);
             },
             child: const Text(
               'Choisir mes intérêts',
@@ -231,6 +227,7 @@ class HomeScreenState extends State<HomeScreen> {
               textAlign: TextAlign.center,
             ),
           ),
+          bottomNavigationBar: const AdaptiveNavigationBar(),
         ),
       ),
     );

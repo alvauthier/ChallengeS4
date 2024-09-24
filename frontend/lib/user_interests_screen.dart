@@ -8,7 +8,15 @@ import 'package:weezemaster/core/services/token_services.dart';
 import 'package:weezemaster/login_register_screen.dart';
 import 'package:weezemaster/translation.dart';
 
+import 'components/adaptive_navigation_bar.dart';
+
 class UserInterestsScreen extends StatefulWidget {
+  static const String routeName = '/user-interests';
+
+  static navigateTo(BuildContext context) {
+    Navigator.of(context).pushNamed(routeName);
+  }
+
   const UserInterestsScreen({super.key});
 
   @override
@@ -32,12 +40,7 @@ class UserInterestsScreenState extends State<UserInterestsScreen> {
     String? token = await tokenService.getValidAccessToken();
     if (token == null) {
       if (mounted) {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-            builder: (context) => const LoginRegisterScreen(),
-          ),
-        );
+        LoginRegisterScreen.navigateTo(context);
       }
     } else {
       await fetchInterests();
@@ -207,6 +210,7 @@ class UserInterestsScreenState extends State<UserInterestsScreen> {
           }).toList(),
         ),
       ),
+      bottomNavigationBar: const AdaptiveNavigationBar(),
     );
   }
 }

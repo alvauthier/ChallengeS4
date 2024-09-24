@@ -3,11 +3,19 @@ import 'package:weezemaster/conversations/blocs/conversations_bloc.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import 'dart:convert';
-import '../login_register_screen.dart';
+import 'package:weezemaster/login_register_screen.dart';
 import 'package:weezemaster/chat.dart';
 import 'package:weezemaster/core/services/token_services.dart';
 
+import '../components/adaptive_navigation_bar.dart';
+
 class ConversationsScreen extends StatefulWidget {
+  static const String routeName = '/conversations';
+
+  static navigateTo(BuildContext context) {
+    Navigator.of(context).pushNamed(routeName);
+  }
+  
   const ConversationsScreen({super.key});
 
   @override
@@ -25,13 +33,9 @@ class ConversationsScreenState extends State<ConversationsScreen> {
     String? jwt = await tokenService.getValidAccessToken();
     if (jwt != null) {
       Map<String, dynamic> decodedToken = _decodeToken(jwt);
-      debugPrint(decodedToken['id']);
       return decodedToken['id'] as String;
     } else {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => const LoginRegisterScreen()),
-      );
+      LoginRegisterScreen.navigateTo(context);
       return '';
     }
   }
@@ -133,10 +137,7 @@ class ConversationsScreenState extends State<ConversationsScreen> {
                               ),
                               subtitle: Text(formatDate(conversation.updatedAt.toString())),
                               onTap: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(builder: (context) => ChatScreen(conversationId: conversation.id)),
-                                );
+                                ChatScreen.navigateTo(context, id: conversation.id);
                               },
                             );
                           }).toList());
@@ -165,10 +166,7 @@ class ConversationsScreenState extends State<ConversationsScreen> {
                               ),
                               subtitle: Text( formatDate(conversation.updatedAt.toString())),
                               onTap: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(builder: (context) => ChatScreen(conversationId: conversation.id)),
-                                );
+                                ChatScreen.navigateTo(context, id: conversation.id);
                               },
                             );
                           }).toList());
@@ -211,15 +209,19 @@ class ConversationsScreenState extends State<ConversationsScreen> {
                     );
                   },
                 ),
+                bottomNavigationBar: const AdaptiveNavigationBar(),
               ),
             ),
           );
         } else {
-          return const Center(
-            child: Text(
-              'Aucune donnée disponible',
-              style: TextStyle(color: Colors.red),
+          return const Scaffold(
+            body: Center(
+              child: Text(
+                'Aucune donnée disponible',
+                style: TextStyle(color: Colors.red),
+              ),
             ),
+            bottomNavigationBar: AdaptiveNavigationBar(),
           );
         }
       },

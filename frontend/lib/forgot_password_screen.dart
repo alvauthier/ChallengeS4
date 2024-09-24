@@ -7,6 +7,12 @@ import 'package:weezemaster/reset_password_screen.dart';
 import 'package:weezemaster/translation.dart';
 
 class ForgotPasswordScreen extends StatefulWidget {
+  static const String routeName = '/forgot-password';
+
+  static navigateTo(BuildContext context) {
+    Navigator.of(context).pushNamed(routeName);
+  }
+
   const ForgotPasswordScreen({super.key});
 
   @override
@@ -55,10 +61,7 @@ class ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
         );
 
         if (response.statusCode == 200) {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => const ResetPasswordScreen()),
-          );
+          ResetPasswordScreen.navigateTo(context);
         }
       } catch (e) {
         ScaffoldMessenger.of(context).showSnackBar(

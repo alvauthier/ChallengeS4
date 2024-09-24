@@ -9,7 +9,7 @@ import 'package:weezemaster/thank_you_screen.dart';
 import 'package:weezemaster/core/services/api_services.dart';
 import 'package:weezemaster/translation.dart';
 
-import '../chat.dart';
+import 'package:weezemaster/chat.dart';
 
 class Ticket {
   final String id;
@@ -74,10 +74,7 @@ class ResaleTicket extends StatelessWidget {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Ticket purchased.')),
         );
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => const ThankYouScreen()),
-        );
+        ThankYouScreen.navigateTo(context);
       } else {
         debugPrint('Failed to update ticket listing status: ${response.body}');
         ScaffoldMessenger.of(context).showSnackBar(
@@ -157,12 +154,7 @@ class ResaleTicket extends StatelessWidget {
                               final tokenService = TokenService();
                               String? token = await tokenService.getValidAccessToken();
                               if (token == null) {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => const LoginRegisterScreen(),
-                                  ),
-                                );
+                                LoginRegisterScreen.navigateTo(context);
                               } else {
                                 final parts = token.split('.');
                                 if (parts.length != 3) {
@@ -191,12 +183,7 @@ class ResaleTicket extends StatelessWidget {
                                   ticket.id
                                 );
 
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => ChatScreen(conversationId: conversationId),
-                                  ),
-                                );
+                                ChatScreen.navigateTo(context, id: conversationId);
                               }
                             },
                             style: ElevatedButton.styleFrom(
@@ -219,12 +206,7 @@ class ResaleTicket extends StatelessWidget {
                               final tokenService = TokenService();
                               String? token = await tokenService.getValidAccessToken();
                               if (token == null) {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => const LoginRegisterScreen(),
-                                  ),
-                                );
+                                LoginRegisterScreen.navigateTo(context);
                               } else {
                                 final paymentIntentData = await paymentService.createPaymentIntent(ticket.id, 'tl_');
                                 if (paymentIntentData != null) {

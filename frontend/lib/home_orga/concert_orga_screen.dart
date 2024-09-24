@@ -9,6 +9,8 @@ import 'package:weezemaster/components/search_bar.dart';
 import 'package:weezemaster/login_register_screen.dart';
 import 'package:weezemaster/translation.dart';
 
+import '../components/adaptive_navigation_bar.dart';
+
 class OrganizerConcertScreen extends StatefulWidget {
   const OrganizerConcertScreen({super.key});
 
@@ -50,10 +52,7 @@ class OrganizerConcertScreenState extends State<OrganizerConcertScreen> {
       Map<String, dynamic> decodedToken = _decodeToken(jwt);
       return decodedToken['id'] as String;
     } else {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => const LoginRegisterScreen()),
-      );
+      LoginRegisterScreen.navigateTo(context);
       return '';
     }
   }
@@ -261,6 +260,7 @@ class OrganizerConcertScreenState extends State<OrganizerConcertScreen> {
               return const SizedBox();
             },
           ),
+          bottomNavigationBar: const AdaptiveNavigationBar(),
         ),
       ),
     );

@@ -9,7 +9,15 @@ import 'package:http/http.dart' as http;
 import 'package:weezemaster/core/services/payment_services.dart';
 import 'package:weezemaster/translation.dart';
 
+import 'components/adaptive_navigation_bar.dart';
+
 class BookingScreen extends StatefulWidget {
+  static const String routeName = '/booking';
+
+  static Future<dynamic> navigateTo(BuildContext context, {required List concertCategories}) async {
+    return Navigator.of(context).pushNamed(routeName, arguments: concertCategories);
+  }
+
   final List<ConcertCategory> concertCategories;
   const BookingScreen({super.key, required this.concertCategories});
 
@@ -52,10 +60,7 @@ class BookingScreenState extends State<BookingScreen> {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text(translate(context)!.booking_success)),
           );
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (context) => const ThankYouScreen()),
-          );
+          ThankYouScreen.navigateTo(context);
         }
       } else {
         debugPrint('Erreur lors de la réservation: ${response.body}');
@@ -143,61 +148,65 @@ class BookingScreenState extends State<BookingScreen> {
               onPressed: () => Navigator.pop(context),
             ),
           ),
-        ],
-      ),
-      bottomNavigationBar: BottomAppBar(
-        child: Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: ElevatedButton(
-            onPressed: selectedCategory == null
-                ? null
-                : () async {
-                    if (selectedCategory == null) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text(translate(context)!.choose_category_empty)),
-                      );
-                      return;
-                    }
+          Positioned(
+            left: 0,
+            right: 0,
+            bottom: 0,
+            child: Container(
+              padding: const EdgeInsets.all(8.0),
+              child: ElevatedButton(
+                onPressed: selectedCategory == null
+                    ? null
+                    : () async {
+                  if (selectedCategory == null) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text(translate(context)!.choose_category_empty)),
+                    );
+                    return;
+                  }
 
-                    final paymentIntentData = await paymentService.createPaymentIntent(selectedCategory!, 'cc_');
-                    if (paymentIntentData != null) {
-                      try {
-                        await paymentService.initAndPresentPaymentSheet(
-                          context,
-                          paymentIntentData['client_secret'],
-                        );
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text(translate(context)!.payment_success)),
-                        );
-                        await proceedToReservation();
-                      } catch (e) {
-                        debugPrint('Error presenting payment sheet: $e');
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text(translate(context)!.payment_failed)),
-                        );
-                      }
-                    } else {
+                  final paymentIntentData = await paymentService.createPaymentIntent(selectedCategory!, 'cc_');
+                  if (paymentIntentData != null) {
+                    try {
+                      await paymentService.initAndPresentPaymentSheet(
+                        context,
+                        paymentIntentData['client_secret'],
+                      );
                       ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text(translate(context)!.payment_error)),
+                        SnackBar(content: Text(translate(context)!.payment_success)),
+                      );
+                      await proceedToReservation();
+                    } catch (e) {
+                      debugPrint('Error presenting payment sheet: $e');
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text(translate(context)!.payment_failed)),
                       );
                     }
-                  },
-            style: ElevatedButton.styleFrom(
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(6.0),
-              ),
-              backgroundColor: selectedCategory == null ? Colors.grey : Colors.deepOrange,
-            ),
-            child: Text(
-              translate(context)!.proceed_payment,
-              style: TextStyle(
-                fontFamily: 'Readex Pro',
-                color: selectedCategory == null ? Colors.black : Colors.white,
+                  } else {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text(translate(context)!.payment_error)),
+                    );
+                  }
+                },
+                style: ElevatedButton.styleFrom(
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(6.0),
+                  ),
+                  backgroundColor: selectedCategory == null ? Colors.grey : Colors.deepOrange,
+                ),
+                child: Text(
+                  translate(context)!.proceed_payment,
+                  style: TextStyle(
+                    fontFamily: 'Readex Pro',
+                    color: selectedCategory == null ? Colors.black : Colors.white,
+                  ),
+                ),
               ),
             ),
           ),
-        ),
+        ],
       ),
+      bottomNavigationBar: const AdaptiveNavigationBar(),
     );
   }
 }

@@ -4,8 +4,16 @@ import 'package:weezemaster/register_screen.dart';
 import 'package:weezemaster/register_organization_screen.dart';
 import 'package:weezemaster/translation.dart';
 
+import 'components/adaptive_navigation_bar.dart';
+
 
 class LoginRegisterScreen extends StatelessWidget {
+  static const String routeName = '/login-register';
+
+  static navigateTo(BuildContext context) {
+    Navigator.of(context).pushNamed(routeName);
+  }
+
   const LoginRegisterScreen({super.key});
 
   @override
@@ -38,21 +46,21 @@ class LoginRegisterScreen extends StatelessWidget {
                     children: <Widget>[
                       ElevatedButton(
                         onPressed: () {
-                          Navigator.push(context, MaterialPageRoute(builder: (context) => const LoginScreen()));
+                          LoginScreen.navigateTo(context);
                         },
                         child: Text(translate(context)!.login),
                       ),
                       const SizedBox(height: 20),
                       ElevatedButton(
                         onPressed: () {
-                          Navigator.push(context, MaterialPageRoute(builder: (context) => const RegisterScreen()));
+                          RegisterScreen.navigateTo(context);
                         },
                         child: Text(translate(context)!.create_account),
                       ),
                       const SizedBox(height: 20),
                       ElevatedButton(
                         onPressed: () {
-                          Navigator.push(context, MaterialPageRoute(builder: (context) => const RegisterOrganisationScreen()));
+                         RegisterOrganisationScreen.navigateTo(context);
                         },
                         child: Text(translate(context)!.create_organization_account),
                       ),
@@ -64,6 +72,7 @@ class LoginRegisterScreen extends StatelessWidget {
           ),
         ],
       ),
+      bottomNavigationBar: const AdaptiveNavigationBar(),
     );
   }
 }

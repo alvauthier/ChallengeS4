@@ -10,7 +10,7 @@ import 'package:weezemaster/components/resale_ticket.dart';
 import 'package:weezemaster/components/interest_chip.dart';
 import 'package:weezemaster/translation.dart';
 
-import '../components/adaptive_navigation_bar.dart';
+import 'package:weezemaster/components/adaptive_navigation_bar.dart';
 
 class ConcertScreen extends StatelessWidget {
   static const String routeName = '/concert';
@@ -96,6 +96,7 @@ class ConcertScreen extends StatelessWidget {
                         .toList();
 
                     if (remainingCategories.isEmpty) {
+                      debugPrint('No remaining tickets');
                       return Center(
                         child: Text(
                           translate(context)!.sold_out,
@@ -188,7 +189,7 @@ class ConcertScreen extends StatelessWidget {
                               ),
                               const Divider(),
                               Padding(
-                                padding: EdgeInsets.only(top: 20.0, right: 10.0, left: 10.0),
+                                padding: const EdgeInsets.only(top: 20.0, right: 10.0, left: 10.0),
                                 child: Align(
                                   alignment: Alignment.centerLeft,
                                   child: Text(
@@ -231,7 +232,7 @@ class ConcertScreen extends StatelessWidget {
                               ),
                               const Divider(),
                               Padding(
-                                padding: EdgeInsets.only(top: 20.0, right: 10.0, left: 10.0),
+                                padding: const EdgeInsets.only(top: 20.0, right: 10.0, left: 10.0),
                                 child: Align(
                                   alignment: Alignment.centerLeft,
                                   child: Text(
@@ -246,7 +247,7 @@ class ConcertScreen extends StatelessWidget {
                               ),
                               if (resaleTickets.isEmpty)
                                 Padding(
-                                  padding: EdgeInsets.all(10.0),
+                                  padding: const EdgeInsets.all(10.0),
                                   child: Align(
                                     alignment: Alignment.centerLeft,
                                     child: Text(
@@ -281,6 +282,7 @@ class ConcertScreen extends StatelessWidget {
                                     ),
                                   ),
                                 ),
+                                const SizedBox(height: 80),
                             ],
                           ),
                         ),
@@ -348,7 +350,7 @@ class ConcertScreen extends StatelessWidget {
                   return Center(
                     child: Text(
                       translate(context)!.generic_error,
-                      style: TextStyle(color: Colors.red),
+                      style: const TextStyle(color: Colors.red),
                     ),
                   );
                 },

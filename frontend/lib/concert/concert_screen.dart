@@ -95,31 +95,21 @@ class ConcertScreen extends StatelessWidget {
                         .where((category) => category.availableTickets > category.soldTickets)
                         .toList();
 
-                    if (remainingCategories.isEmpty) {
-                      debugPrint('No remaining tickets');
-                      return Center(
-                        child: Text(
-                          translate(context)!.sold_out,
-                          style: TextStyle(
-                            fontSize: 20,
-                            fontFamily: 'Readex Pro',
-                            color: Colors.grey[800],
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      );
-                    }
-
-                    // Récupérer les prix des catégories restantes
-                    var prices = remainingCategories.map((concertCategory) => concertCategory.price).toList();
-                    var minPrice = prices.reduce((value, element) => value < element ? value : element);
-                    var maxPrice = prices.reduce((value, element) => value > element ? value : element);
-
                     String priceText;
-                    if (prices.length > 1) {
-                      priceText = '${minPrice.toStringAsFixed(2)} € - ${maxPrice.toStringAsFixed(2)} €';
+
+                    if (remainingCategories.isEmpty) {
+                      priceText = translate(context)!.sold_out;
                     } else {
-                      priceText = '${minPrice.toStringAsFixed(2)} €';
+                      // Récupérer les prix des catégories restantes
+                      var prices = remainingCategories.map((concertCategory) => concertCategory.price).toList();
+                      var minPrice = prices.reduce((value, element) => value < element ? value : element);
+                      var maxPrice = prices.reduce((value, element) => value > element ? value : element);
+
+                      if (prices.length > 1) {
+                        priceText = '${minPrice.toStringAsFixed(2)} € - ${maxPrice.toStringAsFixed(2)} €';
+                      } else {
+                        priceText = '${minPrice.toStringAsFixed(2)} €';
+                      }
                     }
 
                     return Stack(
@@ -315,7 +305,7 @@ class ConcertScreen extends StatelessWidget {
                                 SizedBox(
                                   width: 150,
                                   child: ElevatedButton(
-                                    onPressed: () async {
+                                    onPressed: remainingCategories.isEmpty ? null : () async {
                                       final tokenService = TokenService();
                                       String? token = await tokenService.getValidAccessToken();
                                       if (token == null) {
@@ -337,7 +327,7 @@ class ConcertScreen extends StatelessWidget {
                                         fontFamily: 'Readex Pro',
                                       ),
                                     ),
-                                  ),
+                                  )
                                 ),
                               ],
                             ),

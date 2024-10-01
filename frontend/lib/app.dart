@@ -16,6 +16,7 @@ import 'package:weezemaster/reset_password_screen.dart';
 import 'package:weezemaster/thank_you_screen.dart';
 import 'package:weezemaster/core/models/concert_category.dart';
 import 'package:weezemaster/user_interests_screen.dart';
+import 'home_orga/concert_orga_screen.dart';
 import 'my_tickets/blocs/my_tickets_bloc.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
@@ -38,6 +39,7 @@ class App extends StatelessWidget {
         ConversationsScreen.routeName: (context) => const ConversationsScreen(),
         ProfileScreen.routeName: (context) => const ProfileScreen(),
         ThankYouScreen.routeName: (context) => const ThankYouScreen(),
+        OrganizerConcertScreen.routeName: (context) => const OrganizerConcertScreen(),
         RegisterConcertScreen.routeName: (context) => const RegisterConcertScreen(),
         UserInterestsScreen.routeName: (context) => const UserInterestsScreen(),
         ForgotPasswordScreen.routeName: (context) => const ForgotPasswordScreen(),

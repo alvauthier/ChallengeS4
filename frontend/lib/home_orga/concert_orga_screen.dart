@@ -12,6 +12,12 @@ import 'package:weezemaster/translation.dart';
 import '../components/adaptive_navigation_bar.dart';
 
 class OrganizerConcertScreen extends StatefulWidget {
+  static const String routeName = '/concerts';
+
+  static navigateTo(BuildContext context) {
+    Navigator.of(context).pushNamed(routeName);
+  }
+
   const OrganizerConcertScreen({super.key});
 
   @override

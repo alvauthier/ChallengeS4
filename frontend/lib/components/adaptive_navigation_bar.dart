@@ -1,8 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:weezemaster/conversations/conversations_screen.dart';
+import 'package:weezemaster/login_register_screen.dart';
+import 'package:weezemaster/my_tickets/my_tickets_screen.dart';
+import 'package:weezemaster/profile_screen.dart';
+import 'package:weezemaster/register_concert_screen.dart';
 import 'dart:convert';
 
 import 'package:weezemaster/translation.dart';
+
+import '../home_orga/concert_orga_screen.dart';
 
 class AdaptiveNavigationBar extends StatefulWidget {
   const AdaptiveNavigationBar({super.key});
@@ -127,25 +134,25 @@ class _AdaptiveNavigationBarState extends State<AdaptiveNavigationBar> {
           if (index == 0) {
             Navigator.pushNamed(context, '/');
           } else if (index == 1) {
-            Navigator.pushNamed(context, '/my-tickets');
+            MyTicketsScreen.navigateTo(context);
           } else if (index == 2) {
-            Navigator.pushNamed(context, '/conversations');
+            ConversationsScreen.navigateTo(context);
           } else {
-            Navigator.pushNamed(context, '/profile');
+            ProfileScreen.navigateTo(context);
           }
         } else if(userRole == 'organizer') {
           if (index == 0) {
-            Navigator.pushNamed(context, '/concerts');
+            OrganizerConcertScreen.navigateTo(context);
           } else if (index == 1) {
-            Navigator.pushNamed(context, '/create-concert');
+            RegisterConcertScreen.navigateTo(context);
           } else {
-            Navigator.pushNamed(context, '/profile');
+            ProfileScreen.navigateTo(context);
           }
         } else {
           if (index == 0) {
             Navigator.pushNamed(context, '/');
           } else {
-            Navigator.pushNamed(context, '/login-register');
+            LoginRegisterScreen.navigateTo(context);
           }
         }
       },

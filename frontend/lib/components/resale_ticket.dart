@@ -1,15 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:weezemaster/core/services/payment_services.dart';
 import 'package:weezemaster/core/services/token_services.dart';
-import 'package:weezemaster/login_register_screen.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:weezemaster/thank_you_screen.dart';
 import 'package:weezemaster/core/services/api_services.dart';
 import 'package:weezemaster/translation.dart';
-
-import 'package:weezemaster/chat.dart';
 
 class Ticket {
   final String id;
@@ -74,7 +71,7 @@ class ResaleTicket extends StatelessWidget {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Ticket purchased.')),
         );
-        ThankYouScreen.navigateTo(context);
+        context.pushNamed('thank-you');
       } else {
         debugPrint('Failed to update ticket listing status: ${response.body}');
         ScaffoldMessenger.of(context).showSnackBar(
@@ -154,7 +151,7 @@ class ResaleTicket extends StatelessWidget {
                               final tokenService = TokenService();
                               String? token = await tokenService.getValidAccessToken();
                               if (token == null) {
-                                LoginRegisterScreen.navigateTo(context);
+                                context.pushNamed('login-register');
                               } else {
                                 final parts = token.split('.');
                                 if (parts.length != 3) {
@@ -183,7 +180,7 @@ class ResaleTicket extends StatelessWidget {
                                   ticket.id
                                 );
 
-                                ChatScreen.navigateTo(context, id: conversationId);
+                                context.push('/chat/${conversationId}');
                               }
                             },
                             style: ElevatedButton.styleFrom(
@@ -206,7 +203,7 @@ class ResaleTicket extends StatelessWidget {
                               final tokenService = TokenService();
                               String? token = await tokenService.getValidAccessToken();
                               if (token == null) {
-                                LoginRegisterScreen.navigateTo(context);
+                                context.pushNamed('login-register');
                               } else {
                                 final paymentIntentData = await paymentService.createPaymentIntent(ticket.id, 'tl_');
                                 if (paymentIntentData != null) {

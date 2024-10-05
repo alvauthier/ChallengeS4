@@ -22,7 +22,7 @@ void main() async {
     options: DefaultFirebaseOptions.currentPlatform,
   );
   FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
-  initializeDateFormatting('fr_FR', null).then((_) => runApp(const App()));
+  initializeDateFormatting('fr_FR', null).then((_) => runApp(App()));
 
   if (kReleaseMode) {
     debugPrint = (String? message, {int? wrapWidth}) {};

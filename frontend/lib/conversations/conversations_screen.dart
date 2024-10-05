@@ -1,21 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:weezemaster/conversations/blocs/conversations_bloc.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import 'dart:convert';
-import 'package:weezemaster/login_register_screen.dart';
-import 'package:weezemaster/chat.dart';
 import 'package:weezemaster/core/services/token_services.dart';
 
-import '../components/adaptive_navigation_bar.dart';
-
 class ConversationsScreen extends StatefulWidget {
-  static const String routeName = '/conversations';
-
-  static navigateTo(BuildContext context) {
-    Navigator.of(context).pushNamed(routeName);
-  }
-  
   const ConversationsScreen({super.key});
 
   @override
@@ -35,7 +26,7 @@ class ConversationsScreenState extends State<ConversationsScreen> {
       Map<String, dynamic> decodedToken = _decodeToken(jwt);
       return decodedToken['id'] as String;
     } else {
-      LoginRegisterScreen.navigateTo(context);
+      context.pushNamed('login-register');
       return '';
     }
   }
@@ -137,7 +128,7 @@ class ConversationsScreenState extends State<ConversationsScreen> {
                               ),
                               subtitle: Text(formatDate(conversation.updatedAt.toString())),
                               onTap: () {
-                                ChatScreen.navigateTo(context, id: conversation.id);
+                                context.go('/chat/${conversation.id}');
                               },
                             );
                           }).toList());
@@ -166,7 +157,7 @@ class ConversationsScreenState extends State<ConversationsScreen> {
                               ),
                               subtitle: Text( formatDate(conversation.updatedAt.toString())),
                               onTap: () {
-                                ChatScreen.navigateTo(context, id: conversation.id);
+                                context.go('/chat/${conversation.id}');
                               },
                             );
                           }).toList());
@@ -209,7 +200,6 @@ class ConversationsScreenState extends State<ConversationsScreen> {
                     );
                   },
                 ),
-                bottomNavigationBar: const AdaptiveNavigationBar(),
               ),
             ),
           );
@@ -221,7 +211,6 @@ class ConversationsScreenState extends State<ConversationsScreen> {
                 style: TextStyle(color: Colors.red),
               ),
             ),
-            bottomNavigationBar: AdaptiveNavigationBar(),
           );
         }
       },

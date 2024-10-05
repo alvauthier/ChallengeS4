@@ -2,20 +2,13 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
-import 'components/adaptive_navigation_bar.dart';
 import 'components/message_bubble.dart';
-import 'login_register_screen.dart';
 import 'components/ticket_details.dart';
 import 'package:weezemaster/core/services/api_services.dart';
 
 class ChatScreen extends StatefulWidget {
-  static const String routeName = '/chat';
-
-  static Future<dynamic> navigateTo(BuildContext context, {required String id}) async {
-    return Navigator.of(context).pushNamed(routeName, arguments: id);
-  }
-
   final String id;
 
   const ChatScreen({super.key, required this.id});
@@ -55,7 +48,7 @@ class ChatScreenState extends State<ChatScreen> {
       });
     } else {
       if (mounted) {
-        LoginRegisterScreen.navigateTo(context);
+        context.pushNamed('login-register');
       }
     }
   }
@@ -172,7 +165,7 @@ class ChatScreenState extends State<ChatScreen> {
                 Expanded(
                   child: OutlinedButton(
                     onPressed: () {
-                      Navigator.of(context).pop();
+                      context.pop();
                     },
                     style: OutlinedButton.styleFrom(
                       side: const BorderSide(color: Colors.deepOrange, width: 1.0),
@@ -196,7 +189,7 @@ class ChatScreenState extends State<ChatScreen> {
                           ticket["price"] = newPrice;
                         });
                       }
-                      Navigator.of(context).pop();
+                      context.pop();
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.deepOrange,
@@ -303,7 +296,6 @@ class ChatScreenState extends State<ChatScreen> {
           ],
         ),
       ),
-      bottomNavigationBar: const AdaptiveNavigationBar(),
     );
   }
 }

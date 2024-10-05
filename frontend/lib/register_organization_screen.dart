@@ -1,19 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:go_router/go_router.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-
-import 'components/adaptive_navigation_bar.dart';
-
 import 'package:weezemaster/translation.dart';
 
 class RegisterOrganisationScreen extends StatefulWidget {
-  static const String routeName = '/register-organisation';
-
-  static navigateTo(BuildContext context) {
-    Navigator.of(context).pushNamed(routeName);
-  }
-
   const RegisterOrganisationScreen({super.key});
 
   @override
@@ -181,7 +173,7 @@ class RegisterOrganisationScreenState extends State<RegisterOrganisationScreen> 
                                       ),
                                     );
                                     if (response.statusCode == 201) {
-                                      Navigator.pushNamed(context, '/');
+                                      context.pushNamed('home');
                                     }
                                   } catch (e) {
                                     ScaffoldMessenger.of(context).showSnackBar(
@@ -206,7 +198,6 @@ class RegisterOrganisationScreenState extends State<RegisterOrganisationScreen> 
           ),
         ],
       ),
-      bottomNavigationBar: const AdaptiveNavigationBar(),
     );
   }
 }

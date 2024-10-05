@@ -1,15 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:weezemaster/conversations/conversations_screen.dart';
-import 'package:weezemaster/login_register_screen.dart';
-import 'package:weezemaster/my_tickets/my_tickets_screen.dart';
-import 'package:weezemaster/profile_screen.dart';
-import 'package:weezemaster/register_concert_screen.dart';
+import 'package:go_router/go_router.dart';
 import 'dart:convert';
-
 import 'package:weezemaster/translation.dart';
-
-import '../home_orga/concert_orga_screen.dart';
 
 class AdaptiveNavigationBar extends StatefulWidget {
   const AdaptiveNavigationBar({super.key});
@@ -132,27 +125,27 @@ class _AdaptiveNavigationBarState extends State<AdaptiveNavigationBar> {
 
         if (userRole == 'user') {
           if (index == 0) {
-            Navigator.pushNamed(context, '/');
+            context.pushNamed('home');
           } else if (index == 1) {
-            MyTicketsScreen.navigateTo(context);
+            context.pushNamed('my-tickets');
           } else if (index == 2) {
-            ConversationsScreen.navigateTo(context);
+            context.pushNamed('conversations');
           } else {
-            ProfileScreen.navigateTo(context);
+            context.pushNamed('profile');
           }
         } else if(userRole == 'organizer') {
           if (index == 0) {
-            OrganizerConcertScreen.navigateTo(context);
+            context.pushNamed('organizer-concert');
           } else if (index == 1) {
-            RegisterConcertScreen.navigateTo(context);
+            context.pushNamed('register-concert');
           } else {
-            ProfileScreen.navigateTo(context);
+            context.pushNamed('profile');
           }
         } else {
           if (index == 0) {
-            Navigator.pushNamed(context, '/');
+            context.pushNamed('home');
           } else {
-            LoginRegisterScreen.navigateTo(context);
+            context.pushNamed('login-register');
           }
         }
       },

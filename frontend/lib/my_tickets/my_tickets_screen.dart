@@ -1,23 +1,15 @@
 import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:weezemaster/core/services/token_services.dart';
 import 'package:weezemaster/my_tickets/blocs/my_tickets_bloc.dart';
 import 'package:http/http.dart' as http;
 import 'package:weezemaster/translation.dart';
 
-import '../components/adaptive_navigation_bar.dart';
-
 class MyTicketsScreen extends StatefulWidget {
-  static const String routeName = '/my-tickets';
-
-  static navigateTo(BuildContext context) {
-    Navigator.of(context).pushNamed(routeName);
-  }
-
   const MyTicketsScreen({super.key});
 
   @override
@@ -59,7 +51,7 @@ class MyTicketsScreenState extends State<MyTicketsScreen> {
             TextButton(
               child: const Text('Annuler'),
               onPressed: () {
-                Navigator.of(context).pop();
+                context.pop();
               },
             ),
             TextButton(
@@ -68,7 +60,7 @@ class MyTicketsScreenState extends State<MyTicketsScreen> {
                 final enteredPrice = double.tryParse(_priceController.text);
                 if (enteredPrice != null && enteredPrice <= maxPrice) {
                   await _resellTicket(ticket.id, enteredPrice);
-                  Navigator.of(context).pop();
+                  context.pop();
                 } else {
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(
@@ -274,7 +266,6 @@ class MyTicketsScreenState extends State<MyTicketsScreen> {
               }
             },
           ),
-          bottomNavigationBar: const AdaptiveNavigationBar(),
         ),
       ),
     );

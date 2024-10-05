@@ -205,11 +205,9 @@ class ApiServices {
 
   static Future<User> getUser(String id) async {
     try {
-      print('userId ${id}');
       final tokenService = TokenService();
       String? jwtToken = await tokenService.getValidAccessToken();
       final apiUrl = '${dotenv.env['API_PROTOCOL']}://${dotenv.env['API_HOST']}${dotenv.env['API_PORT']}/users/$id';
-      print('apiUrl ${apiUrl}');
       final response = await http.get(
         Uri.parse(apiUrl),
         headers: {

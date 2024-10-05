@@ -18,14 +18,14 @@ class ChatScreen extends StatefulWidget {
 }
 
 class ChatScreenState extends State<ChatScreen> {
-  final otherUser = "Michelle Obama";
+  late String otherUser = "";
   late String buyerId = "";
   late Map<String, String> ticket = {
-    "imageUrl": "https://picsum.photos/250?image=9",
-    "concertName": "Eras Tour - Taylor Swift",
-    "category": "Category",
-    "price": "100",
-    "maxPrice": "150",
+    "imageUrl": "",
+    "concertName": "",
+    "category": "",
+    "price": "",
+    "maxPrice": "",
   };
   late List messages = [];
   final TextEditingController _controller = TextEditingController();
@@ -98,21 +98,26 @@ class ChatScreenState extends State<ChatScreen> {
         final conversation = await ApiServices.getConversation(widget.id);
         setState(() {
           messages = conversation.messages.map((message) => {
-            "authorId": message['AuthorId'], // Changed from AuthorId to authorId
-            "content": message['Content'], // Ensure this matches the key in your JSON/map
-            "readed": message['Readed'], // Ensure this matches the key in your JSON/map
+            "authorId": message['AuthorId'],
+            "content": message['Content'],
+            "readed": message['Readed'],
           }).toList();
           buyerId = conversation.buyerId;
           ticket = {
             "imageUrl": "https://picsum.photos/250?image=9",
-            "concertName": "Eras Tour - Taylor Swift",
-            "category": "Fosse",
-            "price": conversation.price.toString(),
-            "maxPrice": "150",
+            "concertName": conversation.ticketListing.ticket.concertCategory.concert.name,
+            "category": conversation.ticketListing.ticket.concertCategory.category.name,
+            "price": conversation.ticketListing.price.toString(),
+            "maxPrice": conversation.price.toString(),
           };
+
+          if(userId == buyerId) {
+            otherUser = '${conversation.seller.firstname} ${conversation.seller.lastname}';
+          } else {
+            otherUser = '${conversation.buyer.firstname} ${conversation.buyer.lastname}';
+          }
         });
       } catch (e) {
-        // Handle error or show a message to the user
         debugPrint("Failed to fetch conversation: $e");
       }
     }

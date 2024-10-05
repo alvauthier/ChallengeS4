@@ -47,7 +47,7 @@ func GetConversation(c echo.Context) error {
 	}
 
 	var conversation models.Conversation
-	if err := db.Preload("Messages").Where("id = ?", id).First(&conversation).Error; err != nil {
+	if err := db.Preload("Messages").Preload("TicketListing.Ticket.ConcertCategory.Concert").Preload("TicketListing.Ticket.ConcertCategory.Category").Preload("Buyer").Preload("Buyer").Preload("Seller").Where("id = ?", id).First(&conversation).Error; err != nil {
 		if err == gorm.ErrRecordNotFound {
 			return echo.NewHTTPError(http.StatusNotFound, "Conversation not found")
 		}

@@ -192,11 +192,27 @@ class ConversationsScreenState extends State<ConversationsScreen> {
                       }
                     }
 
-                    return const Center(
-                      child: Text(
-                        'État inattendu',
-                        style: TextStyle(color: Colors.red),
-                      ),
+                    return const Column(
+                      children: [
+                        Center(
+                          child: Padding(
+                            padding: EdgeInsets.all(20.0),
+                            child: Text(
+                              'Vos conversations',
+                              style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold, fontFamily: 'Readex Pro'),
+                            ),
+                          ),
+                        ),
+                        Center(
+                          child: Text(
+                            'Aucune conversation disponible',
+                            style: TextStyle(
+                              fontFamily: 'Readex Pro',
+                              fontSize: 20,
+                            ),
+                          ),
+                        ),
+                      ],
                     );
                   },
                 ),

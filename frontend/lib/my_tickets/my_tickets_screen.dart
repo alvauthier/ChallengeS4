@@ -60,7 +60,7 @@ class MyTicketsScreenState extends State<MyTicketsScreen> {
                 final enteredPrice = double.tryParse(_priceController.text);
                 if (enteredPrice != null && enteredPrice <= maxPrice) {
                   await _resellTicket(ticket.id, enteredPrice);
-                  context.pop();
+                  context.pushNamed('my-tickets');
                 } else {
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(
@@ -102,7 +102,7 @@ class MyTicketsScreenState extends State<MyTicketsScreen> {
             content: Text('Ticket mis en vente avec succès!'),
           ),
         );
-        context.read<MyTicketsBloc>().add(MyTicketsDataLoaded());
+        context.pushNamed('my-tickets');
       }
     } else {
       if (mounted) {
@@ -136,7 +136,7 @@ class MyTicketsScreenState extends State<MyTicketsScreen> {
             content: Text('Annulation de la mise en vente réussie !'),
           ),
         );
-        context.read<MyTicketsBloc>().add(MyTicketsDataLoaded());
+        context.pushNamed('my-tickets');
       }
     } else {
       if (mounted) {

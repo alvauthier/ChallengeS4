@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:weezemaster/booking_screen.dart';
 import 'package:weezemaster/chat.dart';
@@ -23,6 +24,8 @@ import 'home_orga/concert_orga_screen.dart';
 import 'package:weezemaster/components/adaptive_navigation_bar.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+
+import 'my_tickets/blocs/my_tickets_bloc.dart';
 
 class App extends StatelessWidget {
   App({super.key});
@@ -165,9 +168,12 @@ class App extends StatelessWidget {
         path: '/my-tickets',
         name: 'my-tickets',
         builder: (BuildContext context, GoRouterState state) {
-          return const Scaffold(
-            body: MyTicketsScreen(),
-            bottomNavigationBar: AdaptiveNavigationBar(),
+          return Scaffold(
+            body: BlocProvider(
+              create: (context) => MyTicketsBloc()..add(MyTicketsDataLoaded()),
+              child: const MyTicketsScreen(),
+            ),
+            bottomNavigationBar: const AdaptiveNavigationBar(),
           );
         },
       ),

@@ -19,5 +19,5 @@ type Conversation struct {
 	Seller          User `gorm:"foreignKey:SellerId"`
 	TicketListingId uuid.UUID
 	TicketListing   TicketListing `gorm:"foreignKey:TicketListingId"`
-	Price           float64
+	Price           float64       `gorm:"not null"`
 }

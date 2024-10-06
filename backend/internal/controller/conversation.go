@@ -1,12 +1,14 @@
 package controller
 
 import (
-	"github.com/google/uuid"
-	"github.com/labstack/echo/v4"
-	"gorm.io/gorm"
+	"fmt"
 	"net/http"
 	"weezemaster/internal/database"
 	"weezemaster/internal/models"
+
+	"github.com/google/uuid"
+	"github.com/labstack/echo/v4"
+	"gorm.io/gorm"
 )
 
 // GetConversation @Summary		Récupère une conversation
@@ -47,7 +49,7 @@ func GetConversation(c echo.Context) error {
 	}
 
 	var conversation models.Conversation
-	if err := db.Preload("Messages").Where("id = ?", id).First(&conversation).Error; err != nil {
+	if err := db.Preload("Messages").Preload("TicketListing.Ticket.ConcertCategory.Category").Preload("TicketListing.Ticket.ConcertCategory.Concert").Preload("Seller").Where("id = ?", id).First(&conversation).Error; err != nil {
 		if err == gorm.ErrRecordNotFound {
 			return echo.NewHTTPError(http.StatusNotFound, "Conversation not found")
 		}
@@ -58,7 +60,27 @@ func GetConversation(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusUnauthorized, "User is not part of the conversation")
 	}
 
-	return c.JSON(http.StatusOK, conversation)
+	// return c.JSON(http.StatusOK, conversation)
+
+	concert := conversation.TicketListing.Ticket.ConcertCategory.Concert
+
+	response := map[string]interface{}{
+		"ID":         conversation.ID,
+		"Messages":   conversation.Messages,
+		"BuyerId":    conversation.BuyerId,
+		"SellerId":   conversation.SellerId,
+		"SellerName": conversation.Seller.Firstname + " " + conversation.Seller.Lastname,
+		"Price":      conversation.Price,
+		"Category":   conversation.TicketListing.Ticket.ConcertCategory.Category.Name,
+		"Concert": map[string]interface{}{
+			"ID":       concert.ID,
+			"Name":     concert.Name,
+			"Date":     concert.Date,
+			"Location": concert.Location,
+		},
+	}
+
+	return c.JSON(http.StatusOK, response)
 }
 
 // CreateConversation @Summary		Créé une conversation
@@ -115,7 +137,7 @@ func CreateConversation(c echo.Context) error {
 		BuyerId:         input.BuyerId,
 		SellerId:        input.SellerId,
 		TicketListingId: input.TicketListingId,
-		Price:           concertCategory.Price,
+		Price:           ticketListing.Price,
 	}
 
 	if err := db.Create(conversation).Error; err != nil {
@@ -123,4 +145,40 @@ func CreateConversation(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, conversation)
+}
+
+type CheckConversationRequest struct {
+	TicketListingID uuid.UUID `json:"ticket_listing_id"`
+	BuyerID         uuid.UUID `json:"buyer_id"`
+}
+
+type CheckConversationResponse struct {
+	ID              string           `json:"ID"`
+	BuyerId         string           `json:"buyer_id"`
+	SellerId        string           `json:"seller_id"`
+	TicketListingId string           `json:"ticket_listing_id"`
+	Messages        []models.Message `json:"messages"`
+	Price           float64          `json:"price"`
+}
+
+func CheckConversation(c echo.Context) error {
+	fmt.Println("CheckConversation")
+	var req CheckConversationRequest
+	if err := c.Bind(&req); err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]string{"error": "Invalid request"})
+	}
+
+	db := database.GetDB()
+
+	var conversation models.Conversation
+	fmt.Println(req.TicketListingID)
+	fmt.Println(req.BuyerID)
+	if err := db.Where("ticket_listing_id = ? AND buyer_id = ?", req.TicketListingID, req.BuyerID).First(&conversation).Error; err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return c.JSON(http.StatusOK, map[string]string{"ID": ""})
+		}
+		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Database error"})
+	}
+
+	return c.JSON(http.StatusOK, map[string]string{"ID": conversation.ID.String()})
 }

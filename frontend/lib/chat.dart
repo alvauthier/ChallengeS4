@@ -1,49 +1,143 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:intl/intl.dart';
+import 'package:weezemaster/core/exceptions/api_exception.dart';
 import 'components/adaptive_navigation_bar.dart';
 import 'components/message_bubble.dart';
 import 'login_register_screen.dart';
 import 'components/ticket_details.dart';
 import 'package:weezemaster/core/services/api_services.dart';
+import 'package:web_socket_channel/web_socket_channel.dart';
+import 'package:web_socket_channel/status.dart' as status;
 
 class ChatScreen extends StatefulWidget {
   static const String routeName = '/chat';
 
-  static Future<dynamic> navigateTo(BuildContext context, {required String id}) async {
-    return Navigator.of(context).pushNamed(routeName, arguments: id);
+  static Future<dynamic> navigateTo(BuildContext context, {required String id, String? userId, String? resellerId, String? ticketId, String? concertName, String? price, String? resellerName, String? category}) async {
+    return Navigator.of(context).pushNamed(routeName, arguments: {
+      'id': id,
+      'userId': userId,
+      'resellerId': resellerId,
+      'ticketId': ticketId,
+      'concertName': concertName,
+      'price': price,
+      'resellerName': resellerName,
+      'category': category,
+    });
   }
 
-  final String id;
+  String id;
+  final String? userId;
+  final String? resellerId;
+  final String? ticketId;
+  final String? concertName;
+  final String? price;
+  final String? resellerName;
+  final String? category;
 
-  const ChatScreen({super.key, required this.id});
+  ChatScreen({super.key, required this.id, this.userId, this.resellerId, this.ticketId, this.concertName, this.price, this.resellerName, this.category});
 
   @override
   ChatScreenState createState() => ChatScreenState();
 }
 
 class ChatScreenState extends State<ChatScreen> {
-  final otherUser = "Michelle Obama";
+  // final otherUser = "Michelle Obama";
   late String buyerId = "";
   late Map<String, String> ticket = {
     "imageUrl": "https://picsum.photos/250?image=9",
-    "concertName": "Eras Tour - Taylor Swift",
-    "category": "Category",
-    "price": "100",
+    // "concertName": "Eras Tour - Taylor Swift",
+    // "category": "Category",
+    // "price": "100",
     "maxPrice": "150",
   };
   late List messages = [];
   final TextEditingController _controller = TextEditingController();
   final storage = const FlutterSecureStorage();
   String? userId;
+  late String concertName;
+  late String price;
+  late String resellerName;
+  late String category;
+
+  late WebSocketChannel? _channel;
 
   @override
   void initState() {
     super.initState();
-    _loadUserId();
-    _fetchConversation();
+
+    if (widget.id.isEmpty) {
+      concertName = widget.concertName!;
+      price = widget.price!;
+      resellerName = widget.resellerName!;
+      category = widget.category!;
+    } else {
+      concertName = "";
+      price = "";
+      resellerName = "";
+      category = "";
+      _fetchConversation();
+    }
+    _loadUserId().then((_) {
+      _connectWebSocket();
+    });
+  }
+
+  @override
+  void dispose() {
+    _channel?.sink.close(status.goingAway);
+    super.dispose();
+  }
+
+  void _connectWebSocket() {
+    final protocol = dotenv.env['API_PROTOCOL'] == 'http' ? 'ws' : 'wss';
+    final wsUrl = Uri.parse('$protocol://${dotenv.env['API_HOST']}${dotenv.env['API_PORT']}/ws');
+    debugPrint('Attempting WebSocket connection to: $wsUrl');
+
+    try {
+      _channel = WebSocketChannel.connect(wsUrl);
+    } catch (e) {
+      debugPrint('Erreur lors de la connexion WebSocket: $e');
+      return;
+    }
+
+    _channel!.stream.listen((message) {
+      final decodedMessage = jsonDecode(message);
+
+      if (decodedMessage.containsKey('conversation_id')) {
+        setState(() {
+          widget.id = decodedMessage['conversation_id'];
+        });
+      } else {
+        setState(() {
+          messages.add({
+            "authorId": decodedMessage["AuthorId"],
+            "content": decodedMessage["Content"],
+            "readed": decodedMessage["Readed"],
+          });
+        });
+      }
+    }, onError: (error) {
+      debugPrint('Erreur WebSocket: $error');
+    }, onDone: () {
+      debugPrint('WebSocket closed');
+    });
+
+    _initializeWebSocketConnection();
+  }
+
+  void _initializeWebSocketConnection() {
+    final payload = {
+      "conversation_id": widget.id.isNotEmpty ? widget.id : "",
+      "sender_id": userId,
+      "receiver_id": widget.resellerId,
+    };
+
+    _channel?.sink.add(jsonEncode(payload));
+    debugPrint('Initial WebSocket payload sent: $payload');
   }
 
   Future<void> _loadUserId() async {
@@ -100,27 +194,38 @@ class ChatScreenState extends State<ChatScreen> {
   }
 
   Future<void> _fetchConversation() async {
+    debugPrint("Fetching conversation with id: ${widget.id}");
     if (widget.id.isNotEmpty) {
       try {
+        debugPrint("In try Fetching conversation with id: ${widget.id}");
         final conversation = await ApiServices.getConversation(widget.id);
+        debugPrint("Conversation: $conversation");
         setState(() {
-          messages = conversation.messages.map((message) => {
-            "authorId": message['AuthorId'], // Changed from AuthorId to authorId
-            "content": message['Content'], // Ensure this matches the key in your JSON/map
-            "readed": message['Readed'], // Ensure this matches the key in your JSON/map
+          messages = conversation['Messages'].map((message) => {
+            "authorId": message['AuthorId'],
+            "content": message['Content'],
+            "readed": message['Readed'],
           }).toList();
-          buyerId = conversation.buyerId;
-          ticket = {
-            "imageUrl": "https://picsum.photos/250?image=9",
-            "concertName": "Eras Tour - Taylor Swift",
-            "category": "Fosse",
-            "price": conversation.price.toString(),
-            "maxPrice": "150",
-          };
+          debugPrint("Messages: $messages");
+          buyerId = conversation["BuyerId"];
+          if (conversation['Concert'] != null) {
+            concertName = conversation['Concert']['Name'] ?? "Unknown Concert";
+            price = conversation['Price'].toString();
+            resellerName = conversation['SellerName'] ?? "Unknown Seller";
+            category = conversation['Category'] ?? "Unknown Category";
+          } else {
+            concertName = "Fallback Concert";
+            price = "10000000000";
+            resellerName = "Fallback Reseller";
+            category = "Fallback Category";
+          }
         });
       } catch (e) {
-        // Handle error or show a message to the user
-        debugPrint("Failed to fetch conversation: $e");
+        if (e is ApiException) {
+          debugPrint("Failed to fetch conversation: ${e.toString()}");
+        } else {
+          debugPrint("Unexpected error: ${e.toString()}");
+        }
       }
     }
   }
@@ -131,12 +236,29 @@ class ChatScreenState extends State<ChatScreen> {
       return;
     }
 
-    try {
-      await ApiServices.sendMessage(widget.id, content);
-      _fetchConversation();
-    } catch (e) {
-      debugPrint("Failed to send message: $e");
+    if (widget.id.isEmpty) {
+      try {
+        final newConversation = await ApiServices.postConversation(widget.userId!, widget.resellerId!, widget.ticketId!);
+        setState(() {
+          widget.id = newConversation;
+        });
+
+        _channel?.sink.close(status.goingAway);
+        _connectWebSocket();
+      } catch (e) {
+        debugPrint("Erreur lors de la création de la conversation: $e");
+        return;
+      }
     }
+
+    final message = {
+      "AuthorId": userId,
+      "Content": content,
+      "ConversationId": widget.id,
+    };
+
+    _channel?.sink.add(jsonEncode(message));
+    debugPrint('Message sent via WebSocket: $message');
 
     _controller.clear();
   }
@@ -223,7 +345,7 @@ class ChatScreenState extends State<ChatScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          'Négociation avec $otherUser',
+          'Chat avec $resellerName',
           style: const TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.bold,
@@ -237,9 +359,9 @@ class ChatScreenState extends State<ChatScreen> {
           children: [
             TicketDetails(
               imageUrl: ticket["imageUrl"] as String,
-              concertName: ticket["concertName"] as String,
-              category: ticket["category"] as String,
-              price: ticket["price"] as String,
+              concertName: concertName,
+              category: category,
+              price: price,
               onCancel: () {
                 // Handle cancel action
               },

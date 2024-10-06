@@ -15,15 +15,17 @@ class Ticket {
   final String id;
   final String category;
   final String price;
+  final String concertName;
   final Reseller reseller;
 
-  Ticket({required this.id, required this.category, required this.price, required this.reseller});
+  Ticket({required this.id, required this.category, required this.price, required this.concertName, required this.reseller});
 
   factory Ticket.fromMap(Map<String, dynamic> map) {
     return Ticket(
       id: map['id'] as String,
       category: map['category'] as String,
       price: map['price'] as String,
+      concertName: map['concertName'] as String,
       reseller: Reseller.fromMap(map['reseller'] as Map<String, dynamic>),
     );
   }
@@ -151,11 +153,13 @@ class ResaleTicket extends StatelessWidget {
                         children: [
                           ElevatedButton(
                             onPressed: () async {
+                              debugPrint('Contact reseller');
                               final tokenService = TokenService();
                               String? token = await tokenService.getValidAccessToken();
                               if (token == null) {
                                 LoginRegisterScreen.navigateTo(context);
                               } else {
+                                debugPrint('Contact reseller ELSE');
                                 final parts = token.split('.');
                                 if (parts.length != 3) {
                                   throw Exception('Invalid token');
@@ -176,14 +180,36 @@ class ResaleTicket extends StatelessWidget {
                                 }
 
                                 String userId = json.decode(utf8.decode(base64.decode(output)))['id'];
+                                debugPrint('userId: $userId');
+                                debugPrint('resellerId: ${ticket.reseller.id}');
+                                debugPrint('ticketId: ${ticket.id}');
+                                debugPrint('concertName: ${ticket.category}');
+                                debugPrint('price: ${ticket.price}');
 
-                                String conversationId = await ApiServices.postConversation(
+                                final existingConversationId = await ApiServices.checkConversationExists(
+                                  ticket.id,
                                   userId,
-                                  ticket.reseller.id,
-                                  ticket.id
                                 );
+                                debugPrint('existingConversationId: $existingConversationId');
 
-                                ChatScreen.navigateTo(context, id: conversationId);
+                                if (existingConversationId != null && existingConversationId.isNotEmpty) {
+                                  debugPrint('Conversation found in the database, access it');
+                                  ChatScreen.navigateTo(context,
+                                    id: existingConversationId,
+                                  );
+                                } else {
+                                  debugPrint('No conversation found in the database');
+                                  ChatScreen.navigateTo(context,
+                                    id: '',
+                                    userId: userId,
+                                    resellerId: ticket.reseller.id,
+                                    ticketId: ticket.id,
+                                    concertName: ticket.concertName,
+                                    price: ticket.price,
+                                    resellerName: ticket.reseller.name,
+                                    category: ticket.category,
+                                  );
+                                }
                               }
                             },
                             style: ElevatedButton.styleFrom(
@@ -216,18 +242,18 @@ class ResaleTicket extends StatelessWidget {
                                       paymentIntentData['client_secret'],
                                     );
                                     ScaffoldMessenger.of(context).showSnackBar(
-                                      const SnackBar(content: Text('Paiement réussi')),
+                                      SnackBar(content: Text(translate(context)!.payment_success)),
                                     );
                                     await updateTicketListingStatus(context, ticket.id);
                                   } catch (e) {
                                     debugPrint('Error presenting payment sheet: $e');
                                     ScaffoldMessenger.of(context).showSnackBar(
-                                      const SnackBar(content: Text('Echec du paiement')),
+                                      SnackBar(content: Text(translate(context)!.payment_failed)),
                                     );
                                   }
                                 } else {
                                   ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(content: Text('Failed to create payment intent')),
+                                    SnackBar(content: Text(translate(context)!.payment_error)),
                                   );
                                 }
                               }

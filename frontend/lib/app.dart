@@ -49,7 +49,21 @@ class App extends StatelessWidget {
           case ConcertScreen.routeName:
             return MaterialPageRoute(builder: (context) => ConcertScreen(id: args as String));
           case ChatScreen.routeName:
-            return MaterialPageRoute(builder: (context) => ChatScreen(id: args as String));
+            if (args is Map<String, dynamic>) {
+              return MaterialPageRoute(
+                builder: (context) => ChatScreen(
+                  id: args['id'] as String,
+                  userId: args['userId'] as String?,
+                  resellerId: args['resellerId'] as String?,
+                  ticketId: args['ticketId'] as String?,
+                  concertName: args['concertName'] as String?,
+                  price: args['price'] as String?,
+                  resellerName: args['resellerName'] as String?,
+                  category: args['category'] as String?,
+                ),
+              );
+            }
+            return MaterialPageRoute(builder: (context) => const HomeScreen());
           case BookingScreen.routeName:
             return MaterialPageRoute(builder: (context) => BookingScreen(concertCategories: args as List<ConcertCategory>));
           case MyTicketsScreen.routeName:

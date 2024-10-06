@@ -3,6 +3,7 @@ import 'dart:developer';
 import 'dart:io';
 
 import 'package:flinq/flinq.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:weezemaster/core/exceptions/api_exception.dart';
@@ -231,7 +232,7 @@ class ApiServices {
     }
   }
 
-   static Future<List<Category>> getCategories() async {
+  static Future<List<Category>> getCategories() async {
     try {
       final tokenService = TokenService();
       String? jwtToken = await tokenService.getValidAccessToken();
@@ -288,7 +289,7 @@ class ApiServices {
     }
   }
 
-  static Future<Conversation> getConversation(String conversationId) async {
+  static Future<dynamic> getConversation(String conversationId) async {
     try {
       final tokenService = TokenService();
       String? jwtToken = await tokenService.getValidAccessToken();
@@ -304,9 +305,9 @@ class ApiServices {
       if (response.statusCode < 200 || response.statusCode >= 300) {
         throw ApiException(message: 'Failed to fetch conversation');
       }
-
-      final data = json.decode(response.body) as Map<String, dynamic>;
-      return Conversation.fromJson(data); // Assuming you have a fromJson method to parse the conversation
+      
+      final Map<String, dynamic> data = jsonDecode(response.body);
+      return data;
     } on SocketException {
       throw ApiException(message: 'Network error');
     } catch (error) {
@@ -368,5 +369,37 @@ class ApiServices {
 
     final data = json.decode(response.body);
     return data['ID'];
+  }
+
+  static Future<String?> checkConversationExists(
+    String ticketListingId,
+    String buyerId,
+  ) async {
+    final tokenService = TokenService();
+    String? jwtToken = await tokenService.getValidAccessToken();
+    final apiUrl = 'http://${dotenv.env['API_HOST']}${dotenv.env['API_PORT']}/conversations/check';
+    final response = await http.post(
+      Uri.parse(apiUrl),
+      headers: {
+        'Accept': 'application/json; charset=UTF-8',
+        'Authorization': 'Bearer $jwtToken',
+        'Content-Type': 'application/json',
+      },
+      body: json.encode({
+        'ticket_listing_id': ticketListingId,
+        'buyer_id': buyerId,
+      }),
+    );
+
+    if (response.statusCode < 200 || response.statusCode >= 300) {
+      throw ApiException(message: 'Failed to check conversation');
+    }
+
+    debugPrint("Response body: ${response.body}");
+
+    final data = json.decode(response.body);
+    debugPrint("Decoded data: $data");
+
+    return data['ID'] == '' ? null : data['ID'];
   }
 }

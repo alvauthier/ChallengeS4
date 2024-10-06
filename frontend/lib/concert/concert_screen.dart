@@ -78,7 +78,8 @@ class ConcertScreen extends StatelessWidget {
                                   },
                                   'category': concertCategory.category.name,
                                   'price': ticket.ticketListing!.price.toStringAsFixed(2),
-                                  'id': ticket.ticketListing!.id.toString()
+                                  'id': ticket.ticketListing!.id.toString(),
+                                  'concertName': concert.name,
                                 }
                             );
                           }

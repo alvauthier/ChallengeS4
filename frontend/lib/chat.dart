@@ -6,7 +6,6 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:weezemaster/core/exceptions/api_exception.dart';
-import 'components/adaptive_navigation_bar.dart';
 import 'components/message_bubble.dart';
 import 'components/ticket_details.dart';
 import 'package:weezemaster/core/services/api_services.dart';
@@ -30,7 +29,7 @@ class ChatScreen extends StatefulWidget {
 }
 
 class ChatScreenState extends State<ChatScreen> {
-  // final otherUser = "Michelle Obama";
+  late String otherUser = "";
   late String buyerId = "";
   late Map<String, String> ticket = {
     "imageUrl": "https://picsum.photos/250?image=9",
@@ -46,6 +45,7 @@ class ChatScreenState extends State<ChatScreen> {
   late String concertName;
   late String price;
   late String resellerName;
+  late String buyerName;
   late String category;
 
   late WebSocketChannel? _channel;
@@ -56,14 +56,12 @@ class ChatScreenState extends State<ChatScreen> {
     debugPrint("ID: ${widget.id}");
 
     if (widget.id.isEmpty || widget.id == "newchat") {
-      debugPrint("EMPTY ID IN INITSTATE");
       widget.id = '';
       concertName = widget.concertName!;
       price = widget.price!;
       resellerName = widget.resellerName!;
       category = widget.category!;
     } else {
-      debugPrint("NON-EMPTY ID IN INITSTATE, FETCHING CONVERSATION");
       concertName = "";
       price = "";
       resellerName = "";
@@ -202,12 +200,19 @@ class ChatScreenState extends State<ChatScreen> {
             concertName = conversation['Concert']['Name'] ?? "Unknown Concert";
             price = conversation['Price'].toString();
             resellerName = conversation['SellerName'] ?? "Unknown Seller";
+            buyerName = conversation['BuyerName'] ?? "Unknown Buyer";
             category = conversation['Category'] ?? "Unknown Category";
           } else {
             concertName = "Fallback Concert";
             price = "10000000000";
             resellerName = "Fallback Reseller";
+            buyerName = "Fallback Buyer";
             category = "Fallback Category";
+          }
+          if(userId == buyerId) {
+            otherUser = resellerName;
+          } else {
+            otherUser = buyerName;
           }
         });
       } catch (e) {
@@ -335,7 +340,7 @@ class ChatScreenState extends State<ChatScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          'Chat avec $resellerName',
+          'Chat avec $otherUser',
           style: const TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.bold,

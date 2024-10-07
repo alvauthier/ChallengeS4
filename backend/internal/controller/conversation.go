@@ -49,7 +49,7 @@ func GetConversation(c echo.Context) error {
 	}
 
 	var conversation models.Conversation
-	if err := db.Preload("Messages").Preload("TicketListing.Ticket.ConcertCategory.Category").Preload("TicketListing.Ticket.ConcertCategory.Concert").Preload("Seller").Where("id = ?", id).First(&conversation).Error; err != nil {
+	if err := db.Preload("Messages").Preload("TicketListing.Ticket.ConcertCategory.Category").Preload("TicketListing.Ticket.ConcertCategory.Concert").Preload("Seller").Preload("Buyer").Where("id = ?", id).First(&conversation).Error; err != nil {
 		if err == gorm.ErrRecordNotFound {
 			return echo.NewHTTPError(http.StatusNotFound, "Conversation not found")
 		}
@@ -68,6 +68,7 @@ func GetConversation(c echo.Context) error {
 		"ID":         conversation.ID,
 		"Messages":   conversation.Messages,
 		"BuyerId":    conversation.BuyerId,
+		"BuyerName":  conversation.Buyer.Firstname + " " + conversation.Buyer.Lastname,
 		"SellerId":   conversation.SellerId,
 		"SellerName": conversation.Seller.Firstname + " " + conversation.Seller.Lastname,
 		"Price":      conversation.Price,

@@ -1,15 +1,12 @@
 import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:go_router/go_router.dart';
 import 'package:weezemaster/home_orga/blocs/home_bloc.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import 'package:weezemaster/components/search_bar.dart';
-import 'package:weezemaster/login_register_screen.dart';
 import 'package:weezemaster/translation.dart';
-
-import '../components/adaptive_navigation_bar.dart';
 
 class OrganizerConcertScreen extends StatefulWidget {
   const OrganizerConcertScreen({super.key});
@@ -52,7 +49,7 @@ class OrganizerConcertScreenState extends State<OrganizerConcertScreen> {
       Map<String, dynamic> decodedToken = _decodeToken(jwt);
       return decodedToken['id'] as String;
     } else {
-      LoginRegisterScreen.navigateTo(context);
+      context.pushNamed('login-register');
       return '';
     }
   }
@@ -260,7 +257,6 @@ class OrganizerConcertScreenState extends State<OrganizerConcertScreen> {
               return const SizedBox();
             },
           ),
-          bottomNavigationBar: const AdaptiveNavigationBar(),
         ),
       ),
     );

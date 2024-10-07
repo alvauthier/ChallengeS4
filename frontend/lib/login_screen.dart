@@ -1,21 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:weezemaster/forgot_password_screen.dart';
+import 'package:go_router/go_router.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-
-import 'components/adaptive_navigation_bar.dart';
-
 import 'package:weezemaster/translation.dart';
 
 class LoginScreen extends StatefulWidget {
-  static const String routeName = '/login';
-
-  static navigateTo(BuildContext context) {
-    Navigator.of(context).pushNamed(routeName);
-  }
-
   const LoginScreen({super.key});
 
   @override
@@ -114,7 +105,7 @@ class LoginScreenState extends State<LoginScreen> {
                                       final String refreshToken = responseData['refresh_token'];
                                       await storage.write(key: 'access_token', value: accessToken);
                                       await storage.write(key: 'refresh_token', value: refreshToken);
-                                      Navigator.pushNamed(context, '/');
+                                      context.pushNamed('home');
                                     }
                                   } catch (e) {
                                     ScaffoldMessenger.of(context).showSnackBar(
@@ -132,7 +123,7 @@ class LoginScreenState extends State<LoginScreen> {
                         ),
                         TextButton(onPressed: ()
                         {
-                          ForgotPasswordScreen.navigateTo(context);
+                          context.pushNamed('forgot-password');
                         }, child: Text(translate(context)!.forgot_password)),
                       ],
                     ),
@@ -143,7 +134,6 @@ class LoginScreenState extends State<LoginScreen> {
           ),
         ],
       ),
-      bottomNavigationBar: const AdaptiveNavigationBar(),
     );
   }
 }

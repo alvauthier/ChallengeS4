@@ -1,15 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:weezemaster/translation.dart';
 
-import 'components/adaptive_navigation_bar.dart';
-
 class ThankYouScreen extends StatelessWidget {
-  static const String routeName = '/thank-you';
-
-  static navigateTo(BuildContext context) {
-    Navigator.of(context).pushNamed(routeName);
-  }
-
   const ThankYouScreen({super.key});
 
   @override
@@ -40,7 +33,7 @@ class ThankYouScreen extends StatelessWidget {
               const SizedBox(height: 40),
               ElevatedButton(
                 onPressed: () {
-                  Navigator.of(context).popUntil((route) => route.isFirst);
+                  context.pushNamed('home');
                 },
                 child: Text(translate(context)!.back_home),
               ),
@@ -48,7 +41,6 @@ class ThankYouScreen extends StatelessWidget {
           ),
         ),
       ),
-      bottomNavigationBar: const AdaptiveNavigationBar(),
     );
   }
 }

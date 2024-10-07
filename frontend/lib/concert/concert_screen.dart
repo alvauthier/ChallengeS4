@@ -1,24 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:weezemaster/resale_tickets_screen.dart';
-import 'package:weezemaster/booking_screen.dart';
+import 'package:go_router/go_router.dart';
 import 'package:weezemaster/concert/blocs/concert_bloc.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:weezemaster/core/services/token_services.dart';
-import 'package:weezemaster/login_register_screen.dart';
 import 'package:intl/intl.dart';
 import 'package:weezemaster/components/resale_ticket.dart';
 import 'package:weezemaster/components/interest_chip.dart';
 import 'package:weezemaster/translation.dart';
 
-import 'package:weezemaster/components/adaptive_navigation_bar.dart';
-
 class ConcertScreen extends StatelessWidget {
-  static const String routeName = '/concert';
-
-  static Future<dynamic> navigateTo(BuildContext context, {required String id}) async {
-    return Navigator.of(context).pushNamed(routeName, arguments: id);
-  }
-
   final String id;
 
   const ConcertScreen({super.key, required this.id});
@@ -96,31 +86,21 @@ class ConcertScreen extends StatelessWidget {
                         .where((category) => category.availableTickets > category.soldTickets)
                         .toList();
 
-                    if (remainingCategories.isEmpty) {
-                      debugPrint('No remaining tickets');
-                      return Center(
-                        child: Text(
-                          translate(context)!.sold_out,
-                          style: TextStyle(
-                            fontSize: 20,
-                            fontFamily: 'Readex Pro',
-                            color: Colors.grey[800],
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      );
-                    }
-
-                    // Récupérer les prix des catégories restantes
-                    var prices = remainingCategories.map((concertCategory) => concertCategory.price).toList();
-                    var minPrice = prices.reduce((value, element) => value < element ? value : element);
-                    var maxPrice = prices.reduce((value, element) => value > element ? value : element);
-
                     String priceText;
-                    if (prices.length > 1) {
-                      priceText = '${minPrice.toStringAsFixed(2)} € - ${maxPrice.toStringAsFixed(2)} €';
+
+                    if (remainingCategories.isEmpty) {
+                      priceText = translate(context)!.sold_out;
                     } else {
-                      priceText = '${minPrice.toStringAsFixed(2)} €';
+                      // Récupérer les prix des catégories restantes
+                      var prices = remainingCategories.map((concertCategory) => concertCategory.price).toList();
+                      var minPrice = prices.reduce((value, element) => value < element ? value : element);
+                      var maxPrice = prices.reduce((value, element) => value > element ? value : element);
+
+                      if (prices.length > 1) {
+                        priceText = '${minPrice.toStringAsFixed(2)} € - ${maxPrice.toStringAsFixed(2)} €';
+                      } else {
+                        priceText = '${minPrice.toStringAsFixed(2)} €';
+                      }
                     }
 
                     return Stack(
@@ -267,7 +247,10 @@ class ConcertScreen extends StatelessWidget {
                               if (resaleTickets.length > 2)
                                 ElevatedButton(
                                   onPressed: () {
-                                    ResaleTicketsScreen.navigateTo(context, resaleTickets: resaleTickets);
+                                   context.pushNamed(
+                                     'resale-tickets',
+                                     extra: resaleTickets
+                                   );
                                   },
                                   style: ElevatedButton.styleFrom(
                                     backgroundColor: Colors.deepOrange,
@@ -316,13 +299,16 @@ class ConcertScreen extends StatelessWidget {
                                 SizedBox(
                                   width: 150,
                                   child: ElevatedButton(
-                                    onPressed: () async {
+                                    onPressed: remainingCategories.isEmpty ? null : () async {
                                       final tokenService = TokenService();
                                       String? token = await tokenService.getValidAccessToken();
                                       if (token == null) {
-                                        LoginRegisterScreen.navigateTo(context);
+                                        context.pushNamed('login');
                                       } else {
-                                        BookingScreen.navigateTo(context, concertCategories: state.concert.concertCategories);
+                                        context.pushNamed(
+                                          'booking',
+                                          extra: state.concert.concertCategories
+                                        );
                                       }
                                     },
                                     style: ElevatedButton.styleFrom(
@@ -338,7 +324,7 @@ class ConcertScreen extends StatelessWidget {
                                         fontFamily: 'Readex Pro',
                                       ),
                                     ),
-                                  ),
+                                  )
                                 ),
                               ],
                             ),
@@ -361,12 +347,11 @@ class ConcertScreen extends StatelessWidget {
                 left: 10.0,
                 child: FloatingActionButton(
                   child: const Icon(Icons.arrow_back),
-                  onPressed: () => Navigator.pushNamed(context, '/'),
+                  onPressed: () => context.pushNamed('home'),
                 ),
               ),
             ],
           ),
-          bottomNavigationBar: const AdaptiveNavigationBar(),
         ),
       ),
     );

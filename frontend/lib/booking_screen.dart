@@ -1,23 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:go_router/go_router.dart';
 import 'dart:convert';
 import 'package:weezemaster/core/models/concert_category.dart';
 import 'package:weezemaster/core/services/token_services.dart';
-import 'package:weezemaster/thank_you_screen.dart';
 import 'package:http/http.dart' as http;
 import 'package:weezemaster/core/services/payment_services.dart';
 import 'package:weezemaster/translation.dart';
 
-import 'components/adaptive_navigation_bar.dart';
-
 class BookingScreen extends StatefulWidget {
-  static const String routeName = '/booking';
-
-  static Future<dynamic> navigateTo(BuildContext context, {required List concertCategories}) async {
-    return Navigator.of(context).pushNamed(routeName, arguments: concertCategories);
-  }
-
   final List<ConcertCategory> concertCategories;
   const BookingScreen({super.key, required this.concertCategories});
 
@@ -60,7 +52,7 @@ class BookingScreenState extends State<BookingScreen> {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text(translate(context)!.booking_success)),
           );
-          ThankYouScreen.navigateTo(context);
+          context.pushNamed('thank-you');
         }
       } else {
         debugPrint('Erreur lors de la réservation: ${response.body}');
@@ -145,7 +137,7 @@ class BookingScreenState extends State<BookingScreen> {
             left: 10.0,
             child: FloatingActionButton(
               child: const Icon(Icons.arrow_back),
-              onPressed: () => Navigator.pop(context),
+              onPressed: () => context.pop(),
             ),
           ),
           Positioned(
@@ -206,7 +198,6 @@ class BookingScreenState extends State<BookingScreen> {
           ),
         ],
       ),
-      bottomNavigationBar: const AdaptiveNavigationBar(),
     );
   }
 }

@@ -2,15 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:weezemaster/components/resale_ticket.dart';
 import 'package:weezemaster/translation.dart';
 
-import 'components/adaptive_navigation_bar.dart';
-
 class ResaleTicketsScreen extends StatelessWidget {
-  static const String routeName = '/resale-tickets';
-
-  static Future<dynamic> navigateTo(BuildContext context, {required List resaleTickets}) async {
-    return Navigator.of(context).pushNamed(routeName, arguments: resaleTickets);
-  }
-
   final List resaleTickets;
 
   const ResaleTicketsScreen({super.key, required this.resaleTickets});
@@ -28,7 +20,6 @@ class ResaleTicketsScreen extends StatelessWidget {
           return ResaleTicket(ticket: Ticket.fromMap(resaleTicket));
         },
       ),
-      bottomNavigationBar: const AdaptiveNavigationBar(),
     );
   }
 }

@@ -1,22 +1,14 @@
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:weezemaster/core/models/interest.dart';
 import 'package:weezemaster/components/user_interest_chip.dart';
 import 'package:weezemaster/core/services/api_services.dart';
 import 'package:weezemaster/core/exceptions/api_exception.dart';
 import 'package:weezemaster/core/services/token_services.dart';
-import 'package:weezemaster/login_register_screen.dart';
 import 'package:weezemaster/translation.dart';
 
-import 'components/adaptive_navigation_bar.dart';
-
 class UserInterestsScreen extends StatefulWidget {
-  static const String routeName = '/user-interests';
-
-  static navigateTo(BuildContext context) {
-    Navigator.of(context).pushNamed(routeName);
-  }
-
   const UserInterestsScreen({super.key});
 
   @override
@@ -40,7 +32,7 @@ class UserInterestsScreenState extends State<UserInterestsScreen> {
     String? token = await tokenService.getValidAccessToken();
     if (token == null) {
       if (mounted) {
-        LoginRegisterScreen.navigateTo(context);
+        context.pushNamed('login-register');
       }
     } else {
       await fetchInterests();
@@ -157,7 +149,7 @@ class UserInterestsScreenState extends State<UserInterestsScreen> {
   void _logout() async {
     await clearTokens();
     if (mounted) {
-      Navigator.of(context).pushReplacementNamed('/login');
+      context.pushNamed('login');
     }
   }
 
@@ -210,7 +202,6 @@ class UserInterestsScreenState extends State<UserInterestsScreen> {
           }).toList(),
         ),
       ),
-      bottomNavigationBar: const AdaptiveNavigationBar(),
     );
   }
 }

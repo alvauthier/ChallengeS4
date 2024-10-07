@@ -47,7 +47,34 @@ func GetAllUsers(c echo.Context) error {
 func GetUser(c echo.Context) error {
 	db := database.GetDB()
 
-	id := c.Param("id")
+	authHeader := c.Request().Header.Get("Authorization")
+    if authHeader == "" {
+        return c.JSON(http.StatusUnauthorized, map[string]string{"error": "Authorization header is missing"})
+    }
+
+    tokenString := authHeader
+    if len(authHeader) > 7 && authHeader[:7] == "Bearer " {
+        tokenString = authHeader[7:]
+    }
+
+    claims, err := verifyToken(tokenString)
+    if err != nil {
+        return c.JSON(http.StatusUnauthorized, map[string]string{"error": "Invalid or expired token"})
+    }
+
+    userIdFromToken, ok := claims["id"].(string)
+    userRole, ok := claims["role"].(string)
+
+    if !ok {
+        return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Invalid token claims"})
+    }
+
+    id := c.Param("id")
+
+	if userRole != "admin" && userIdFromToken != id {
+		return echo.NewHTTPError(http.StatusForbidden, "You are not allowed to access this resource")
+	}
+
 	var user models.User
 	if err := db.Preload("ConversationsAsBuyer").Preload("ConversationsAsBuyer.Buyer").Preload("ConversationsAsBuyer.Seller").Preload("ConversationsAsSeller").Preload("ConversationsAsSeller.Buyer").Preload("ConversationsAsSeller.Seller").Where("id = ?", id).First(&user).Error; err != nil {
 		if err == gorm.ErrRecordNotFound {

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:go_router/go_router.dart';
 import 'dart:convert';
-
 import 'package:weezemaster/translation.dart';
 
 class AdaptiveNavigationBar extends StatefulWidget {
@@ -125,27 +125,27 @@ class _AdaptiveNavigationBarState extends State<AdaptiveNavigationBar> {
 
         if (userRole == 'user') {
           if (index == 0) {
-            Navigator.pushNamed(context, '/');
+            context.pushNamed('home');
           } else if (index == 1) {
-            Navigator.pushNamed(context, '/my-tickets');
+            context.pushNamed('my-tickets');
           } else if (index == 2) {
-            Navigator.pushNamed(context, '/conversations');
+            context.pushNamed('conversations');
           } else {
-            Navigator.pushNamed(context, '/profile');
+            context.pushNamed('profile');
           }
         } else if(userRole == 'organizer') {
           if (index == 0) {
-            Navigator.pushNamed(context, '/concerts');
+            context.pushNamed('organizer-concert');
           } else if (index == 1) {
-            Navigator.pushNamed(context, '/create-concert');
+            context.pushNamed('register-concert');
           } else {
-            Navigator.pushNamed(context, '/profile');
+            context.pushNamed('profile');
           }
         } else {
           if (index == 0) {
-            Navigator.pushNamed(context, '/');
+            context.pushNamed('home');
           } else {
-            Navigator.pushNamed(context, '/login-register');
+            context.pushNamed('login-register');
           }
         }
       },

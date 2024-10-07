@@ -1,12 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:weezemaster/home/blocs/home_bloc.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
-import 'package:weezemaster/concert/concert_screen.dart';
 import 'package:weezemaster/components/search_bar.dart';
 import 'package:weezemaster/translation.dart';
-import 'package:weezemaster/user_interests_screen.dart';
-import 'package:weezemaster/components/adaptive_navigation_bar.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -141,7 +139,10 @@ class HomeScreenState extends State<HomeScreen> {
                             final concert = _filteredConcerts[index];
                             return GestureDetector(
                               onTap: () {
-                                ConcertScreen.navigateTo(context, id: concert.id);
+                                context.pushNamed(
+                                  'concert',
+                                  pathParameters: {'id': concert.id},
+                                );
                               },
                               child: Padding(
                                 padding: const EdgeInsets.symmetric(vertical: 20.0, horizontal: 10.0),
@@ -215,7 +216,7 @@ class HomeScreenState extends State<HomeScreen> {
           ),
           floatingActionButton: FloatingActionButton(
             onPressed: () {
-              UserInterestsScreen.navigateTo(context);
+              context.pushNamed('user-interests');
             },
             child: const Text(
               'Choisir mes intérêts',
@@ -227,7 +228,6 @@ class HomeScreenState extends State<HomeScreen> {
               textAlign: TextAlign.center,
             ),
           ),
-          bottomNavigationBar: const AdaptiveNavigationBar(),
         ),
       ),
     );

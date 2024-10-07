@@ -215,8 +215,19 @@ class App extends StatelessWidget {
         path: '/chat/:id',
         name: 'chat',
         builder: (BuildContext context, GoRouterState state) {
+          final extras = state.extra as Map<String, dynamic>?;
+
           return Scaffold(
-            body: ChatScreen(id: state.pathParameters['id'] ?? ''),
+            body: ChatScreen(
+              id: state.pathParameters['id'] ?? '',
+              userId: extras?['userId'] ?? '',
+              resellerId: extras?['resellerId'] ?? '',
+              ticketId: extras?['ticketId'] ?? '',
+              concertName: extras?['concertName'] ?? '',
+              price: extras?['price'] ?? '',
+              resellerName: extras?['resellerName'] ?? '',
+              category: extras?['category'] ?? '',
+            ),
             bottomNavigationBar: const AdaptiveNavigationBar(),
           );
         },

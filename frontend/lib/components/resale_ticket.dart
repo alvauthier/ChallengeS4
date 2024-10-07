@@ -187,27 +187,40 @@ class ResaleTicket extends StatelessWidget {
                                   ticket.id,
                                   userId,
                                 );
+                                // final existingConversationId = 'çéçujçè!§h';
+
                                 debugPrint('existingConversationId: $existingConversationId');
 
                                 if (existingConversationId != null && existingConversationId.isNotEmpty) {
                                   debugPrint('Conversation found in the database, access it');
-                                  ChatScreen.navigateTo(context,
-                                    id: existingConversationId,
+                                  context.push(
+                                    '/chat/$existingConversationId',
+                                    // extra: {
+                                    //   'userId': null,
+                                    //   'resellerId': null,
+                                    //   'ticketId': null,
+                                    //   'concertName': null,
+                                    //   'price': null,
+                                    //   'resellerName': null,
+                                    //   'category': null,
+                                    // }
                                   );
                                 } else {
                                   debugPrint('No conversation found in the database');
-                                  ChatScreen.navigateTo(context,
-                                    id: '',
-                                    userId: userId,
-                                    resellerId: ticket.reseller.id,
-                                    ticketId: ticket.id,
-                                    concertName: ticket.concertName,
-                                    price: ticket.price,
-                                    resellerName: ticket.reseller.name,
-                                    category: ticket.category,
+                                  context.push(
+                                    '/chat/newchat',
+                                    extra: {
+                                      'userId': userId,
+                                      'resellerId': ticket.reseller.id,
+                                      'ticketId': ticket.id,
+                                      'concertName': ticket.concertName,
+                                      'price': ticket.price,
+                                      'resellerName': ticket.reseller.name,
+                                      'category': ticket.category,
+                                    },
                                   );
                                 }
-                                context.push('/chat/${conversationId}');
+                                // context.push('/chat/${existingConversationId}');
                               }
                             },
                             style: ElevatedButton.styleFrom(

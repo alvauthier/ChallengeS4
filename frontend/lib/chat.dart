@@ -14,8 +14,6 @@ import 'package:web_socket_channel/web_socket_channel.dart';
 import 'package:web_socket_channel/status.dart' as status;
 
 class ChatScreen extends StatefulWidget {
-  static const String routeName = '/chat';
-
   String id;
   final String? userId;
   final String? resellerId;
@@ -55,13 +53,17 @@ class ChatScreenState extends State<ChatScreen> {
   @override
   void initState() {
     super.initState();
+    debugPrint("ID: ${widget.id}");
 
-    if (widget.id.isEmpty) {
+    if (widget.id.isEmpty || widget.id == "newchat") {
+      debugPrint("EMPTY ID IN INITSTATE");
+      widget.id = '';
       concertName = widget.concertName!;
       price = widget.price!;
       resellerName = widget.resellerName!;
       category = widget.category!;
     } else {
+      debugPrint("NON-EMPTY ID IN INITSTATE, FETCHING CONVERSATION");
       concertName = "";
       price = "";
       resellerName = "";
@@ -80,8 +82,8 @@ class ChatScreenState extends State<ChatScreen> {
   }
 
   void _connectWebSocket() {
-    // final protocol = dotenv.env['API_PROTOCOL'] == 'http' ? 'ws' : 'wss';
-    final protocol = 'wss';
+    final protocol = dotenv.env['API_PROTOCOL'] == 'http' ? 'ws' : 'wss';
+    // final protocol = 'ws';
     final wsUrl = Uri.parse('$protocol://${dotenv.env['API_HOST']}${dotenv.env['API_PORT']}/ws');
     debugPrint('Attempting WebSocket connection to: $wsUrl');
 

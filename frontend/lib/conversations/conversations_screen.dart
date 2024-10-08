@@ -129,7 +129,7 @@ class ConversationsScreenState extends State<ConversationsScreen> {
                               ),
                               subtitle: Text(formatDate(conversation.updatedAt.toString())),
                               onTap: () {
-                                context.go('/chat/${conversation.id}');
+                                context.push('/chat/${conversation.id}');
                               },
                             );
                           }).toList());
@@ -158,7 +158,7 @@ class ConversationsScreenState extends State<ConversationsScreen> {
                               ),
                               subtitle: Text( formatDate(conversation.updatedAt.toString())),
                               onTap: () {
-                                context.go('/chat/${conversation.id}');
+                                context.push('/chat/${conversation.id}');
                               },
                             );
                           }).toList());

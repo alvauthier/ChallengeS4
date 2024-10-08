@@ -269,12 +269,12 @@ func UpdateUser(c echo.Context) error {
 		patchUser.Password = &hashedPassword
 	}
 
-	if patchUser.Email != nil {
-		var existingUser models.User
-		if err := db.Where("email = ?", *patchUser.Email).First(&existingUser).Error; err != gorm.ErrRecordNotFound {
-			return c.JSON(http.StatusUnprocessableEntity, map[string]string{"message": "Email already used"})
-		}
-	}
+	if patchUser.Email != nil && *patchUser.Email != user.Email {
+    	var existingUser models.User
+    	if err := db.Where("email = ?", *patchUser.Email).First(&existingUser).Error; err != gorm.ErrRecordNotFound {
+    		return c.JSON(http.StatusUnprocessableEntity, map[string]string{"message": "Email already used"})
+    	}
+    }
 
 	if err := db.Model(&user).Updates(patchUser).Error; err != nil {
 		return c.JSON(http.StatusUnprocessableEntity, map[string]string{"message": "Invalid fields"})

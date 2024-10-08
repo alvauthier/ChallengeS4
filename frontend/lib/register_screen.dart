@@ -146,7 +146,7 @@ class RegisterScreenState extends State<RegisterScreen> {
                                       ),
                                     );
                                     if (response.statusCode == 201) {
-                                      context.pushNamed('home');
+                                      context.pushNamed('login');
                                     }
                                   } catch (e) {
                                     ScaffoldMessenger.of(context).showSnackBar(

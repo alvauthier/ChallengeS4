@@ -214,20 +214,6 @@ class HomeScreenState extends State<HomeScreen> {
               return const SizedBox();
             },
           ),
-          floatingActionButton: FloatingActionButton(
-            onPressed: () {
-              context.pushNamed('user-interests');
-            },
-            child: const Text(
-              'Choisir mes intérêts',
-              style: TextStyle(
-                fontSize: 12,
-                fontFamily: 'Readex Pro',
-                fontWeight: FontWeight.w600
-              ),
-              textAlign: TextAlign.center,
-            ),
-          ),
         ),
       ),
     );

@@ -107,6 +107,7 @@ func main() {
 
 	authenticated.POST("/reservation", controller.CreateReservation, middleware.CheckRole("user"))
 	authenticated.POST("/ticket_listing_reservation/:ticketListingId", controller.CreateTicketListingReservation, middleware.CheckRole("user"))
+	authenticated.POST("/ticket_listing_reservation_conversation/:conversationId", controller.CreateTicketListingReservationFromConversation, middleware.CheckRole("user"))
 
 	authenticated.POST("/create-payment-intent", controller.CreatePaymentIntent, middleware.CheckRole("user"))
 

@@ -64,6 +64,18 @@ func GetAmountById(id string) (int64, error) {
 		amountDecimal := priceDecimal.Mul(decimal.NewFromInt(100))
 		amount := amountDecimal.IntPart()
 		return amount, nil
+	case "cv":
+		var conversation models.Conversation
+		if err := db.Where("id = ?", idStr).First(&conversation).Error; err != nil {
+			if errors.Is(err, gorm.ErrRecordNotFound) {
+				return 0, errors.New("no Conversation found with the given UUID")
+			}
+			return 0, err
+		}
+		priceDecimal := decimal.NewFromFloat(conversation.Price)
+		amountDecimal := priceDecimal.Mul(decimal.NewFromInt(100))
+		amount := amountDecimal.IntPart()
+		return amount, nil
 	default:
 		return 0, errors.New("unknown ID prefix")
 	}

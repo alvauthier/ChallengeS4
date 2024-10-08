@@ -6,11 +6,15 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:weezemaster/core/exceptions/api_exception.dart';
+import 'package:weezemaster/translation.dart';
 import 'components/message_bubble.dart';
 import 'components/ticket_details.dart';
 import 'package:weezemaster/core/services/api_services.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 import 'package:web_socket_channel/status.dart' as status;
+import 'package:http/http.dart' as http;
+import 'package:weezemaster/core/services/payment_services.dart';
+import 'package:weezemaster/core/services/token_services.dart';
 
 class ChatScreen extends StatefulWidget {
   String id;
@@ -49,6 +53,45 @@ class ChatScreenState extends State<ChatScreen> {
   late String category;
 
   late WebSocketChannel? _channel;
+
+  Future<void> updateTicketListingStatus(BuildContext context, String conversationId) async {
+    final tokenService = TokenService();
+    String? jwtToken = await tokenService.getValidAccessToken();
+
+    final body = jsonEncode({
+      'conversationId': conversationId,
+    });
+
+    try {
+      final apiUrl = '${dotenv.env['API_PROTOCOL']}://${dotenv.env['API_HOST']}${dotenv.env['API_PORT']}/ticket_listing_reservation_conversation/$conversationId';
+      final response = await http.post(
+        Uri.parse(apiUrl),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $jwtToken',
+        },
+        body: body,
+      );
+
+      if (response.statusCode == 200) {
+        debugPrint('Ticket listing purchased');
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Ticket purchased.')),
+        );
+        context.pushNamed('thank-you');
+      } else {
+        debugPrint('Failed to update ticket listing status: ${response.body}');
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Failed to update ticket listing status.')),
+        );
+      }
+    } catch (e) {
+      debugPrint('Error updating ticket listing status: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Error updating ticket listing status.')),
+      );
+    }
+  }
 
   @override
   void initState() {
@@ -337,6 +380,7 @@ class ChatScreenState extends State<ChatScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final paymentService = PaymentService();
     return Scaffold(
       appBar: AppBar(
         title: Text(
@@ -359,12 +403,42 @@ class ChatScreenState extends State<ChatScreen> {
               price: price,
               onCancel: () {
                 // Handle cancel action
+                context.pop();
               },
-              secondAction: () {
+              secondAction: () async {
                 if (buyerId == userId) {
-                  // Handle buy action
+                  debugPrint('Buy');
+                  final tokenService = TokenService();
+                  String? token = await tokenService.getValidAccessToken();
+                  if (token == null) {
+                    context.pushNamed('login-register');
+                  } else {
+                    final paymentIntentData = await paymentService.createPaymentIntent(widget.id, 'cv_');
+                    if (paymentIntentData != null) {
+                      try {
+                        await paymentService.initAndPresentPaymentSheet(
+                          context,
+                          paymentIntentData['client_secret'],
+                        );
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text(translate(context)!.payment_success)),
+                        );
+                        await updateTicketListingStatus(context, widget.id);
+                      } catch (e) {
+                        debugPrint('Error presenting payment sheet: $e');
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text(translate(context)!.payment_failed)),
+                        );
+                      }
+                    } else {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text(translate(context)!.payment_error)),
+                      );
+                    }
+                  }
                 } else {
                   _showChangePriceDialog();
+
                 }
               },
               secondActionText: buyerId == userId ? 'Acheter' : 'Changer le prix',

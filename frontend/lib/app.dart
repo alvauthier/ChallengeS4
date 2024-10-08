@@ -203,7 +203,7 @@ class App extends StatelessWidget {
         path: '/resale-tickets',
         name: 'resale-tickets',
         builder: (BuildContext context, GoRouterState state) {
-          final resaleTickets = state.extra as List<ResaleTicket>;
+          final resaleTickets = state.extra as List<dynamic>;
 
           return Scaffold(
             body: ResaleTicketsScreen(resaleTickets: resaleTickets),

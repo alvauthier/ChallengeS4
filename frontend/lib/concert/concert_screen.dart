@@ -303,7 +303,7 @@ class ConcertScreen extends StatelessWidget {
                                       final tokenService = TokenService();
                                       String? token = await tokenService.getValidAccessToken();
                                       if (token == null) {
-                                        context.pushNamed('login');
+                                        context.pushNamed('login-register');
                                       } else {
                                         context.pushNamed(
                                           'booking',

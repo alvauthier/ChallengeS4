@@ -12,7 +12,7 @@ class Conversation {
   final String ticketListingId;
   final TicketListing ticketListing;
   final List messages;
-  final int price;
+  final double price;
 
   Conversation({
     required this.id,
@@ -40,7 +40,7 @@ class Conversation {
       ticketListingId: json['TicketListingId'],
       ticketListing: TicketListing.fromJson(json['TicketListing']),
       messages: json['Messages'] ?? [],
-      price: json['Price'] ?? 0,
+      price: (json['Price'] ?? 0).toDouble(),
     );
   }
 }

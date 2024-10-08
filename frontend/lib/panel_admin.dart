@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:weezemaster/admin/ticket_listings/ticket_listings.dart';
 import 'package:weezemaster/admin/users/users.dart';
 import 'package:weezemaster/translation.dart';
-import 'package:weezemaster/admin/organizations/organizations.dart';
 import 'package:weezemaster/admin/tickets/tickets.dart';
+
+import 'core/models/organization.dart';
 
 class AdminPanel extends StatelessWidget {
   const AdminPanel({super.key});
@@ -32,8 +34,8 @@ class AdminPanel extends StatelessWidget {
         body: TabBarView(
           children: [
             UsersScreen(),
-            TicketsScreen(),
-            TicketListingsScreen(),
+            const TicketsScreen(),
+            const TicketListingsScreen(),
             OrganizationsScreen(),
             InterestsScreen(),
             CategoriesScreen(),
@@ -43,22 +45,6 @@ class AdminPanel extends StatelessWidget {
       ),
     );
   }
-}
-
-class TicketListing {
-  final int id;
-  final double price;
-  final DateTime createdAt;
-  final DateTime updatedAt;
-  final String status;
-
-  TicketListing({
-    required this.id,
-    required this.price,
-    required this.createdAt,
-    required this.updatedAt,
-    required this.status,
-  });
 }
 
 class Interest {
@@ -91,37 +77,33 @@ class Concert {
   });
 }
 
-class TicketListingsScreen extends StatelessWidget {
-  final List<TicketListing> ticketListings = [
-    TicketListing(id: 1, price: 50.0, createdAt: DateTime.now(), updatedAt: DateTime.now(), status: 'available'),
-    // Add more ticket listings here
+class OrganizationsScreen extends StatelessWidget {
+  final List<Organization> organizations = [
+    Organization(id: '', name: 'Org 1'),
   ];
-
-  TicketListingsScreen({super.key});
-
+  OrganizationsScreen({super.key});
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: ListView.builder(
-        itemCount: ticketListings.length,
+        itemCount: organizations.length,
         itemBuilder: (context, index) {
-          final ticketListing = ticketListings[index];
+          final organization = organizations[index];
           return ListTile(
-            title: Text('Ticket Listing ID: ${ticketListing.id}'),
-            subtitle: Text('Price: \$${ticketListing.price}, Status: ${ticketListing.status}'),
+            title: Text(organization.name),
             trailing: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
                 IconButton(
                   icon: const Icon(Icons.edit),
                   onPressed: () {
-                    // Edit ticket listing logic
+                    // Edit organization logic
                   },
                 ),
                 IconButton(
                   icon: const Icon(Icons.delete),
                   onPressed: () {
-                    // Delete ticket listing logic
+                    // Delete organization logic
                   },
                 ),
               ],

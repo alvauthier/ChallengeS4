@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:developer';
+import 'dart:ffi';
 import 'dart:io';
 
 import 'package:flinq/flinq.dart';
@@ -10,6 +11,7 @@ import 'package:weezemaster/core/models/concert.dart';
 import 'package:weezemaster/core/models/interest.dart';
 import 'package:weezemaster/core/models/category.dart';
 import 'package:weezemaster/core/models/ticket.dart';
+import 'package:weezemaster/core/models/ticket_listing.dart';
 import 'package:weezemaster/core/services/token_services.dart';
 import 'package:http/http.dart' as http;
 import 'package:weezemaster/core/models/user.dart';
@@ -452,7 +454,7 @@ class ApiServices {
       log('Network error.', error: error);
       throw ApiException(message: 'Network error');
     } catch (error) {
-      log('An error occurred while fetching user.', error: error);
+      log('An error occurred while fetching tickets.', error: error);
       throw ApiException(message: 'Unknown error');
     }
   }
@@ -462,7 +464,6 @@ class ApiServices {
       final tokenService = TokenService();
       String? jwtToken = await tokenService.getValidAccessToken();
       final apiUrl = '${dotenv.env['API_PROTOCOL']}://${dotenv.env['API_HOST']}${dotenv.env['API_PORT']}/tickets/$id';
-      print('userId: $userId, categoryId: $categoryId');
       final response = await http.patch(
         Uri.parse(apiUrl),
         headers: {
@@ -484,6 +485,64 @@ class ApiServices {
       throw ApiException(message: 'Network error');
     } catch (error) {
       log('An error occurred while updating ticket.', error: error);
+      throw ApiException(message: 'Unknown error');
+    }
+  }
+
+  static Future<List<TicketListing>> getTicketListings() async {
+    try {
+      final tokenService = TokenService();
+      String? jwtToken = await tokenService.getValidAccessToken();
+      final apiUrl = '${dotenv.env['API_PROTOCOL']}://${dotenv.env['API_HOST']}${dotenv.env['API_PORT']}/ticketlisting';
+      final response = await http.get(
+        Uri.parse(apiUrl),
+        headers: {
+          'Accept': 'application/json; charset=UTF-8',
+          'Authorization': 'Bearer $jwtToken',
+        },
+      );
+      await Future.delayed(const Duration(seconds: 1));
+      if (response.statusCode < 200 || response.statusCode >= 400) {
+        throw ApiException(message: 'Bad request');
+      }
+
+      final data = json.decode(response.body) as List<dynamic>;
+      return data.mapList((e) => TicketListing.fromJson(e));
+    } on SocketException catch (error) {
+      log('Network error.', error: error);
+      throw ApiException(message: 'Network error');
+    } catch (error) {
+      log('An error occurred while fetching ticket listings.', error: error);
+      throw ApiException(message: 'Unknown error');
+    }
+  }
+
+  static Future<TicketListing> updateTicketListing(String id, double price, String status) async {
+    try {
+      final tokenService = TokenService();
+      String? jwtToken = await tokenService.getValidAccessToken();
+      final apiUrl = '${dotenv.env['API_PROTOCOL']}://${dotenv.env['API_HOST']}${dotenv.env['API_PORT']}/ticketlisting/$id';
+      final response = await http.patch(
+        Uri.parse(apiUrl),
+        headers: {
+          'Accept': 'application/json; charset=UTF-8',
+          'Authorization': 'Bearer $jwtToken',
+          'Content-Type': 'application/json',
+        },
+        body: json.encode({
+          'price': price,
+          'status': status,
+        }),
+      );
+      if (response.statusCode != 200) {
+        throw ApiException(message: 'Failed to update ticket listing');
+      }
+      return TicketListing.fromJson(json.decode(response.body));
+    } on SocketException catch (error) {
+      log('Network error.', error: error);
+      throw ApiException(message: 'Network error');
+    } catch (error) {
+      log('An error occurred while updating ticket listing.', error: error);
       throw ApiException(message: 'Unknown error');
     }
   }

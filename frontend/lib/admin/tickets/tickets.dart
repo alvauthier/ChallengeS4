@@ -96,7 +96,6 @@ class _TicketsScreenState extends State<TicketsScreen> {
                     onChanged: (String? value) {
                       setState(() {
                         _selectedConcertCategoryId = value;
-                        print(_selectedConcertCategoryId);
                       });
                     },
                   ),

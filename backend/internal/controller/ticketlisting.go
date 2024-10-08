@@ -14,7 +14,7 @@ import (
 func GetAllTicketListings(c echo.Context) error {
 	db := database.GetDB()
 	var ticketListing []models.TicketListing
-	db.Find(&ticketListing)
+	db.Preload("Ticket.ConcertCategory").Find(&ticketListing)
 	return c.JSON(http.StatusOK, ticketListing)
 }
 

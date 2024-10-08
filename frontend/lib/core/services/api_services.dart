@@ -398,7 +398,7 @@ class ApiServices {
     }
   }
 
-  static Future<User> updateUser(String id, String firstname, String lastname, String email, String role) async {
+  static Future<User> updateUser(String id, String firstname, String lastname, String email) async {
     try {
       final tokenService = TokenService();
       String? jwtToken = await tokenService.getValidAccessToken();
@@ -414,7 +414,6 @@ class ApiServices {
           'firstname': firstname,
           'lastname': lastname,
           'email': email,
-          'role': role,
         }),
       );
       if (response.statusCode != 200) {
@@ -426,6 +425,65 @@ class ApiServices {
       throw ApiException(message: 'Network error');
     } catch (error) {
       log('An error occurred while updating user.', error: error);
+      throw ApiException(message: 'Unknown error');
+    }
+  }
+
+  static Future<List<Ticket>> getTickets() async {
+    try {
+      final tokenService = TokenService();
+      String? jwtToken = await tokenService.getValidAccessToken();
+      final apiUrl = '${dotenv.env['API_PROTOCOL']}://${dotenv.env['API_HOST']}${dotenv.env['API_PORT']}/tickets';
+      final response = await http.get(
+        Uri.parse(apiUrl),
+        headers: {
+          'Accept': 'application/json; charset=UTF-8',
+          'Authorization': 'Bearer $jwtToken',
+        },
+      );
+      await Future.delayed(const Duration(seconds: 1));
+      if (response.statusCode < 200 || response.statusCode >= 400) {
+        throw ApiException(message: 'Bad request');
+      }
+
+      final data = json.decode(response.body) as List<dynamic>;
+      return data.mapList((e) => Ticket.fromJson(e));
+    } on SocketException catch (error) {
+      log('Network error.', error: error);
+      throw ApiException(message: 'Network error');
+    } catch (error) {
+      log('An error occurred while fetching user.', error: error);
+      throw ApiException(message: 'Unknown error');
+    }
+  }
+
+  static Future<Ticket> updateTicket(String id, String? userId, String? categoryId) async {
+    try {
+      final tokenService = TokenService();
+      String? jwtToken = await tokenService.getValidAccessToken();
+      final apiUrl = '${dotenv.env['API_PROTOCOL']}://${dotenv.env['API_HOST']}${dotenv.env['API_PORT']}/tickets/$id';
+      print('userId: $userId, categoryId: $categoryId');
+      final response = await http.patch(
+        Uri.parse(apiUrl),
+        headers: {
+          'Accept': 'application/json; charset=UTF-8',
+          'Authorization': 'Bearer $jwtToken',
+          'Content-Type': 'application/json',
+        },
+        body: json.encode({
+          'user_id': userId,
+          'concert_category_id': categoryId,
+        }),
+      );
+      if (response.statusCode != 200) {
+        throw ApiException(message: 'Failed to update ticket');
+      }
+      return Ticket.fromJson(json.decode(response.body));
+    } on SocketException catch (error) {
+      log('Network error.', error: error);
+      throw ApiException(message: 'Network error');
+    } catch (error) {
+      log('An error occurred while updating ticket.', error: error);
       throw ApiException(message: 'Unknown error');
     }
   }

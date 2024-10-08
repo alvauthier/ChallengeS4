@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 import 'package:weezemaster/core/services/api_services.dart';
 import 'package:weezemaster/core/models/user.dart';
 import 'blocs/users_bloc.dart';
@@ -9,20 +8,6 @@ class UsersScreen extends StatelessWidget {
   final TextEditingController _firstnameController = TextEditingController();
   final TextEditingController _lastnameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
-  final DropdownButton<String> _roleDropdown = DropdownButton<String>(
-    value: 'user',
-    items: const [
-      DropdownMenuItem(
-        value: 'user',
-        child: Text('Utilisateur'),
-      ),
-      DropdownMenuItem(
-        value: 'organizer',
-        child: Text('Organisateur'),
-      ),
-    ],
-    onChanged: (String? value) {},
-  );
 
   UsersScreen({super.key});
 
@@ -56,14 +41,6 @@ class UsersScreen extends StatelessWidget {
                 controller: _emailController,
                 decoration: const InputDecoration(labelText: 'Email'),
               ),
-              const SizedBox(height: 8),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text('Rôle'),
-                  _roleDropdown,
-                ],
-              ),
             ],
           ),
           actions: [
@@ -81,7 +58,6 @@ class UsersScreen extends StatelessWidget {
                     _firstnameController.text,
                     _lastnameController.text,
                     _emailController.text,
-                    _roleDropdown.value!,
                   );
                   Navigator.of(dialogContext).pop();
                   usersBloc.add(UsersDataLoaded());

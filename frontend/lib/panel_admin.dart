@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:weezemaster/admin/users/users.dart';
 import 'package:weezemaster/translation.dart';
-
-import 'admin/organizations/organizations.dart';
-import 'admin/tickets/tickets.dart';
+import 'package:weezemaster/admin/organizations/organizations.dart';
+import 'package:weezemaster/admin/tickets/tickets.dart';
 
 class AdminPanel extends StatelessWidget {
   const AdminPanel({super.key});
@@ -11,7 +10,7 @@ class AdminPanel extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(
-      length: 6, // TODO: Update this to 7 after tickets page update
+      length: 7,
       child: Scaffold(
         appBar: AppBar(
           title: Text(translate(context)!.admin_panel),
@@ -21,7 +20,7 @@ class AdminPanel extends StatelessWidget {
             indicatorColor: Colors.deepOrange,
             tabs: [
               Tab(text: translate(context)!.users),
-              // Tab(text: 'Tickets'),
+              Tab(text: 'Tickets'),
               Tab(text: 'Ticket Listings'),
               Tab(text: 'Organizations'),
               Tab(text: 'Interests'),
@@ -33,7 +32,7 @@ class AdminPanel extends StatelessWidget {
         body: TabBarView(
           children: [
             UsersScreen(),
-            // TicketsScreen(),
+            TicketsScreen(),
             TicketListingsScreen(),
             OrganizationsScreen(),
             InterestsScreen(),

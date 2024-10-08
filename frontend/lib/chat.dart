@@ -102,13 +102,15 @@ class ChatScreenState extends State<ChatScreen> {
       widget.id = '';
       concertName = widget.concertName!;
       price = widget.price!;
-      resellerName = widget.resellerName!;
+      otherUser = widget.resellerName!;
       category = widget.category!;
+      buyerId = widget.userId!;
     } else {
       concertName = "";
       price = "";
-      resellerName = "";
+      otherUser = "";
       category = "";
+      buyerId = "";
       _fetchConversation();
     }
     _loadUserId().then((_) {
@@ -365,7 +367,7 @@ class ChatScreenState extends State<ChatScreen> {
                       ),
                     ),
                     child: const Text(
-                      'Changer le prix',
+                      'Testttt',
                       style: TextStyle(color: Colors.white, fontFamily: 'Readex Pro'),
                     ),
                   ),
@@ -407,6 +409,8 @@ class ChatScreenState extends State<ChatScreen> {
                 context.pop();
               },
               secondAction: () async {
+                debugPrint('BuyerId: $buyerId');
+                debugPrint('UserId: $userId');
                 if (buyerId == userId) {
                   debugPrint('Buy');
                   final tokenService = TokenService();

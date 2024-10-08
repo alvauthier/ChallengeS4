@@ -686,4 +686,34 @@ class ApiServices {
       throw ApiException(message: 'Unknown error');
     }
   }
+
+  static Future<Concert> updateConcert(String id, String name, String location) async {
+    try {
+      final tokenService = TokenService();
+      String? jwtToken = await tokenService.getValidAccessToken();
+      final apiUrl = '${dotenv.env['API_PROTOCOL']}://${dotenv.env['API_HOST']}${dotenv.env['API_PORT']}/concerts/$id';
+      final response = await http.patch(
+        Uri.parse(apiUrl),
+        headers: {
+          'Accept': 'application/json; charset=UTF-8',
+          'Authorization': 'Bearer $jwtToken',
+          'Content-Type': 'application/json',
+        },
+        body: json.encode({
+          'name': name,
+          'location': location,
+        }),
+      );
+      if (response.statusCode != 200) {
+        throw ApiException(message: 'Failed to update concert');
+      }
+      return Concert.fromJson(json.decode(response.body));
+    } on SocketException catch (error) {
+      log('Network error.', error: error);
+      throw ApiException(message: 'Network error');
+    } catch (error) {
+      log('An error occurred while updating concert.', error: error);
+      throw ApiException(message: 'Unknown error');
+    }
+  }
 }

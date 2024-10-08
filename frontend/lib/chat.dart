@@ -401,6 +401,7 @@ class ChatScreenState extends State<ChatScreen> {
               concertName: concertName,
               category: category,
               price: price,
+              showButtons: widget.id.isEmpty || widget.id == 'newchat' ? false : true,
               onCancel: () {
                 // Handle cancel action
                 context.pop();

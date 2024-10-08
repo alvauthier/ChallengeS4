@@ -22,7 +22,7 @@ import (
 func GetAllConcerts(c echo.Context) error {
 	db := database.GetDB()
 	var concerts []models.Concert
-	db.Find(&concerts)
+	db.Preload("Interests").Find(&concerts)
 	return c.JSON(http.StatusOK, concerts)
 }
 

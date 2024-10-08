@@ -146,7 +146,7 @@ class _AdaptiveNavigationBarState extends State<AdaptiveNavigationBar> {
           } else if (index == 2) {
             context.pushNamed('conversations');
           } else {
-            context.pushNamed('profile');
+            context.pushNamed('user-interests');
           }
         } else if(userRole == 'organizer') {
           if (index == 0) {

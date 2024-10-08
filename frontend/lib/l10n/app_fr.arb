@@ -110,6 +110,8 @@
     "your_conversations": "Vos conversations",
     "no_conversation": "Aucune conversation disponible",
     "no_data": "Aucune donnée disponible",
+    "recent": "Récents",
+    "ancient": "Ancien",
     "my_concert": "Mon concert",
     "admin_panel": "Panneau admin",
     "users": "Utilisateurs"

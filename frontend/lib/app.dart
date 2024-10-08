@@ -11,6 +11,7 @@ import 'package:weezemaster/home/home_screen.dart';
 import 'package:weezemaster/login_register_screen.dart';
 import 'package:weezemaster/login_screen.dart';
 import 'package:weezemaster/my_tickets/my_tickets_screen.dart';
+import 'package:weezemaster/panel_admin.dart';
 import 'package:weezemaster/profile_screen.dart';
 import 'package:weezemaster/register_concert_screen.dart';
 import 'package:weezemaster/register_organization_screen.dart';
@@ -237,6 +238,16 @@ class App extends StatelessWidget {
         builder: (BuildContext context, GoRouterState state) {
           return const Scaffold(
             body: ThankYouScreen(),
+            bottomNavigationBar: AdaptiveNavigationBar(),
+          );
+        },
+      ),
+      GoRoute(
+        path: '/admin',
+        name: 'admin',
+        builder: (BuildContext context, GoRouterState state) {
+          return const Scaffold(
+            body: AdminPanel(),
             bottomNavigationBar: AdaptiveNavigationBar(),
           );
         },

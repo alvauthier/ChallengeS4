@@ -1,23 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:weezemaster/admin/users/users.dart';
+import 'package:weezemaster/translation.dart';
 
-void main() {
-  runApp(const AdminPanelApp());
-}
-
-class AdminPanelApp extends StatelessWidget {
-  const AdminPanelApp({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Admin Panel',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-      ),
-      home: const AdminPanel(),
-    );
-  }
-}
+import 'admin/organizations/organizations.dart';
+import 'admin/tickets/tickets.dart';
 
 class AdminPanel extends StatelessWidget {
   const AdminPanel({super.key});
@@ -25,18 +11,19 @@ class AdminPanel extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(
-      length: 8,
+      length: 6, // TODO: Update this to 7 after tickets page update
       child: Scaffold(
         appBar: AppBar(
-          title: const Text('Admin Panel'),
-          bottom: const TabBar(
+          title: Text(translate(context)!.admin_panel),
+          bottom: TabBar(
             isScrollable: true,
+            labelColor: Colors.deepOrange,
+            indicatorColor: Colors.deepOrange,
             tabs: [
-              Tab(text: 'Users'),
-              Tab(text: 'Tickets'),
+              Tab(text: translate(context)!.users),
+              // Tab(text: 'Tickets'),
               Tab(text: 'Ticket Listings'),
               Tab(text: 'Organizations'),
-              Tab(text: 'Messages'),
               Tab(text: 'Interests'),
               Tab(text: 'Categories'),
               Tab(text: 'Concerts'),
@@ -46,10 +33,9 @@ class AdminPanel extends StatelessWidget {
         body: TabBarView(
           children: [
             UsersScreen(),
-            TicketsScreen(),
+            // TicketsScreen(),
             TicketListingsScreen(),
             OrganizationsScreen(),
-            MessagesScreen(),
             InterestsScreen(),
             CategoriesScreen(),
             ConcertsScreen(),
@@ -58,35 +44,6 @@ class AdminPanel extends StatelessWidget {
       ),
     );
   }
-}
-
-// Example data models (replace with actual models)
-class User {
-  final int id;
-  final String username;
-  final String firstname;
-  final String lastname;
-  final String role;
-
-  User({
-    required this.id,
-    required this.username,
-    required this.firstname,
-    required this.lastname,
-    required this.role,
-  });
-}
-
-class Ticket {
-  final int id;
-  final int userId;
-  final bool booked;
-
-  Ticket({
-    required this.id,
-    required this.userId,
-    required this.booked,
-  });
 }
 
 class TicketListing {
@@ -102,28 +59,6 @@ class TicketListing {
     required this.createdAt,
     required this.updatedAt,
     required this.status,
-  });
-}
-
-class Organization {
-  final int id;
-  final String name;
-
-  Organization({
-    required this.id,
-    required this.name,
-  });
-}
-
-class Message {
-  final int id;
-  final String content;
-  final int conversationId;
-
-  Message({
-    required this.id,
-    required this.content,
-    required this.conversationId,
   });
 }
 
@@ -155,91 +90,6 @@ class Concert {
     required this.id,
     required this.name,
   });
-}
-
-// Screens for each section (implement logic as needed)
-class UsersScreen extends StatelessWidget {
-  final List<User> users = [
-    User(id: 1, username: 'johndoe', firstname: 'John', lastname: 'Doe', role: 'admin'),
-    // Add more users here
-  ];
-
-  UsersScreen({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: ListView.builder(
-        itemCount: users.length,
-        itemBuilder: (context, index) {
-          final user = users[index];
-          return ListTile(
-            title: Text(user.username),
-            subtitle: Text('${user.firstname} ${user.lastname} - ${user.role}'),
-            trailing: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                IconButton(
-                  icon: const Icon(Icons.edit),
-                  onPressed: () {
-                    // Edit user logic
-                  },
-                ),
-                IconButton(
-                  icon: const Icon(Icons.delete),
-                  onPressed: () {
-                    // Delete user logic
-                  },
-                ),
-              ],
-            ),
-          );
-        },
-      ),
-    );
-  }
-}
-
-class TicketsScreen extends StatelessWidget {
-  final List<Ticket> tickets = [
-    Ticket(id: 1, userId: 1, booked: true),
-    // Add more tickets here
-  ];
-
-  TicketsScreen({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: ListView.builder(
-        itemCount: tickets.length,
-        itemBuilder: (context, index) {
-          final ticket = tickets[index];
-          return ListTile(
-            title: Text('Ticket ID: ${ticket.id}'),
-            subtitle: Text('User ID: ${ticket.userId}, Booked: ${ticket.booked}'),
-            trailing: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                IconButton(
-                  icon: const Icon(Icons.edit),
-                  onPressed: () {
-                    // Edit ticket logic
-                  },
-                ),
-                IconButton(
-                  icon: const Icon(Icons.delete),
-                  onPressed: () {
-                    // Delete ticket logic
-                  },
-                ),
-              ],
-            ),
-          );
-        },
-      ),
-    );
-  }
 }
 
 class TicketListingsScreen extends StatelessWidget {
@@ -277,72 +127,6 @@ class TicketListingsScreen extends StatelessWidget {
                 ),
               ],
             ),
-          );
-        },
-      ),
-    );
-  }
-}
-
-class OrganizationsScreen extends StatelessWidget {
-  final List<Organization> organizations = [
-    Organization(id: 1, name: 'Org 1'),
-    // Add more organizations here
-  ];
-
-  OrganizationsScreen({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: ListView.builder(
-        itemCount: organizations.length,
-        itemBuilder: (context, index) {
-          final organization = organizations[index];
-          return ListTile(
-            title: Text(organization.name),
-            trailing: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                IconButton(
-                  icon: const Icon(Icons.edit),
-                  onPressed: () {
-                    // Edit organization logic
-                  },
-                ),
-                IconButton(
-                  icon: const Icon(Icons.delete),
-                  onPressed: () {
-                    // Delete organization logic
-                  },
-                ),
-              ],
-            ),
-          );
-        },
-      ),
-    );
-  }
-}
-
-class MessagesScreen extends StatelessWidget {
-  final List<Message> messages = [
-    Message(id: 1, content: 'Hello World', conversationId: 1),
-    // Add more messages here
-  ];
-
-  MessagesScreen({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: ListView.builder(
-        itemCount: messages.length,
-        itemBuilder: (context, index) {
-          final message = messages[index];
-          return ListTile(
-            title: Text('Message ID: ${message.id}'),
-            subtitle: Text(message.content),
           );
         },
       ),

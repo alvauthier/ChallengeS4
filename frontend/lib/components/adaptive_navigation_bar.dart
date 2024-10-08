@@ -103,6 +103,21 @@ class _AdaptiveNavigationBarState extends State<AdaptiveNavigationBar> {
           label: translate(context)!.my_profile,
         ),
       ];
+    } else if (userRole == 'admin') {
+      items = <NavigationDestination>[
+        NavigationDestination(
+          icon: const Icon(Icons.home),
+          label: translate(context)!.home,
+        ),
+        NavigationDestination(
+          icon: const Icon(Icons.admin_panel_settings_sharp),
+          label: translate(context)!.admin_panel,
+        ),
+        NavigationDestination(
+          icon: const Icon(Icons.person),
+          label: translate(context)!.my_profile,
+        ),
+      ];
     } else {
       items = <NavigationDestination>[
         NavigationDestination(
@@ -138,6 +153,14 @@ class _AdaptiveNavigationBarState extends State<AdaptiveNavigationBar> {
             context.pushNamed('organizer-concert');
           } else if (index == 1) {
             context.pushNamed('register-concert');
+          } else {
+            context.pushNamed('profile');
+          }
+        } else if (userRole == 'admin') {
+          if (index == 0) {
+            context.pushNamed('home');
+          } else if (index == 1) {
+            context.pushNamed('admin');
           } else {
             context.pushNamed('profile');
           }

@@ -94,5 +94,7 @@
     "create_concert_success": "Création du concert réussie",
     "create_concert_failed": "Erreur lors de la création du concert",
     "create_the_concert": "Créer le concert",
-    "my_concert": "Mon concert"
+    "my_concert": "Mon concert",
+    "admin_panel": "Panneau admin",
+    "users": "Utilisateurs"
 }

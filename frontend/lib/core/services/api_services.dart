@@ -369,4 +369,64 @@ class ApiServices {
     final data = json.decode(response.body);
     return data['ID'];
   }
+
+  static Future<List<User>> getUsers() async {
+    try {
+      final tokenService = TokenService();
+      String? jwtToken = await tokenService.getValidAccessToken();
+      final apiUrl = '${dotenv.env['API_PROTOCOL']}://${dotenv.env['API_HOST']}${dotenv.env['API_PORT']}/users';
+      final response = await http.get(
+        Uri.parse(apiUrl),
+        headers: {
+          'Accept': 'application/json; charset=UTF-8',
+          'Authorization': 'Bearer $jwtToken',
+        },
+      );
+      await Future.delayed(const Duration(seconds: 1));
+      if (response.statusCode < 200 || response.statusCode >= 400) {
+        throw ApiException(message: 'Bad request');
+      }
+
+      final data = json.decode(response.body) as List<dynamic>;
+      return data.mapList((e) => User.fromJson(e));
+    } on SocketException catch (error) {
+      log('Network error.', error: error);
+      throw ApiException(message: 'Network error');
+    } catch (error) {
+      log('An error occurred while fetching user.', error: error);
+      throw ApiException(message: 'Unknown error');
+    }
+  }
+
+  static Future<User> updateUser(String id, String firstname, String lastname, String email, String role) async {
+    try {
+      final tokenService = TokenService();
+      String? jwtToken = await tokenService.getValidAccessToken();
+      final apiUrl = '${dotenv.env['API_PROTOCOL']}://${dotenv.env['API_HOST']}${dotenv.env['API_PORT']}/users/$id';
+      final response = await http.patch(
+        Uri.parse(apiUrl),
+        headers: {
+          'Accept': 'application/json; charset=UTF-8',
+          'Authorization': 'Bearer $jwtToken',
+          'Content-Type': 'application/json',
+        },
+        body: json.encode({
+          'firstname': firstname,
+          'lastname': lastname,
+          'email': email,
+          'role': role,
+        }),
+      );
+      if (response.statusCode != 200) {
+        throw ApiException(message: 'Failed to update user');
+      }
+      return User.fromJson(json.decode(response.body));
+    } on SocketException catch (error) {
+      log('Network error.', error: error);
+      throw ApiException(message: 'Network error');
+    } catch (error) {
+      log('An error occurred while updating user.', error: error);
+      throw ApiException(message: 'Unknown error');
+    }
+  }
 }

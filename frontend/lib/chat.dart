@@ -76,19 +76,19 @@ class ChatScreenState extends State<ChatScreen> {
       if (response.statusCode == 200) {
         debugPrint('Ticket listing purchased');
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Ticket purchased.')),
+          SnackBar(content: Text(translate(context)!.ticket_success)),
         );
         context.pushNamed('thank-you');
       } else {
         debugPrint('Failed to update ticket listing status: ${response.body}');
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Failed to update ticket listing status.')),
+          SnackBar(content: Text(translate(context)!.ticket_failed)),
         );
       }
     } catch (e) {
       debugPrint('Error updating ticket listing status: $e');
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Error updating ticket listing status.')),
+        SnackBar(content: Text(translate(context)!.generic_error)),
       );
     }
   }
@@ -115,19 +115,19 @@ class ChatScreenState extends State<ChatScreen> {
       if (response.statusCode == 200) {
         debugPrint('Price updated');
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Price updated.')),
+          SnackBar(content: Text(translate(context)!.price_success)),
         );
       } else {
         debugPrint('Failed to update price: ${response.body}');
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Failed to change the price.')),
+          SnackBar(content: Text(translate(context)!.price_failed)),
         );
         throw Exception('Failed to update price');
       }
     } catch (e) {
       debugPrint('Error updating price: $e');
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Error updating price.')),
+        SnackBar(content: Text(translate(context)!.generic_error)),
       );
       throw Exception('Error updating price');
     }
@@ -349,9 +349,9 @@ class ChatScreenState extends State<ChatScreen> {
       builder: (BuildContext context) {
         final TextEditingController priceController = TextEditingController(text: ticket["price"]);
         return AlertDialog(
-          title: const Text(
-              'Nouveau prix',
-              style: TextStyle(fontFamily: 'Readex Pro', fontWeight: FontWeight.bold),
+          title: Text(
+              translate(context)!.new_price,
+              style: const TextStyle(fontFamily: 'Readex Pro', fontWeight: FontWeight.bold),
           ),
           content: TextField(
             controller: priceController,
@@ -382,9 +382,9 @@ class ChatScreenState extends State<ChatScreen> {
                         borderRadius: BorderRadius.circular(6.0),
                       ),
                     ),
-                    child: const Text(
-                      'Annuler',
-                      style: TextStyle(color: Colors.deepOrange, fontFamily: 'Readex Pro'),
+                    child: Text(
+                      translate(context)!.cancel,
+                      style: const TextStyle(color: Colors.deepOrange, fontFamily: 'Readex Pro'),
                     ),
                   ),
                 ),
@@ -407,9 +407,9 @@ class ChatScreenState extends State<ChatScreen> {
                         borderRadius: BorderRadius.circular(6.0),
                       ),
                     ),
-                    child: const Text(
-                      'Confirmer',
-                      style: TextStyle(color: Colors.white, fontFamily: 'Readex Pro'),
+                    child: Text(
+                      translate(context)!.confirm,
+                      style: const TextStyle(color: Colors.white, fontFamily: 'Readex Pro'),
                     ),
                   ),
                 ),
@@ -427,7 +427,7 @@ class ChatScreenState extends State<ChatScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          'Chat avec $otherUser',
+          '${translate(context)!.chat_with} $otherUser',
           style: const TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.bold,
@@ -487,7 +487,7 @@ class ChatScreenState extends State<ChatScreen> {
 
                 }
               },
-              secondActionText: buyerId == userId ? 'Acheter' : 'Changer le prix',
+              secondActionText: buyerId == userId ? translate(context)!.buy : translate(context)!.change_price,
             ),
             Expanded(
               child: ListView.builder(
@@ -520,7 +520,7 @@ class ChatScreenState extends State<ChatScreen> {
                     child: TextField(
                       controller: _controller,
                       decoration: InputDecoration(
-                        hintText: "Saisissez votre message...",
+                        hintText: translate(context)!.enter_message,
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
                         ),

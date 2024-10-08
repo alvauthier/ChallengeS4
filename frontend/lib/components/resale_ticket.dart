@@ -71,19 +71,19 @@ class ResaleTicket extends StatelessWidget {
       if (response.statusCode == 200) {
         debugPrint('Ticket listing purchased');
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Ticket purchased.')),
+          SnackBar(content: Text(translate(context)!.ticket_success)),
         );
         context.pushNamed('thank-you');
       } else {
         debugPrint('Failed to update ticket listing status: ${response.body}');
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Failed to update ticket listing status.')),
+          SnackBar(content: Text(translate(context)!.ticket_failed)),
         );
       }
     } catch (e) {
       debugPrint('Error updating ticket listing status: $e');
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Error updating ticket listing status.')),
+        SnackBar(content: Text(translate(context)!.generic_error)),
       );
     }
   }
@@ -150,13 +150,11 @@ class ResaleTicket extends StatelessWidget {
                         children: [
                           ElevatedButton(
                             onPressed: () async {
-                              debugPrint('Contact reseller');
                               final tokenService = TokenService();
                               String? token = await tokenService.getValidAccessToken();
                               if (token == null) {
                                 context.pushNamed('login-register');
                               } else {
-                                debugPrint('Contact reseller ELSE');
                                 final parts = token.split('.');
                                 if (parts.length != 3) {
                                   throw Exception('Invalid token');
@@ -177,18 +175,11 @@ class ResaleTicket extends StatelessWidget {
                                 }
 
                                 String userId = json.decode(utf8.decode(base64.decode(output)))['id'];
-                                debugPrint('userId: $userId');
-                                debugPrint('resellerId: ${ticket.reseller.id}');
-                                debugPrint('ticketId: ${ticket.id}');
-                                debugPrint('concertName: ${ticket.category}');
-                                debugPrint('price: ${ticket.price}');
 
                                 final existingConversationId = await ApiServices.checkConversationExists(
                                   ticket.id,
                                   userId,
                                 );
-                                // final existingConversationId = 'çéçujçè!§h';
-
                                 debugPrint('existingConversationId: $existingConversationId');
 
                                 if (existingConversationId != null && existingConversationId.isNotEmpty) {
@@ -220,7 +211,6 @@ class ResaleTicket extends StatelessWidget {
                                     },
                                   );
                                 }
-                                // context.push('/chat/${existingConversationId}');
                               }
                             },
                             style: ElevatedButton.styleFrom(

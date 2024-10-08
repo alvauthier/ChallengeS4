@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:weezemaster/translation.dart';
 
 class TicketDetails extends StatelessWidget {
   final String imageUrl;
@@ -89,9 +90,9 @@ class TicketDetails extends StatelessWidget {
                         borderRadius: BorderRadius.circular(6.0),
                       ),
                     ),
-                    child: const Text(
-                      'Annuler',
-                      style: TextStyle(color: Colors.deepOrange, fontFamily: 'Readex Pro'),
+                    child: Text(
+                      translate(context)!.cancel,
+                      style: const TextStyle(color: Colors.deepOrange, fontFamily: 'Readex Pro'),
                     ),
                   ),
                 ),

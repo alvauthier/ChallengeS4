@@ -39,7 +39,7 @@ type User struct {
 	Tickets               []Ticket   `gorm:"foreignKey:UserId"`
 	OrganizationId        uuid.UUID
 	Organization          *Organization  `gorm:"foreignKey:OrganizationId"`
-	Interests             []Interest     `gorm:"many2many:user_interests;"`
+	Interests             []Interest     `gorm:"many2many:user_interests;constraint:OnDelete:CASCADE;"`
 	ConversationsAsBuyer  []Conversation `gorm:"foreignKey:BuyerId"`
 	ConversationsAsSeller []Conversation `gorm:"foreignKey:SellerId"`
 	Messages              []Message      `gorm:"foreignKey:AuthorId"`

@@ -546,4 +546,85 @@ class ApiServices {
       throw ApiException(message: 'Unknown error');
     }
   }
+
+  static Future<List<Interest>> getInterests() async {
+    try {
+      final tokenService = TokenService();
+      String? jwtToken = await tokenService.getValidAccessToken();
+      final apiUrl = '${dotenv.env['API_PROTOCOL']}://${dotenv.env['API_HOST']}${dotenv.env['API_PORT']}/interests';
+      final response = await http.get(
+        Uri.parse(apiUrl),
+        headers: {
+          'Accept': 'application/json; charset=UTF-8',
+          'Authorization': 'Bearer $jwtToken',
+        },
+      );
+      await Future.delayed(const Duration(seconds: 1));
+      if (response.statusCode < 200 || response.statusCode >= 400) {
+        throw ApiException(message: 'Bad request');
+      }
+
+      final data = json.decode(response.body) as List<dynamic>;
+      return data.mapList((e) => Interest.fromJson(e));
+    } on SocketException catch (error) {
+      log('Network error.', error: error);
+      throw ApiException(message: 'Network error');
+    } catch (error) {
+      log('An error occurred while fetching interests.', error: error);
+      throw ApiException(message: 'Unknown error');
+    }
+  }
+
+  static Future<Interest> updateInterest(int id, String name) async {
+    try {
+      final tokenService = TokenService();
+      String? jwtToken = await tokenService.getValidAccessToken();
+      final apiUrl = '${dotenv.env['API_PROTOCOL']}://${dotenv.env['API_HOST']}${dotenv.env['API_PORT']}/interests/$id';
+      final response = await http.patch(
+        Uri.parse(apiUrl),
+        headers: {
+          'Accept': 'application/json; charset=UTF-8',
+          'Authorization': 'Bearer $jwtToken',
+          'Content-Type': 'application/json',
+        },
+        body: json.encode({
+          'name': name
+        }),
+      );
+      if (response.statusCode != 200) {
+        throw ApiException(message: 'Failed to update interest');
+      }
+      return Interest.fromJson(json.decode(response.body));
+    } on SocketException catch (error) {
+      log('Network error.', error: error);
+      throw ApiException(message: 'Network error');
+    } catch (error) {
+      log('An error occurred while updating interest.', error: error);
+      throw ApiException(message: 'Unknown error');
+    }
+  }
+
+  static Future<void> deleteInterest(int id) async {
+    try {
+      final tokenService = TokenService();
+      String? jwtToken = await tokenService.getValidAccessToken();
+      final apiUrl = '${dotenv.env['API_PROTOCOL']}://${dotenv.env['API_HOST']}${dotenv.env['API_PORT']}/interests/$id';
+      final response = await http.delete(
+        Uri.parse(apiUrl),
+        headers: {
+          'Accept': 'application/json; charset=UTF-8',
+          'Authorization': 'Bearer $jwtToken',
+        },
+      );
+      if (response.statusCode != 204) {
+        throw ApiException(message: 'Failed to delete interest');
+      }
+    } on SocketException catch (error) {
+      log('Network error.', error: error);
+      throw ApiException(message: 'Network error');
+    } catch (error) {
+      log('An error occurred while deleting interest.', error: error);
+      throw ApiException(message: 'Unknown error');
+    }
+  }
 }

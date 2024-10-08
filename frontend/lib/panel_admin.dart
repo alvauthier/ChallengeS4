@@ -4,6 +4,7 @@ import 'package:weezemaster/admin/users/users.dart';
 import 'package:weezemaster/translation.dart';
 import 'package:weezemaster/admin/tickets/tickets.dart';
 
+import 'admin/interests/interests.dart';
 import 'core/models/organization.dart';
 
 class AdminPanel extends StatelessWidget {
@@ -12,7 +13,7 @@ class AdminPanel extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(
-      length: 7,
+      length: 6,
       child: Scaffold(
         appBar: AppBar(
           title: Text(translate(context)!.admin_panel),
@@ -24,7 +25,6 @@ class AdminPanel extends StatelessWidget {
               Tab(text: translate(context)!.users),
               Tab(text: 'Tickets'),
               Tab(text: 'Ticket Listings'),
-              Tab(text: 'Organizations'),
               Tab(text: 'Interests'),
               Tab(text: 'Categories'),
               Tab(text: 'Concerts'),
@@ -36,7 +36,6 @@ class AdminPanel extends StatelessWidget {
             UsersScreen(),
             const TicketsScreen(),
             const TicketListingsScreen(),
-            OrganizationsScreen(),
             InterestsScreen(),
             CategoriesScreen(),
             ConcertsScreen(),
@@ -45,16 +44,6 @@ class AdminPanel extends StatelessWidget {
       ),
     );
   }
-}
-
-class Interest {
-  final int id;
-  final String label;
-
-  Interest({
-    required this.id,
-    required this.label,
-  });
 }
 
 class Category {
@@ -75,91 +64,6 @@ class Concert {
     required this.id,
     required this.name,
   });
-}
-
-class OrganizationsScreen extends StatelessWidget {
-  final List<Organization> organizations = [
-    Organization(id: '', name: 'Org 1'),
-  ];
-  OrganizationsScreen({super.key});
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: ListView.builder(
-        itemCount: organizations.length,
-        itemBuilder: (context, index) {
-          final organization = organizations[index];
-          return ListTile(
-            title: Text(organization.name),
-            trailing: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                IconButton(
-                  icon: const Icon(Icons.edit),
-                  onPressed: () {
-                    // Edit organization logic
-                  },
-                ),
-                IconButton(
-                  icon: const Icon(Icons.delete),
-                  onPressed: () {
-                    // Delete organization logic
-                  },
-                ),
-              ],
-            ),
-          );
-        },
-      ),
-    );
-  }
-}
-
-class InterestsScreen extends StatelessWidget {
-  final List<Interest> interests = [
-    Interest(id: 1, label: 'Music'),
-    // Add more interests here
-  ];
-
-  InterestsScreen({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: ListView.builder(
-        itemCount: interests.length,
-        itemBuilder: (context, index) {
-          final interest = interests[index];
-          return ListTile(
-            title: Text(interest.label),
-            trailing: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                IconButton(
-                  icon: const Icon(Icons.edit),
-                  onPressed: () {
-                    // Edit interest logic
-                  },
-                ),
-                IconButton(
-                  icon: const Icon(Icons.delete),
-                  onPressed: () {
-                    // Delete interest logic
-                  },
-                ),
-              ],
-            ),
-          );
-        },
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          // Add interest logic
-        },
-        child: const Icon(Icons.add),
-      ),
-    );
-  }
 }
 
 class CategoriesScreen extends StatelessWidget {

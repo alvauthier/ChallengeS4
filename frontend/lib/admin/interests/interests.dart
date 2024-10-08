@@ -9,6 +9,57 @@ class InterestsScreen extends StatelessWidget {
 
   InterestsScreen({super.key});
 
+  void _showAddingDialog(BuildContext context) {
+    final interestsBloc = context.read<InterestsBloc>();
+
+    _nameController.text = '';
+
+    showDialog(
+      context: context,
+      builder: (BuildContext dialogContext) {
+        return AlertDialog(
+          title: const Text('Ajouter un intérêt'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              TextField(
+                controller: _nameController,
+                decoration: const InputDecoration(labelText: 'Nom'),
+              ),
+              const SizedBox(height: 8),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(dialogContext).pop();
+              },
+              child: const Text('Annuler'),
+            ),
+            TextButton(
+              onPressed: () async {
+                try {
+                  await ApiServices.addInterest(
+                    _nameController.text,
+                  );
+                  Navigator.of(dialogContext).pop();
+                  interestsBloc.add(InterestsDataLoaded());
+                } catch (e) {
+                  print('An error occurred while adding interest: $e');
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('Failed to add interest: $e')),
+                  );
+                }
+              },
+              child: const Text('Ajouter'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   void _showUpdateDialog(BuildContext context, Interest interest) {
     final interestsBloc = context.read<InterestsBloc>();
 
@@ -107,31 +158,42 @@ class InterestsScreen extends StatelessWidget {
             if (state is InterestsLoading) {
               return const Center(child: CircularProgressIndicator());
             } else if (state is InterestsDataLoadingSuccess) {
-              return ListView.builder(
-                itemCount: state.interests.length,
-                itemBuilder: (context, index) {
-                  final interest = state.interests[index];
-                  return ListTile(
-                    title: Text(interest.name),
-                    trailing: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        IconButton(
-                          icon: const Icon(Icons.edit),
-                          onPressed: () {
-                            _showUpdateDialog(context, interest);
-                          },
-                        ),
-                        IconButton(
-                          icon: const Icon(Icons.delete),
-                          onPressed: () async {
-                            _showDeleteDialog(context, interest);
-                          },
-                        ),
-                      ],
-                    )
-                  );
-                },
+              return Scaffold(
+                body: ListView.builder(
+                  itemCount: state.interests.length,
+                  itemBuilder: (context, index) {
+                    final interest = state.interests[index];
+                    return ListTile(
+                        title: Text(interest.name),
+                        trailing: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            IconButton(
+                              icon: const Icon(Icons.edit),
+                              onPressed: () {
+                                _showUpdateDialog(context, interest);
+                              },
+                            ),
+                            IconButton(
+                              icon: const Icon(Icons.delete),
+                              onPressed: () async {
+                                _showDeleteDialog(context, interest);
+                              },
+                            ),
+                          ],
+                        )
+                    );
+                  },
+                ),
+                floatingActionButton: FloatingActionButton(
+                  backgroundColor: Colors.deepOrange,
+                  foregroundColor: Colors.white,
+                  onPressed: () {
+                    _showAddingDialog(context);
+                  },
+                  child: const Icon(Icons.add),
+                ),
+                floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat
               );
             } else if (state is InterestsDataLoadingError) {
               return Center(

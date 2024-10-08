@@ -115,6 +115,7 @@ func main() {
 
 	authenticated.GET("/conversations/:id", controller.GetConversation, middleware.CheckRole("user", "organizer", "admin"))
 	authenticated.POST("/conversations", controller.CreateConversation, middleware.CheckRole("user", "organizer", "admin"))
+	authenticated.PATCH("/conversations/:id", controller.UpdateConversation, middleware.CheckRole("user", "organizer", "admin"))
 
 	authenticated.POST("/messages", controller.PostMessage, middleware.CheckRole("user", "organizer", "admin"))
 

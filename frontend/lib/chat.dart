@@ -93,6 +93,46 @@ class ChatScreenState extends State<ChatScreen> {
     }
   }
 
+  Future<void> updateConversationPrice(String conversationId, double price) async {
+    final tokenService = TokenService();
+    String? jwtToken = await tokenService.getValidAccessToken();
+
+    final body = jsonEncode({
+      'price': price,
+    });
+
+    try {
+      final apiUrl = '${dotenv.env['API_PROTOCOL']}://${dotenv.env['API_HOST']}${dotenv.env['API_PORT']}/conversations/$conversationId';
+      final response = await http.patch(
+        Uri.parse(apiUrl),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $jwtToken',
+        },
+        body: body,
+      );
+
+      if (response.statusCode == 200) {
+        debugPrint('Price updated');
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Price updated.')),
+        );
+      } else {
+        debugPrint('Failed to update price: ${response.body}');
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Failed to change the price.')),
+        );
+        throw Exception('Failed to update price');
+      }
+    } catch (e) {
+      debugPrint('Error updating price: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Error updating price.')),
+      );
+      throw Exception('Error updating price');
+    }
+  }
+
   @override
   void initState() {
     super.initState();
@@ -320,7 +360,7 @@ class ChatScreenState extends State<ChatScreen> {
               FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d{0,2}')),
               TextInputFormatter.withFunction((oldValue, newValue) {
                 final newPrice = double.tryParse(newValue.text);
-                if (newPrice != null && newPrice > double.parse(ticket["maxPrice"]!)) {
+                if (newPrice != null && newPrice > double.parse(price)) {
                   return oldValue;
                 }
                 return newValue;
@@ -351,11 +391,12 @@ class ChatScreenState extends State<ChatScreen> {
                 const SizedBox(width: 8),
                 Expanded(
                   child: ElevatedButton(
-                    onPressed: () {
+                    onPressed: () async {
                       final newPrice = priceController.text;
                       if (newPrice.isNotEmpty) {
+                        await updateConversationPrice(widget.id, double.parse(newPrice));
                         setState(() {
-                          ticket["price"] = newPrice;
+                          price = newPrice.toString();
                         });
                       }
                       context.pop();
@@ -367,7 +408,7 @@ class ChatScreenState extends State<ChatScreen> {
                       ),
                     ),
                     child: const Text(
-                      'Testttt',
+                      'Confirmer',
                       style: TextStyle(color: Colors.white, fontFamily: 'Readex Pro'),
                     ),
                   ),

@@ -183,3 +183,29 @@ func CheckConversation(c echo.Context) error {
 
 	return c.JSON(http.StatusOK, map[string]string{"ID": conversation.ID.String()})
 }
+
+func UpdateConversation(c echo.Context) error {
+	db := database.GetDB()
+	id := c.Param("id")
+
+	var input struct {
+		Price float64 `json:"price"`
+	}
+
+	if err := c.Bind(&input); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, "Failed to bind input: "+err.Error())
+	}
+
+	var conversation models.Conversation
+	if err := db.Where("id = ?", id).First(&conversation).Error; err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
+
+	conversation.Price = input.Price
+
+	if err := db.Save(&conversation).Error; err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
+
+	return c.JSON(http.StatusOK, conversation)
+}

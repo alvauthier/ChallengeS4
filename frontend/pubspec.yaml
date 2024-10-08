@@ -52,6 +52,7 @@ dependencies:
     sdk: flutter
   go_router: ^14.3.0
   web_socket_channel: ^3.0.1
+  flutter_stripe_web: ^5.2.0
 
 dev_dependencies:
   flutter_test:

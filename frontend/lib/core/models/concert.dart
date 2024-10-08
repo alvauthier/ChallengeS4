@@ -11,6 +11,7 @@ class Concert {
   final List<Interest> interests;
   final Organization organization;
   final List<ConcertCategory> concertCategories;
+  final String? createdAt;
 
   Concert({
     required this.id,
@@ -20,7 +21,8 @@ class Concert {
     required this.location,
     required this.interests,
     required this.organization,
-    required this.concertCategories
+    required this.concertCategories,
+    this.createdAt
   });
 
   factory Concert.fromJson(Map<String, dynamic> json) {
@@ -40,7 +42,8 @@ class Concert {
         location: json['Location'],
         interests: interestList,
         organization: organizationFromJson,
-        concertCategories: concertCategoryList
+        concertCategories: concertCategoryList,
+        createdAt: json['CreatedAt'],
     );
   }
 }

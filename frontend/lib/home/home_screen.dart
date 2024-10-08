@@ -1,10 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:weezemaster/core/models/interest.dart';
+import 'package:weezemaster/core/services/token_services.dart';
 import 'package:weezemaster/home/blocs/home_bloc.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import 'package:weezemaster/components/search_bar.dart';
 import 'package:weezemaster/translation.dart';
+import 'package:weezemaster/core/services/api_services.dart';
+
+// Définir un enum pour les options de tri
+enum SortOption { none, interests, recent, ancient }
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -16,11 +22,17 @@ class HomeScreen extends StatefulWidget {
 class HomeScreenState extends State<HomeScreen> {
   final TextEditingController _searchController = TextEditingController();
   List _filteredConcerts = [];
+  List<Interest> userInterests = [];
+  bool isUserConnected = false;
+
+  // Ajouter une variable d'état pour suivre l'option de tri actuelle
+  SortOption _currentSortOption = SortOption.none;
 
   @override
   void initState() {
     super.initState();
     _searchController.addListener(_onSearchChanged);
+    checkUserConnection();
   }
 
   @override
@@ -28,6 +40,29 @@ class HomeScreenState extends State<HomeScreen> {
     _searchController.removeListener(_onSearchChanged);
     _searchController.dispose();
     super.dispose();
+  }
+
+  Future<void> checkUserConnection() async {
+    final tokenService = TokenService();
+    String? token = await tokenService.getValidAccessToken();
+
+    if (token != null) {
+      setState(() {
+        isUserConnected = true;
+      });
+      await fetchUserInterests();
+    }
+  }
+
+  Future<void> fetchUserInterests() async {
+    try {
+      final interests = await ApiServices.getUserInterests();
+      setState(() {
+        userInterests = interests;
+      });
+    } catch (e) {
+      debugPrint('Erreur lors du chargement des centres d\'intérêts: $e');
+    }
   }
 
   void _onSearchChanged() {
@@ -94,9 +129,37 @@ class HomeScreenState extends State<HomeScreen> {
               }
 
               if (state is HomeDataLoadingSuccess) {
+                // Filtrer les concerts en fonction de la recherche
                 _filteredConcerts = state.concerts.where((concert) {
                   return concert.name.toLowerCase().contains(_searchController.text.toLowerCase());
                 }).toList();
+
+                // Appliquer le tri en fonction de l'option sélectionnée
+                if (_currentSortOption == SortOption.interests) {
+                  _filteredConcerts.sort((a, b) {
+                    // Récupère les noms des intérêts des concerts
+                    List<dynamic> aInterests = a.interests.map((interest) => interest.name).toList();
+                    List<dynamic> bInterests = b.interests.map((interest) => interest.name).toList();
+
+                    // Vérifie si le concert a un intérêt correspondant à l'utilisateur
+                    bool aHasInterest = aInterests.any((interest) => userInterests.any((userInterest) => userInterest.name == interest));
+                    bool bHasInterest = bInterests.any((interest) => userInterests.any((userInterest) => userInterest.name == interest));
+
+                    // Trie les concerts avec des intérêts en premier
+                    if (aHasInterest && !bHasInterest) return -1;
+                    if (!aHasInterest && bHasInterest) return 1;
+                    return 0;
+                  });
+                } else if (_currentSortOption == SortOption.recent) {
+                  _filteredConcerts.sort((a, b) {
+                    return DateTime.parse(b.createdAt).compareTo(DateTime.parse(a.createdAt));
+                  });
+                } else if (_currentSortOption == SortOption.ancient) {
+                  _filteredConcerts.sort((a, b) {
+                    return DateTime.parse(a.createdAt).compareTo(DateTime.parse(b.createdAt));
+                  });
+                }
+                
 
                 return RefreshIndicator(
                   onRefresh: () => _refreshData(context),
@@ -119,6 +182,50 @@ class HomeScreenState extends State<HomeScreen> {
                           setState(() {});
                         },
                       ),
+                      if (isUserConnected)
+                        Padding(
+                          padding: const EdgeInsets.all(10.0),
+                          child: Align(
+                            alignment: Alignment.centerLeft,
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  '${translate(context)!.my_interests} : ${userInterests.length}',
+                                  style: const TextStyle(
+                                    fontSize: 18,
+                                    fontFamily: 'Readex Pro',
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                                PopupMenuButton<String>(
+                                  onSelected: (String value) {
+                                    setState(() {
+                                      if (value == translate(context)!.interests) {
+                                        _currentSortOption = SortOption.interests;
+                                      } else if (value == translate(context)!.recent) {
+                                        _currentSortOption = SortOption.recent;
+                                      } else if (value == translate(context)!.ancient) {
+                                        _currentSortOption = SortOption.ancient;
+                                      } else {
+                                        _currentSortOption = SortOption.none;
+                                      }
+                                    });
+                                  },
+                                  itemBuilder: (BuildContext context) {
+                                    return {translate(context)!.interests, translate(context)!.recent, translate(context)!.ancient}.map((String choice) {
+                                      return PopupMenuItem<String>(
+                                        value: choice,
+                                        child: Text(choice),
+                                      );
+                                    }).toList();
+                                  },
+                                  child: const Icon(Icons.sort),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
                       Padding(
                         padding: const EdgeInsets.all(10.0),
                         child: Align(

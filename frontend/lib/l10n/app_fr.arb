@@ -109,5 +109,7 @@
     "conversations_as_seller": "Vos conversations en tant que vendeur",
     "your_conversations": "Vos conversations",
     "no_conversation": "Aucune conversation disponible",
-    "no_data": "Aucune donnée disponible"
+    "no_data": "Aucune donnée disponible",
+    "recent": "Récents",
+    "ancient": "Ancien"
 }

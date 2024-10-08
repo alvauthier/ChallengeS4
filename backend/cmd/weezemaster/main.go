@@ -107,6 +107,7 @@ func main() {
 
 	authenticated.POST("/reservation", controller.CreateReservation, middleware.CheckRole("user"))
 	authenticated.POST("/ticket_listing_reservation/:ticketListingId", controller.CreateTicketListingReservation, middleware.CheckRole("user"))
+	authenticated.POST("/ticket_listing_reservation_conversation/:conversationId", controller.CreateTicketListingReservationFromConversation, middleware.CheckRole("user"))
 
 	authenticated.POST("/create-payment-intent", controller.CreatePaymentIntent, middleware.CheckRole("user"))
 
@@ -114,26 +115,12 @@ func main() {
 
 	authenticated.GET("/conversations/:id", controller.GetConversation, middleware.CheckRole("user", "organizer", "admin"))
 	authenticated.POST("/conversations", controller.CreateConversation, middleware.CheckRole("user", "organizer", "admin"))
+	authenticated.PATCH("/conversations/:id", controller.UpdateConversation, middleware.CheckRole("user", "organizer", "admin"))
 
 	authenticated.POST("/messages", controller.PostMessage, middleware.CheckRole("user", "organizer", "admin"))
 
-	// if env == "prod" {
-	// 	// Configuration TLS pour production
-	// 	certFile := "/etc/letsencrypt/live/alexandrevauthier.dev/fullchain.pem"
-	// 	keyFile := "/etc/letsencrypt/live/alexandrevauthier.dev/privkey.pem"
+	authenticated.POST("/conversations/check", controller.CheckConversation, middleware.CheckRole("user", "organizer", "admin"))
+	router.GET("/ws", controller.HandleWebSocket)
 
-	// 	// Redirection HTTP vers HTTPS
-	// 	go func() {
-	// 		fmt.Println("Starting HTTP server on port 80")
-	// 		router.Pre(echoMiddleware.HTTPSRedirect())
-	// 		router.Start(":80")
-	// 	}()
-
-	// 	fmt.Println("Starting HTTPS server on port 443")
-	// 	router.StartTLS(":443", certFile, keyFile)
-	// } else {
-	// 	// Démarrage du serveur en mode développement
-	// 	router.Start(":8080")
-	// }
 	router.Start(":8080")
 }

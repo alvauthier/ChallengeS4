@@ -68,7 +68,8 @@ class ConcertScreen extends StatelessWidget {
                                   },
                                   'category': concertCategory.category.name,
                                   'price': ticket.ticketListing!.price.toStringAsFixed(2),
-                                  'id': ticket.ticketListing!.id.toString()
+                                  'id': ticket.ticketListing!.id.toString(),
+                                  'concertName': concert.name,
                                 }
                             );
                           }
@@ -302,7 +303,7 @@ class ConcertScreen extends StatelessWidget {
                                       final tokenService = TokenService();
                                       String? token = await tokenService.getValidAccessToken();
                                       if (token == null) {
-                                        context.pushNamed('login');
+                                        context.pushNamed('login-register');
                                       } else {
                                         context.pushNamed(
                                           'booking',

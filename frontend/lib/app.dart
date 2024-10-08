@@ -203,7 +203,7 @@ class App extends StatelessWidget {
         path: '/resale-tickets',
         name: 'resale-tickets',
         builder: (BuildContext context, GoRouterState state) {
-          final resaleTickets = state.extra as List<ResaleTicket>;
+          final resaleTickets = state.extra as List<dynamic>;
 
           return Scaffold(
             body: ResaleTicketsScreen(resaleTickets: resaleTickets),
@@ -215,8 +215,19 @@ class App extends StatelessWidget {
         path: '/chat/:id',
         name: 'chat',
         builder: (BuildContext context, GoRouterState state) {
+          final extras = state.extra as Map<String, dynamic>?;
+
           return Scaffold(
-            body: ChatScreen(id: state.pathParameters['id'] ?? ''),
+            body: ChatScreen(
+              id: state.pathParameters['id'] ?? '',
+              userId: extras?['userId'] ?? '',
+              resellerId: extras?['resellerId'] ?? '',
+              ticketId: extras?['ticketId'] ?? '',
+              concertName: extras?['concertName'] ?? '',
+              price: extras?['price'] ?? '',
+              resellerName: extras?['resellerName'] ?? '',
+              category: extras?['category'] ?? '',
+            ),
             bottomNavigationBar: const AdaptiveNavigationBar(),
           );
         },

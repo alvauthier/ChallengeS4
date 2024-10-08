@@ -75,6 +75,10 @@
     "payment_success": "Paiement réussi",
     "payment_failed": "Echec du paiement",
     "payment_error": "Erreur (payment intent)",
+    "ticket_success": "Ticket acheté avec succès",
+    "ticket_failed": "Une erreur est survenue lors de l'achat du ticket. Veuillez réessayer.",
+    "price_success": "Prix mis à jour.",
+    "price_failed": " Echec de la mise à jour du prix.",
     "concert_name": "Nom du concert",
     "concert_name_empty": "Veuillez entrer le nom du concert",
     "concert_description": "Description du concert",
@@ -94,5 +98,16 @@
     "create_concert_success": "Création du concert réussie",
     "create_concert_failed": "Erreur lors de la création du concert",
     "create_the_concert": "Créer le concert",
-    "my_concert": "Mon concert"
+    "my_concert": "Mon concert",
+    "new_price": "Nouveau prix",
+    "cancel": "Annuler",
+    "confirm": "Confirmer",
+    "chat_with": "Chat avec",
+    "change_price": "Changer le prix",
+    "enter_message": "Saisissez votre message...",
+    "conversations_as_buyer": "Vos conversations en tant qu'acheteur",
+    "conversations_as_seller": "Vos conversations en tant que vendeur",
+    "your_conversations": "Vos conversations",
+    "no_conversation": "Aucune conversation disponible",
+    "no_data": "Aucune donnée disponible"
 }

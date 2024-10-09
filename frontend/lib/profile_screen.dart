@@ -3,6 +3,9 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:go_router/go_router.dart';
 import 'dart:convert';
 
+import 'package:weezemaster/core/services/token_services.dart';
+import 'package:weezemaster/translation.dart';
+
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
 
@@ -18,6 +21,18 @@ class ProfileScreenState extends State<ProfileScreen> {
   void initState() {
     super.initState();
     verifyJwtAndRedirectIfNecessary();
+  }
+
+  Future<void> clearTokens() async {
+    TokenService tokenService = TokenService();
+    await tokenService.clearTokens();
+  }
+
+    void _logout() async {
+    await clearTokens();
+    if (mounted) {
+      context.pushNamed('login');
+    }
   }
 
   Future<void> verifyJwtAndRedirectIfNecessary() async {
@@ -82,6 +97,15 @@ class ProfileScreenState extends State<ProfileScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Profile Screen'),
+        actions: [
+          TextButton(
+            onPressed: _logout,
+            child: Text(
+              translate(context)!.logout,
+              style: const TextStyle(color: Colors.red),
+            ),
+          ),
+        ],
       ),
       body: Center(
         child: Text('Bonjour $email'),

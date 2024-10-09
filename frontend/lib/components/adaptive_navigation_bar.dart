@@ -154,7 +154,7 @@ class _AdaptiveNavigationBarState extends State<AdaptiveNavigationBar> {
           } else if (index == 1) {
             context.pushNamed('register-concert');
           } else {
-            context.pushNamed('profile');
+            context.pushNamed('user-interests');
           }
         } else if (userRole == 'admin') {
           if (index == 0) {
@@ -162,7 +162,7 @@ class _AdaptiveNavigationBarState extends State<AdaptiveNavigationBar> {
           } else if (index == 1) {
             context.pushNamed('admin');
           } else {
-            context.pushNamed('profile');
+            context.pushNamed('user-interests');
           }
         } else {
           if (index == 0) {

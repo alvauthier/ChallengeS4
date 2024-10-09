@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:weezemaster/translation.dart';
 
 class TicketDetails extends StatelessWidget {
   final String imageUrl;
@@ -8,6 +9,7 @@ class TicketDetails extends StatelessWidget {
   final VoidCallback onCancel;
   final String secondActionText;
   final VoidCallback secondAction;
+  final bool showButtons;
 
   const TicketDetails({
     super.key,
@@ -18,6 +20,7 @@ class TicketDetails extends StatelessWidget {
     required this.onCancel,
     required this.secondActionText,
     required this.secondAction,
+    this.showButtons = true,
   });
 
   @override
@@ -61,7 +64,7 @@ class TicketDetails extends StatelessWidget {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      '$price€',
+                      '$price €',
                       style: const TextStyle(
                           fontWeight: FontWeight.w700,
                           fontSize: 24,
@@ -75,41 +78,42 @@ class TicketDetails extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 8),
-          Row(
-            children: [
-              Expanded(
-                child: OutlinedButton(
-                  onPressed: onCancel,
-                  style: OutlinedButton.styleFrom(
-                    side: const BorderSide(color: Colors.deepOrange, width: 1.0),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(6.0),
+          if (showButtons)
+            Row(
+              children: [
+                Expanded(
+                  child: OutlinedButton(
+                    onPressed: onCancel,
+                    style: OutlinedButton.styleFrom(
+                      side: const BorderSide(color: Colors.deepOrange, width: 1.0),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(6.0),
+                      ),
+                    ),
+                    child: Text(
+                      translate(context)!.cancel,
+                      style: const TextStyle(color: Colors.deepOrange, fontFamily: 'Readex Pro'),
                     ),
                   ),
-                  child: const Text(
-                    'Annuler',
-                    style: TextStyle(color: Colors.deepOrange, fontFamily: 'Readex Pro'),
-                  ),
                 ),
-              ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: ElevatedButton(
-                  onPressed: secondAction,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.deepOrange,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(6.0),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: ElevatedButton(
+                    onPressed: secondAction,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.deepOrange,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(6.0),
+                      ),
+                    ),
+                    child: Text(
+                      secondActionText,
+                      style: const TextStyle(color: Colors.white, fontFamily: 'Readex Pro'),
                     ),
                   ),
-                  child: Text(
-                    secondActionText,
-                    style: const TextStyle(color: Colors.white, fontFamily: 'Readex Pro'),
-                  ),
                 ),
-              ),
-            ],
-          ),
+              ],
+            ),
         ],
       ),
     );

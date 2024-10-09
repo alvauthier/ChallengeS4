@@ -1,12 +1,13 @@
 import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:weezemaster/core/services/token_services.dart';
 import 'package:weezemaster/my_tickets/blocs/my_tickets_bloc.dart';
 import 'package:http/http.dart' as http;
+import 'package:weezemaster/translation.dart';
 
 class MyTicketsScreen extends StatefulWidget {
   const MyTicketsScreen({super.key});
@@ -50,7 +51,7 @@ class MyTicketsScreenState extends State<MyTicketsScreen> {
             TextButton(
               child: const Text('Annuler'),
               onPressed: () {
-                Navigator.of(context).pop();
+                context.pop();
               },
             ),
             TextButton(
@@ -59,7 +60,7 @@ class MyTicketsScreenState extends State<MyTicketsScreen> {
                 final enteredPrice = double.tryParse(_priceController.text);
                 if (enteredPrice != null && enteredPrice <= maxPrice) {
                   await _resellTicket(ticket.id, enteredPrice);
-                  Navigator.of(context).pop();
+                  context.pushNamed('my-tickets');
                 } else {
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(
@@ -101,7 +102,7 @@ class MyTicketsScreenState extends State<MyTicketsScreen> {
             content: Text('Ticket mis en vente avec succès!'),
           ),
         );
-        context.read<MyTicketsBloc>().add(MyTicketsDataLoaded());
+        context.pushNamed('my-tickets');
       }
     } else {
       if (mounted) {
@@ -135,7 +136,7 @@ class MyTicketsScreenState extends State<MyTicketsScreen> {
             content: Text('Annulation de la mise en vente réussie !'),
           ),
         );
-        context.read<MyTicketsBloc>().add(MyTicketsDataLoaded());
+        context.pushNamed('my-tickets');
       }
     } else {
       if (mounted) {
@@ -162,11 +163,11 @@ class MyTicketsScreenState extends State<MyTicketsScreen> {
               } else if (state is MyTicketsDataLoadingSuccess) {
                 return Column(
                   children: [
-                    const Padding(
-                      padding: EdgeInsets.all(8.0),
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
                       child: Text(
-                        'Vos tickets',
-                        style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                        translate(context)!.my_tickets,
+                        style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
                       ),
                     ),
                     Expanded(
@@ -192,9 +193,9 @@ class MyTicketsScreenState extends State<MyTicketsScreen> {
                                   ),
                                   backgroundColor: Colors.orange,
                                 ),
-                                child: const Text(
-                                  'Annuler revente',
-                                  style: TextStyle(fontFamily: 'Readex Pro'),
+                                child: Text(
+                                  translate(context)!.cancel_resale,
+                                  style: const TextStyle(fontFamily: 'Readex Pro'),
                                 ),
                               );
                             }
@@ -210,9 +211,9 @@ class MyTicketsScreenState extends State<MyTicketsScreen> {
                                 ),
                                 backgroundColor: Colors.deepOrange,
                               ),
-                              child: const Text(
-                                'Revendre',
-                                style: TextStyle(fontFamily: 'Readex Pro'),
+                              child: Text(
+                                translate(context)!.resell,
+                                style: const TextStyle(fontFamily: 'Readex Pro'),
                               ),
                             );
                             }
@@ -228,9 +229,9 @@ class MyTicketsScreenState extends State<MyTicketsScreen> {
                                 ),
                                 backgroundColor: Colors.deepOrange,
                               ),
-                              child: const Text(
-                                'Revendre',
-                                style: TextStyle(fontFamily: 'Readex Pro'),
+                              child: Text(
+                                translate(context)!.resell,
+                                style: const TextStyle(fontFamily: 'Readex Pro'),
                               ),
                             );
                           }
@@ -244,9 +245,9 @@ class MyTicketsScreenState extends State<MyTicketsScreen> {
                                   Text(category.name),
                                   Text('${concert.location} - ${formatDate(concert.date)}'),
                                   if (ticket.ticketListing != null && ticket.ticketListing!.status == 'available')
-                                    const Text(
-                                      'Proposé à la revente',
-                                      style: TextStyle(color: Colors.green),
+                                    Text(
+                                      '${translate(context)!.offered_for_resale} ${ticket.ticketListing!.price.toStringAsFixed(2)} €',
+                                      style: const TextStyle(color: Colors.green),
                                     ),
                                 ],
                               ),
@@ -261,7 +262,7 @@ class MyTicketsScreenState extends State<MyTicketsScreen> {
               } else if (state is MyTicketsDataLoadingError) {
                 return Center(child: Text(state.errorMessage));
               } else {
-                return const Center(child: Text('Aucun ticket disponible.'));
+                return Center(child: Text(translate(context)!.no_tickets));
               }
             },
           ),

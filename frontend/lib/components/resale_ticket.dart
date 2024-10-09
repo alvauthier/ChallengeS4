@@ -1,28 +1,28 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:weezemaster/core/services/payment_services.dart';
 import 'package:weezemaster/core/services/token_services.dart';
-import 'package:weezemaster/login_register_screen.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:weezemaster/thank_you_screen.dart';
 import 'package:weezemaster/core/services/api_services.dart';
-
-import '../chat.dart';
+import 'package:weezemaster/translation.dart';
 
 class Ticket {
   final String id;
   final String category;
   final String price;
+  final String concertName;
   final Reseller reseller;
 
-  Ticket({required this.id, required this.category, required this.price, required this.reseller});
+  Ticket({required this.id, required this.category, required this.price, required this.concertName, required this.reseller});
 
   factory Ticket.fromMap(Map<String, dynamic> map) {
     return Ticket(
       id: map['id'] as String,
       category: map['category'] as String,
       price: map['price'] as String,
+      concertName: map['concertName'] as String,
       reseller: Reseller.fromMap(map['reseller'] as Map<String, dynamic>),
     );
   }
@@ -71,22 +71,19 @@ class ResaleTicket extends StatelessWidget {
       if (response.statusCode == 200) {
         debugPrint('Ticket listing purchased');
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Ticket purchased.')),
+          SnackBar(content: Text(translate(context)!.ticket_success)),
         );
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => const ThankYouScreen()),
-        );
+        context.pushNamed('thank-you');
       } else {
         debugPrint('Failed to update ticket listing status: ${response.body}');
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Failed to update ticket listing status.')),
+          SnackBar(content: Text(translate(context)!.ticket_failed)),
         );
       }
     } catch (e) {
       debugPrint('Error updating ticket listing status: $e');
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Error updating ticket listing status.')),
+        SnackBar(content: Text(translate(context)!.generic_error)),
       );
     }
   }
@@ -156,12 +153,7 @@ class ResaleTicket extends StatelessWidget {
                               final tokenService = TokenService();
                               String? token = await tokenService.getValidAccessToken();
                               if (token == null) {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => const LoginRegisterScreen(),
-                                  ),
-                                );
+                                context.pushNamed('login-register');
                               } else {
                                 final parts = token.split('.');
                                 if (parts.length != 3) {
@@ -184,18 +176,41 @@ class ResaleTicket extends StatelessWidget {
 
                                 String userId = json.decode(utf8.decode(base64.decode(output)))['id'];
 
-                                String conversationId = await ApiServices.postConversation(
+                                final existingConversationId = await ApiServices.checkConversationExists(
+                                  ticket.id,
                                   userId,
-                                  ticket.reseller.id,
-                                  ticket.id
                                 );
+                                debugPrint('existingConversationId: $existingConversationId');
 
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => ChatScreen(conversationId: conversationId),
-                                  ),
-                                );
+                                if (existingConversationId != null && existingConversationId.isNotEmpty) {
+                                  debugPrint('Conversation found in the database, access it');
+                                  context.push(
+                                    '/chat/$existingConversationId',
+                                    // extra: {
+                                    //   'userId': null,
+                                    //   'resellerId': null,
+                                    //   'ticketId': null,
+                                    //   'concertName': null,
+                                    //   'price': null,
+                                    //   'resellerName': null,
+                                    //   'category': null,
+                                    // }
+                                  );
+                                } else {
+                                  debugPrint('No conversation found in the database');
+                                  context.push(
+                                    '/chat/newchat',
+                                    extra: {
+                                      'userId': userId,
+                                      'resellerId': ticket.reseller.id,
+                                      'ticketId': ticket.id,
+                                      'concertName': ticket.concertName,
+                                      'price': ticket.price,
+                                      'resellerName': ticket.reseller.name,
+                                      'category': ticket.category,
+                                    },
+                                  );
+                                }
                               }
                             },
                             style: ElevatedButton.styleFrom(
@@ -204,9 +219,9 @@ class ResaleTicket extends StatelessWidget {
                                 borderRadius: BorderRadius.circular(6.0),
                               ),
                             ),
-                            child: const Text(
-                              'Négocier',
-                              style: TextStyle(
+                            child: Text(
+                              translate(context)!.contact,
+                              style: const TextStyle(
                                 fontFamily: 'Readex Pro',
                                 color: Colors.black
                               )
@@ -218,12 +233,7 @@ class ResaleTicket extends StatelessWidget {
                               final tokenService = TokenService();
                               String? token = await tokenService.getValidAccessToken();
                               if (token == null) {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => const LoginRegisterScreen(),
-                                  ),
-                                );
+                                context.pushNamed('login-register');
                               } else {
                                 final paymentIntentData = await paymentService.createPaymentIntent(ticket.id, 'tl_');
                                 if (paymentIntentData != null) {
@@ -233,18 +243,18 @@ class ResaleTicket extends StatelessWidget {
                                       paymentIntentData['client_secret'],
                                     );
                                     ScaffoldMessenger.of(context).showSnackBar(
-                                      const SnackBar(content: Text('Paiement réussi')),
+                                      SnackBar(content: Text(translate(context)!.payment_success)),
                                     );
                                     await updateTicketListingStatus(context, ticket.id);
                                   } catch (e) {
                                     debugPrint('Error presenting payment sheet: $e');
                                     ScaffoldMessenger.of(context).showSnackBar(
-                                      const SnackBar(content: Text('Echec du paiement')),
+                                      SnackBar(content: Text(translate(context)!.payment_failed)),
                                     );
                                   }
                                 } else {
                                   ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(content: Text('Failed to create payment intent')),
+                                    SnackBar(content: Text(translate(context)!.payment_error)),
                                   );
                                 }
                               }
@@ -256,9 +266,9 @@ class ResaleTicket extends StatelessWidget {
                               ),
                               backgroundColor: Colors.deepOrange,
                             ),
-                            child: const Text(
-                              'Acheter',
-                              style: TextStyle(
+                            child: Text(
+                              translate(context)!.buy,
+                              style: const TextStyle(
                                   fontFamily: 'Readex Pro'
                               )
                             ),

@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:weezemaster/login_register_screen.dart';
+import 'package:go_router/go_router.dart';
 import 'dart:convert';
+
+import 'package:weezemaster/core/services/token_services.dart';
+import 'package:weezemaster/translation.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -20,14 +23,23 @@ class ProfileScreenState extends State<ProfileScreen> {
     verifyJwtAndRedirectIfNecessary();
   }
 
+  Future<void> clearTokens() async {
+    TokenService tokenService = TokenService();
+    await tokenService.clearTokens();
+  }
+
+    void _logout() async {
+    await clearTokens();
+    if (mounted) {
+      context.pushNamed('login');
+    }
+  }
+
   Future<void> verifyJwtAndRedirectIfNecessary() async {
-    String? jwt = await storage.read(key: 'token');
+    String? jwt = await storage.read(key: 'access_token');
     // if (jwt == null || !_isTokenValid(jwt)) {
     if (jwt == null) {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => const LoginRegisterScreen()),
-      );
+      context.pushNamed('login-register');
     } else {
       getEmailFromJwt();
     }
@@ -38,7 +50,7 @@ class ProfileScreenState extends State<ProfileScreen> {
   // }
 
   Future<void> getEmailFromJwt() async {
-    String? jwt = await storage.read(key: 'token');
+    String? jwt = await storage.read(key: 'access_token');
     if (jwt != null) {
       Map<String, dynamic> decodedToken = _decodeToken(jwt);
       setState(() {
@@ -85,6 +97,15 @@ class ProfileScreenState extends State<ProfileScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Profile Screen'),
+        actions: [
+          TextButton(
+            onPressed: _logout,
+            child: Text(
+              translate(context)!.logout,
+              style: const TextStyle(color: Colors.red),
+            ),
+          ),
+        ],
       ),
       body: Center(
         child: Text('Bonjour $email'),

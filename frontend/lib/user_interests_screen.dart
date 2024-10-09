@@ -1,11 +1,12 @@
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:weezemaster/core/models/interest.dart';
 import 'package:weezemaster/components/user_interest_chip.dart';
 import 'package:weezemaster/core/services/api_services.dart';
 import 'package:weezemaster/core/exceptions/api_exception.dart';
 import 'package:weezemaster/core/services/token_services.dart';
-import 'package:weezemaster/login_register_screen.dart';
+import 'package:weezemaster/translation.dart';
 
 class UserInterestsScreen extends StatefulWidget {
   const UserInterestsScreen({super.key});
@@ -31,12 +32,7 @@ class UserInterestsScreenState extends State<UserInterestsScreen> {
     String? token = await tokenService.getValidAccessToken();
     if (token == null) {
       if (mounted) {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-            builder: (context) => const LoginRegisterScreen(),
-          ),
-        );
+        context.pushNamed('login-register');
       }
     } else {
       await fetchInterests();
@@ -153,7 +149,7 @@ class UserInterestsScreenState extends State<UserInterestsScreen> {
   void _logout() async {
     await clearTokens();
     if (mounted) {
-      Navigator.of(context).pushReplacementNamed('/login');
+      context.pushNamed('login');
     }
   }
 
@@ -162,7 +158,7 @@ class UserInterestsScreenState extends State<UserInterestsScreen> {
     if (isLoading) {
       return Scaffold(
         appBar: AppBar(
-          title: const Text('Centres d\'intérêts'),
+          title: Text(translate(context)!.my_interests),
         ),
         body: const Center(child: CircularProgressIndicator()),
       );
@@ -171,7 +167,7 @@ class UserInterestsScreenState extends State<UserInterestsScreen> {
     if (errorMessage != null) {
       return Scaffold(
         appBar: AppBar(
-          title: const Text('Centres d\'intérêts'),
+          title: Text(translate(context)!.my_interests),
         ),
         body: Center(child: Text(errorMessage!)),
       );
@@ -179,13 +175,13 @@ class UserInterestsScreenState extends State<UserInterestsScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Centres d\'intérêts'),
+        title: Text(translate(context)!.my_interests),
         actions: [
           TextButton(
             onPressed: _logout,
-            child: const Text(
-              'Déconnexion',
-              style: TextStyle(color: Colors.red),
+            child: Text(
+              translate(context)!.logout,
+              style: const TextStyle(color: Colors.red),
             ),
           ),
         ],

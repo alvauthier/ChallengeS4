@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:go_router/go_router.dart';
 import 'dart:convert';
 import 'package:weezemaster/core/models/concert_category.dart';
 import 'package:weezemaster/core/services/token_services.dart';
-import 'package:weezemaster/thank_you_screen.dart';
 import 'package:http/http.dart' as http;
 import 'package:weezemaster/core/services/payment_services.dart';
+import 'package:weezemaster/translation.dart';
 
 class BookingScreen extends StatefulWidget {
   final List<ConcertCategory> concertCategories;
@@ -23,7 +24,7 @@ class BookingScreenState extends State<BookingScreen> {
   Future<void> proceedToReservation() async {
     if (selectedCategory == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Veuillez sélectionner une catégorie de billet.')),
+        SnackBar(content: Text(translate(context)!.choose_category_empty)),
       );
       return;
     }
@@ -49,18 +50,15 @@ class BookingScreenState extends State<BookingScreen> {
         debugPrint('Réservation réussie');
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Réservation réussie.')),
+            SnackBar(content: Text(translate(context)!.booking_success)),
           );
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (context) => const ThankYouScreen()),
-          );
+          context.pushNamed('thank-you');
         }
       } else {
         debugPrint('Erreur lors de la réservation: ${response.body}');
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Une erreur est survenue lors de la réservation. Veuillez réessayer.')),
+            SnackBar(content: Text(translate(context)!.booking_failed)),
           );
         }
       }
@@ -68,7 +66,7 @@ class BookingScreenState extends State<BookingScreen> {
       debugPrint('Erreur lors de la connexion au serveur: $e');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Erreur lors de la connexion au serveur. Veuillez réessayer.')),
+          SnackBar(content: Text(translate(context)!.generic_error)),
         );
       }
     }
@@ -84,11 +82,11 @@ class BookingScreenState extends State<BookingScreen> {
         children: [
           Column(
             children: [
-              const Padding(
-                padding: EdgeInsets.only(top: 80.0, bottom: 20.0),
+              Padding(
+                padding: const EdgeInsets.only(top: 80.0, bottom: 20.0),
                 child: Text(
-                  'Choisissez votre catégorie de billets',
-                  style: TextStyle(
+                  translate(context)!.choose_category,
+                  style: const TextStyle(
                     fontSize: 20,
                     fontFamily: 'Readex Pro',
                     fontWeight: FontWeight.w600,
@@ -118,7 +116,7 @@ class BookingScreenState extends State<BookingScreen> {
                             ),
                           ],
                         ),
-                        subtitle: Text('Nombre de tickets restants: $remainingTickets'),
+                        subtitle: Text('${translate(context)!.number_tickets_remaining} $remainingTickets'),
                         value: concertCategory.id,
                         groupValue: selectedCategory,
                         onChanged: isSoldOut ? null : (String? value) {
@@ -139,63 +137,66 @@ class BookingScreenState extends State<BookingScreen> {
             left: 10.0,
             child: FloatingActionButton(
               child: const Icon(Icons.arrow_back),
-              onPressed: () => Navigator.pop(context),
+              onPressed: () => context.pop(),
+            ),
+          ),
+          Positioned(
+            left: 0,
+            right: 0,
+            bottom: 0,
+            child: Container(
+              padding: const EdgeInsets.all(8.0),
+              child: ElevatedButton(
+                onPressed: selectedCategory == null
+                    ? null
+                    : () async {
+                  if (selectedCategory == null) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text(translate(context)!.choose_category_empty)),
+                    );
+                    return;
+                  }
+
+                  final paymentIntentData = await paymentService.createPaymentIntent(selectedCategory!, 'cc_');
+                  if (paymentIntentData != null) {
+                    try {
+                      await paymentService.initAndPresentPaymentSheet(
+                        context,
+                        paymentIntentData['client_secret'],
+                      );
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text(translate(context)!.payment_success)),
+                      );
+                      await proceedToReservation();
+                    } catch (e) {
+                      debugPrint('Error presenting payment sheet: $e');
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text(translate(context)!.payment_failed)),
+                      );
+                    }
+                  } else {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text(translate(context)!.payment_error)),
+                    );
+                  }
+                },
+                style: ElevatedButton.styleFrom(
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(6.0),
+                  ),
+                  backgroundColor: selectedCategory == null ? Colors.grey : Colors.deepOrange,
+                ),
+                child: Text(
+                  translate(context)!.proceed_payment,
+                  style: TextStyle(
+                    fontFamily: 'Readex Pro',
+                    color: selectedCategory == null ? Colors.black : Colors.white,
+                  ),
+                ),
+              ),
             ),
           ),
         ],
-      ),
-      bottomNavigationBar: BottomAppBar(
-        child: Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: ElevatedButton(
-            onPressed: selectedCategory == null
-                ? null
-                : () async {
-                    if (selectedCategory == null) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Veuillez sélectionner une catégorie de billet.')),
-                      );
-                      return;
-                    }
-
-                    final paymentIntentData = await paymentService.createPaymentIntent(selectedCategory!, 'cc_');
-                    if (paymentIntentData != null) {
-                      try {
-                        await paymentService.initAndPresentPaymentSheet(
-                          context,
-                          paymentIntentData['client_secret'],
-                        );
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('Paiement réussi')),
-                        );
-                        await proceedToReservation();
-                      } catch (e) {
-                        debugPrint('Error presenting payment sheet: $e');
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('Echec du paiement')),
-                        );
-                      }
-                    } else {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Failed to create payment intent')),
-                      );
-                    }
-                  },
-            style: ElevatedButton.styleFrom(
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(6.0),
-              ),
-              backgroundColor: selectedCategory == null ? Colors.grey : Colors.deepOrange,
-            ),
-            child: Text(
-              'Procéder au paiement',
-              style: TextStyle(
-                fontFamily: 'Readex Pro',
-                color: selectedCategory == null ? Colors.black : Colors.white,
-              ),
-            ),
-          ),
-        ),
       ),
     );
   }

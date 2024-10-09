@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:weezemaster/conversations/blocs/conversations_bloc.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import 'dart:convert';
-import '../login_register_screen.dart';
-import 'package:weezemaster/chat.dart';
 import 'package:weezemaster/core/services/token_services.dart';
+import 'package:weezemaster/translation.dart';
 
 class ConversationsScreen extends StatefulWidget {
   const ConversationsScreen({super.key});
@@ -25,13 +25,9 @@ class ConversationsScreenState extends State<ConversationsScreen> {
     String? jwt = await tokenService.getValidAccessToken();
     if (jwt != null) {
       Map<String, dynamic> decodedToken = _decodeToken(jwt);
-      debugPrint(decodedToken['id']);
       return decodedToken['id'] as String;
     } else {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => const LoginRegisterScreen()),
-      );
+      context.pushNamed('login-register');
       return '';
     }
   }
@@ -113,11 +109,11 @@ class ConversationsScreenState extends State<ConversationsScreen> {
                         List<Widget> combinedList = [];
 
                         if (state.conversationsAsBuyer.isNotEmpty) {
-                          combinedList.add(const Padding(
-                            padding: EdgeInsets.all(20.0),
+                          combinedList.add(Padding(
+                            padding: const EdgeInsets.all(20.0),
                             child: Text(
-                              'Vos conversations en tant qu\'acheteur',
-                              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, fontFamily: 'Readex Pro'),
+                              translate(context)!.conversations_as_buyer,
+                              style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold, fontFamily: 'Readex Pro'),
                             ),
                           ));
 
@@ -133,10 +129,7 @@ class ConversationsScreenState extends State<ConversationsScreen> {
                               ),
                               subtitle: Text(formatDate(conversation.updatedAt.toString())),
                               onTap: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(builder: (context) => ChatScreen(conversationId: conversation.id)),
-                                );
+                                context.push('/chat/${conversation.id}');
                               },
                             );
                           }).toList());
@@ -145,11 +138,11 @@ class ConversationsScreenState extends State<ConversationsScreen> {
                         }
 
                         if (state.conversationsAsSeller.isNotEmpty) {
-                          combinedList.add(const Padding(
-                            padding: EdgeInsets.only(left: 20.0, right: 20.0, bottom: 20.0),
+                          combinedList.add(Padding(
+                            padding: const EdgeInsets.only(left: 20.0, right: 20.0, bottom: 20.0),
                             child: Text(
-                              'Vos conversations en tant que vendeur',
-                              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, fontFamily: 'Readex Pro'),
+                              translate(context)!.conversations_as_seller,
+                              style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold, fontFamily: 'Readex Pro'),
                             ),
                           ));
 
@@ -165,10 +158,7 @@ class ConversationsScreenState extends State<ConversationsScreen> {
                               ),
                               subtitle: Text( formatDate(conversation.updatedAt.toString())),
                               onTap: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(builder: (context) => ChatScreen(conversationId: conversation.id)),
-                                );
+                                context.push('/chat/${conversation.id}');
                               },
                             );
                           }).toList());
@@ -178,21 +168,21 @@ class ConversationsScreenState extends State<ConversationsScreen> {
                           children: combinedList,
                         );
                       } else {
-                        return const Column(
+                        return Column(
                           children: [
                             Center(
                               child: Padding(
                                 padding: EdgeInsets.all(20.0),
                                 child: Text(
-                                  'Vos conversations',
-                                  style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold, fontFamily: 'Readex Pro'),
+                                  translate(context)!.your_conversations,
+                                  style: const TextStyle(fontSize: 30, fontWeight: FontWeight.bold, fontFamily: 'Readex Pro'),
                                 ),
                               ),
                             ),
                             Center(
                               child: Text(
-                                'Aucune conversation disponible',
-                                style: TextStyle(
+                                translate(context)!.no_conversation,
+                                style: const TextStyle(
                                   fontFamily: 'Readex Pro',
                                   fontSize: 20,
                                 ),
@@ -203,11 +193,27 @@ class ConversationsScreenState extends State<ConversationsScreen> {
                       }
                     }
 
-                    return const Center(
-                      child: Text(
-                        'État inattendu',
-                        style: TextStyle(color: Colors.red),
-                      ),
+                    return Column(
+                      children: [
+                        Center(
+                          child: Padding(
+                            padding: const EdgeInsets.all(20.0),
+                            child: Text(
+                              translate(context)!.your_conversations,
+                              style: const TextStyle(fontSize: 30, fontWeight: FontWeight.bold, fontFamily: 'Readex Pro'),
+                            ),
+                          ),
+                        ),
+                        Center(
+                          child: Text(
+                            translate(context)!.no_conversation,
+                            style: const TextStyle(
+                              fontFamily: 'Readex Pro',
+                              fontSize: 20,
+                            ),
+                          ),
+                        ),
+                      ],
                     );
                   },
                 ),
@@ -215,10 +221,12 @@ class ConversationsScreenState extends State<ConversationsScreen> {
             ),
           );
         } else {
-          return const Center(
-            child: Text(
-              'Aucune donnée disponible',
-              style: TextStyle(color: Colors.red),
+          return Scaffold(
+            body: Center(
+              child: Text(
+                translate(context)!.no_data,
+                style: const TextStyle(color: Colors.red),
+              ),
             ),
           );
         }

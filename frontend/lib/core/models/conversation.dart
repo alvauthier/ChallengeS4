@@ -12,7 +12,7 @@ class Conversation {
   final String ticketListingId;
   final TicketListing ticketListing;
   final List messages;
-  final int price;
+  final double price;
 
   Conversation({
     required this.id,
@@ -34,13 +34,13 @@ class Conversation {
       createdAt: DateTime.parse(json['CreatedAt']),
       updatedAt: DateTime.parse(json['UpdatedAt']),
       buyerId: json['BuyerId'],
-      buyer: json['Buyer'] != null ? SellerBuyer.fromJson(json['Buyer']) : SellerBuyer(firstname: '', lastname: ''),
+      buyer: SellerBuyer.fromJson(json['Buyer']),
       sellerId: json['SellerId'],
-      seller: json['Seller'] != null ? SellerBuyer.fromJson(json['Seller']) : SellerBuyer(firstname: '', lastname: ''),
+      seller: SellerBuyer.fromJson(json['Seller']),
       ticketListingId: json['TicketListingId'],
       ticketListing: TicketListing.fromJson(json['TicketListing']),
       messages: json['Messages'] ?? [],
-      price: json['Price'] ?? 0,
+      price: (json['Price'] ?? 0).toDouble(),
     );
   }
 }

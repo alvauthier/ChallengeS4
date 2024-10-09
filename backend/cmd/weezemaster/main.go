@@ -59,8 +59,10 @@ func main() {
 	router.POST("/register", controller.Register)
 	router.POST("/login", controller.Login)
 	router.POST("/refresh", controller.RefreshAccessToken)
+	router.POST("/forgot-password", controller.EmailForgotPassword)
+	router.POST("/reset-password", controller.ResetPassword)
 	authenticated.GET("/users", controller.GetAllUsers, middleware.CheckRole("admin"))
-	authenticated.GET("/users/:id", controller.GetUser, middleware.CheckRole("admin"))
+	authenticated.GET("/users/:id", controller.GetUser, middleware.CheckRole("user", "admin"))
 	authenticated.PATCH("/users/:id", controller.UpdateUser, middleware.CheckRole("admin"))
 	authenticated.DELETE("/users/:id", controller.DeleteUser, middleware.CheckRole("admin"))
 
@@ -99,12 +101,13 @@ func main() {
 	authenticated.DELETE("/concerts/:id", controller.DeleteConcert, middleware.CheckRole("organizer", "admin"))
 	authenticated.GET("/organization/concerts", controller.GetConcertByOrganizationID, middleware.CheckRole("organizer", "admin"))
 
-	authenticated.GET("/user/interests", controller.GetUserInterests, middleware.CheckRole("user"))
-	authenticated.POST("/user/interests/:id", controller.AddUserInterest, middleware.CheckRole("user"))
-	authenticated.DELETE("/user/interests/:id", controller.RemoveUserInterest, middleware.CheckRole("user"))
+	authenticated.GET("/user/interests", controller.GetUserInterests, middleware.CheckRole("user, organizer, admin"))
+	authenticated.POST("/user/interests/:id", controller.AddUserInterest, middleware.CheckRole("user, organizer, admin"))
+	authenticated.DELETE("/user/interests/:id", controller.RemoveUserInterest, middleware.CheckRole("user, organizer, admin"))
 
 	authenticated.POST("/reservation", controller.CreateReservation, middleware.CheckRole("user"))
 	authenticated.POST("/ticket_listing_reservation/:ticketListingId", controller.CreateTicketListingReservation, middleware.CheckRole("user"))
+	authenticated.POST("/ticket_listing_reservation_conversation/:conversationId", controller.CreateTicketListingReservationFromConversation, middleware.CheckRole("user"))
 
 	authenticated.POST("/create-payment-intent", controller.CreatePaymentIntent, middleware.CheckRole("user"))
 
@@ -112,26 +115,12 @@ func main() {
 
 	authenticated.GET("/conversations/:id", controller.GetConversation, middleware.CheckRole("user", "organizer", "admin"))
 	authenticated.POST("/conversations", controller.CreateConversation, middleware.CheckRole("user", "organizer", "admin"))
+	authenticated.PATCH("/conversations/:id", controller.UpdateConversation, middleware.CheckRole("user", "organizer", "admin"))
 
 	authenticated.POST("/messages", controller.PostMessage, middleware.CheckRole("user", "organizer", "admin"))
 
-	// if env == "prod" {
-	// 	// Configuration TLS pour production
-	// 	certFile := "/etc/letsencrypt/live/alexandrevauthier.dev/fullchain.pem"
-	// 	keyFile := "/etc/letsencrypt/live/alexandrevauthier.dev/privkey.pem"
+	authenticated.POST("/conversations/check", controller.CheckConversation, middleware.CheckRole("user", "organizer", "admin"))
+	router.GET("/ws", controller.HandleWebSocket)
 
-	// 	// Redirection HTTP vers HTTPS
-	// 	go func() {
-	// 		fmt.Println("Starting HTTP server on port 80")
-	// 		router.Pre(echoMiddleware.HTTPSRedirect())
-	// 		router.Start(":80")
-	// 	}()
-
-	// 	fmt.Println("Starting HTTPS server on port 443")
-	// 	router.StartTLS(":443", certFile, keyFile)
-	// } else {
-	// 	// Démarrage du serveur en mode développement
-	// 	router.Start(":8080")
-	// }
 	router.Start(":8080")
 }

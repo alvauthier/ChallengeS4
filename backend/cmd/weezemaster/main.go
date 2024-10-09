@@ -101,9 +101,9 @@ func main() {
 	authenticated.DELETE("/concerts/:id", controller.DeleteConcert, middleware.CheckRole("organizer", "admin"))
 	authenticated.GET("/organization/concerts", controller.GetConcertByOrganizationID, middleware.CheckRole("organizer", "admin"))
 
-	authenticated.GET("/user/interests", controller.GetUserInterests, middleware.CheckRole("user"))
-	authenticated.POST("/user/interests/:id", controller.AddUserInterest, middleware.CheckRole("user"))
-	authenticated.DELETE("/user/interests/:id", controller.RemoveUserInterest, middleware.CheckRole("user"))
+	authenticated.GET("/user/interests", controller.GetUserInterests, middleware.CheckRole("user, organizer, admin"))
+	authenticated.POST("/user/interests/:id", controller.AddUserInterest, middleware.CheckRole("user, organizer, admin"))
+	authenticated.DELETE("/user/interests/:id", controller.RemoveUserInterest, middleware.CheckRole("user, organizer, admin"))
 
 	authenticated.POST("/reservation", controller.CreateReservation, middleware.CheckRole("user"))
 	authenticated.POST("/ticket_listing_reservation/:ticketListingId", controller.CreateTicketListingReservation, middleware.CheckRole("user"))

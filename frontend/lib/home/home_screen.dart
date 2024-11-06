@@ -106,14 +106,13 @@ Future<void> joinQueueOrConcertPage(String concertId, String userId) async {
               'concert',
               pathParameters: {'id': concertId},
             );
-            webSocketChannel.sink.close();
           } else if (data['status'] == 'in_queue') {
             context.pushNamed(
               'queue',
               extra: {
                 'position': data['position'],
-                'webSocketStream': broadcastStream, // Passez le Stream broadcast ici
-                'webSocketChannel': webSocketChannel // Passez aussi le canal si besoin de fermer plus tard
+                'webSocketStream': broadcastStream,
+                'webSocketChannel': webSocketChannel,
               },
             );
           }

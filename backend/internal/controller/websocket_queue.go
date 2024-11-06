@@ -74,13 +74,20 @@ func handleQueue(userID, concertID string, conn *websocket.Conn) error {
 	queueMutex.Lock()
 	defer queueMutex.Unlock()
 
-	// Vérifier le nombre d'utilisateurs déjà présents dans la salle pour ce concert
+	// Si l'utilisateur est déjà dans la salle, on lui envoie l'accès sans le retirer
+	for _, id := range queue[concertID] {
+		if id == userID {
+			message := Message{Status: "access_granted"}
+			messageBytes, _ := json.Marshal(message)
+			return conn.WriteMessage(websocket.TextMessage, messageBytes)
+		}
+	}
+
+	// Si la limite est atteinte, ajouter l'utilisateur en file d'attente
 	if len(queue[concertID]) >= maxUsers {
-		// Ajouter l'utilisateur à la file d'attente
 		queue[concertID] = append(queue[concertID], userID)
 		position := len(queue[concertID])
 
-		// Message JSON indiquant la position en file d'attente
 		message := Message{
 			Status:   "in_queue",
 			Position: position,
@@ -91,7 +98,8 @@ func handleQueue(userID, concertID string, conn *websocket.Conn) error {
 		return conn.WriteMessage(websocket.TextMessage, messageBytes)
 	}
 
-	// Si l'utilisateur peut entrer dans la salle, envoyer un message d'acceptation
+	// Ajouter l'utilisateur et lui accorder l'accès sans fermer sa connexion WebSocket
+	queue[concertID] = append(queue[concertID], userID)
 	message := Message{Status: "access_granted"}
 	messageBytes, _ := json.Marshal(message)
 	fmt.Printf("User %s accepté dans la salle pour le concert %s\n", userID, concertID)

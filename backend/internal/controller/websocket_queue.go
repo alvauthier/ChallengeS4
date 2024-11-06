@@ -50,11 +50,19 @@ func HandleWebSocketQueue(c echo.Context) error {
 
 	// Écouter les messages WebSocket (si nécessaire pour d'autres actions)
 	for {
-		_, _, err := conn.ReadMessage()
+		_, message, err := conn.ReadMessage()
 		if err != nil {
 			// Si la connexion est fermée, retirer l'utilisateur de la file d'attente
 			removeUserFromQueue(concertID, userID)
 			break
+		}
+
+		// Ignorer les messages "ping"
+		var receivedMessage map[string]interface{}
+		if err := json.Unmarshal(message, &receivedMessage); err == nil {
+			if receivedMessage["type"] == "ping" {
+				continue
+			}
 		}
 	}
 

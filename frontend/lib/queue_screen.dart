@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -20,6 +21,21 @@ class QueueScreen extends StatefulWidget {
 }
 
 class _QueueScreenState extends State<QueueScreen> {
+  @override
+void initState() {
+  super.initState();
+  widget.webSocketChannel.sink.add(jsonEncode({'type': 'ping'}));
+
+  Timer.periodic(const Duration(seconds: 30), (timer) {
+    if (mounted) {
+      widget.webSocketChannel.sink.add(jsonEncode({'type': 'ping'}));
+    } else {
+      timer.cancel();
+    }
+  });
+}
+
+
   @override
   Widget build(BuildContext context) {
     return StreamBuilder(

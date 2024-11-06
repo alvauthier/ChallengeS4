@@ -86,7 +86,7 @@ func CreateConcert(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, "Failed to bind input: "+err.Error())
 	}
 
-	date, _ := time.Parse("2006-01-02", input.Date)
+	date, _ := time.Parse("2006-01-02 15:04", input.Date)
 	fmt.Println(date)
 
 	user := &models.User{}

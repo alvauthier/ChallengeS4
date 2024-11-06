@@ -120,7 +120,8 @@ func main() {
 	authenticated.POST("/messages", controller.PostMessage, middleware.CheckRole("user", "organizer", "admin"))
 
 	authenticated.POST("/conversations/check", controller.CheckConversation, middleware.CheckRole("user", "organizer", "admin"))
-	router.GET("/ws", controller.HandleWebSocket)
+	router.GET("/ws-chat", controller.HandleWebSocketChat)
+	router.GET("/ws-queue", controller.HandleWebSocketQueue)
 
 	router.Start(":8080")
 }

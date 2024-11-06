@@ -1,5 +1,9 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:go_router/go_router.dart';
+import 'package:web_socket_channel/web_socket_channel.dart';
 import 'package:weezemaster/core/models/interest.dart';
 import 'package:weezemaster/core/services/token_services.dart';
 import 'package:weezemaster/home/blocs/home_bloc.dart';
@@ -78,6 +82,57 @@ class HomeScreenState extends State<HomeScreen> {
     DateFormat dateFormat = DateFormat('dd/MM/yyyy HH:mm', 'fr_FR');
     return dateFormat.format(dateTime);
   }
+  
+Future<void> joinQueueOrConcertPage(String concertId, String userId) async {
+    final protocol = dotenv.env['API_PROTOCOL'] == 'http' ? 'ws' : 'wss';
+    final wsUrl = Uri.parse('$protocol://${dotenv.env['API_HOST']}${dotenv.env['API_PORT']}/ws-queue?concertId=$concertId&userId=$userId');
+    
+    debugPrint('Attempting WebSocket connection to: $wsUrl');
+
+    try {
+      final webSocketChannel = WebSocketChannel.connect(wsUrl);
+      debugPrint('WebSocket connection established.');
+
+      // Créez un Stream broadcast pour permettre plusieurs écouteurs
+      final broadcastStream = webSocketChannel.stream.asBroadcastStream();
+
+      // Écoute dans home_screen pour diriger vers la file d'attente ou le concert
+      broadcastStream.listen(
+        (event) {
+          final data = jsonDecode(event);
+          
+          if (data['status'] == 'access_granted') {
+            context.pushNamed(
+              'concert',
+              pathParameters: {'id': concertId},
+            );
+            webSocketChannel.sink.close();
+          } else if (data['status'] == 'in_queue') {
+            context.pushNamed(
+              'queue',
+              extra: {
+                'position': data['position'],
+                'webSocketStream': broadcastStream, // Passez le Stream broadcast ici
+                'webSocketChannel': webSocketChannel // Passez aussi le canal si besoin de fermer plus tard
+              },
+            );
+          }
+        },
+        onError: (error) {
+          debugPrint('WebSocket error: $error');
+        },
+        onDone: () {
+          debugPrint('WebSocket connection closed.');
+        },
+      );
+
+    } catch (e) {
+      debugPrint('Failed to establish WebSocket connection: $e');
+    }
+  }
+
+
+
 
   @override
   Widget build(BuildContext context) {
@@ -245,11 +300,40 @@ class HomeScreenState extends State<HomeScreen> {
                           itemBuilder: (context, index) {
                             final concert = _filteredConcerts[index];
                             return GestureDetector(
-                              onTap: () {
-                                context.pushNamed(
-                                  'concert',
-                                  pathParameters: {'id': concert.id},
-                                );
+                              onTap: () async {
+                                final tokenService = TokenService();
+                                String? token = await tokenService.getValidAccessToken();
+                                if (token == null) {
+                                  context.pushNamed(
+                                    'concert',
+                                    pathParameters: {'id': concert.id},
+                                  );
+                                } else {
+                                  final parts = token.split('.');
+                                  if (parts.length != 3) {
+                                    throw Exception('Invalid token');
+                                  }
+
+                                  String output = parts[1].replaceAll('-', '+').replaceAll('_', '/');
+                                  switch (output.length % 4) {
+                                    case 0:
+                                      break;
+                                    case 2:
+                                      output += '==';
+                                      break;
+                                    case 3:
+                                      output += '=';
+                                      break;
+                                    default:
+                                      throw Exception('Illegal base64url string!"');
+                                  }
+
+                                  String userId = json.decode(utf8.decode(base64.decode(output)))['id'];
+
+                                  debugPrint('Joining queue or concert page for concert: ${concert.id} and user: $userId');
+                                  await joinQueueOrConcertPage(concert.id, userId);
+
+                                }
                               },
                               child: Padding(
                                 padding: const EdgeInsets.symmetric(vertical: 20.0, horizontal: 10.0),

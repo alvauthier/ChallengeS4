@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:web_socket_channel/web_socket_channel.dart';
 import 'package:weezemaster/booking_screen.dart';
 import 'package:weezemaster/chat.dart';
-import 'package:weezemaster/components/resale_ticket.dart';
 import 'package:weezemaster/concert/concert_screen.dart';
 import 'package:weezemaster/conversations/conversations_screen.dart';
 import 'package:weezemaster/forgot_password_screen.dart';
@@ -13,6 +13,7 @@ import 'package:weezemaster/login_screen.dart';
 import 'package:weezemaster/my_tickets/my_tickets_screen.dart';
 import 'package:weezemaster/panel_admin.dart';
 import 'package:weezemaster/profile_screen.dart';
+import 'package:weezemaster/queue_screen.dart';
 import 'package:weezemaster/register_concert_screen.dart';
 import 'package:weezemaster/register_organization_screen.dart';
 import 'package:weezemaster/register_screen.dart';
@@ -250,6 +251,24 @@ class App extends StatelessWidget {
           return const Scaffold(
             body: ThankYouScreen(),
             bottomNavigationBar: AdaptiveNavigationBar(),
+          );
+        },
+      ),
+      GoRoute(
+        path: '/queue',
+        name: 'queue',
+        builder: (BuildContext context, GoRouterState state) {
+          final extra = state.extra as Map<String, dynamic>? ?? {};
+          final initialPosition = extra['position'] as int;
+          final webSocketStream = extra['webSocketStream'] as Stream;
+          final webSocketChannel = extra['webSocketChannel'] as WebSocketChannel;
+          debugPrint('Initial Position: $initialPosition, WebSocketChannel: $webSocketChannel');
+          return Scaffold(
+            body: QueueScreen(
+              initialPosition: initialPosition,
+              webSocketStream: webSocketStream,
+              webSocketChannel: webSocketChannel,
+            ),
           );
         },
       ),

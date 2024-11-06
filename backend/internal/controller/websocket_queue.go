@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"sync"
+	"time"
 
 	"github.com/gorilla/websocket"
 	"github.com/labstack/echo/v4"
@@ -26,43 +27,47 @@ type Message struct {
 	Position int    `json:"position,omitempty"` // Position optionnelle pour la file d'attente
 }
 
+// Intervalle pour les pings en secondes
+const pingInterval = 30 * time.Second
+
 // HandleWebSocketQueue gère les connexions WebSocket pour la file d'attente des concerts
 func HandleWebSocketQueue(c echo.Context) error {
 	concertID := c.QueryParam("concertId")
 	userID := c.QueryParam("userId")
 
-	// Vérification des paramètres requis
 	if concertID == "" || userID == "" {
 		return echo.NewHTTPError(http.StatusBadRequest, "ConcertID et UserID requis")
 	}
 
-	// Établir la connexion WebSocket
 	conn, err := upgraderQueue.Upgrade(c.Response(), c.Request(), nil)
 	if err != nil {
 		return err
 	}
 	defer conn.Close()
 
-	// Gérer l'entrée de l'utilisateur dans la file d'attente
+	// Routine pour envoyer des pings périodiquement pour garder la connexion active
+	ticker := time.NewTicker(pingInterval)
+	defer ticker.Stop()
+	go func() {
+		for range ticker.C {
+			if err := conn.WriteMessage(websocket.PingMessage, nil); err != nil {
+				fmt.Println("Erreur lors de l'envoi du ping :", err)
+				break
+			}
+		}
+	}()
+
+	// Gérer l’entrée de l’utilisateur dans la file d’attente
 	if err := handleQueue(userID, concertID, conn); err != nil {
 		return err
 	}
 
-	// Écouter les messages WebSocket (si nécessaire pour d'autres actions)
+	// Écouter les messages WebSocket
 	for {
-		_, message, err := conn.ReadMessage()
+		_, _, err := conn.ReadMessage()
 		if err != nil {
-			// Si la connexion est fermée, retirer l'utilisateur de la file d'attente
 			removeUserFromQueue(concertID, userID)
 			break
-		}
-
-		// Ignorer les messages "ping"
-		var receivedMessage map[string]interface{}
-		if err := json.Unmarshal(message, &receivedMessage); err == nil {
-			if receivedMessage["type"] == "ping" {
-				continue
-			}
 		}
 	}
 

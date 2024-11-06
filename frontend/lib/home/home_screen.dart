@@ -83,7 +83,7 @@ class HomeScreenState extends State<HomeScreen> {
     return dateFormat.format(dateTime);
   }
   
-Future<void> joinQueueOrConcertPage(String concertId, String userId) async {
+  Future<void> joinQueueOrConcertPage(String concertId, String userId) async {
     final protocol = dotenv.env['API_PROTOCOL'] == 'http' ? 'ws' : 'wss';
     final wsUrl = Uri.parse('$protocol://${dotenv.env['API_HOST']}${dotenv.env['API_PORT']}/ws-queue?concertId=$concertId&userId=$userId');
     

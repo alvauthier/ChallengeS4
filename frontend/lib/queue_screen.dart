@@ -6,8 +6,8 @@ import 'package:web_socket_channel/web_socket_channel.dart';
 
 class QueueScreen extends StatefulWidget {
   final int initialPosition;
-  final Stream webSocketStream; // Utilisez le Stream en broadcast
-  final WebSocketChannel webSocketChannel; // Si besoin pour la gestion
+  final Stream webSocketStream;
+  final WebSocketChannel webSocketChannel;
 
   const QueueScreen({
     Key? key,
@@ -21,21 +21,6 @@ class QueueScreen extends StatefulWidget {
 }
 
 class _QueueScreenState extends State<QueueScreen> {
-  @override
-void initState() {
-  super.initState();
-  widget.webSocketChannel.sink.add(jsonEncode({'type': 'ping'}));
-
-  Timer.periodic(const Duration(seconds: 30), (timer) {
-    if (mounted) {
-      widget.webSocketChannel.sink.add(jsonEncode({'type': 'ping'}));
-    } else {
-      timer.cancel();
-    }
-  });
-}
-
-
   @override
   Widget build(BuildContext context) {
     return StreamBuilder(

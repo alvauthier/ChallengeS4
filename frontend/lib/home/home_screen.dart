@@ -1,11 +1,10 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:go_router/go_router.dart';
-import 'package:web_socket_channel/web_socket_channel.dart';
 import 'package:weezemaster/core/models/interest.dart';
 import 'package:weezemaster/core/services/token_services.dart';
+import 'package:weezemaster/core/services/websocket_service.dart';
 import 'package:weezemaster/home/blocs/home_bloc.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
@@ -82,56 +81,50 @@ class HomeScreenState extends State<HomeScreen> {
     DateFormat dateFormat = DateFormat('dd/MM/yyyy HH:mm', 'fr_FR');
     return dateFormat.format(dateTime);
   }
+
+  final webSocketService = WebSocketService();
   
   Future<void> joinQueueOrConcertPage(String concertId, String userId) async {
-    final protocol = dotenv.env['API_PROTOCOL'] == 'http' ? 'ws' : 'wss';
-    final wsUrl = Uri.parse('$protocol://${dotenv.env['API_HOST']}${dotenv.env['API_PORT']}/ws-queue?concertId=$concertId&userId=$userId');
+    webSocketService.connect(concertId, userId);
+
+    // Accès au flux de diffusion
+    final broadcastStream = webSocketService.stream;
     
-    debugPrint('Attempting WebSocket connection to: $wsUrl');
-
-    try {
-      final webSocketChannel = WebSocketChannel.connect(wsUrl);
-      debugPrint('WebSocket connection established.');
-
-      // Créez un Stream broadcast pour permettre plusieurs écouteurs
-      final broadcastStream = webSocketChannel.stream.asBroadcastStream();
-
-      // Écoute dans home_screen pour diriger vers la file d'attente ou le concert
-      broadcastStream.listen(
-        (event) {
-          final data = jsonDecode(event);
-          
-          if (data['status'] == 'access_granted') {
-            context.pushNamed(
-              'concert',
-              pathParameters: {'id': concertId},
-            );
-          } else if (data['status'] == 'in_queue') {
-            context.pushNamed(
-              'queue',
-              extra: {
-                'position': data['position'],
-                'webSocketStream': broadcastStream,
-                'webSocketChannel': webSocketChannel,
-              },
-            );
-          }
-        },
-        onError: (error) {
-          debugPrint('WebSocket error: $error');
-        },
-        onDone: () {
-          debugPrint('WebSocket connection closed.');
-        },
-      );
-
-    } catch (e) {
-      debugPrint('Failed to establish WebSocket connection: $e');
+    if (broadcastStream == null) {
+      debugPrint('Failed to get WebSocket broadcast stream.');
+      return;
     }
+
+    broadcastStream.listen(
+      (event) {
+        final data = jsonDecode(event);
+
+        if (data['status'] == 'access_granted') {
+          context.pushNamed(
+            'concert',
+            pathParameters: {'id': concertId},
+            extra: {
+              'webSocketService': webSocketService,
+            },
+          );
+        } else if (data['status'] == 'in_queue') {
+          context.pushNamed(
+            'queue',
+            extra: {
+              'position': data['position'],
+              'webSocketService': webSocketService,
+            },
+          );
+        }
+      },
+      onError: (error) {
+        debugPrint('WebSocket error: $error');
+      },
+      onDone: () {
+        debugPrint('WebSocket connection closed.');
+      },
+    );
   }
-
-
-
 
   @override
   Widget build(BuildContext context) {

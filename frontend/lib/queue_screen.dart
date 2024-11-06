@@ -1,19 +1,16 @@
-import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:web_socket_channel/web_socket_channel.dart';
+import 'package:weezemaster/core/services/websocket_service.dart';
 
 class QueueScreen extends StatefulWidget {
   final int initialPosition;
-  final Stream webSocketStream;
-  final WebSocketChannel webSocketChannel;
+  final  WebSocketService webSocketService;
 
   const QueueScreen({
     Key? key,
     required this.initialPosition,
-    required this.webSocketStream,
-    required this.webSocketChannel,
+    required this.webSocketService,
   }) : super(key: key);
 
   @override
@@ -24,7 +21,7 @@ class _QueueScreenState extends State<QueueScreen> {
   @override
   Widget build(BuildContext context) {
     return StreamBuilder(
-      stream: widget.webSocketStream, // Utilise le Stream broadcast ici
+      stream: widget.webSocketService.stream,
       builder: (context, snapshot) {
         if (snapshot.hasData) {
           final data = jsonDecode(snapshot.data as String);
@@ -34,18 +31,32 @@ class _QueueScreenState extends State<QueueScreen> {
               'concert',
               pathParameters: {'id': data['concertId']},
             );
-            widget.webSocketChannel.sink.close(); // Fermez ici si nécessaire
+            widget.webSocketService.disconnect();
             return Container();
           } else {
             final position = data['position'];
             return Center(
-              child: Text("Votre position dans la file: $position"),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const CircularProgressIndicator(),
+                  const SizedBox(height: 20),
+                  Text("Votre position dans la file: $position"),
+                ],
+              ),
             );
           }
         }
 
         return Center(
-          child: Text("Votre position dans la file: ${widget.initialPosition}"),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const CircularProgressIndicator(),
+              const SizedBox(height: 20),
+              Text("Votre position dans la file: ${widget.initialPosition}"),
+            ],
+          ),
         );
       },
     );

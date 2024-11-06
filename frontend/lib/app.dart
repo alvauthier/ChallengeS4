@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:web_socket_channel/web_socket_channel.dart';
 import 'package:weezemaster/booking_screen.dart';
 import 'package:weezemaster/chat.dart';
 import 'package:weezemaster/concert/concert_screen.dart';
 import 'package:weezemaster/conversations/conversations_screen.dart';
+import 'package:weezemaster/core/services/websocket_service.dart';
 import 'package:weezemaster/forgot_password_screen.dart';
 import 'package:weezemaster/home/home_screen.dart';
 import 'package:weezemaster/login_register_screen.dart';
@@ -28,6 +28,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import 'my_tickets/blocs/my_tickets_bloc.dart';
+import 'go_router_observer.dart';
 
 class App extends StatelessWidget {
   App({super.key});
@@ -55,6 +56,7 @@ class App extends StatelessWidget {
 
   final GoRouter _router = GoRouter(
     initialLocation: '/',
+    observers: [routeObserver],
     routes: <RouteBase>[
       GoRoute(
         path: '/',
@@ -260,14 +262,14 @@ class App extends StatelessWidget {
         builder: (BuildContext context, GoRouterState state) {
           final extra = state.extra as Map<String, dynamic>? ?? {};
           final initialPosition = extra['position'] as int;
-          final webSocketStream = extra['webSocketStream'] as Stream;
-          final webSocketChannel = extra['webSocketChannel'] as WebSocketChannel;
-          debugPrint('Initial Position: $initialPosition, WebSocketChannel: $webSocketChannel');
+          final webSocketService = extra['webSocketService'] as WebSocketService;
+
+          debugPrint('Initial Position: $initialPosition, WebTokenService: $webSocketService');
+
           return Scaffold(
             body: QueueScreen(
               initialPosition: initialPosition,
-              webSocketStream: webSocketStream,
-              webSocketChannel: webSocketChannel,
+              webSocketService: webSocketService,
             ),
           );
         },

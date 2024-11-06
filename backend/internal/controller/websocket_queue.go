@@ -88,10 +88,18 @@ func handleQueue(userID, concertID string, conn *websocket.Conn) error {
 		}
 	}
 
+	// Calcul du nombre d'utilisateurs déjà en salle
+	currentInConcert := 0
+	if len(queue[concertID]) >= maxUsers {
+		currentInConcert = maxUsers
+	} else {
+		currentInConcert = len(queue[concertID])
+	}
+
 	// Si la limite est atteinte, ajouter l'utilisateur en file d'attente
 	if len(queue[concertID]) >= maxUsers {
 		queue[concertID] = append(queue[concertID], userID)
-		position := len(queue[concertID])
+		position := len(queue[concertID]) - currentInConcert
 
 		message := Message{
 			Status:   "in_queue",

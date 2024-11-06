@@ -151,7 +151,7 @@ class RegisterOrganisationScreenState extends State<RegisterOrganisationScreen> 
                                   // Process data.
                                   try {
                                     var response = await http.post(
-                                      Uri.parse('http://${dotenv.env['API_HOST']}${dotenv.env['API_PORT']}/registerorganizer'),
+                                      Uri.parse('${dotenv.env['API_PROTOCOL']}://${dotenv.env['API_HOST']}${dotenv.env['API_PORT']}/registerorganizer'),
                                       headers: <String, String>{
                                         'Content-Type': 'application/json; charset=UTF-8',
                                       },

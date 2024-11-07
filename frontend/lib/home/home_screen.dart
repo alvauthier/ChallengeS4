@@ -98,6 +98,7 @@ class HomeScreenState extends State<HomeScreen> {
     broadcastStream.listen(
       (event) {
         final data = jsonDecode(event);
+        debugPrint('Données reçues - $data');
 
         if (data['status'] == 'access_granted') {
           context.pushNamed(

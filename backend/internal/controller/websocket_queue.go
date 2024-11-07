@@ -17,9 +17,10 @@ var upgraderQueue = websocket.Upgrader{
 	},
 }
 
-var queue = make(map[string][]*UserConnection) // File d'attente par concert (concertID -> liste d'utilisateurs)
+var queue = make(map[string][]*UserConnection)
+var authorized = make(map[string][]*UserConnection)
 var queueMutex = sync.Mutex{}
-var maxUsers = 1 // Maximum d'utilisateurs autorisés par concert
+var maxUsers = 2 // Maximum d'utilisateurs autorisés par concert
 
 type UserConnection struct {
 	UserID string
@@ -84,8 +85,8 @@ func handleQueue(userID, concertID string, conn *websocket.Conn) error {
 	queueMutex.Lock()
 	defer queueMutex.Unlock()
 
-	// Si l'utilisateur est déjà dans la salle, on lui envoie l'accès sans le retirer
-	for _, uc := range queue[concertID] {
+	// Vérifie si l'utilisateur est déjà dans la liste des utilisateurs autorisés
+	for _, uc := range authorized[concertID] {
 		if uc.UserID == userID {
 			message := Message{Status: "access_granted"}
 			messageBytes, _ := json.Marshal(message)
@@ -93,18 +94,13 @@ func handleQueue(userID, concertID string, conn *websocket.Conn) error {
 		}
 	}
 
-	// Calcul du nombre d'utilisateurs déjà en salle
-	currentInConcert := 0
-	if len(queue[concertID]) >= maxUsers {
-		currentInConcert = maxUsers
-	} else {
-		currentInConcert = len(queue[concertID])
-	}
+	// Calcul du nombre d'utilisateurs déjà autorisés
+	currentInConcert := len(authorized[concertID])
 
-	// Si la limite est atteinte, ajouter l'utilisateur en file d'attente
-	if len(queue[concertID]) >= maxUsers {
+	// Si la limite est atteinte, ajoute l'utilisateur en file d'attente
+	if currentInConcert >= maxUsers {
 		queue[concertID] = append(queue[concertID], &UserConnection{UserID: userID, Conn: conn})
-		position := len(queue[concertID]) - currentInConcert
+		position := len(queue[concertID])
 
 		message := Message{
 			Status:   "in_queue",
@@ -116,8 +112,8 @@ func handleQueue(userID, concertID string, conn *websocket.Conn) error {
 		return conn.WriteMessage(websocket.TextMessage, messageBytes)
 	}
 
-	// Ajouter l'utilisateur et lui accorder l'accès sans fermer sa connexion WebSocket
-	queue[concertID] = append(queue[concertID], &UserConnection{UserID: userID, Conn: conn})
+	// Ajouter l'utilisateur aux utilisateurs autorisés
+	authorized[concertID] = append(authorized[concertID], &UserConnection{UserID: userID, Conn: conn})
 	message := Message{Status: "access_granted"}
 	messageBytes, _ := json.Marshal(message)
 	fmt.Printf("User %s accepté dans la salle pour le concert %s\n", userID, concertID)
@@ -126,35 +122,60 @@ func handleQueue(userID, concertID string, conn *websocket.Conn) error {
 }
 
 // removeUserFromQueue retire un utilisateur spécifique de la file d'attente lorsque sa connexion est fermée
+// removeUserFromQueue retire un utilisateur spécifique de la file d'attente
 func removeUserFromQueue(concertID, userID string) {
 	queueMutex.Lock()
 	defer queueMutex.Unlock()
 
-	if queueUsers, ok := queue[concertID]; ok {
-		for i, uc := range queueUsers {
+	// Vérifie d'abord si l'utilisateur est dans la liste des utilisateurs autorisés
+	if authorizedUsers, ok := authorized[concertID]; ok {
+		for i, uc := range authorizedUsers {
 			if uc.UserID == userID {
+				// Retire l'utilisateur des utilisateurs autorisés
+				authorized[concertID] = append(authorizedUsers[:i], authorizedUsers[i+1:]...)
+				fmt.Printf("User %s a quitté la page concert pour le concert %s\n", userID, concertID)
+				break
+			}
+		}
+	}
+
+	// Si la liste des utilisateurs autorisés est en dessous de la limite, on promeut le prochain en file d'attente
+	if len(authorized[concertID]) < maxUsers {
+		if queueUsers, ok := queue[concertID]; ok && len(queueUsers) > 0 {
+			// Sélectionne le premier utilisateur en attente dans la file (index 0)
+			nextUser := queueUsers[0]
+			queue[concertID] = queueUsers[1:] // Retire l'utilisateur promu de la file
+
+			// Ajoute l'utilisateur promu aux utilisateurs autorisés
+			authorized[concertID] = append(authorized[concertID], nextUser)
+
+			// Envoie une notification de type "access_granted" au nouvel utilisateur autorisé
+			message := Message{Status: "access_granted"}
+			messageBytes, _ := json.Marshal(message)
+			if err := nextUser.Conn.WriteMessage(websocket.TextMessage, messageBytes); err != nil {
+				fmt.Printf("Erreur d'écriture WebSocket : %v\n", err)
+			}
+			fmt.Printf("User %s promu pour entrer dans le concert %s\n", nextUser.UserID, concertID)
+		}
+	}
+
+	// Gestion du décalage dans la file d'attente si un utilisateur en file d'attente quitte
+	if queueUsers, ok := queue[concertID]; ok {
+		for i, user := range queueUsers {
+			if user.UserID == userID {
+				// Retirer l'utilisateur de la file d'attente
 				queue[concertID] = append(queueUsers[:i], queueUsers[i+1:]...)
-				fmt.Printf("User %s retiré de la file d'attente pour le concert %s\n", userID, concertID)
+				fmt.Printf("User %s a quitté la file d'attente pour le concert %s\n", userID, concertID)
 				break
 			}
 		}
 
-		// Promouvoir le premier utilisateur en file s'il y a de la place dans la salle
-		if len(queue[concertID]) > 0 && len(queue[concertID]) <= maxUsers {
-			nextUser := queue[concertID][0]
-			queue[concertID] = queue[concertID][1:]
-
-			// Envoyer le message d'accès à l'utilisateur promu
-			message := Message{Status: "access_granted"}
-			messageBytes, _ := json.Marshal(message)
-			nextUser.Conn.WriteMessage(websocket.TextMessage, messageBytes)
-			fmt.Printf("User %s promu pour entrer dans le concert %s\n", nextUser.UserID, concertID)
-
-			// Mettre à jour la position de chaque utilisateur restant dans la file d'attente
-			for index, user := range queue[concertID] {
-				updatedMessage := Message{Status: "in_queue", Position: index + 1}
-				updatedMessageBytes, _ := json.Marshal(updatedMessage)
-				user.Conn.WriteMessage(websocket.TextMessage, updatedMessageBytes)
+		// Mise à jour de la position de chaque utilisateur restant dans la file d'attente
+		for index, user := range queue[concertID] {
+			updatedMessage := Message{Status: "in_queue", Position: index + 1}
+			updatedMessageBytes, _ := json.Marshal(updatedMessage)
+			if err := user.Conn.WriteMessage(websocket.TextMessage, updatedMessageBytes); err != nil {
+				fmt.Printf("Erreur lors de la mise à jour de la position pour l'utilisateur %s : %v\n", user.UserID, err)
 			}
 		}
 	}

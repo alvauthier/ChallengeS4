@@ -25,13 +25,13 @@ class _QueueScreenState extends State<QueueScreen> {
       builder: (context, snapshot) {
         if (snapshot.hasData) {
           final data = jsonDecode(snapshot.data as String);
-
+          debugPrint('Donnéees reçues Queue Screen: ${snapshot.data}');
+          debugPrint('Donnéees reçues Queue Screen: $data');
           if (data['status'] == 'access_granted') {
             context.pushReplacementNamed(
               'concert',
               pathParameters: {'id': data['concertId']},
             );
-            widget.webSocketService.disconnect();
             return Container();
           } else {
             final position = data['position'];

@@ -86,6 +86,8 @@
     "location": "Location",
     "location_empty": "Please enter the location",
     "select_date": "Select date",
+    "select_date": "Select date",
+    "selected_date": "Selected date",
     "select_date_empty": "No date selected",
     "ticket_categories": "Ticket categories",
     "number_of_tickets_for": "Number of tickets for",

@@ -5,6 +5,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:go_router/go_router.dart';
 import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
+import 'package:omni_datetime_picker/omni_datetime_picker.dart';
 import 'package:weezemaster/core/models/category.dart';
 import 'package:weezemaster/core/models/interest.dart';
 import 'package:weezemaster/core/services/api_services.dart';
@@ -79,15 +80,18 @@ Future<void> _fetchCategories() async {
   }
 
   Future<void> _selectDate(BuildContext context) async {
-    final DateTime? picked = await showDatePicker(
+    DateTime? dateTime = await showOmniDateTimePicker(
       context: context,
-      initialDate: _selectedDate ?? DateTime.now(),
-      firstDate: DateTime(2000),
-      lastDate: DateTime(2101),
+      initialDate: _selectedDate ?? DateTime.now().add(const Duration(days: 1)),
+      firstDate: DateTime.now().add(const Duration(days: 1)),
+      lastDate: DateTime.now().add(
+        const Duration(days: 3652),
+      ),
+      is24HourMode: true,
     );
-    if (picked != null) {
+    if (dateTime != null) {
       setState(() {
-        _selectedDate = picked;
+        _selectedDate = dateTime;
       });
     }
   }
@@ -217,7 +221,7 @@ Future<void> _fetchCategories() async {
                                 child: Text(
                                   _selectedDate == null
                                       ? translate(context)!.select_date_empty
-                                      : 'Date: ${_selectedDate!.toLocal().toIso8601String().split('T')[0]}',
+                                      : '${translate(context)!.selected_date} ${_selectedDate!.toLocal().toIso8601String().split('T')[0]} ${_selectedDate!.toLocal().toIso8601String().split('T')[1].split(':').sublist(0, 2).join(':')}',
                                 ),
                               ),
                               ElevatedButton(
@@ -342,7 +346,7 @@ Future<void> _fetchCategories() async {
                                           'image': _base64Image,
                                           'description': _descriptionController.text,
                                           'location': _cityController.text,
-                                          'date': _selectedDate!.toIso8601String().split('T')[0],
+                                          'date': '${_selectedDate!.toLocal().toIso8601String().split('T')[0]} ${_selectedDate!.toLocal().toIso8601String().split('T')[1].split(':').sublist(0, 2).join(':')}',
                                           'userId': userId,
                                           'InterestIDs': selectedInterestsList,
                                           'CategoriesIDs': tabCategories,
@@ -357,12 +361,12 @@ Future<void> _fetchCategories() async {
                                         ),
                                       );
                                       if (response.statusCode == 200) {
-                                        context.pop();
+                                        context.pushNamed('home');
                                       }
                                     } catch (e) {
                                       ScaffoldMessenger.of(context).showSnackBar(
                                         SnackBar(
-                                          content: Text(translate(context)!.generic_error),
+                                          content: Text(e.toString()),
                                           duration: const Duration(seconds: 5),
                                         ),
                                       );

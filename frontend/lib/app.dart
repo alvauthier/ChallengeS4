@@ -3,9 +3,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:weezemaster/booking_screen.dart';
 import 'package:weezemaster/chat.dart';
-import 'package:weezemaster/components/resale_ticket.dart';
 import 'package:weezemaster/concert/concert_screen.dart';
 import 'package:weezemaster/conversations/conversations_screen.dart';
+import 'package:weezemaster/core/services/websocket_service.dart';
 import 'package:weezemaster/forgot_password_screen.dart';
 import 'package:weezemaster/home/home_screen.dart';
 import 'package:weezemaster/login_register_screen.dart';
@@ -13,6 +13,7 @@ import 'package:weezemaster/login_screen.dart';
 import 'package:weezemaster/my_tickets/my_tickets_screen.dart';
 import 'package:weezemaster/panel_admin.dart';
 import 'package:weezemaster/profile_screen.dart';
+import 'package:weezemaster/queue_screen.dart';
 import 'package:weezemaster/register_concert_screen.dart';
 import 'package:weezemaster/register_organization_screen.dart';
 import 'package:weezemaster/register_screen.dart';
@@ -27,6 +28,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import 'my_tickets/blocs/my_tickets_bloc.dart';
+import 'go_router_observer.dart';
 
 class App extends StatelessWidget {
   App({super.key});
@@ -54,6 +56,7 @@ class App extends StatelessWidget {
 
   final GoRouter _router = GoRouter(
     initialLocation: '/',
+    observers: [routeObserver],
     routes: <RouteBase>[
       GoRoute(
         path: '/',
@@ -250,6 +253,24 @@ class App extends StatelessWidget {
           return const Scaffold(
             body: ThankYouScreen(),
             bottomNavigationBar: AdaptiveNavigationBar(),
+          );
+        },
+      ),
+      GoRoute(
+        path: '/queue',
+        name: 'queue',
+        builder: (BuildContext context, GoRouterState state) {
+          final extra = state.extra as Map<String, dynamic>? ?? {};
+          final initialPosition = extra['position'] as int;
+          final webSocketService = extra['webSocketService'] as WebSocketService;
+
+          debugPrint('Initial Position: $initialPosition, WebTokenService: $webSocketService');
+
+          return Scaffold(
+            body: QueueScreen(
+              initialPosition: initialPosition,
+              webSocketService: webSocketService,
+            ),
           );
         },
       ),

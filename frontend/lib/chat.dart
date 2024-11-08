@@ -167,7 +167,7 @@ class ChatScreenState extends State<ChatScreen> {
   void _connectWebSocket() {
     final protocol = dotenv.env['API_PROTOCOL'] == 'http' ? 'ws' : 'wss';
     // final protocol = 'ws';
-    final wsUrl = Uri.parse('$protocol://${dotenv.env['API_HOST']}${dotenv.env['API_PORT']}/ws');
+    final wsUrl = Uri.parse('$protocol://${dotenv.env['API_HOST']}${dotenv.env['API_PORT']}/ws-chat');
     debugPrint('Attempting WebSocket connection to: $wsUrl');
 
     try {

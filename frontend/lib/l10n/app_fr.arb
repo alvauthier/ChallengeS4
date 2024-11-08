@@ -115,5 +115,9 @@
     "ancient": "Ancien",
     "my_concert": "Mon concert",
     "admin_panel": "Panneau admin",
-    "users": "Utilisateurs"
+    "users": "Utilisateurs",
+    "queue_info": "Suite à une forte demande, vous venez d'être placé en file d'attente.",
+    "queue_warning": "Afin de conserver votre place dans la file d'attente, veuillez ne pas quitter cette page ou l'application.",
+    "queue_position": "Votre position dans la file :",
+    "queue_checkbox": "En retournant à l'accueil, je comprends et j'accepte de perdre ma place en file d'attente."
 }

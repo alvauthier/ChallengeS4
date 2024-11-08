@@ -33,7 +33,7 @@ type MessagePayload struct {
 }
 
 // HandleWebSocket gère les connexions WebSocket pour toutes les conversations
-func HandleWebSocket(c echo.Context) error {
+func HandleWebSocketChat(c echo.Context) error {
 	conn, err := upgrader.Upgrade(c.Response(), c.Request(), nil)
 	if err != nil {
 		return err

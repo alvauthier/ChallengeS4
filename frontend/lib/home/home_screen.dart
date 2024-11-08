@@ -1,7 +1,10 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:weezemaster/core/models/interest.dart';
 import 'package:weezemaster/core/services/token_services.dart';
+import 'package:weezemaster/core/services/websocket_service.dart';
 import 'package:weezemaster/home/blocs/home_bloc.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
@@ -77,6 +80,50 @@ class HomeScreenState extends State<HomeScreen> {
     DateTime dateTime = DateTime.parse(date);
     DateFormat dateFormat = DateFormat('dd/MM/yyyy HH:mm', 'fr_FR');
     return dateFormat.format(dateTime);
+  }
+
+  final webSocketService = WebSocketService();
+  
+  Future<void> joinQueueOrConcertPage(String concertId, String userId) async {
+    webSocketService.connect(concertId, userId);
+
+    // Accès au flux de diffusion
+    final broadcastStream = webSocketService.stream;
+    
+    if (broadcastStream == null) {
+      debugPrint('Failed to get WebSocket broadcast stream.');
+      return;
+    }
+
+    broadcastStream.listen(
+      (event) {
+        final data = jsonDecode(event);
+
+        if (data['isFirstMessage'] == true && data['status'] == 'access_granted') {
+          context.pushNamed(
+            'concert',
+            pathParameters: {'id': concertId},
+            extra: {
+              'webSocketService': webSocketService,
+            },
+          );
+        } else if (data['isFirstMessage'] == true && data['status'] == 'in_queue') {
+          context.pushNamed(
+            'queue',
+            extra: {
+              'position': data['position'],
+              'webSocketService': webSocketService,
+            },
+          );
+        }
+      },
+      onError: (error) {
+        debugPrint('WebSocket error: $error');
+      },
+      onDone: () {
+        debugPrint('WebSocket connection closed.');
+      },
+    );
   }
 
   @override
@@ -245,11 +292,40 @@ class HomeScreenState extends State<HomeScreen> {
                           itemBuilder: (context, index) {
                             final concert = _filteredConcerts[index];
                             return GestureDetector(
-                              onTap: () {
-                                context.pushNamed(
-                                  'concert',
-                                  pathParameters: {'id': concert.id},
-                                );
+                              onTap: () async {
+                                final tokenService = TokenService();
+                                String? token = await tokenService.getValidAccessToken();
+                                if (token == null) {
+                                  context.pushNamed(
+                                    'concert',
+                                    pathParameters: {'id': concert.id},
+                                  );
+                                } else {
+                                  final parts = token.split('.');
+                                  if (parts.length != 3) {
+                                    throw Exception('Invalid token');
+                                  }
+
+                                  String output = parts[1].replaceAll('-', '+').replaceAll('_', '/');
+                                  switch (output.length % 4) {
+                                    case 0:
+                                      break;
+                                    case 2:
+                                      output += '==';
+                                      break;
+                                    case 3:
+                                      output += '=';
+                                      break;
+                                    default:
+                                      throw Exception('Illegal base64url string!"');
+                                  }
+
+                                  String userId = json.decode(utf8.decode(base64.decode(output)))['id'];
+
+                                  debugPrint('Joining queue or concert page for concert: ${concert.id} and user: $userId');
+                                  await joinQueueOrConcertPage(concert.id, userId);
+
+                                }
                               },
                               child: Padding(
                                 padding: const EdgeInsets.symmetric(vertical: 20.0, horizontal: 10.0),

@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:weezemaster/core/services/websocket_service.dart';
+import 'package:weezemaster/translation.dart';
 
 class QueueScreen extends StatefulWidget {
   final int initialPosition;
@@ -51,22 +52,22 @@ class _QueueScreenState extends State<QueueScreen> {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      const Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 50.0),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 50.0),
                         child: Text(
-                          "Suite à une forte demande, vous venez d'être placé en file d'attente.",
-                          style: TextStyle(
+                          translate(context)!.queue_info,
+                          style: const TextStyle(
                             fontSize: 16,
                             fontFamily: 'ReadexPro',
                           ),
                           textAlign: TextAlign.center,
                         ),
                       ),
-                      const Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 20.0),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 20.0),
                         child: Text(
-                          "Afin de conserver votre place dans la file d'attente, veuillez ne pas quitter cette page ou l'application.",
-                          style: TextStyle(
+                          translate(context)!.queue_warning,
+                          style: const TextStyle(
                             fontSize: 16,
                             fontFamily: 'ReadexPro',
                           ),
@@ -76,7 +77,7 @@ class _QueueScreenState extends State<QueueScreen> {
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 40.0),
                         child: Text(
-                          "Votre position dans la file : $position",
+                          '${translate(context)!.queue_position} $position',
                           style: const TextStyle(
                             fontSize: 16,
                             fontFamily: 'ReadexPro',
@@ -86,26 +87,33 @@ class _QueueScreenState extends State<QueueScreen> {
                       ),
                       const CircularProgressIndicator(),
                       const SizedBox(height: 90),
-                      Row(
-                        children: [
-                          Checkbox(
-                            value: _isChecked,
-                            onChanged: (bool? value) {
-                              setState(() {
-                                _isChecked = value ?? false;
-                              });
-                            },
-                          ),
-                          const Expanded(
-                            child: Text(
-                              "En retournant à l'accueil, je comprends et j'accepte de perdre ma place en file d'attente.",
-                              style: TextStyle(
-                                fontSize: 16,
-                                fontFamily: 'ReadexPro',
+                      GestureDetector(
+                        onTap: () {
+                          setState(() {
+                            _isChecked = !_isChecked;
+                          });
+                        },
+                        child: Row(
+                          children: [
+                            Checkbox(
+                              value: _isChecked,
+                              onChanged: (bool? value) {
+                                setState(() {
+                                  _isChecked = value ?? false;
+                                });
+                              },
+                            ),
+                            Expanded(
+                              child: Text(
+                                translate(context)!.queue_checkbox,
+                                style: const TextStyle(
+                                  fontSize: 16,
+                                  fontFamily: 'ReadexPro',
+                                ),
                               ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
                       const SizedBox(height: 20),
                       ElevatedButton(
@@ -121,9 +129,9 @@ class _QueueScreenState extends State<QueueScreen> {
                           ),
                           backgroundColor: Colors.deepOrange,
                         ),
-                        child: const Text(
-                          'Retour à l\'accueil',
-                          style: TextStyle(
+                        child: Text(
+                          translate(context)!.back_home,
+                          style: const TextStyle(
                             fontFamily: 'ReadexPro',
                           ),
                         ),
@@ -153,22 +161,22 @@ class _QueueScreenState extends State<QueueScreen> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 50.0),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 50.0),
                     child: Text(
-                      "Suite à une forte demande, vous venez d'être placé en file d'attente.",
-                      style: TextStyle(
+                      translate(context)!.queue_info,
+                      style: const TextStyle(
                         fontSize: 16,
                         fontFamily: 'ReadexPro',
                       ),
                       textAlign: TextAlign.center,
                     ),
                   ),
-                  const Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 20.0),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 20.0),
                     child: Text(
-                      "Afin de conserver votre place dans la file d'attente, veuillez ne pas quitter cette page ou l'application.",
-                      style: TextStyle(
+                      translate(context)!.queue_warning,
+                      style: const TextStyle(
                         fontSize: 16,
                         fontFamily: 'ReadexPro',
                       ),
@@ -178,7 +186,7 @@ class _QueueScreenState extends State<QueueScreen> {
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 40.0),
                     child: Text(
-                      "Votre position dans la file : ${widget.initialPosition}",
+                      '${translate(context)!.queue_position} ${widget.initialPosition}',
                       style: const TextStyle(
                         fontSize: 16,
                         fontFamily: 'ReadexPro',
@@ -188,26 +196,33 @@ class _QueueScreenState extends State<QueueScreen> {
                   ),
                   const CircularProgressIndicator(),
                   const SizedBox(height: 90),
-                  Row(
-                    children: [
-                      Checkbox(
-                        value: _isChecked,
-                        onChanged: (bool? value) {
-                          setState(() {
-                            _isChecked = value ?? false;
-                          });
-                        },
-                      ),
-                      const Expanded(
-                        child: Text(
-                          "En retournant à l'accueil, je comprends et j'accepte de perdre ma place en file d'attente.",
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontFamily: 'ReadexPro',
+                  GestureDetector(
+                    onTap: () {
+                      setState(() {
+                        _isChecked = !_isChecked;
+                      });
+                    },
+                    child: Row(
+                      children: [
+                        Checkbox(
+                          value: _isChecked,
+                          onChanged: (bool? value) {
+                            setState(() {
+                              _isChecked = value ?? false;
+                            });
+                          },
+                        ),
+                        Expanded(
+                          child: Text(
+                            translate(context)!.queue_checkbox,
+                            style: const TextStyle(
+                              fontSize: 16,
+                              fontFamily: 'ReadexPro',
+                            ),
                           ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                   const SizedBox(height: 20),
                   ElevatedButton(
@@ -223,9 +238,9 @@ class _QueueScreenState extends State<QueueScreen> {
                       ),
                       backgroundColor: Colors.deepOrange,
                     ),
-                    child: const Text(
-                      'Retour à l\'accueil',
-                      style: TextStyle(
+                    child: Text(
+                      translate(context)!.back_home,
+                      style: const TextStyle(
                         fontFamily: 'ReadexPro',
                       ),
                     ),

@@ -116,5 +116,9 @@
     "ancient": "Ancient",
     "my_concert": "My concert",
     "admin_panel": "Admin panel",
-    "users": "Users"
+    "users": "Users",
+    "queue_info": "Due to high demand, you have just been placed in the queue.",
+    "queue_warning": "To keep your place in the queue, please do not leave this page or the application.",
+    "queue_position": "Your position in the queue:",
+    "queue_checkbox": "Returning home page, I understand and accept the loss of my place in line."
 }

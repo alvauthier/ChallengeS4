@@ -18,6 +18,8 @@ class QueueScreen extends StatefulWidget {
 }
 
 class _QueueScreenState extends State<QueueScreen> {
+  bool _isChecked = false;
+  
   @override
   Widget build(BuildContext context) {
     return StreamBuilder(
@@ -25,38 +27,213 @@ class _QueueScreenState extends State<QueueScreen> {
       builder: (context, snapshot) {
         if (snapshot.hasData) {
           final data = jsonDecode(snapshot.data as String);
-          debugPrint('Donnéees reçues Queue Screen: ${snapshot.data}');
-          debugPrint('Donnéees reçues Queue Screen: $data');
           if (data['isFirstMessage'] == false && data['status'] == 'access_granted') {
-            debugPrint('ICI QUEUE QUI PUSH REPLACE VERS CONCERT');
             WidgetsBinding.instance.addPostFrameCallback((_) {
               context.pushReplacementNamed('concert', pathParameters: {'id': data['concertId']});
             });
             // return Container();
           } else {
             final position = data['position'];
-            return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const CircularProgressIndicator(),
-                  const SizedBox(height: 20),
-                  Text("Votre position dans la file: $position"),
-                ],
-              ),
+            return Column(
+              children: [
+                const Padding(
+                  padding: EdgeInsets.symmetric(vertical: 60.0),
+                  child: Text(
+                    'Weezemaster',
+                    style: TextStyle(
+                      fontSize: 40,
+                      fontWeight: FontWeight.bold,
+                      fontFamily: 'ReadexProBold',
+                    ),
+                  ),
+                ),
+                Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 50.0),
+                        child: Text(
+                          "Suite à une forte demande, vous venez d'être placé en file d'attente.",
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontFamily: 'ReadexPro',
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                      const Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 20.0),
+                        child: Text(
+                          "Afin de conserver votre place dans la file d'attente, veuillez ne pas quitter cette page ou l'application.",
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontFamily: 'ReadexPro',
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 40.0),
+                        child: Text(
+                          "Votre position dans la file : $position",
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontFamily: 'ReadexPro',
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                      const CircularProgressIndicator(),
+                      const SizedBox(height: 90),
+                      Row(
+                        children: [
+                          Checkbox(
+                            value: _isChecked,
+                            onChanged: (bool? value) {
+                              setState(() {
+                                _isChecked = value ?? false;
+                              });
+                            },
+                          ),
+                          const Expanded(
+                            child: Text(
+                              "En retournant à l'accueil, je comprends et j'accepte de perdre ma place en file d'attente.",
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontFamily: 'ReadexPro',
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 20),
+                      ElevatedButton(
+                        onPressed: _isChecked
+                          ? () {
+                              Navigator.of(context).popUntil((route) => route.isFirst);
+                            }
+                          : null,
+                        style: ElevatedButton.styleFrom(
+                          foregroundColor: Colors.white,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(6.0),
+                          ),
+                          backgroundColor: Colors.deepOrange,
+                        ),
+                        child: const Text(
+                          'Retour à l\'accueil',
+                          style: TextStyle(
+                            fontFamily: 'ReadexPro',
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
             );
           }
         }
 
-        return Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const CircularProgressIndicator(),
-              const SizedBox(height: 20),
-              Text("Votre position dans la file: ${widget.initialPosition}"),
-            ],
-          ),
+        return Column(
+          children: [
+            const Padding(
+              padding: EdgeInsets.symmetric(vertical: 60.0),
+              child: Text(
+                'Weezemaster',
+                style: TextStyle(
+                  fontSize: 40,
+                  fontWeight: FontWeight.bold,
+                  fontFamily: 'ReadexProBold',
+                ),
+              ),
+            ),
+            Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 50.0),
+                    child: Text(
+                      "Suite à une forte demande, vous venez d'être placé en file d'attente.",
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontFamily: 'ReadexPro',
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                  const Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 20.0),
+                    child: Text(
+                      "Afin de conserver votre place dans la file d'attente, veuillez ne pas quitter cette page ou l'application.",
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontFamily: 'ReadexPro',
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 40.0),
+                    child: Text(
+                      "Votre position dans la file : ${widget.initialPosition}",
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontFamily: 'ReadexPro',
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                  const CircularProgressIndicator(),
+                  const SizedBox(height: 90),
+                  Row(
+                    children: [
+                      Checkbox(
+                        value: _isChecked,
+                        onChanged: (bool? value) {
+                          setState(() {
+                            _isChecked = value ?? false;
+                          });
+                        },
+                      ),
+                      const Expanded(
+                        child: Text(
+                          "En retournant à l'accueil, je comprends et j'accepte de perdre ma place en file d'attente.",
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontFamily: 'ReadexPro',
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 20),
+                  ElevatedButton(
+                    onPressed: _isChecked
+                      ? () {
+                          Navigator.of(context).popUntil((route) => route.isFirst);
+                        }
+                      : null,
+                    style: ElevatedButton.styleFrom(
+                      foregroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(6.0),
+                      ),
+                      backgroundColor: Colors.deepOrange,
+                    ),
+                    child: const Text(
+                      'Retour à l\'accueil',
+                      style: TextStyle(
+                        fontFamily: 'ReadexPro',
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
         );
       },
     );

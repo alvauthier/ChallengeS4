@@ -98,10 +98,8 @@ class HomeScreenState extends State<HomeScreen> {
     broadcastStream.listen(
       (event) {
         final data = jsonDecode(event);
-        debugPrint('Données reçues - $data');
 
         if (data['isFirstMessage'] == true && data['status'] == 'access_granted') {
-          debugPrint('ICI HOME QUI PUSH VERS CONCERT');
           context.pushNamed(
             'concert',
             pathParameters: {'id': concertId},
@@ -110,7 +108,6 @@ class HomeScreenState extends State<HomeScreen> {
             },
           );
         } else if (data['isFirstMessage'] == true && data['status'] == 'in_queue') {
-          debugPrint('ICI HOME QUI PUSH VERS QUEUE');
           context.pushNamed(
             'queue',
             extra: {

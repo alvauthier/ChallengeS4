@@ -100,7 +100,8 @@ class HomeScreenState extends State<HomeScreen> {
         final data = jsonDecode(event);
         debugPrint('Données reçues - $data');
 
-        if (data['status'] == 'access_granted') {
+        if (data['isFirstMessage'] == true && data['status'] == 'access_granted') {
+          debugPrint('ICI HOME QUI PUSH VERS CONCERT');
           context.pushNamed(
             'concert',
             pathParameters: {'id': concertId},
@@ -108,7 +109,8 @@ class HomeScreenState extends State<HomeScreen> {
               'webSocketService': webSocketService,
             },
           );
-        } else if (data['status'] == 'in_queue') {
+        } else if (data['isFirstMessage'] == true && data['status'] == 'in_queue') {
+          debugPrint('ICI HOME QUI PUSH VERS QUEUE');
           context.pushNamed(
             'queue',
             extra: {

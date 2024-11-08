@@ -29,8 +29,10 @@ type UserConnection struct {
 
 // Message struct pour formater les messages WebSocket en JSON
 type Message struct {
-	Status   string `json:"status"`
-	Position int    `json:"position,omitempty"` // Position optionnelle pour la file d'attente
+	Status         string `json:"status"`
+	Position       int    `json:"position,omitempty"`
+	ConcertID      string `json:"concertId,omitempty"`
+	IsFirstMessage bool   `json:"isFirstMessage"`
 }
 
 // Intervalle pour les pings en secondes
@@ -88,7 +90,7 @@ func handleQueue(userID, concertID string, conn *websocket.Conn) error {
 	// Vérifie si l'utilisateur est déjà dans la liste des utilisateurs autorisés
 	for _, uc := range authorized[concertID] {
 		if uc.UserID == userID {
-			message := Message{Status: "access_granted"}
+			message := Message{Status: "access_granted", ConcertID: concertID, IsFirstMessage: true}
 			messageBytes, _ := json.Marshal(message)
 			return conn.WriteMessage(websocket.TextMessage, messageBytes)
 		}
@@ -103,8 +105,10 @@ func handleQueue(userID, concertID string, conn *websocket.Conn) error {
 		position := len(queue[concertID])
 
 		message := Message{
-			Status:   "in_queue",
-			Position: position,
+			Status:         "in_queue",
+			Position:       position,
+			ConcertID:      concertID,
+			IsFirstMessage: true,
 		}
 		messageBytes, _ := json.Marshal(message)
 		fmt.Printf("User %s ajouté à la file d'attente pour le concert %s à la position %d\n", userID, concertID, position)
@@ -114,7 +118,7 @@ func handleQueue(userID, concertID string, conn *websocket.Conn) error {
 
 	// Ajouter l'utilisateur aux utilisateurs autorisés
 	authorized[concertID] = append(authorized[concertID], &UserConnection{UserID: userID, Conn: conn})
-	message := Message{Status: "access_granted"}
+	message := Message{Status: "access_granted", ConcertID: concertID, IsFirstMessage: true}
 	messageBytes, _ := json.Marshal(message)
 	fmt.Printf("User %s accepté dans la salle pour le concert %s\n", userID, concertID)
 
@@ -150,7 +154,7 @@ func removeUserFromQueue(concertID, userID string) {
 			authorized[concertID] = append(authorized[concertID], nextUser)
 
 			// Envoie une notification de type "access_granted" au nouvel utilisateur autorisé
-			message := Message{Status: "access_granted"}
+			message := Message{Status: "access_granted", ConcertID: concertID, IsFirstMessage: false}
 			messageBytes, _ := json.Marshal(message)
 			if err := nextUser.Conn.WriteMessage(websocket.TextMessage, messageBytes); err != nil {
 				fmt.Printf("Erreur d'écriture WebSocket : %v\n", err)
@@ -172,7 +176,7 @@ func removeUserFromQueue(concertID, userID string) {
 
 		// Mise à jour de la position de chaque utilisateur restant dans la file d'attente
 		for index, user := range queue[concertID] {
-			updatedMessage := Message{Status: "in_queue", Position: index + 1}
+			updatedMessage := Message{Status: "in_queue", Position: index + 1, ConcertID: concertID, IsFirstMessage: false}
 			updatedMessageBytes, _ := json.Marshal(updatedMessage)
 			if err := user.Conn.WriteMessage(websocket.TextMessage, updatedMessageBytes); err != nil {
 				fmt.Printf("Erreur lors de la mise à jour de la position pour l'utilisateur %s : %v\n", user.UserID, err)

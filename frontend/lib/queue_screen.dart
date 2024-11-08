@@ -27,12 +27,12 @@ class _QueueScreenState extends State<QueueScreen> {
           final data = jsonDecode(snapshot.data as String);
           debugPrint('Donnéees reçues Queue Screen: ${snapshot.data}');
           debugPrint('Donnéees reçues Queue Screen: $data');
-          if (data['status'] == 'access_granted') {
-            context.pushReplacementNamed(
-              'concert',
-              pathParameters: {'id': data['concertId']},
-            );
-            return Container();
+          if (data['isFirstMessage'] == false && data['status'] == 'access_granted') {
+            debugPrint('ICI QUEUE QUI PUSH REPLACE VERS CONCERT');
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              context.pushReplacementNamed('concert', pathParameters: {'id': data['concertId']});
+            });
+            // return Container();
           } else {
             final position = data['position'];
             return Center(

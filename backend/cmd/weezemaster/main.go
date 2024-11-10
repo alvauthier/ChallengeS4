@@ -3,6 +3,9 @@ package main
 import (
 	"fmt"
 	"log"
+	"net/http"
+	"os"
+	"path/filepath"
 	"weezemaster/internal/config"
 	"weezemaster/internal/controller"
 	"weezemaster/internal/database"
@@ -11,6 +14,7 @@ import (
 	_ "weezemaster/docs"
 
 	"github.com/labstack/echo/v4"
+	echoMiddleware "github.com/labstack/echo/v4/middleware"
 	echoSwagger "github.com/swaggo/echo-swagger"
 )
 
@@ -30,18 +34,39 @@ import (
 //	@BasePath	/
 
 func main() {
-	// erro := godotenv.Load("../../.env")
-	// if erro != nil {
-	// 	log.Fatalf("Error loading .env file")
-	// }
-
-	// env := os.Getenv("ENVIRONMENT")
-
 	fmt.Println("Starting server...")
+
+	tempDir := "temp"
+	logFilePath := filepath.Join(tempDir, "weezemaster.log")
+
+	if _, err := os.Stat(tempDir); os.IsNotExist(err) {
+		err := os.Mkdir(tempDir, 0755)
+		if err != nil {
+			log.Fatalf("Error creating temp directory: %v", err)
+		}
+	}
+
+	logFile, err := os.OpenFile(logFilePath, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
+	if err != nil {
+		log.Fatalf("Error opening log file: %v", err)
+	}
+	defer logFile.Close()
+
 	router := echo.New()
+	router.HideBanner = true
+
+	router.Logger.SetLevel(2)
+	router.Logger.SetOutput(logFile)
+
+	router.Use(echoMiddleware.LoggerWithConfig(echoMiddleware.LoggerConfig{
+		Output: logFile,
+	}))
+
+	router.Logger.Info("Logger initialized successfully.")
+
 	database.InitDB()
 
-	err := config.InitFirebase()
+	err = config.InitFirebase()
 	if err != nil {
 		log.Fatalf("Failed to initialize Firebase: %v", err)
 	}
@@ -123,5 +148,14 @@ func main() {
 	router.GET("/ws-chat", controller.HandleWebSocketChat)
 	router.GET("/ws-queue", controller.HandleWebSocketQueue)
 
-	router.Start(":8080")
+	// router.Start(":8080")
+	server := &http.Server{
+		Addr:    ":8080",
+		Handler: router,
+	}
+
+	fmt.Println("⇨ HTTP server started on [::]:8080")
+	if err := server.ListenAndServe(); err != http.ErrServerClosed {
+		router.Logger.Fatal(err)
+	}
 }

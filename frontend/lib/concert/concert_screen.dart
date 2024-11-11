@@ -7,6 +7,7 @@ import 'package:intl/intl.dart';
 import 'package:weezemaster/components/resale_ticket.dart';
 import 'package:weezemaster/components/interest_chip.dart';
 import 'package:weezemaster/translation.dart';
+import 'package:weezemaster/core/utils/constants.dart';
 
 class ConcertScreen extends StatelessWidget {
   final String id;
@@ -303,7 +304,7 @@ class ConcertScreen extends StatelessWidget {
                                       final tokenService = TokenService();
                                       String? token = await tokenService.getValidAccessToken();
                                       if (token == null) {
-                                        context.pushNamed('login-register');
+                                        GoRouter.of(context).go(Routes.loginRegisterNamedPage);
                                       } else {
                                         context.pushNamed(
                                           'booking',
@@ -347,7 +348,7 @@ class ConcertScreen extends StatelessWidget {
                 left: 10.0,
                 child: FloatingActionButton(
                   child: const Icon(Icons.arrow_back),
-                  onPressed: () => context.pushNamed('home'),
+                  onPressed: () => GoRouter.of(context).go(Routes.homeNamedPage),
                 ),
               ),
             ],

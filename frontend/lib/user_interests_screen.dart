@@ -7,6 +7,8 @@ import 'package:weezemaster/core/services/api_services.dart';
 import 'package:weezemaster/core/exceptions/api_exception.dart';
 import 'package:weezemaster/core/services/token_services.dart';
 import 'package:weezemaster/translation.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:weezemaster/controller/navigation_cubit.dart';
 
 class UserInterestsScreen extends StatefulWidget {
   const UserInterestsScreen({super.key});
@@ -32,7 +34,7 @@ class UserInterestsScreenState extends State<UserInterestsScreen> {
     String? token = await tokenService.getValidAccessToken();
     if (token == null) {
       if (mounted) {
-        context.pushNamed('login-register');
+        GoRouter.of(context).go('/login-register');
       }
     } else {
       await fetchInterests();
@@ -148,6 +150,8 @@ class UserInterestsScreenState extends State<UserInterestsScreen> {
 
   void _logout() async {
     await clearTokens();
+    context.read<NavigationCubit>().updateUserRole('');
+
     if (mounted) {
       context.pushNamed('login');
     }

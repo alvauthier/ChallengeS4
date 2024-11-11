@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:go_router/go_router.dart';
 import 'dart:convert';
-
 import 'package:weezemaster/core/services/token_services.dart';
 import 'package:weezemaster/translation.dart';
+import 'package:weezemaster/core/utils/constants.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:weezemaster/controller/navigation_cubit.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -31,23 +33,19 @@ class ProfileScreenState extends State<ProfileScreen> {
     void _logout() async {
     await clearTokens();
     if (mounted) {
+      context.read<NavigationCubit>().updateUserRole('');
       context.pushNamed('login');
     }
   }
 
   Future<void> verifyJwtAndRedirectIfNecessary() async {
     String? jwt = await storage.read(key: 'access_token');
-    // if (jwt == null || !_isTokenValid(jwt)) {
     if (jwt == null) {
-      context.pushNamed('login-register');
+      GoRouter.of(context).go(Routes.loginRegisterNamedPage);
     } else {
       getEmailFromJwt();
     }
   }
-
-  // bool _isTokenValid(String token) {
-  //   return false;
-  // }
 
   Future<void> getEmailFromJwt() async {
     String? jwt = await storage.read(key: 'access_token');

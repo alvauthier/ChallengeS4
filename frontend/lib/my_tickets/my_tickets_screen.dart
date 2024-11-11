@@ -8,6 +8,7 @@ import 'package:weezemaster/core/services/token_services.dart';
 import 'package:weezemaster/my_tickets/blocs/my_tickets_bloc.dart';
 import 'package:http/http.dart' as http;
 import 'package:weezemaster/translation.dart';
+import 'package:weezemaster/core/utils/constants.dart';
 
 class MyTicketsScreen extends StatefulWidget {
   const MyTicketsScreen({super.key});
@@ -60,8 +61,10 @@ class MyTicketsScreenState extends State<MyTicketsScreen> {
                 final enteredPrice = double.tryParse(_priceController.text);
                 if (enteredPrice != null && enteredPrice <= maxPrice) {
                   await _resellTicket(ticket.id, enteredPrice);
+                  context.pop();
                   context.pushNamed('my-tickets');
                 } else {
+                  context.pop();
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(
                       content: Text('Le prix de revente ne peut pas dépasser le prix d\'achat.'),

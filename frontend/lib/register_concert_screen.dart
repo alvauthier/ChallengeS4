@@ -12,6 +12,7 @@ import 'package:weezemaster/core/services/api_services.dart';
 import 'package:weezemaster/core/services/token_services.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:weezemaster/translation.dart';
+import 'package:weezemaster/core/utils/constants.dart';
 
 class RegisterConcertScreen extends StatefulWidget {
   const RegisterConcertScreen({super.key});
@@ -103,7 +104,7 @@ Future<void> _fetchCategories() async {
       return decodedToken['id'] as String;
     } else {
       if (mounted) {
-        context.pushNamed('login-register');
+        GoRouter.of(context).go(Routes.loginRegisterNamedPage);
       }
       return '';
     }
@@ -361,7 +362,7 @@ Future<void> _fetchCategories() async {
                                         ),
                                       );
                                       if (response.statusCode == 200) {
-                                        context.pushNamed('home');
+                                        GoRouter.of(context).go(Routes.homeNamedPage);
                                       }
                                     } catch (e) {
                                       ScaffoldMessenger.of(context).showSnackBar(

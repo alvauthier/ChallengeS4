@@ -4,6 +4,9 @@ import 'package:go_router/go_router.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:weezemaster/translation.dart';
+import 'package:weezemaster/core/utils/constants.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:weezemaster/controller/navigation_cubit.dart';
 
 class RegisterOrganisationScreen extends StatefulWidget {
   const RegisterOrganisationScreen({super.key});
@@ -173,7 +176,8 @@ class RegisterOrganisationScreenState extends State<RegisterOrganisationScreen> 
                                       ),
                                     );
                                     if (response.statusCode == 201) {
-                                      context.pushNamed('home');
+                                      context.read<NavigationCubit>().updateUserRole('organizer');
+                                      GoRouter.of(context).go(Routes.homeNamedPage);
                                     }
                                   } catch (e) {
                                     ScaffoldMessenger.of(context).showSnackBar(

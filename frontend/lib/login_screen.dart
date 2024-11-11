@@ -5,6 +5,9 @@ import 'package:go_router/go_router.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:weezemaster/translation.dart';
+import 'package:weezemaster/core/utils/constants.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:weezemaster/controller/navigation_cubit.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -22,6 +25,45 @@ class LoginScreenState extends State<LoginScreen> {
       r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$');
 
   final storage = const FlutterSecureStorage();
+
+  Future<String> getUserRoleFromJwt(accessToken) async {
+    Map<String, dynamic> decodedToken = _decodeToken(accessToken);
+
+    return decodedToken['role'];
+  }
+
+  Map<String, dynamic> _decodeToken(String token) {
+    final parts = token.split('.');
+    if (parts.length != 3) {
+      throw Exception('Invalid token');
+    }
+
+    final payload = _decodeBase64(parts[1]);
+    final payloadMap = json.decode(payload);
+    if (payloadMap is! Map<String, dynamic>) {
+      throw Exception('Invalid payload');
+    }
+
+    return payloadMap;
+  }
+
+  String _decodeBase64(String str) {
+    String output = str.replaceAll('-', '+').replaceAll('_', '/');
+    switch (output.length % 4) {
+      case 0:
+        break;
+      case 2:
+        output += '==';
+        break;
+      case 3:
+        output += '=';
+        break;
+      default:
+        throw Exception('Illegal base64url string!"');
+    }
+
+    return utf8.decode(base64Url.decode(output));
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -105,7 +147,9 @@ class LoginScreenState extends State<LoginScreen> {
                                       final String refreshToken = responseData['refresh_token'];
                                       await storage.write(key: 'access_token', value: accessToken);
                                       await storage.write(key: 'refresh_token', value: refreshToken);
-                                      context.pushNamed('home');
+                                      final String userRole = await getUserRoleFromJwt(accessToken);
+                                      context.read<NavigationCubit>().updateUserRole(userRole);
+                                      GoRouter.of(context).go(Routes.homeNamedPage);
                                     }
                                   } catch (e) {
                                     ScaffoldMessenger.of(context).showSnackBar(

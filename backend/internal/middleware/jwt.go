@@ -18,6 +18,10 @@ func JWTMiddleware() echo.MiddlewareFunc {
 			return new(jwt.MapClaims)
 		},
 		ErrorHandler: func(c echo.Context, err error) error {
+			// Exclure la racine `/` de la vérification JWT pour renvoyer un 404 au lieu d'un 401
+			if c.Request().URL.Path == "/" {
+				return echo.NewHTTPError(http.StatusNotFound, "Not Found")
+			}
 			return echo.NewHTTPError(http.StatusUnauthorized, "Invalid or expired token")
 		},
 	})

@@ -148,6 +148,8 @@ func main() {
 	router.GET("/ws-chat", controller.HandleWebSocketChat)
 	router.GET("/ws-queue", controller.HandleWebSocketQueue)
 
+	router.GET("/logs", controller.GetLogs)
+
 	// router.Start(":8080")
 	server := &http.Server{
 		Addr:    ":8080",

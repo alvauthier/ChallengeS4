@@ -90,6 +90,7 @@ class LoginScreenState extends State<LoginScreen> {
                           controller: _emailController,
                           decoration: InputDecoration(
                             labelText: translate(context)!.email,
+                            errorMaxLines: 3,
                           ),
                           validator: (value) {
                             if (value == null || value.isEmpty) {
@@ -104,6 +105,7 @@ class LoginScreenState extends State<LoginScreen> {
                           controller: _passwordController,
                           decoration: InputDecoration(
                             labelText: translate(context)!.password,
+                            errorMaxLines: 3,
                           ),
                           obscureText: true,
                           validator: (value) {
@@ -161,14 +163,34 @@ class LoginScreenState extends State<LoginScreen> {
                                   }
                                 }
                               },
-                              child: Text(translate(context)!.login),
+                              style: ElevatedButton.styleFrom(
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(6.0),
+                                ),
+                                backgroundColor: Colors.deepOrange,
+                              ),
+                              child: Text(
+                                translate(context)!.login,
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontFamily: 'Readex Pro',
+                                ),
+                              ),
                             ),
                           ),
                         ),
-                        TextButton(onPressed: ()
-                        {
-                          context.pushNamed('forgot-password');
-                        }, child: Text(translate(context)!.forgot_password)),
+                        TextButton(
+                          onPressed: () {
+                            context.pushNamed('forgot-password');
+                          },
+                          child: Text(
+                            translate(context)!.forgot_password,
+                            style: const TextStyle(
+                              color: Colors.deepOrange,
+                              fontFamily: 'Readex Pro',
+                            ),
+                          )
+                        ),
                       ],
                     ),
                   ),

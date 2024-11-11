@@ -20,38 +20,97 @@ class LoginRegisterScreen extends StatelessWidget {
           ),
           Column(
             children: <Widget>[
-              AppBar(
-                title: Text(
-                  translate(context)!.welcome,
-                  style: const TextStyle(color: Colors.white),
-                ),
-                backgroundColor: Colors.transparent,
-                elevation: 0,
-              ),
-              Expanded(
-                child: Center(
+              const Spacer(),
+              Align(
+                alignment: Alignment.bottomCenter,
+                child: Padding(
+                  padding: const EdgeInsets.all(20.0),
                   child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
+                    mainAxisSize: MainAxisSize.min,
                     children: <Widget>[
-                      ElevatedButton(
-                        onPressed: () {
-                          context.pushNamed('login');
-                        },
-                        child: Text(translate(context)!.login),
+                      Text(
+                        translate(context)!.welcome,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 48,
+                          fontFamily: 'Readex Pro',
+                          fontWeight: FontWeight.bold,
+                          height: 0.9,
+                        ),
                       ),
-                      const SizedBox(height: 20),
-                      ElevatedButton(
-                        onPressed: () {
-                          context.pushNamed('register');
-                        },
-                        child: Text(translate(context)!.create_account),
+                      const SizedBox(height: 50),
+                      SizedBox(
+                        width: double.infinity,
+                        height: 50,
+                        child: ElevatedButton(
+                          onPressed: () {
+                            context.pushNamed('login');
+                          },
+                          style: ElevatedButton.styleFrom(
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(6.0),
+                            ),
+                            backgroundColor: Colors.deepOrange,
+                          ),
+                          child: Text(
+                            translate(context)!.login,
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontFamily: 'Readex Pro',
+                              fontSize: 16,
+                            ),
+                          ),
+                        ),
                       ),
-                      const SizedBox(height: 20),
-                      ElevatedButton(
-                        onPressed: () {
-                          context.pushNamed('register-organization');
-                        },
-                        child: Text(translate(context)!.create_organization_account),
+                      const SizedBox(height: 15),
+                      SizedBox(
+                        width: double.infinity,
+                        height: 50,
+                        child: ElevatedButton(
+                          onPressed: () {
+                            context.pushNamed('register');
+                          },
+                          style: ElevatedButton.styleFrom(
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(6.0),
+                              side: const BorderSide(color: Colors.white),
+                            ),
+                            backgroundColor: Colors.transparent,
+                          ),
+                          child: Text(
+                            translate(context)!.create_account,
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontFamily: 'Readex Pro',
+                              fontSize: 16,
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 15),
+                      SizedBox(
+                        width: double.infinity,
+                        height: 50,
+                        child: ElevatedButton(
+                          onPressed: () {
+                            context.pushNamed('register-organization');
+                          },
+                          style: ElevatedButton.styleFrom(
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(6.0),
+                              side: const BorderSide(color: Colors.white),
+                            ),
+                            backgroundColor: Colors.transparent,
+                          ),
+                          child: Text(
+                            translate(context)!.create_organization_account,
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontFamily: 'Readex Pro',
+                              fontSize: 16,
+                            ),
+                          ),
+                        ),
                       ),
                     ],
                   ),

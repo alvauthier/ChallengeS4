@@ -20,10 +20,8 @@ class RegisterScreenState extends State<RegisterScreen> {
   final _firstnameController = TextEditingController();
   final _lastnameController = TextEditingController();
 
-  final RegExp emailRegExp = RegExp(
-      r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$');
-  final RegExp passwordRegExp = RegExp(
-      r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#\$&*~]).{8,}$');
+  final RegExp emailRegExp = RegExp(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$');
+  final RegExp passwordRegExp = RegExp(r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#\$&*~]).{8,}$');
 
   @override
   Widget build(BuildContext context) {
@@ -46,74 +44,90 @@ class RegisterScreenState extends State<RegisterScreen> {
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: <Widget>[
-                        TextFormField(
-                          controller: _firstnameController,
-                          decoration: InputDecoration(
-                            labelText: translate(context)!.firstname,
+                        Flexible(
+                          child: TextFormField(
+                            controller: _firstnameController,
+                            decoration: InputDecoration(
+                              labelText: translate(context)!.firstname,
+                              errorMaxLines: 3,
+                            ),
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return translate(context)!.firstname_empty;
+                              }
+                              return null;
+                            },
                           ),
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return translate(context)!.firstname_empty;
-                            }
-                            return null;
-                          },
                         ),
-                        TextFormField(
-                          controller: _lastnameController,
-                          decoration: InputDecoration(
-                            labelText: translate(context)!.lastname,
+                        Flexible(
+                          child: TextFormField(
+                            controller: _lastnameController,
+                            decoration: InputDecoration(
+                              labelText: translate(context)!.lastname,
+                              errorMaxLines: 3,
+                            ),
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return translate(context)!.lastname_empty;
+                              }
+                              return null;
+                            },
                           ),
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return translate(context)!.lastname_empty;
-                            }
-                            return null;
-                          },
                         ),
-                        TextFormField(
-                          controller: _emailController,
-                          decoration: InputDecoration(
-                            labelText: translate(context)!.email,
+                        Flexible(
+                          child: TextFormField(
+                            controller: _emailController,
+                            decoration: InputDecoration(
+                              labelText: translate(context)!.email,
+                              errorMaxLines: 3,
+                            ),
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return translate(context)!.email_empty;
+                              } else if (!emailRegExp.hasMatch(value)) {
+                                return translate(context)!.email_invalid;
+                              }
+                              return null;
+                            },
                           ),
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return translate(context)!.email_empty;
-                            } else if (!emailRegExp.hasMatch(value)) {
-                              return translate(context)!.email_invalid;
-                            }
-                            return null;
-                          },
                         ),
-                        TextFormField(
-                          controller: _passwordController,
-                          decoration: InputDecoration(
-                            labelText: translate(context)!.password,
+                        Flexible(
+                          child: TextFormField(
+                            controller: _passwordController,
+                            decoration: InputDecoration(
+                              labelText: translate(context)!.password,
+                              errorMaxLines: 3,
+                            ),
+                            obscureText: true,
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return translate(context)!.password_empty;
+                              } else if (!passwordRegExp.hasMatch(value)) {
+                                return translate(context)!.password_invalid;
+                              }
+                              return null;
+                            },
+                            autovalidateMode: AutovalidateMode.onUserInteraction,
                           ),
-                          obscureText: true,
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return translate(context)!.password_empty;
-                            } else if (!passwordRegExp.hasMatch(value)) {
-                              return translate(context)!.password_invalid;
-                            }
-                            return null;
-                          },
                         ),
-                        TextFormField(
-                          controller: _confirmPasswordController,
-                          decoration: InputDecoration(
-                            labelText: translate(context)!.confirm_password,
+                        Flexible(
+                          child: TextFormField(
+                            controller: _confirmPasswordController,
+                            decoration: InputDecoration(
+                              labelText: translate(context)!.confirm_password,
+                              errorMaxLines: 3,
+                            ),
+                            obscureText: true,
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return translate(context)!.confirm_password_empty;
+                              }
+                              if (value != _passwordController.text) {
+                                return translate(context)!.password_no_match;
+                              }
+                              return null;
+                            },
                           ),
-                          obscureText: true,
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return translate(context)!.confirm_password_empty;
-                            }
-                            if (value != _passwordController.text) {
-                              return translate(context)!.password_no_match;
-                            }
-                            return null;
-                          },
                         ),
                         Padding(
                           padding: const EdgeInsets.only(top: 15.0),
@@ -123,45 +137,24 @@ class RegisterScreenState extends State<RegisterScreen> {
                               onPressed: () async {
                                 if (_formKey.currentState!.validate()) {
                                   // Process data.
-                                  try {
-                                    final apiUrl = '${dotenv.env['API_PROTOCOL']}://${dotenv.env['API_HOST']}${dotenv.env['API_PORT']}/register';
-                                    var response = await http.post(
-                                      Uri.parse(apiUrl),
-                                      headers: <String, String>{
-                                        'Content-Type': 'application/json; charset=UTF-8',
-                                      },
-                                      body: jsonEncode(<String, String>{
-                                        'firstname': _firstnameController.text,
-                                        'lastname': _lastnameController.text,
-                                        'email': _emailController.text,
-                                        'password': _passwordController.text,
-                                      }),
-                                    );
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(
-                                        content: Text(response.statusCode == 201
-                                            ? translate(context)!.register_success
-                                            : translate(context)!.register_failed),
-                                        duration: const Duration(seconds: 5),
-                                      ),
-                                    );
-                                    if (response.statusCode == 201) {
-                                      context.pushNamed('login');
-                                    }
-                                  } catch (e) {
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(
-                                        content: Text(translate(context)!.generic_error),
-                                        duration: const Duration(seconds: 5),
-                                      ),
-                                    );
-                                  }
                                 }
                               },
-                              child: Text(translate(context)!.register),
+                              style: ElevatedButton.styleFrom(
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(6.0),
+                                ),
+                                backgroundColor: Colors.deepOrange,
+                              ),
+                              child: Text(
+                                translate(context)!.register,
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontFamily: 'Readex Pro',
+                                ),
+                              ),
                             ),
                           ),
-                        )
+                        ),
                       ],
                     ),
                   ),

@@ -15,6 +15,7 @@ class App extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         useMaterial3: true,
+        primarySwatch: Colors.deepOrange,
       ),
       localizationsDelegates: const [
         AppLocalizations.delegate,

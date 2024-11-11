@@ -55,6 +55,7 @@ class RegisterOrganisationScreenState extends State<RegisterOrganisationScreen> 
                           controller: _organameController,
                           decoration: InputDecoration(
                             labelText: translate(context)!.organization_name,
+                            errorMaxLines: 3,
                           ),
                           validator: (value) {
                             if (value == null || value.isEmpty) {
@@ -67,6 +68,7 @@ class RegisterOrganisationScreenState extends State<RegisterOrganisationScreen> 
                           controller: _orgadescriController,
                           decoration: InputDecoration(
                             labelText: translate(context)!.organization_description,
+                            errorMaxLines: 3,
                           ),
                           validator: (value) {
                             if (value == null || value.isEmpty) {
@@ -79,6 +81,7 @@ class RegisterOrganisationScreenState extends State<RegisterOrganisationScreen> 
                           controller: _firstnameController,
                           decoration: InputDecoration(
                             labelText: translate(context)!.firstname,
+                            errorMaxLines: 3,
                           ),
                           validator: (value) {
                             if (value == null || value.isEmpty) {
@@ -91,6 +94,7 @@ class RegisterOrganisationScreenState extends State<RegisterOrganisationScreen> 
                           controller: _lastnameController,
                           decoration: InputDecoration(
                             labelText: translate(context)!.lastname,
+                            errorMaxLines: 3,
                           ),
                           validator: (value) {
                             if (value == null || value.isEmpty) {
@@ -103,6 +107,7 @@ class RegisterOrganisationScreenState extends State<RegisterOrganisationScreen> 
                           controller: _emailController,
                           decoration: InputDecoration(
                             labelText: translate(context)!.email,
+                            errorMaxLines: 3,
                           ),
                           validator: (value) {
                             if (value == null || value.isEmpty) {
@@ -117,6 +122,7 @@ class RegisterOrganisationScreenState extends State<RegisterOrganisationScreen> 
                           controller: _passwordController,
                           decoration: InputDecoration(
                             labelText: translate(context)!.password,
+                            errorMaxLines: 3,
                           ),
                           obscureText: true,
                           validator: (value) {
@@ -132,6 +138,7 @@ class RegisterOrganisationScreenState extends State<RegisterOrganisationScreen> 
                           controller: _confirmPasswordController,
                           decoration: InputDecoration(
                             labelText: translate(context)!.confirm_password,
+                            errorMaxLines: 3,
                           ),
                           obscureText: true,
                           validator: (value) {
@@ -189,7 +196,18 @@ class RegisterOrganisationScreenState extends State<RegisterOrganisationScreen> 
                                   }
                                 }
                               },
-                              child: Text(translate(context)!.register),
+                              style: ElevatedButton.styleFrom(
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(6.0),
+                                ),
+                                backgroundColor: Colors.deepOrange,
+                              ),
+                              child: Text(
+                                translate(context)!.register,
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                ),
+                              ),
                             ),
                           ),
                         )

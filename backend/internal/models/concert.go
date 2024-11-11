@@ -13,6 +13,7 @@ type Concert struct {
 	Description       string    `gorm:"not null"`
 	Location          string    `gorm:"not null"`
 	Date              time.Time `gorm:"not null"`
+	Image             string
 	CreatedAt         time.Time
 	UpdatedAt         time.Time
 	DeletedAt         *time.Time        `gorm:"index"`

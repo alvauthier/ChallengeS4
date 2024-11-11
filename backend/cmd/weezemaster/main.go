@@ -7,6 +7,7 @@ import (
 	"weezemaster/internal/controller"
 	"weezemaster/internal/database"
 	"weezemaster/internal/middleware"
+	"net/http"
 
 	_ "weezemaster/docs"
 
@@ -55,6 +56,8 @@ func main() {
 
 	authenticated := router.Group("")
 	authenticated.Use(middleware.JWTMiddleware())
+
+	router.GET("/uploads/*", echo.WrapHandler(http.StripPrefix("/uploads/", http.FileServer(http.Dir("uploads")))))
 
 	router.POST("/register", controller.Register)
 	router.POST("/login", controller.Login)

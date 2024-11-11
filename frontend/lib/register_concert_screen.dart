@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:go_router/go_router.dart';
 import 'package:http/http.dart' as http;
+import 'package:http_parser/http_parser.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:omni_datetime_picker/omni_datetime_picker.dart';
 import 'package:weezemaster/core/models/category.dart';
@@ -58,17 +59,16 @@ class RegisterConcertScreenState extends State<RegisterConcertScreen> {
     _fetchInterests();
   }
 
-Future<void> _fetchCategories() async {
-  categories = await ApiServices.getCategories();
-  setState(() {
-    for (var category in categories) {
-      selectedCategories[category.id] = false;
-      _categoriesController[category.id] = TextEditingController();
-      _pricesController[category.id] = TextEditingController();
-    }
-  });
-}
-
+  Future<void> _fetchCategories() async {
+    categories = await ApiServices.getCategories();
+    setState(() {
+      for (var category in categories) {
+        selectedCategories[category.id] = false;
+        _categoriesController[category.id] = TextEditingController();
+        _pricesController[category.id] = TextEditingController();
+      }
+    });
+  }
 
   Future<void> _fetchInterests() async {
     interests = await ApiServices.getAllInterests();
@@ -151,7 +151,14 @@ Future<void> _fetchCategories() async {
           Column(
             children: <Widget>[
               AppBar(
-                title: Text(translate(context)!.create_a_concert),
+                title: Text(
+                  translate(context)!.create_a_concert,
+                  style: const TextStyle(
+                    fontFamily: 'Readex Pro',
+                    fontWeight: FontWeight.bold,
+                    fontSize: 24,
+                  ),
+                ),
                 elevation: 0,
               ),
               Expanded(
@@ -167,15 +174,15 @@ Future<void> _fetchCategories() async {
                             onTap: getImage,
                             child: _image == null
                                 ? Container(
-                                    width: 100,
-                                    height: 100,
+                                    width: double.infinity,
+                                    height: 200,
                                     color: Colors.grey[300],
                                     child: const Icon(Icons.camera_alt),
                                   )
                                 : Image.file(
                                     File(_image!.path),
-                                    width: 100,
-                                    height: 100,
+                                    width: double.infinity,
+                                    height: 200,
                                   ),
                           ),
                           const SizedBox(height: 20),
@@ -183,6 +190,7 @@ Future<void> _fetchCategories() async {
                             controller: _nameController,
                             decoration: InputDecoration(
                               labelText: translate(context)!.concert_name,
+                              errorMaxLines: 3,
                             ),
                             validator: (value) {
                               if (value == null || value.isEmpty) {
@@ -195,6 +203,7 @@ Future<void> _fetchCategories() async {
                             controller: _descriptionController,
                             decoration: InputDecoration(
                               labelText: translate(context)!.concert_description,
+                              errorMaxLines: 3,
                             ),
                             validator: (value) {
                               if (value == null || value.isEmpty) {
@@ -207,6 +216,7 @@ Future<void> _fetchCategories() async {
                             controller: _cityController,
                             decoration: InputDecoration(
                               labelText: translate(context)!.location,
+                              errorMaxLines: 3,
                             ),
                             validator: (value) {
                               if (value == null || value.isEmpty) {
@@ -223,30 +233,54 @@ Future<void> _fetchCategories() async {
                                   _selectedDate == null
                                       ? translate(context)!.select_date_empty
                                       : '${translate(context)!.selected_date} ${_selectedDate!.toLocal().toIso8601String().split('T')[0]} ${_selectedDate!.toLocal().toIso8601String().split('T')[1].split(':').sublist(0, 2).join(':')}',
+                                  style: const TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontFamily: 'Readex Pro',
+                                      fontSize: 16
+                                  ),
                                 ),
                               ),
                               ElevatedButton(
                                 onPressed: () => _selectDate(context),
-                                child: Text(translate(context)!.select_date),
+                                style: ElevatedButton.styleFrom(
+                                  foregroundColor: Colors.white,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(6.0),
+                                  ),
+                                  backgroundColor: Colors.deepOrange,
+                                ),
+                                child: Text(
+                                    translate(context)!.select_date,
+                                    style: const TextStyle(fontFamily: 'Readex Pro'),
+                                ),
                               ),
                             ],
                           ),
-                          const SizedBox(height: 20),
+                          const SizedBox(height: 30),
                           Text(
                             translate(context)!.ticket_categories,
-                            style: const TextStyle(fontWeight: FontWeight.bold),
+                            style: const TextStyle(
+                              fontFamily: 'Readex Pro',
+                              fontWeight: FontWeight.bold,
+                              fontSize: 20,
+                            ),
                           ),
+                          const SizedBox(height: 10),
                           ...categories.map((category) {
                             return Column(
                               children: [
                                 CheckboxListTile(
-                                  title: Text(category.name),
+                                  title: Text(
+                                    category.name,
+                                    style: const TextStyle(fontFamily: 'Readex Pro'),
+                                  ),
                                   value: selectedCategories[category.id],
                                   onChanged: (bool? value) {
                                     setState(() {
                                       selectedCategories[category.id] = value!;
                                     });
                                   },
+                                  activeColor: Colors.deepOrange,
                                 ),
                                 if (selectedCategories[category.id]!)
                                   Column(
@@ -255,6 +289,7 @@ Future<void> _fetchCategories() async {
                                         controller: _categoriesController[category.id],
                                         decoration: InputDecoration(
                                           labelText: '${translate(context)!.number_of_tickets_for} ${category.name}',
+                                          errorMaxLines: 3,
                                         ),
                                         validator: (value) {
                                           if (value == null || value.isEmpty) {
@@ -271,6 +306,7 @@ Future<void> _fetchCategories() async {
                                         controller: _pricesController[category.id],
                                         decoration: InputDecoration(
                                           labelText: '${translate(context)!.tickets_prices_for} ${category.name}',
+                                          errorMaxLines: 3,
                                         ),
                                         validator: (value) {
                                           if (value == null || value.isEmpty) {
@@ -289,16 +325,26 @@ Future<void> _fetchCategories() async {
                             );
                           }),
 
-                          const SizedBox(height: 20),
+                          const SizedBox(height: 30),
                           Text(
                             translate(context)!.interests,
-                            style: const TextStyle(fontWeight: FontWeight.bold),
+                            style: const TextStyle(
+                              fontFamily: 'Readex Pro',
+                              fontWeight: FontWeight.bold,
+                              fontSize: 20,
+                            ),
                           ),
+                          const SizedBox(height: 10),
                           Wrap(
                             spacing: 10,
                             children: interests.map((interest) {
                               return ChoiceChip(
-                                label: Text(interest.name),
+                                label: Text(
+                                  interest.name,
+                                  style: const TextStyle(
+                                    fontFamily: 'Readex Pro',
+                                  ),
+                                ),
                                 selected: selectedInterests[interest.id]!,
                                 selectedColor: Colors.deepOrangeAccent,
                                 onSelected: (bool selected) {
@@ -335,24 +381,33 @@ Future<void> _fetchCategories() async {
                                     try {
                                       final tokenService = TokenService();
                                       String? jwtToken = await tokenService.getValidAccessToken();
-                                      String userId = await getUserIdFromJwt();
-                                      var response = await http.post(
+
+                                      var request = http.MultipartRequest(
+                                        'POST',
                                         Uri.parse('${dotenv.env['API_PROTOCOL']}://${dotenv.env['API_HOST']}${dotenv.env['API_PORT']}/concerts'),
-                                        headers: <String, String>{
-                                          'Content-Type': 'application/json; charset=UTF-8',
-                                          'Authorization': 'Bearer $jwtToken', // HOT FIX : ajout du jwt manquant pour la création de concert...
-                                        },
-                                        body: jsonEncode(<String, dynamic>{
-                                          'name': _nameController.text,
-                                          'image': _base64Image,
-                                          'description': _descriptionController.text,
-                                          'location': _cityController.text,
-                                          'date': '${_selectedDate!.toLocal().toIso8601String().split('T')[0]} ${_selectedDate!.toLocal().toIso8601String().split('T')[1].split(':').sublist(0, 2).join(':')}',
-                                          'userId': userId,
-                                          'InterestIDs': selectedInterestsList,
-                                          'CategoriesIDs': tabCategories,
-                                        }),
                                       );
+
+                                      request.headers['Authorization'] = 'Bearer $jwtToken';
+
+                                      request.fields['name'] = _nameController.text;
+                                      request.fields['description'] = _descriptionController.text;
+                                      request.fields['location'] = _cityController.text;
+                                      request.fields['date'] = '${_selectedDate!.toLocal().toIso8601String().split('T')[0]} ${_selectedDate!.toLocal().toIso8601String().split('T')[1].split(':').sublist(0, 2).join(':')}';
+                                      request.fields['InterestIDs'] = selectedInterestsList.join(',');
+                                      request.fields['CategoriesIDs'] = jsonEncode(tabCategories);
+
+                                      if (_image != null) {
+                                        request.files.add(
+                                          await http.MultipartFile.fromPath(
+                                            'image',
+                                            _image!.path,
+                                            contentType: MediaType('image', _image!.path.split('.').last),
+                                          ),
+                                        );
+                                      }
+
+                                      var response = await request.send();
+
                                       ScaffoldMessenger.of(context).showSnackBar(
                                         SnackBar(
                                           content: Text(response.statusCode == 200
@@ -361,6 +416,7 @@ Future<void> _fetchCategories() async {
                                           duration: const Duration(seconds: 5),
                                         ),
                                       );
+
                                       if (response.statusCode == 200) {
                                         GoRouter.of(context).go(Routes.homeNamedPage);
                                       }
@@ -374,7 +430,17 @@ Future<void> _fetchCategories() async {
                                     }
                                   }
                                 },
-                                child: Text(translate(context)!.create_the_concert),
+                                style: ElevatedButton.styleFrom(
+                                  foregroundColor: Colors.white,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(6.0),
+                                  ),
+                                  backgroundColor: Colors.deepOrange,
+                                ),
+                                child: Text(
+                                    translate(context)!.create_the_concert,
+                                    style: const TextStyle(fontFamily: 'Readex Pro'),
+                                ),
                               ),
                             ),
                           ),

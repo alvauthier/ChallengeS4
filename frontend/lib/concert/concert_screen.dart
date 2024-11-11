@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:go_router/go_router.dart';
 import 'package:weezemaster/concert/blocs/concert_bloc.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -110,9 +111,11 @@ class ConcertScreen extends StatelessWidget {
                           child: Column(
                             children: <Widget>[
                               Image.network(
-                                'https://picsum.photos/seed/picsum/800/400',
+                                concert.image != null
+                                    ? '${dotenv.env['API_PROTOCOL']}://${dotenv.env['API_HOST']}${dotenv.env['API_PORT']}/uploads/concerts/${concert.image}'
+                                    : 'https://picsum.photos/seed/picsum/800/400',
                                 width: double.infinity,
-                                height: 200,
+                                height: 250,
                                 fit: BoxFit.cover,
                               ),
                               Padding(

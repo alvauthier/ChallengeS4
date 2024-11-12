@@ -66,7 +66,9 @@ class ConcertScreen extends StatelessWidget {
                                   'reseller': {
                                     'id': ticket.user.id,
                                     'name': '${ticket.user.firstname} ${ticket.user.lastname}',
-                                    'avatar': 'https://thispersondoesnotexist.com/',
+                                    'avatar': ticket.user.image != ''
+                                        ? '${dotenv.env['API_PROTOCOL']}://${dotenv.env['API_HOST']}${dotenv.env['API_PORT']}/uploads/users/${ticket.user.image}'
+                                        : '',
                                   },
                                   'category': concertCategory.category.name,
                                   'price': ticket.ticketListing!.price.toStringAsFixed(2),
@@ -111,7 +113,7 @@ class ConcertScreen extends StatelessWidget {
                           child: Column(
                             children: <Widget>[
                               Image.network(
-                                concert.image != null
+                                concert.image != ''
                                     ? '${dotenv.env['API_PROTOCOL']}://${dotenv.env['API_HOST']}${dotenv.env['API_PORT']}/uploads/concerts/${concert.image}'
                                     : 'https://picsum.photos/seed/picsum/800/400',
                                 width: double.infinity,

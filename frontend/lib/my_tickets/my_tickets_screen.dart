@@ -8,7 +8,6 @@ import 'package:weezemaster/core/services/token_services.dart';
 import 'package:weezemaster/my_tickets/blocs/my_tickets_bloc.dart';
 import 'package:http/http.dart' as http;
 import 'package:weezemaster/translation.dart';
-import 'package:weezemaster/core/utils/constants.dart';
 
 class MyTicketsScreen extends StatefulWidget {
   const MyTicketsScreen({super.key});
@@ -167,7 +166,7 @@ class MyTicketsScreenState extends State<MyTicketsScreen> {
                 return Column(
                   children: [
                     Padding(
-                      padding: const EdgeInsets.all(8.0),
+                      padding: const EdgeInsets.all(20.0),
                       child: Text(
                         translate(context)!.my_tickets,
                         style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
@@ -239,23 +238,75 @@ class MyTicketsScreenState extends State<MyTicketsScreen> {
                             );
                           }
 
-                          return Card(
-                            child: ListTile(
-                              title: Text(concert.name),
-                              subtitle: Column(
+                          return Padding(
+                            padding: const EdgeInsets.all(10.0),
+                            child: Card(
+                              elevation: 0,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Text(category.name),
-                                  Text('${concert.location} - ${formatDate(concert.date)}'),
-                                  if (ticket.ticketListing != null && ticket.ticketListing!.status == 'available')
-                                    Text(
-                                      '${translate(context)!.offered_for_resale} ${ticket.ticketListing!.price.toStringAsFixed(2)} €',
-                                      style: const TextStyle(color: Colors.green),
+                                  ClipRRect(
+                                    borderRadius: const BorderRadius.only(
+                                      topLeft: Radius.circular(10),
+                                      topRight: Radius.circular(10),
                                     ),
+                                    child: Image.network(
+                                      (concert.image != null && concert.image != '')
+                                          ? '${dotenv.env['API_PROTOCOL']}://${dotenv.env['API_HOST']}${dotenv.env['API_PORT']}/uploads/concerts/${concert.image}'
+                                          : 'https://picsum.photos/seed/picsum/800/400',
+                                      width: double.infinity,
+                                      height: 200,
+                                      fit: BoxFit.cover,
+                                    ),
+                                  ),
+                                  ListTile(
+                                    contentPadding: const EdgeInsets.all(10),
+                                    title: Text(
+                                        concert.name,
+                                        style: const TextStyle(
+                                          fontSize: 20,
+                                          fontWeight: FontWeight.bold,
+                                          fontFamily: 'Readex Pro'
+                                        ),
+                                    ),
+                                    subtitle: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Padding(
+                                          padding: const EdgeInsets.symmetric(vertical: 2.0),
+                                          child: Text(
+                                            category.name,
+                                            style: const TextStyle(
+                                              color: Colors.black54,
+                                              fontFamily: 'Readex Pro',
+                                            ),
+                                          ),
+                                        ),
+                                        Padding(
+                                          padding: const EdgeInsets.symmetric(vertical: 4.0),
+                                          child: Text(
+                                            '${concert.location} - ${formatDate(concert.date)}',
+                                            style: const TextStyle(
+                                              color: Colors.grey,
+                                              fontFamily: 'Readex Pro',
+                                            ),
+                                          ),
+                                        ),
+                                        if (ticket.ticketListing != null && ticket.ticketListing!.status == 'available')
+                                          Text(
+                                            '${translate(context)!.offered_for_resale} ${ticket.ticketListing!.price.toStringAsFixed(2)} €',
+                                            style: const TextStyle(color: Colors.green),
+                                          ),
+                                      ],
+                                    ),
+                                    trailing: actionButton,
+                                  ),
                                 ],
                               ),
-                              trailing: actionButton,
-                            ),
+                            )
                           );
                         },
                       ),

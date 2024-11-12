@@ -7,6 +7,10 @@ import (
 	"weezemaster/internal/config"
 	"weezemaster/internal/database"
 	"weezemaster/internal/models"
+    "io"
+    "os"
+    "path/filepath"
+    "strings"
 
 	"fmt"
 
@@ -91,6 +95,7 @@ type RegisterRequest struct {
 	Password  string `json:"password"`
 	Firstname string `json:"firstname"`
 	Lastname  string `json:"lastname"`
+    Image     string `json:"image"`
 }
 
 // @Summary		Créé un utilisateur
@@ -103,20 +108,69 @@ type RegisterRequest struct {
 func Register(c echo.Context) error {
 	db := database.GetDB()
 
-	req := new(RegisterRequest)
-	if err := c.Bind(req); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
-	}
+	email := c.FormValue("email")
+
+	// Vérifier si l'email est déjà utilisé
+	var existingUser models.User
+	if err := db.Where("email = ?", email).First(&existingUser).Error; err != gorm.ErrRecordNotFound {
+	    return echo.NewHTTPError(http.StatusUnprocessableEntity, "Email already used")
+    }
+
+	password := c.FormValue("password")
+	firstname := c.FormValue("firstname")
+	lastname := c.FormValue("lastname")
+
+    // Récupérer le fichier image depuis le form-data
+    file, err := c.FormFile("image")
+    if err != nil {
+        return echo.NewHTTPError(http.StatusBadRequest, "Image file is required")
+    }
+
+    // Ouvrir le fichier
+    src, err := file.Open()
+    if err != nil {
+        return echo.NewHTTPError(http.StatusInternalServerError, "Failed to open image file: "+err.Error())
+    }
+    defer src.Close()
+
+    // Vérifier l'extension du fichier
+    fileExtension := strings.ToLower(filepath.Ext(file.Filename))
+    if fileExtension != ".jpg" && fileExtension != ".jpeg" && fileExtension != ".png" {
+        return echo.NewHTTPError(http.StatusBadRequest, "Invalid file extension")
+    }
+
+    // Générer un UUID pour le nom du fichier
+    fileUUID := uuid.New().String()
+    fileName := fileUUID + fileExtension
+    filePath := filepath.Join("uploads", "users", fileName)
+
+    // Créer le dossier uploads/concerts s'il n'existe pas
+    if err := os.MkdirAll(filepath.Dir(filePath), os.ModePerm); err != nil {
+        return echo.NewHTTPError(http.StatusInternalServerError, "Failed to create directory: "+err.Error())
+    }
+
+    // Créer le fichier de destination
+    dst, err := os.Create(filePath)
+    if err != nil {
+        return echo.NewHTTPError(http.StatusInternalServerError, "Failed to create destination file: "+err.Error())
+    }
+    defer dst.Close()
+
+    // Copier les données de l'image dans le fichier de destination
+    if _, err := io.Copy(dst, src); err != nil {
+        return echo.NewHTTPError(http.StatusInternalServerError, "Failed to save image: "+err.Error())
+    }
 
 	user := &models.User{
 		ID:        uuid.New(),
-		Email:     req.Email,
-		Firstname: req.Firstname,
-		Lastname:  req.Lastname,
+		Email:     email,
+		Firstname: firstname,
+		Lastname:  lastname,
+		Image:     fileName,
 		Role:      "user",
 	}
 
-	hashedPassword, err := HashPassword(req.Password)
+	hashedPassword, err := HashPassword(password)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}

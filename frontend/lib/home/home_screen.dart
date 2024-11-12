@@ -328,7 +328,7 @@ class HomeScreenState extends State<HomeScreen> {
                                 }
                               },
                               child: Padding(
-                                padding: const EdgeInsets.symmetric(vertical: 20.0, horizontal: 10.0),
+                                padding: const EdgeInsets.all(10.0),
                                 child: Card(
                                   elevation: 0,
                                   shape: RoundedRectangleBorder(

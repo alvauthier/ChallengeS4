@@ -106,8 +106,15 @@ class ResaleTicket extends StatelessWidget {
             children: [
               ClipRRect(
                 borderRadius: BorderRadius.circular(10),
-                child: Image.network(
+                child: ticket.reseller.avatar.isNotEmpty
+                    ? Image.network(
                   ticket.reseller.avatar,
+                  width: 140,
+                  height: 140,
+                  fit: BoxFit.cover,
+                )
+                    : const Image(
+                  image: AssetImage("assets/user-placeholder.jpg"),
                   width: 140,
                   height: 140,
                   fit: BoxFit.cover,
@@ -187,15 +194,6 @@ class ResaleTicket extends StatelessWidget {
                                   debugPrint('Conversation found in the database, access it');
                                   context.push(
                                     '/chat/$existingConversationId',
-                                    // extra: {
-                                    //   'userId': null,
-                                    //   'resellerId': null,
-                                    //   'ticketId': null,
-                                    //   'concertName': null,
-                                    //   'price': null,
-                                    //   'resellerName': null,
-                                    //   'category': null,
-                                    // }
                                   );
                                 } else {
                                   debugPrint('No conversation found in the database');

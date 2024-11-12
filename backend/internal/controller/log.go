@@ -5,7 +5,9 @@ import (
 	"encoding/json"
 	"net/http"
 	"os"
+	"sort"
 	"strings"
+	"time"
 
 	"github.com/labstack/echo/v4"
 )
@@ -32,6 +34,18 @@ type LogEntry struct {
 }
 
 func GetLogs(c echo.Context) error {
+	dateParam := c.QueryParam("date")
+	eventType := c.QueryParam("event")
+
+	var date time.Time
+	var err error
+	if dateParam != "" {
+		date, err = time.Parse("2006-01-02", dateParam)
+		if err != nil {
+			return c.JSON(http.StatusBadRequest, map[string]string{"error": "Invalid date format"})
+		}
+	}
+
 	logFile, err := os.Open("../../cmd/weezemaster/temp/weezemaster.log")
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Impossible de lire le fichier de logs"})
@@ -41,8 +55,6 @@ func GetLogs(c echo.Context) error {
 	var logs []LogEntry
 	scanner := bufio.NewScanner(logFile)
 
-	eventType := c.QueryParam("event")
-
 	for scanner.Scan() {
 		line := scanner.Text()
 		var entry LogEntry
@@ -51,12 +63,43 @@ func GetLogs(c echo.Context) error {
 		if err := json.Unmarshal([]byte(line), &entry); err == nil {
 			entry.Error = extractErrorMessage(entry.Error)
 
-			if eventType != "" && !strings.Contains(entry.Message, eventType) {
-				continue
+			if !date.IsZero() {
+				logTime, err := time.Parse(time.RFC3339, entry.Time)
+				if err != nil {
+					continue
+				}
+				if logTime.Year() != date.Year() || logTime.YearDay() != date.YearDay() {
+					continue
+				}
 			}
+
+			if eventType != "" {
+				if eventType == "errorEvent" {
+					if entry.Error == "" {
+						continue
+					}
+				} else {
+					if !strings.Contains(entry.Message, eventType) {
+						continue
+					}
+				}
+			}
+
 			logs = append(logs, entry)
-			continue
 		}
+	}
+
+	sort.Slice(logs, func(i, j int) bool {
+		timeI, errI := time.Parse(time.RFC3339, logs[i].Time)
+		timeJ, errJ := time.Parse(time.RFC3339, logs[j].Time)
+		if errI != nil || errJ != nil {
+			return false
+		}
+		return timeI.After(timeJ)
+	})
+
+	if len(logs) == 0 {
+		return c.JSON(http.StatusOK, []LogEntry{})
 	}
 
 	return c.JSON(http.StatusOK, logs)

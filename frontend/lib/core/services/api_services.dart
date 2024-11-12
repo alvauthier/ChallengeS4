@@ -10,6 +10,7 @@ import 'package:weezemaster/core/exceptions/api_exception.dart';
 import 'package:weezemaster/core/models/concert.dart';
 import 'package:weezemaster/core/models/interest.dart';
 import 'package:weezemaster/core/models/category.dart';
+import 'package:weezemaster/core/models/log.dart';
 import 'package:weezemaster/core/models/ticket.dart';
 import 'package:weezemaster/core/models/ticket_listing.dart';
 import 'package:weezemaster/core/services/token_services.dart';
@@ -744,6 +745,48 @@ class ApiServices {
       throw ApiException(message: 'Network error');
     } catch (error) {
       log('An error occurred while updating concert.', error: error);
+      throw ApiException(message: 'Unknown error');
+    }
+  }
+
+  static Future<List<Log>> getLogs({DateTime? date, String? event}) async {
+    try {
+      final tokenService = TokenService();
+      String? jwtToken = await tokenService.getValidAccessToken();
+      String apiUrl = '${dotenv.env['API_PROTOCOL']}://${dotenv.env['API_HOST']}${dotenv.env['API_PORT']}/logs';
+      if (date != null) {
+        apiUrl += '?date=${date.toIso8601String().split('T').first}';
+        if (event != null && event.isNotEmpty) {
+          apiUrl += '&event=$event';
+        }
+      } else if (event != null && event.isNotEmpty) {
+        apiUrl += '?event=$event';
+      }
+      
+      final response = await http.get(
+        Uri.parse(apiUrl),
+        headers: {
+          'Accept': 'application/json; charset=UTF-8',
+          'Authorization': 'Bearer $jwtToken',
+          'Content-Type': 'application/json',
+        },
+      );
+      
+      if (response.statusCode != 200) {
+        throw ApiException(message: 'Failed to get logs');
+      }
+
+      final List<dynamic>? data = json.decode(response.body);
+      if (data == null) {
+        return [];
+      }
+      return data.map((log) => Log.fromJson(log)).toList();
+      
+    } on SocketException catch (error) {
+      log('Network error.', error: error);
+      throw ApiException(message: 'Network error');
+    } catch (error) {
+      log('An error occurred while getting logs.', error: error);
       throw ApiException(message: 'Unknown error');
     }
   }

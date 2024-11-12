@@ -113,6 +113,10 @@ class _AdaptiveNavigationBarState extends State<AdaptiveNavigationBar> {
           icon: const Icon(Icons.admin_panel_settings_sharp),
           label: translate(context)!.admin_panel,
         ),
+        const NavigationDestination(
+          icon: Icon(Icons.build),
+          label: "Logs",
+        ),
         NavigationDestination(
           icon: const Icon(Icons.person),
           label: translate(context)!.my_profile,
@@ -161,6 +165,8 @@ class _AdaptiveNavigationBarState extends State<AdaptiveNavigationBar> {
             context.pushNamed('home');
           } else if (index == 1) {
             context.pushNamed('admin');
+          } else if (index == 2) {
+            context.pushNamed('logs');
           } else {
             context.pushNamed('profile');
           }

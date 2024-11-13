@@ -11,7 +11,7 @@ class LogsScreen extends StatefulWidget {
 
 class _LogsScreenState extends State<LogsScreen> with SingleTickerProviderStateMixin {
   late TabController _tabController;
-  late Future<List<Log>> _logsFuture;
+  Future<List<Log>>? _logsFuture;
   DateTime _selectedDate = DateTime.now();
   String? _selectedEvent;
 
@@ -19,7 +19,7 @@ class _LogsScreenState extends State<LogsScreen> with SingleTickerProviderStateM
   void initState() {
     super.initState();
     _tabController = TabController(length: 5, vsync: this);
-    _logsFuture = ApiServices.getLogs(date: _selectedDate);
+    _fetchLogs();
     _tabController.addListener(_onTabChanged);
   }
 
@@ -30,27 +30,34 @@ class _LogsScreenState extends State<LogsScreen> with SingleTickerProviderStateM
     super.dispose();
   }
 
-  void _onTabChanged() {
+  void _fetchLogs() {
     setState(() {
-      switch (_tabController.index) {
-        case 0:
-          _selectedEvent = null;
-          break;
-        case 1:
-          _selectedEvent = "TicketPurchased";
-          break;
-        case 2:
-          _selectedEvent = "ConcertAdded";
-          break;
-        case 3:
-          _selectedEvent = "UserAuthenticated";
-          break;
-        case 4:
-          _selectedEvent = "errorEvent";
-          break;
-      }
       _logsFuture = ApiServices.getLogs(date: _selectedDate, event: _selectedEvent);
     });
+  }
+
+  void _onTabChanged() {
+    if (_tabController.indexIsChanging) {
+      return;
+    }
+    switch (_tabController.index) {
+      case 0:
+        _selectedEvent = null;
+        break;
+      case 1:
+        _selectedEvent = "TicketPurchased";
+        break;
+      case 2:
+        _selectedEvent = "ConcertAdded";
+        break;
+      case 3:
+        _selectedEvent = "UserAuthenticated";
+        break;
+      case 4:
+        _selectedEvent = "errorEvent";
+        break;
+    }
+    _fetchLogs();
   }
 
   Future<void> _selectDate(BuildContext context) async {
@@ -63,7 +70,7 @@ class _LogsScreenState extends State<LogsScreen> with SingleTickerProviderStateM
     if (picked != null && picked != _selectedDate) {
       setState(() {
         _selectedDate = picked;
-        _logsFuture = ApiServices.getLogs(date: _selectedDate, event: _selectedEvent);
+        _fetchLogs();
       });
     }
   }
@@ -71,7 +78,7 @@ class _LogsScreenState extends State<LogsScreen> with SingleTickerProviderStateM
   void _previousDay() {
     setState(() {
       _selectedDate = _selectedDate.subtract(const Duration(days: 1));
-      _logsFuture = ApiServices.getLogs(date: _selectedDate, event: _selectedEvent);
+      _fetchLogs();
     });
   }
 
@@ -79,7 +86,7 @@ class _LogsScreenState extends State<LogsScreen> with SingleTickerProviderStateM
     if (!_isToday(_selectedDate)) {
       setState(() {
         _selectedDate = _selectedDate.add(const Duration(days: 1));
-        _logsFuture = ApiServices.getLogs(date: _selectedDate, event: _selectedEvent);
+        _fetchLogs();
       });
     }
   }
@@ -155,7 +162,7 @@ class _LogsScreenState extends State<LogsScreen> with SingleTickerProviderStateM
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(child: CircularProgressIndicator());
         } else if (snapshot.hasError) {
-          return Center(child: Text('Erreur: ${snapshot.error}'));
+          return Center(child: Text('Erreur : ${snapshot.error}'));
         } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
           return const Center(child: Text('Aucun log disponible.'));
         } else {
@@ -174,12 +181,12 @@ class _LogsScreenState extends State<LogsScreen> with SingleTickerProviderStateM
                 subtitle: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text("Heure: ${(log.time).toLocal()}"),
-                    if (log.level != null) Text("Niveau: ${log.level}"),
-                    if (log.method != null) Text("Méthode: ${log.method}"),
-                    if (log.status != null) Text("Statut: ${log.status}"),
-                    if (log.latencyHuman != null) Text("Latence: ${log.latencyHuman}"),
-                    if (log.error != null) Text("Erreur: ${log.error}"),
+                    Text("Heure : ${(log.time).toLocal()}"),
+                    if (log.level != null) Text("Niveau : ${log.level}"),
+                    if (log.method != null) Text("Méthode : ${log.method}"),
+                    if (log.status != null) Text("Statut : ${log.status}"),
+                    if (log.latencyHuman != null) Text("Latence : ${log.latencyHuman}"),
+                    if (log.error != null) Text("Erreur : ${log.error}"),
                   ],
                 ),
               );

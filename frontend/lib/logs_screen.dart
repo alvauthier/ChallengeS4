@@ -13,18 +13,44 @@ class _LogsScreenState extends State<LogsScreen> with SingleTickerProviderStateM
   late TabController _tabController;
   late Future<List<Log>> _logsFuture;
   DateTime _selectedDate = DateTime.now();
+  String? _selectedEvent;
 
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 5, vsync: this);
     _logsFuture = ApiServices.getLogs(date: _selectedDate);
+    _tabController.addListener(_onTabChanged);
   }
 
   @override
   void dispose() {
+    _tabController.removeListener(_onTabChanged);
     _tabController.dispose();
     super.dispose();
+  }
+
+  void _onTabChanged() {
+    setState(() {
+      switch (_tabController.index) {
+        case 0:
+          _selectedEvent = null;
+          break;
+        case 1:
+          _selectedEvent = "TicketPurchased";
+          break;
+        case 2:
+          _selectedEvent = "ConcertAdded";
+          break;
+        case 3:
+          _selectedEvent = "UserAuthenticated";
+          break;
+        case 4:
+          _selectedEvent = "errorEvent";
+          break;
+      }
+      _logsFuture = ApiServices.getLogs(date: _selectedDate, event: _selectedEvent);
+    });
   }
 
   Future<void> _selectDate(BuildContext context) async {
@@ -37,7 +63,7 @@ class _LogsScreenState extends State<LogsScreen> with SingleTickerProviderStateM
     if (picked != null && picked != _selectedDate) {
       setState(() {
         _selectedDate = picked;
-        _logsFuture = ApiServices.getLogs(date: _selectedDate);
+        _logsFuture = ApiServices.getLogs(date: _selectedDate, event: _selectedEvent);
       });
     }
   }
@@ -45,7 +71,7 @@ class _LogsScreenState extends State<LogsScreen> with SingleTickerProviderStateM
   void _previousDay() {
     setState(() {
       _selectedDate = _selectedDate.subtract(const Duration(days: 1));
-      _logsFuture = ApiServices.getLogs(date: _selectedDate);
+      _logsFuture = ApiServices.getLogs(date: _selectedDate, event: _selectedEvent);
     });
   }
 
@@ -53,7 +79,7 @@ class _LogsScreenState extends State<LogsScreen> with SingleTickerProviderStateM
     if (!_isToday(_selectedDate)) {
       setState(() {
         _selectedDate = _selectedDate.add(const Duration(days: 1));
-        _logsFuture = ApiServices.getLogs(date: _selectedDate);
+        _logsFuture = ApiServices.getLogs(date: _selectedDate, event: _selectedEvent);
       });
     }
   }
@@ -100,7 +126,7 @@ class _LogsScreenState extends State<LogsScreen> with SingleTickerProviderStateM
                 ),
                 IconButton(
                   icon: const Icon(Icons.arrow_right),
-                  onPressed: _isToday(_selectedDate) ? null : _nextDay, // Désactiver la flèche si la date sélectionnée est aujourd'hui
+                  onPressed: _isToday(_selectedDate) ? null : _nextDay,
                 ),
               ],
             ),
@@ -109,54 +135,58 @@ class _LogsScreenState extends State<LogsScreen> with SingleTickerProviderStateM
             child: TabBarView(
               controller: _tabController,
               children: [
-                FutureBuilder<List<Log>>(
-                  future: _logsFuture,
-                  builder: (context, snapshot) {
-                    if (snapshot.connectionState == ConnectionState.waiting) {
-                      return const Center(child: CircularProgressIndicator());
-                    } else if (snapshot.hasError) {
-                      return Center(child: Text('Erreur: ${snapshot.error}'));
-                    } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                      return const Center(child: Text('Aucun log disponible.'));
-                    } else {
-                      List<Log> logs = snapshot.data!;
-                      return ListView.separated(
-                        itemCount: logs.length,
-                        separatorBuilder: (context, index) => const Divider(color: Colors.grey),
-                        itemBuilder: (context, index) {
-                          Log log = logs[index];
-                          String title = log.message ?? 'Aucun message';
-                          if (log.method != null && log.status != null && log.uri != null) {
-                            title = '${log.method} ${log.uri}';
-                          }
-                          return ListTile(
-                            title: Text(title),
-                            subtitle: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text("Heure: ${(log.time).toLocal()}"),
-                                if (log.level != null) Text("Niveau: ${log.level}"),
-                                if (log.method != null) Text("Méthode: ${log.method}"),
-                                if (log.status != null) Text("Statut: ${log.status}"),
-                                if (log.latencyHuman != null) Text("Latence: ${log.latencyHuman}"),
-                                if (log.error != null) Text("Erreur: ${log.error}"),
-                              ],
-                            ),
-                          );
-                        },
-                      );
-                    }
-                  },
-                ),
-                const Center(child: Text("Tickets réservés")),
-                const Center(child: Text("Concerts ajoutés")),
-                const Center(child: Text("Connexions")),
-                const Center(child: Text("Erreurs")),
+                _buildLogsTab(),
+                _buildLogsTab(),
+                _buildLogsTab(),
+                _buildLogsTab(),
+                _buildLogsTab(),
               ],
             ),
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildLogsTab() {
+    return FutureBuilder<List<Log>>(
+      future: _logsFuture,
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        } else if (snapshot.hasError) {
+          return Center(child: Text('Erreur: ${snapshot.error}'));
+        } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+          return const Center(child: Text('Aucun log disponible.'));
+        } else {
+          List<Log> logs = snapshot.data!;
+          return ListView.separated(
+            itemCount: logs.length,
+            separatorBuilder: (context, index) => const Divider(color: Colors.grey),
+            itemBuilder: (context, index) {
+              Log log = logs[index];
+              String title = log.message ?? 'Aucun message';
+              if (log.method != null && log.status != null && log.uri != null) {
+                title = '${log.method} ${log.uri}';
+              }
+              return ListTile(
+                title: Text(title),
+                subtitle: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text("Heure: ${(log.time).toLocal()}"),
+                    if (log.level != null) Text("Niveau: ${log.level}"),
+                    if (log.method != null) Text("Méthode: ${log.method}"),
+                    if (log.status != null) Text("Statut: ${log.status}"),
+                    if (log.latencyHuman != null) Text("Latence: ${log.latencyHuman}"),
+                    if (log.error != null) Text("Erreur: ${log.error}"),
+                  ],
+                ),
+              );
+            },
+          );
+        }
+      },
     );
   }
 }

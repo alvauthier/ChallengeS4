@@ -26,26 +26,26 @@ class ChatScreen extends StatefulWidget {
   final String? price;
   final String? resellerName;
   final String? category;
+  final String? concertImage;
 
-  ChatScreen({super.key, required this.id, this.userId, this.resellerId, this.ticketId, this.concertName, this.price, this.resellerName, this.category});
+  ChatScreen({super.key, required this.id, this.userId, this.resellerId, this.ticketId, this.concertName, this.price, this.resellerName, this.category, this.concertImage});
 
   @override
   ChatScreenState createState() => ChatScreenState();
 }
 
 class ChatScreenState extends State<ChatScreen> {
+  bool _isLoading = true;
+
   late String otherUser = "";
   late String buyerId = "";
-  late Map<String, String> ticket = {
-    "imageUrl": "https://picsum.photos/250?image=9",
-    "maxPrice": "150",
-  };
   late List messages = [];
   final TextEditingController _controller = TextEditingController();
   final storage = const FlutterSecureStorage();
   String? userId;
   late String concertName;
   late String price;
+  late String concertImage;
   late String resellerName;
   late String buyerName;
   late String category;
@@ -138,17 +138,20 @@ class ChatScreenState extends State<ChatScreen> {
 
     if (widget.id.isEmpty || widget.id == "newchat") {
       widget.id = '';
-      concertName = widget.concertName!;
-      price = widget.price!;
-      otherUser = widget.resellerName!;
-      category = widget.category!;
-      buyerId = widget.userId!;
+      concertName = widget.concertName ?? "Unknown Concert";
+      price = widget.price ?? "0";
+      otherUser = widget.resellerName ?? "Unknown Reseller";
+      category = widget.category ?? "Unknown Category";
+      buyerId = widget.userId ?? "";
+      concertImage = widget.concertImage ?? "https://picsum.photos/seed/picsum/800/400";
+      _isLoading = false;
     } else {
       concertName = "";
       price = "";
       otherUser = "";
       category = "";
       buyerId = "";
+      concertImage = "";
       _fetchConversation();
     }
     _loadUserId().then((_) {
@@ -285,12 +288,17 @@ class ChatScreenState extends State<ChatScreen> {
             resellerName = conversation['SellerName'] ?? "Unknown Seller";
             buyerName = conversation['BuyerName'] ?? "Unknown Buyer";
             category = conversation['Category'] ?? "Unknown Category";
+            concertImage = conversation['Concert']['Image'] != ""
+                ? '${dotenv.env['API_PROTOCOL']}://${dotenv.env['API_HOST']}${dotenv.env['API_PORT']}/uploads/concerts/${conversation['Concert']['Image']}'
+                : "https://picsum.photos/seed/picsum/800/400";
+            debugPrint("concertImage: ${conversation['Concert']}");
           } else {
             concertName = "Fallback Concert";
             price = "10000000000";
             resellerName = "Fallback Reseller";
             buyerName = "Fallback Buyer";
             category = "Fallback Category";
+            concertImage = "https://picsum.photos/seed/picsum/800/400";
           }
           if(userId == buyerId) {
             otherUser = resellerName;
@@ -298,12 +306,16 @@ class ChatScreenState extends State<ChatScreen> {
             otherUser = buyerName;
           }
         });
+        _isLoading = false;
       } catch (e) {
         if (e is ApiException) {
           debugPrint("Failed to fetch conversation: ${e.toString()}");
         } else {
           debugPrint("Unexpected error: ${e.toString()}");
         }
+        setState(() {
+          _isLoading = false;
+        });
       }
     }
   }
@@ -345,7 +357,7 @@ class ChatScreenState extends State<ChatScreen> {
     showDialog(
       context: context,
       builder: (BuildContext context) {
-        final TextEditingController priceController = TextEditingController(text: ticket["price"]);
+        final TextEditingController priceController = TextEditingController(text: price);
         return AlertDialog(
           title: Text(
               translate(context)!.new_price,
@@ -433,111 +445,113 @@ class ChatScreenState extends State<ChatScreen> {
           ),
         ),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: Column(
-          children: [
-            TicketDetails(
-              imageUrl: ticket["imageUrl"] as String,
-              concertName: concertName,
-              category: category,
-              price: price,
-              showButtons: widget.id.isEmpty || widget.id == 'newchat' ? false : true,
-              onCancel: () {
-                // Handle cancel action
-                context.pop();
-              },
-              secondAction: () async {
-                debugPrint('BuyerId: $buyerId');
-                debugPrint('UserId: $userId');
-                if (buyerId == userId) {
-                  debugPrint('Buy');
-                  final tokenService = TokenService();
-                  String? token = await tokenService.getValidAccessToken();
-                  if (token == null) {
-                    GoRouter.of(context).go(Routes.loginRegisterNamedPage);
-                  } else {
-                    final paymentIntentData = await paymentService.createPaymentIntent(widget.id, 'cv_');
-                    if (paymentIntentData != null) {
-                      try {
-                        await paymentService.initAndPresentPaymentSheet(
-                          context,
-                          paymentIntentData['client_secret'],
-                        );
+      body: _isLoading
+        ? const Center(child: CircularProgressIndicator())
+        : Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Column(
+            children: [
+              TicketDetails(
+                concertName: concertName,
+                category: category,
+                price: price,
+                concertImage: concertImage,
+                showButtons: widget.id.isEmpty || widget.id == 'newchat' ? false : true,
+                onCancel: () {
+                  // Handle cancel action
+                  context.pop();
+                },
+                secondAction: () async {
+                  debugPrint('BuyerId: $buyerId');
+                  debugPrint('UserId: $userId');
+                  if (buyerId == userId) {
+                    debugPrint('Buy');
+                    final tokenService = TokenService();
+                    String? token = await tokenService.getValidAccessToken();
+                    if (token == null) {
+                      GoRouter.of(context).go(Routes.loginRegisterNamedPage);
+                    } else {
+                      final paymentIntentData = await paymentService.createPaymentIntent(widget.id, 'cv_');
+                      if (paymentIntentData != null) {
+                        try {
+                          await paymentService.initAndPresentPaymentSheet(
+                            context,
+                            paymentIntentData['client_secret'],
+                          );
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text(translate(context)!.payment_success)),
+                          );
+                          await updateTicketListingStatus(context, widget.id);
+                        } catch (e) {
+                          debugPrint('Error presenting payment sheet: $e');
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text(translate(context)!.payment_failed)),
+                          );
+                        }
+                      } else {
                         ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text(translate(context)!.payment_success)),
-                        );
-                        await updateTicketListingStatus(context, widget.id);
-                      } catch (e) {
-                        debugPrint('Error presenting payment sheet: $e');
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text(translate(context)!.payment_failed)),
+                          SnackBar(content: Text(translate(context)!.payment_error)),
                         );
                       }
-                    } else {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text(translate(context)!.payment_error)),
-                      );
                     }
-                  }
-                } else {
-                  _showChangePriceDialog();
+                  } else {
+                    _showChangePriceDialog();
 
-                }
-              },
-              secondActionText: buyerId == userId ? translate(context)!.buy : translate(context)!.change_price,
-            ),
-            Expanded(
-              child: ListView.builder(
-                padding: const EdgeInsets.symmetric(vertical: 16.0),
-                itemCount: messages.length,
-                itemBuilder: (context, index) {
-                  final message = messages[index];
-                  final authorId = message["authorId"] as String? ?? "";
-                  final content = message["content"] as String? ?? "";
-                  final isCurrentUser = authorId == userId;
-                  return Column(
-                    children: [
-                      MessageBubble(
-                        authorId: authorId,
-                        content: content,
-                        isCurrentUser: isCurrentUser,
-                        readed: message["readed"] as bool? ?? false,
-                      ),
-                      const SizedBox(height: 10),
-                    ],
-                  );
+                  }
                 },
+                secondActionText: buyerId == userId ? translate(context)!.buy : translate(context)!.change_price,
               ),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: TextField(
-                      controller: _controller,
-                      decoration: InputDecoration(
-                        hintText: translate(context)!.enter_message,
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
+              Expanded(
+                child: ListView.builder(
+                  padding: const EdgeInsets.symmetric(vertical: 16.0),
+                  itemCount: messages.length,
+                  itemBuilder: (context, index) {
+                    final message = messages[index];
+                    final authorId = message["authorId"] as String? ?? "";
+                    final content = message["content"] as String? ?? "";
+                    final isCurrentUser = authorId == userId;
+                    return Column(
+                      children: [
+                        MessageBubble(
+                          authorId: authorId,
+                          content: content,
+                          isCurrentUser: isCurrentUser,
+                          readed: message["readed"] as bool? ?? false,
+                        ),
+                        const SizedBox(height: 10),
+                      ],
+                    );
+                  },
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: TextField(
+                        controller: _controller,
+                        decoration: InputDecoration(
+                          hintText: translate(context)!.enter_message,
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                  IconButton(
-                    icon: const Icon(
-                        Icons.send,
-                        color: Colors.deepOrange,
+                    IconButton(
+                      icon: const Icon(
+                          Icons.send,
+                          color: Colors.deepOrange,
+                      ),
+                      onPressed: _sendMessage,
                     ),
-                    onPressed: _sendMessage,
-                  ),
-                ],
+                  ],
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
-      ),
     );
   }
 }

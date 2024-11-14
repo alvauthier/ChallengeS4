@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:weezemaster/core/utils/constants.dart';
+import 'package:weezemaster/logs_screen.dart';
 import 'package:weezemaster/navigation/main_screen.dart';
 import 'package:weezemaster/controller/navigation_cubit.dart';
 import 'package:weezemaster/booking_screen.dart';
@@ -226,6 +227,14 @@ class AppRouter {
               pageBuilder: (context, state) =>
               const NoTransitionPage(
                 child: AdminPanel(),
+              ),
+            ),
+            GoRoute(
+              path: Routes.logsNamedPage,
+              name: 'logs',
+              pageBuilder: (context, state) =>
+              const NoTransitionPage(
+                child: LogsScreen(),
               ),
             ),
             GoRoute(

@@ -2,3 +2,4 @@
 .env
 serviceAccountKey.json
 uploads/
+cmd/weezemaster/temp

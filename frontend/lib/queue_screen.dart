@@ -9,10 +9,10 @@ class QueueScreen extends StatefulWidget {
   final  WebSocketService webSocketService;
 
   const QueueScreen({
-    Key? key,
+    super.key,
     required this.initialPosition,
     required this.webSocketService,
-  }) : super(key: key);
+  });
 
   @override
   _QueueScreenState createState() => _QueueScreenState();

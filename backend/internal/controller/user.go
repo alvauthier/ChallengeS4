@@ -52,28 +52,28 @@ func GetUser(c echo.Context) error {
 	db := database.GetDB()
 
 	authHeader := c.Request().Header.Get("Authorization")
-    if authHeader == "" {
-        return c.JSON(http.StatusUnauthorized, map[string]string{"error": "Authorization header is missing"})
-    }
+	if authHeader == "" {
+		return c.JSON(http.StatusUnauthorized, map[string]string{"error": "Authorization header is missing"})
+	}
 
-    tokenString := authHeader
-    if len(authHeader) > 7 && authHeader[:7] == "Bearer " {
-        tokenString = authHeader[7:]
-    }
+	tokenString := authHeader
+	if len(authHeader) > 7 && authHeader[:7] == "Bearer " {
+		tokenString = authHeader[7:]
+	}
 
-    claims, err := verifyToken(tokenString)
-    if err != nil {
-        return c.JSON(http.StatusUnauthorized, map[string]string{"error": "Invalid or expired token"})
-    }
+	claims, err := verifyToken(tokenString)
+	if err != nil {
+		return c.JSON(http.StatusUnauthorized, map[string]string{"error": "Invalid or expired token"})
+	}
 
-    userIdFromToken, ok := claims["id"].(string)
-    userRole, ok := claims["role"].(string)
+	userIdFromToken, ok := claims["id"].(string)
+	userRole, ok := claims["role"].(string)
 
-    if !ok {
-        return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Invalid token claims"})
-    }
+	if !ok {
+		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Invalid token claims"})
+	}
 
-    id := c.Param("id")
+	id := c.Param("id")
 
 	if userRole != "admin" && userIdFromToken != id {
 		return echo.NewHTTPError(http.StatusForbidden, "You are not allowed to access this resource")
@@ -181,6 +181,7 @@ func Register(c echo.Context) error {
 	}
 
 	user.Password = ""
+	c.Logger().Infof("event=UserCreated user_id=%s timestamp=%s", user.ID, time.Now().Format(time.RFC3339))
 	return c.JSON(http.StatusCreated, user)
 }
 
@@ -283,6 +284,8 @@ func RegisterOrganizer(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
+	c.Logger().Infof("event=UserCreated user_id=%s timestamp=%s", user.ID, time.Now().Format(time.RFC3339))
+	c.Logger().Infof("event=OrganizationCreated organization_id=%s timestamp=%s", org.ID, time.Now().Format(time.RFC3339))
 	return c.JSON(http.StatusCreated, map[string]interface{}{
 		"organization": org,
 		"user":         user,
@@ -328,6 +331,7 @@ func Login(c echo.Context) error {
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]string{"message": err.Error()})
 	}
+	c.Logger().Infof("event=UserAuthenticated user_id=%s timestamp=%s", user.ID, time.Now().Format(time.RFC3339))
 	return c.JSON(http.StatusOK, map[string]string{
 		"access_token":  accessToken,
 		"refresh_token": refreshToken,

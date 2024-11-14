@@ -84,6 +84,7 @@ func CreateReservation(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to commit transaction"})
 	}
 
+	c.Logger().Infof("event=TicketPurchased ticket_id=%s user_id=%s timestamp=%s", ticket.ID, user.ID, time.Now().Format(time.RFC3339))
 	return c.JSON(http.StatusOK, ticket)
 }
 

@@ -91,6 +91,7 @@ class ResetPasswordScreenState extends State<ResetPasswordScreen> {
                 controller: _resetCodeController,
                 decoration: InputDecoration(
                   labelText: translate(context)!.reset_code,
+                  errorMaxLines: 3,
                 ),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
@@ -103,6 +104,7 @@ class ResetPasswordScreenState extends State<ResetPasswordScreen> {
                 controller: _newPasswordController,
                 decoration: InputDecoration(
                   labelText: translate(context)!.new_password,
+                  errorMaxLines: 3,
                 ),
                 obscureText: true,
                 validator: (value) {
@@ -119,9 +121,21 @@ class ResetPasswordScreenState extends State<ResetPasswordScreen> {
                 width: double.infinity,
                 child: ElevatedButton(
                   onPressed: _isLoading ? null : resetPassword,
+                  style: ElevatedButton.styleFrom(
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(6.0),
+                    ),
+                    backgroundColor: Colors.deepOrange,
+                  ),
                   child: _isLoading
-                      ? const CircularProgressIndicator()
-                      : Text(translate(context)!.reset_password),
+                    ? const CircularProgressIndicator()
+                    : Text(
+                      translate(context)!.reset_password,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontFamily: 'Readex Pro',
+                      ),
+                    ),
                 ),
               ),
             ],

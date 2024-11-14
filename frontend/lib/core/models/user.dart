@@ -6,6 +6,7 @@ class User {
   final String firstname;
   final String lastname;
   final String email;
+  final String image;
   final String role;
   final List<Ticket> tickets;
   final List<Conversation> conversationsAsBuyer;
@@ -16,6 +17,7 @@ class User {
     required this.firstname,
     required this.lastname,
     required this.email,
+    required this.image,
     required this.role,
     required this.tickets,
     required this.conversationsAsBuyer,
@@ -24,11 +26,12 @@ class User {
 
   factory User.fromJson(Map<String, dynamic> json) {
     return User(
-      id: json['ID'],
-      firstname: json['Firstname'],
-      lastname: json['Lastname'],
-      email: json['email'],
-      role: json['Role'],
+      id: json['ID'] ?? '',
+      firstname: json['Firstname'] ?? '',
+      lastname: json['Lastname'] ?? '',
+      email: json['email'] ?? '',
+      image: json['Image'] ?? '',
+      role: json['Role'] ?? '',
       tickets: json['Tickets'] != null ? List<Ticket>.from(json['Tickets'].map((e) => Ticket.fromJson(e))) : [],
       conversationsAsBuyer: (json['ConversationsAsBuyer'] as List<dynamic>?)?.map((e) => Conversation.fromJson(e)).toList() ?? [],
       conversationsAsSeller: (json['ConversationsAsSeller'] as List<dynamic>?)?.map((e) => Conversation.fromJson(e)).toList() ?? [],

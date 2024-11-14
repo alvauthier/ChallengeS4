@@ -8,6 +8,7 @@ class Concert {
   final String description;
   final String date;
   final String location;
+  final String? image;
   final List<Interest> interests;
   final Organization organization;
   final List<ConcertCategory> concertCategories;
@@ -18,6 +19,7 @@ class Concert {
     required this.name,
     required this.description,
     required this.date,
+    required this.image,
     required this.location,
     required this.interests,
     required this.organization,
@@ -39,6 +41,7 @@ class Concert {
         name: json['Name'],
         description: json['Description'],
         date: json['Date'],
+        image: json['Image'],
         location: json['Location'],
         interests: interestList,
         organization: organizationFromJson,

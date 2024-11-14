@@ -1,9 +1,13 @@
+import 'dart:convert';
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:go_router/go_router.dart';
-import 'package:http/http.dart' as http;
-import 'dart:convert';
 import 'package:weezemaster/translation.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:http/http.dart' as http;
+import 'package:http_parser/http_parser.dart';
+import 'core/services/token_services.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -20,10 +24,22 @@ class RegisterScreenState extends State<RegisterScreen> {
   final _firstnameController = TextEditingController();
   final _lastnameController = TextEditingController();
 
-  final RegExp emailRegExp = RegExp(
-      r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$');
-  final RegExp passwordRegExp = RegExp(
-      r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#\$&*~]).{8,}$');
+  File? _image;
+  String? _base64Image;
+  final picker = ImagePicker();
+
+  Future<void> getImage() async {
+    final pickedImage = await picker.pickImage(source: ImageSource.gallery);
+    setState(() {
+      if (pickedImage != null) {
+        _image = File(pickedImage.path);
+        _base64Image = base64Encode(_image!.readAsBytesSync());
+      }
+    });
+  }
+
+  final RegExp emailRegExp = RegExp(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$');
+  final RegExp passwordRegExp = RegExp(r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#\$&*~]).{8,}$');
 
   @override
   Widget build(BuildContext context) {
@@ -46,74 +62,108 @@ class RegisterScreenState extends State<RegisterScreen> {
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: <Widget>[
-                        TextFormField(
-                          controller: _firstnameController,
-                          decoration: InputDecoration(
-                            labelText: translate(context)!.firstname,
+                        GestureDetector(
+                          onTap: getImage,
+                          child: ClipOval(
+                            child: _image == null
+                                ? Container(
+                              width: 100,
+                              height: 100,
+                              color: Colors.grey[300],
+                              child: const Icon(Icons.camera_alt),
+                            )
+                                : Image.file(
+                              File(_image!.path),
+                              width: 100,
+                              height: 100,
+                              fit: BoxFit.cover,
+                            ),
                           ),
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return translate(context)!.firstname_empty;
-                            }
-                            return null;
-                          },
                         ),
-                        TextFormField(
-                          controller: _lastnameController,
-                          decoration: InputDecoration(
-                            labelText: translate(context)!.lastname,
+                        Flexible(
+                          child: TextFormField(
+                            controller: _firstnameController,
+                            decoration: InputDecoration(
+                              labelText: translate(context)!.firstname,
+                              errorMaxLines: 3,
+                            ),
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return translate(context)!.firstname_empty;
+                              }
+                              return null;
+                            },
                           ),
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return translate(context)!.lastname_empty;
-                            }
-                            return null;
-                          },
                         ),
-                        TextFormField(
-                          controller: _emailController,
-                          decoration: InputDecoration(
-                            labelText: translate(context)!.email,
+                        Flexible(
+                          child: TextFormField(
+                            controller: _lastnameController,
+                            decoration: InputDecoration(
+                              labelText: translate(context)!.lastname,
+                              errorMaxLines: 3,
+                            ),
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return translate(context)!.lastname_empty;
+                              }
+                              return null;
+                            },
                           ),
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return translate(context)!.email_empty;
-                            } else if (!emailRegExp.hasMatch(value)) {
-                              return translate(context)!.email_invalid;
-                            }
-                            return null;
-                          },
                         ),
-                        TextFormField(
-                          controller: _passwordController,
-                          decoration: InputDecoration(
-                            labelText: translate(context)!.password,
+                        Flexible(
+                          child: TextFormField(
+                            controller: _emailController,
+                            decoration: InputDecoration(
+                              labelText: translate(context)!.email,
+                              errorMaxLines: 3,
+                            ),
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return translate(context)!.email_empty;
+                              } else if (!emailRegExp.hasMatch(value)) {
+                                return translate(context)!.email_invalid;
+                              }
+                              return null;
+                            },
                           ),
-                          obscureText: true,
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return translate(context)!.password_empty;
-                            } else if (!passwordRegExp.hasMatch(value)) {
-                              return translate(context)!.password_invalid;
-                            }
-                            return null;
-                          },
                         ),
-                        TextFormField(
-                          controller: _confirmPasswordController,
-                          decoration: InputDecoration(
-                            labelText: translate(context)!.confirm_password,
+                        Flexible(
+                          child: TextFormField(
+                            controller: _passwordController,
+                            decoration: InputDecoration(
+                              labelText: translate(context)!.password,
+                              errorMaxLines: 3,
+                            ),
+                            obscureText: true,
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return translate(context)!.password_empty;
+                              } else if (!passwordRegExp.hasMatch(value)) {
+                                return translate(context)!.password_invalid;
+                              }
+                              return null;
+                            },
+                            autovalidateMode: AutovalidateMode.onUserInteraction,
                           ),
-                          obscureText: true,
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return translate(context)!.confirm_password_empty;
-                            }
-                            if (value != _passwordController.text) {
-                              return translate(context)!.password_no_match;
-                            }
-                            return null;
-                          },
+                        ),
+                        Flexible(
+                          child: TextFormField(
+                            controller: _confirmPasswordController,
+                            decoration: InputDecoration(
+                              labelText: translate(context)!.confirm_password,
+                              errorMaxLines: 3,
+                            ),
+                            obscureText: true,
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return translate(context)!.confirm_password_empty;
+                              }
+                              if (value != _passwordController.text) {
+                                return translate(context)!.password_no_match;
+                              }
+                              return null;
+                            },
+                          ),
                         ),
                         Padding(
                           padding: const EdgeInsets.only(top: 15.0),
@@ -122,21 +172,35 @@ class RegisterScreenState extends State<RegisterScreen> {
                             child: ElevatedButton(
                               onPressed: () async {
                                 if (_formKey.currentState!.validate()) {
-                                  // Process data.
                                   try {
-                                    final apiUrl = '${dotenv.env['API_PROTOCOL']}://${dotenv.env['API_HOST']}${dotenv.env['API_PORT']}/register';
-                                    var response = await http.post(
-                                      Uri.parse(apiUrl),
-                                      headers: <String, String>{
-                                        'Content-Type': 'application/json; charset=UTF-8',
-                                      },
-                                      body: jsonEncode(<String, String>{
-                                        'firstname': _firstnameController.text,
-                                        'lastname': _lastnameController.text,
-                                        'email': _emailController.text,
-                                        'password': _passwordController.text,
-                                      }),
+                                    final tokenService = TokenService();
+                                    String? jwtToken = await tokenService.getValidAccessToken();
+
+                                    var request = http.MultipartRequest(
+                                      'POST',
+                                      Uri.parse('${dotenv.env['API_PROTOCOL']}://${dotenv.env['API_HOST']}${dotenv.env['API_PORT']}/register'),
                                     );
+
+                                    request.headers['Authorization'] = 'Bearer $jwtToken';
+
+                                    request.fields['email'] = _emailController.text;
+                                    request.fields['password'] = _passwordController.text;
+                                    request.fields['confirm_password'] = _confirmPasswordController.text;
+                                    request.fields['firstname'] = _firstnameController.text;
+                                    request.fields['lastname'] = _lastnameController.text;
+
+                                    if (_image != null) {
+                                      request.files.add(
+                                        await http.MultipartFile.fromPath(
+                                          'image',
+                                          _image!.path,
+                                          contentType: MediaType('image', _image!.path.split('.').last),
+                                        ),
+                                      );
+                                    }
+
+                                    var response = await request.send();
+
                                     ScaffoldMessenger.of(context).showSnackBar(
                                       SnackBar(
                                         content: Text(response.statusCode == 201
@@ -145,23 +209,36 @@ class RegisterScreenState extends State<RegisterScreen> {
                                         duration: const Duration(seconds: 5),
                                       ),
                                     );
+
                                     if (response.statusCode == 201) {
                                       context.pushNamed('login');
                                     }
                                   } catch (e) {
                                     ScaffoldMessenger.of(context).showSnackBar(
                                       SnackBar(
-                                        content: Text(translate(context)!.generic_error),
+                                        content: Text(e.toString()),
                                         duration: const Duration(seconds: 5),
                                       ),
                                     );
                                   }
                                 }
                               },
-                              child: Text(translate(context)!.register),
+                              style: ElevatedButton.styleFrom(
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(6.0),
+                                ),
+                                backgroundColor: Colors.deepOrange,
+                              ),
+                              child: Text(
+                                translate(context)!.register,
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontFamily: 'Readex Pro',
+                                ),
+                              ),
                             ),
                           ),
-                        )
+                        ),
                       ],
                     ),
                   ),

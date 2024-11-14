@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:weezemaster/translation.dart';
+import 'package:weezemaster/core/utils/constants.dart';
 
 class ThankYouScreen extends StatelessWidget {
   const ThankYouScreen({super.key});
@@ -33,7 +34,7 @@ class ThankYouScreen extends StatelessWidget {
               const SizedBox(height: 40),
               ElevatedButton(
                 onPressed: () {
-                  context.pushNamed('home');
+                  GoRouter.of(context).go(Routes.homeNamedPage);
                 },
                 child: Text(translate(context)!.back_home),
               ),

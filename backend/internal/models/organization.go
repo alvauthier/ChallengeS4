@@ -11,6 +11,7 @@ type Organization struct {
 	ID          uuid.UUID `gorm:"unique;type:uuid;primaryKey"`
 	Name        string    `gorm:"unique;not null"`
 	Description string    `gorm:"not null"`
+	Image       string
 	CreatedAt   time.Time
 	UpdatedAt   time.Time
 	DeletedAt   *time.Time `gorm:"index"`

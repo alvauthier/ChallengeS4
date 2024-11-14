@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:go_router/go_router.dart';
 import 'package:weezemaster/concert/blocs/concert_bloc.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -7,6 +8,7 @@ import 'package:intl/intl.dart';
 import 'package:weezemaster/components/resale_ticket.dart';
 import 'package:weezemaster/components/interest_chip.dart';
 import 'package:weezemaster/translation.dart';
+import 'package:weezemaster/core/utils/constants.dart';
 
 class ConcertScreen extends StatelessWidget {
   final String id;
@@ -64,7 +66,9 @@ class ConcertScreen extends StatelessWidget {
                                   'reseller': {
                                     'id': ticket.user.id,
                                     'name': '${ticket.user.firstname} ${ticket.user.lastname}',
-                                    'avatar': 'https://thispersondoesnotexist.com/',
+                                    'avatar': ticket.user.image != ''
+                                        ? '${dotenv.env['API_PROTOCOL']}://${dotenv.env['API_HOST']}${dotenv.env['API_PORT']}/uploads/users/${ticket.user.image}'
+                                        : '',
                                   },
                                   'category': concertCategory.category.name,
                                   'price': ticket.ticketListing!.price.toStringAsFixed(2),
@@ -109,9 +113,11 @@ class ConcertScreen extends StatelessWidget {
                           child: Column(
                             children: <Widget>[
                               Image.network(
-                                'https://picsum.photos/seed/picsum/800/400',
+                                concert.image != ''
+                                    ? '${dotenv.env['API_PROTOCOL']}://${dotenv.env['API_HOST']}${dotenv.env['API_PORT']}/uploads/concerts/${concert.image}'
+                                    : 'https://picsum.photos/seed/picsum/800/400',
                                 width: double.infinity,
-                                height: 200,
+                                height: 250,
                                 fit: BoxFit.cover,
                               ),
                               Padding(
@@ -303,7 +309,7 @@ class ConcertScreen extends StatelessWidget {
                                       final tokenService = TokenService();
                                       String? token = await tokenService.getValidAccessToken();
                                       if (token == null) {
-                                        context.pushNamed('login-register');
+                                        GoRouter.of(context).go(Routes.loginRegisterNamedPage);
                                       } else {
                                         context.pushNamed(
                                           'booking',
@@ -347,7 +353,7 @@ class ConcertScreen extends StatelessWidget {
                 left: 10.0,
                 child: FloatingActionButton(
                   child: const Icon(Icons.arrow_back),
-                  onPressed: () => context.pushNamed('home'),
+                  onPressed: () => GoRouter.of(context).go(Routes.homeNamedPage),
                 ),
               ),
             ],

@@ -120,5 +120,10 @@
     "queue_info": "Due to high demand, you have just been placed in the queue.",
     "queue_warning": "To keep your place in the queue, please do not leave this page or the application.",
     "queue_position": "Your position in the queue:",
-    "queue_checkbox": "Returning home page, I understand and accept the loss of my place in line."
+    "queue_checkbox": "Returning home page, I understand and accept the loss of my place in line.",
+    "update": "Update",
+    "update_profile_success": "Profile updated successfully",
+    "update_profile_failed": "Error updating profile",
+    "edit_profile": "Edit profile",
+    "hello": "Hello"
 }

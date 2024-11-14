@@ -1,5 +1,5 @@
 import 'dart:convert';
-
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:weezemaster/core/models/interest.dart';
@@ -328,7 +328,7 @@ class HomeScreenState extends State<HomeScreen> {
                                 }
                               },
                               child: Padding(
-                                padding: const EdgeInsets.symmetric(vertical: 20.0, horizontal: 10.0),
+                                padding: const EdgeInsets.all(10.0),
                                 child: Card(
                                   elevation: 0,
                                   shape: RoundedRectangleBorder(
@@ -343,7 +343,9 @@ class HomeScreenState extends State<HomeScreen> {
                                           topRight: Radius.circular(10),
                                         ),
                                         child: Image.network(
-                                          'https://picsum.photos/seed/picsum/800/400', // URL de l'image unique
+                                          (concert.image != null && concert.image.isNotEmpty)
+                                              ? '${dotenv.env['API_PROTOCOL']}://${dotenv.env['API_HOST']}${dotenv.env['API_PORT']}/uploads/concerts/${concert.image}'
+                                              : 'https://picsum.photos/seed/picsum/800/400',
                                           width: double.infinity,
                                           height: 200,
                                           fit: BoxFit.cover,

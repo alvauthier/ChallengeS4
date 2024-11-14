@@ -15,6 +15,7 @@ import 'package:web_socket_channel/status.dart' as status;
 import 'package:http/http.dart' as http;
 import 'package:weezemaster/core/services/payment_services.dart';
 import 'package:weezemaster/core/services/token_services.dart';
+import 'package:weezemaster/core/utils/constants.dart';
 
 class ChatScreen extends StatefulWidget {
   String id;
@@ -37,9 +38,6 @@ class ChatScreenState extends State<ChatScreen> {
   late String buyerId = "";
   late Map<String, String> ticket = {
     "imageUrl": "https://picsum.photos/250?image=9",
-    // "concertName": "Eras Tour - Taylor Swift",
-    // "category": "Category",
-    // "price": "100",
     "maxPrice": "150",
   };
   late List messages = [];
@@ -222,7 +220,7 @@ class ChatScreenState extends State<ChatScreen> {
       });
     } else {
       if (mounted) {
-        context.pushNamed('login-register');
+        GoRouter.of(context).go(Routes.loginRegisterNamedPage);
       }
     }
   }
@@ -457,7 +455,7 @@ class ChatScreenState extends State<ChatScreen> {
                   final tokenService = TokenService();
                   String? token = await tokenService.getValidAccessToken();
                   if (token == null) {
-                    context.pushNamed('login-register');
+                    GoRouter.of(context).go(Routes.loginRegisterNamedPage);
                   } else {
                     final paymentIntentData = await paymentService.createPaymentIntent(widget.id, 'cv_');
                     if (paymentIntentData != null) {
@@ -506,7 +504,7 @@ class ChatScreenState extends State<ChatScreen> {
                         isCurrentUser: isCurrentUser,
                         readed: message["readed"] as bool? ?? false,
                       ),
-                      const SizedBox(height: 10), // Add space between bubbles
+                      const SizedBox(height: 10),
                     ],
                   );
                 },

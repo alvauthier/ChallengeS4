@@ -7,6 +7,7 @@ import 'dart:convert';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:weezemaster/core/services/api_services.dart';
 import 'package:weezemaster/translation.dart';
+import 'package:weezemaster/core/utils/constants.dart';
 
 class Ticket {
   final String id;
@@ -105,8 +106,15 @@ class ResaleTicket extends StatelessWidget {
             children: [
               ClipRRect(
                 borderRadius: BorderRadius.circular(10),
-                child: Image.network(
+                child: ticket.reseller.avatar.isNotEmpty
+                    ? Image.network(
                   ticket.reseller.avatar,
+                  width: 140,
+                  height: 140,
+                  fit: BoxFit.cover,
+                )
+                    : const Image(
+                  image: AssetImage("assets/user-placeholder.jpg"),
                   width: 140,
                   height: 140,
                   fit: BoxFit.cover,
@@ -153,7 +161,7 @@ class ResaleTicket extends StatelessWidget {
                               final tokenService = TokenService();
                               String? token = await tokenService.getValidAccessToken();
                               if (token == null) {
-                                context.pushNamed('login-register');
+                                GoRouter.of(context).go(Routes.loginRegisterNamedPage);
                               } else {
                                 final parts = token.split('.');
                                 if (parts.length != 3) {
@@ -186,15 +194,6 @@ class ResaleTicket extends StatelessWidget {
                                   debugPrint('Conversation found in the database, access it');
                                   context.push(
                                     '/chat/$existingConversationId',
-                                    // extra: {
-                                    //   'userId': null,
-                                    //   'resellerId': null,
-                                    //   'ticketId': null,
-                                    //   'concertName': null,
-                                    //   'price': null,
-                                    //   'resellerName': null,
-                                    //   'category': null,
-                                    // }
                                   );
                                 } else {
                                   debugPrint('No conversation found in the database');
@@ -233,7 +232,7 @@ class ResaleTicket extends StatelessWidget {
                               final tokenService = TokenService();
                               String? token = await tokenService.getValidAccessToken();
                               if (token == null) {
-                                context.pushNamed('login-register');
+                                GoRouter.of(context).go(Routes.loginRegisterNamedPage);
                               } else {
                                 final paymentIntentData = await paymentService.createPaymentIntent(ticket.id, 'tl_');
                                 if (paymentIntentData != null) {

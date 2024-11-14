@@ -1,9 +1,16 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:go_router/go_router.dart';
 import 'package:http/http.dart' as http;
+import 'package:image_picker/image_picker.dart';
 import 'dart:convert';
 import 'package:weezemaster/translation.dart';
+import 'package:weezemaster/core/utils/constants.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:weezemaster/controller/navigation_cubit.dart';
+import 'core/services/token_services.dart';
+import 'package:http_parser/http_parser.dart';
 
 class RegisterOrganisationScreen extends StatefulWidget {
   const RegisterOrganisationScreen({super.key});
@@ -27,6 +34,20 @@ class RegisterOrganisationScreenState extends State<RegisterOrganisationScreen> 
   final RegExp passwordRegExp = RegExp(
       r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#\$&*~]).{8,}$');
 
+  File? _image;
+  String? _base64Image;
+  final picker = ImagePicker();
+
+  Future<void> getImage() async {
+    final pickedImage = await picker.pickImage(source: ImageSource.gallery);
+    setState(() {
+      if (pickedImage != null) {
+        _image = File(pickedImage.path);
+        _base64Image = base64Encode(_image!.readAsBytesSync());
+      }
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -48,10 +69,29 @@ class RegisterOrganisationScreenState extends State<RegisterOrganisationScreen> 
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: <Widget>[
+                        GestureDetector(
+                          onTap: getImage,
+                          child: ClipOval(
+                            child: _image == null
+                                ? Container(
+                              width: 100,
+                              height: 100,
+                              color: Colors.grey[300],
+                              child: const Icon(Icons.camera_alt),
+                            )
+                                : Image.file(
+                              File(_image!.path),
+                              width: 100,
+                              height: 100,
+                              fit: BoxFit.cover,
+                            ),
+                          ),
+                        ),
                         TextFormField(
                           controller: _organameController,
                           decoration: InputDecoration(
                             labelText: translate(context)!.organization_name,
+                            errorMaxLines: 3,
                           ),
                           validator: (value) {
                             if (value == null || value.isEmpty) {
@@ -64,6 +104,7 @@ class RegisterOrganisationScreenState extends State<RegisterOrganisationScreen> 
                           controller: _orgadescriController,
                           decoration: InputDecoration(
                             labelText: translate(context)!.organization_description,
+                            errorMaxLines: 3,
                           ),
                           validator: (value) {
                             if (value == null || value.isEmpty) {
@@ -76,6 +117,7 @@ class RegisterOrganisationScreenState extends State<RegisterOrganisationScreen> 
                           controller: _firstnameController,
                           decoration: InputDecoration(
                             labelText: translate(context)!.firstname,
+                            errorMaxLines: 3,
                           ),
                           validator: (value) {
                             if (value == null || value.isEmpty) {
@@ -88,6 +130,7 @@ class RegisterOrganisationScreenState extends State<RegisterOrganisationScreen> 
                           controller: _lastnameController,
                           decoration: InputDecoration(
                             labelText: translate(context)!.lastname,
+                            errorMaxLines: 3,
                           ),
                           validator: (value) {
                             if (value == null || value.isEmpty) {
@@ -100,6 +143,7 @@ class RegisterOrganisationScreenState extends State<RegisterOrganisationScreen> 
                           controller: _emailController,
                           decoration: InputDecoration(
                             labelText: translate(context)!.email,
+                            errorMaxLines: 3,
                           ),
                           validator: (value) {
                             if (value == null || value.isEmpty) {
@@ -114,6 +158,7 @@ class RegisterOrganisationScreenState extends State<RegisterOrganisationScreen> 
                           controller: _passwordController,
                           decoration: InputDecoration(
                             labelText: translate(context)!.password,
+                            errorMaxLines: 3,
                           ),
                           obscureText: true,
                           validator: (value) {
@@ -129,6 +174,7 @@ class RegisterOrganisationScreenState extends State<RegisterOrganisationScreen> 
                           controller: _confirmPasswordController,
                           decoration: InputDecoration(
                             labelText: translate(context)!.confirm_password,
+                            errorMaxLines: 3,
                           ),
                           obscureText: true,
                           validator: (value) {
@@ -150,20 +196,35 @@ class RegisterOrganisationScreenState extends State<RegisterOrganisationScreen> 
                                 if (_formKey.currentState!.validate()) {
                                   // Process data.
                                   try {
-                                    var response = await http.post(
+                                    final tokenService = TokenService();
+                                    String? jwtToken = await tokenService.getValidAccessToken();
+
+                                    var request = http.MultipartRequest(
+                                      'POST',
                                       Uri.parse('${dotenv.env['API_PROTOCOL']}://${dotenv.env['API_HOST']}${dotenv.env['API_PORT']}/registerorganizer'),
-                                      headers: <String, String>{
-                                        'Content-Type': 'application/json; charset=UTF-8',
-                                      },
-                                      body: jsonEncode(<String, String>{
-                                        'firstname': _firstnameController.text,
-                                        'lastname': _lastnameController.text,
-                                        'email': _emailController.text,
-                                        'password': _passwordController.text,
-                                        'organization': _organameController.text,
-                                        'orgadescri': _orgadescriController.text
-                                      }),
                                     );
+
+                                    request.headers['Authorization'] = 'Bearer $jwtToken';
+
+                                    request.fields['firstname'] = _firstnameController.text;
+                                    request.fields['lastname'] = _lastnameController.text;
+                                    request.fields['email'] = _emailController.text;
+                                    request.fields['password'] = _passwordController.text;
+                                    request.fields['organization'] = _organameController.text;
+                                    request.fields['orgadescri'] = _orgadescriController.text;
+
+                                    if (_image != null) {
+                                      request.files.add(
+                                        await http.MultipartFile.fromPath(
+                                          'image',
+                                          _image!.path,
+                                          contentType: MediaType('image', _image!.path.split('.').last),
+                                        ),
+                                      );
+                                    }
+
+                                    var response = await request.send();
+
                                     ScaffoldMessenger.of(context).showSnackBar(
                                       SnackBar(
                                         content: Text(response.statusCode == 201
@@ -173,19 +234,31 @@ class RegisterOrganisationScreenState extends State<RegisterOrganisationScreen> 
                                       ),
                                     );
                                     if (response.statusCode == 201) {
-                                      context.pushNamed('home');
+                                      context.read<NavigationCubit>().updateUserRole('organizer');
+                                      context.pushNamed('login');
                                     }
                                   } catch (e) {
                                     ScaffoldMessenger.of(context).showSnackBar(
                                       SnackBar(
                                         content: Text(translate(context)!.generic_error),
-                                        duration: Duration(seconds: 5),
+                                        duration: const Duration(seconds: 5),
                                       ),
                                     );
                                   }
                                 }
                               },
-                              child: Text(translate(context)!.register),
+                              style: ElevatedButton.styleFrom(
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(6.0),
+                                ),
+                                backgroundColor: Colors.deepOrange,
+                              ),
+                              child: Text(
+                                translate(context)!.register,
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                ),
+                              ),
                             ),
                           ),
                         )

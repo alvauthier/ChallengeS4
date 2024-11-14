@@ -103,9 +103,21 @@ class ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                 width: double.infinity,
                 child: ElevatedButton(
                   onPressed: _isLoading ? null : sendResetCode,
+                  style: ElevatedButton.styleFrom(
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(6.0),
+                    ),
+                    backgroundColor: Colors.deepOrange,
+                  ),
                   child: _isLoading
-                      ? const CircularProgressIndicator()
-                      : Text(translate(context)!.send_code),
+                    ? const CircularProgressIndicator()
+                    : Text(
+                      translate(context)!.send_code,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontFamily: 'Readex Pro',
+                      ),
+                  ),
                 ),
               ),
             ],

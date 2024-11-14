@@ -89,6 +89,7 @@ flutter:
     - .env
     - assets/thanks_purchase.png
     - assets/thanks.gif
+    - assets/user-placeholder.jpg
 
   fonts:
     - family: Readex Pro

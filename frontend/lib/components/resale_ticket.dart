@@ -15,8 +15,9 @@ class Ticket {
   final String price;
   final String concertName;
   final Reseller reseller;
+  final String concertImage;
 
-  Ticket({required this.id, required this.category, required this.price, required this.concertName, required this.reseller});
+  Ticket({required this.id, required this.category, required this.price, required this.concertName, required this.reseller, required this.concertImage});
 
   factory Ticket.fromMap(Map<String, dynamic> map) {
     return Ticket(
@@ -25,6 +26,7 @@ class Ticket {
       price: map['price'] as String,
       concertName: map['concertName'] as String,
       reseller: Reseller.fromMap(map['reseller'] as Map<String, dynamic>),
+      concertImage: map['concertImage'] as String,
     );
   }
 }
@@ -196,7 +198,6 @@ class ResaleTicket extends StatelessWidget {
                                     '/chat/$existingConversationId',
                                   );
                                 } else {
-                                  debugPrint('No conversation found in the database');
                                   context.push(
                                     '/chat/newchat',
                                     extra: {
@@ -207,6 +208,7 @@ class ResaleTicket extends StatelessWidget {
                                       'price': ticket.price,
                                       'resellerName': ticket.reseller.name,
                                       'category': ticket.category,
+                                      'concertImage': ticket.concertImage,
                                     },
                                   );
                                 }

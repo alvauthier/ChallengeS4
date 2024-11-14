@@ -194,6 +194,7 @@ class AppRouter {
                   price: extras?['price'] ?? '',
                   resellerName: extras?['resellerName'] ?? '',
                   category: extras?['category'] ?? '',
+                  concertImage: extras?['concertImage'] ?? '',
                 );
               },
             ),

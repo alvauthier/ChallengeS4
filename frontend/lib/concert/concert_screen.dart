@@ -74,6 +74,9 @@ class ConcertScreen extends StatelessWidget {
                                   'price': ticket.ticketListing!.price.toStringAsFixed(2),
                                   'id': ticket.ticketListing!.id.toString(),
                                   'concertName': concert.name,
+                                  'concertImage': concert.image != ''
+                                      ? '${dotenv.env['API_PROTOCOL']}://${dotenv.env['API_HOST']}${dotenv.env['API_PORT']}/uploads/concerts/${concert.image}'
+                                      : 'https://picsum.photos/seed/picsum/800/400',
                                 }
                             );
                           }

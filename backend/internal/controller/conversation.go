@@ -78,6 +78,7 @@ func GetConversation(c echo.Context) error {
 			"Name":     concert.Name,
 			"Date":     concert.Date,
 			"Location": concert.Location,
+			"Image":    concert.Image,
 		},
 	}
 

@@ -94,6 +94,11 @@ BlocBuilder<NavigationCubit, NavigationState> _buildBottomNavigation(BuildContex
             label: translate(context)!.admin_panel,
           ),
           NamedNavigationBarItemWidget(
+            initialLocation: Routes.logsNamedPage,
+            icon: const Icon(Icons.build),
+            label: 'Logs',
+          ),
+          NamedNavigationBarItemWidget(
             initialLocation: Routes.profileNamedPage,
             icon: const Icon(Icons.person),
             label: translate(context)!.my_profile,

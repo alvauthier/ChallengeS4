@@ -6,6 +6,7 @@ class Routes {
   static const userInterestsNamedPage = '/user-interests';
   static const profileNamedPage = '/profile';
   static const adminNamedPage = '/admin';
+  static const logsNamedPage = '/logs';
   static const registerConcertNamedPage = '/register-concert';
   static const organizerConcertNamedPage = '/organizer-concert';
 }

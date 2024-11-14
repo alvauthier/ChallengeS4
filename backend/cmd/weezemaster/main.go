@@ -10,7 +10,6 @@ import (
 	"weezemaster/internal/controller"
 	"weezemaster/internal/database"
 	"weezemaster/internal/middleware"
-	"net/http"
 
 	_ "weezemaster/docs"
 

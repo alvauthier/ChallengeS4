@@ -267,7 +267,7 @@ func UpdateConcert(c echo.Context) error {
     if err == nil {
         // Supprimer l'ancienne image si elle existe
         if concert.Image != "" {
-            oldImagePath := filepath.Join("uploads", "concerts", user.Image)
+            oldImagePath := filepath.Join("uploads", "concerts", concert.Image)
             if err := os.Remove(oldImagePath); err != nil {
                 return c.JSON(http.StatusInternalServerError, map[string]string{"message": "Failed to delete old image: " + err.Error()})
             }

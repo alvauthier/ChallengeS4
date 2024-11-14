@@ -58,7 +58,7 @@ BlocBuilder<NavigationCubit, NavigationState> _buildBottomNavigation(BuildContex
             label: translate(context)!.my_messages,
           ),
           NamedNavigationBarItemWidget(
-            initialLocation: Routes.userInterestsNamedPage,
+            initialLocation: Routes.profileNamedPage,
             icon: const Icon(Icons.person),
             label: translate(context)!.my_profile,
           ),

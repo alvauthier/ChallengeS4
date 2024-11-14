@@ -7,8 +7,8 @@ import 'package:weezemaster/core/services/api_services.dart';
 import 'package:weezemaster/core/exceptions/api_exception.dart';
 import 'package:weezemaster/core/services/token_services.dart';
 import 'package:weezemaster/translation.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:weezemaster/controller/navigation_cubit.dart';
+
+import 'core/utils/constants.dart';
 
 class UserInterestsScreen extends StatefulWidget {
   const UserInterestsScreen({super.key});
@@ -143,68 +143,147 @@ class UserInterestsScreenState extends State<UserInterestsScreen> {
     return topic.toLowerCase().replaceAll(' ', '_');
   }
 
-  Future<void> clearTokens() async {
-    TokenService tokenService = TokenService();
-    await tokenService.clearTokens();
-  }
-
-  void _logout() async {
-    await clearTokens();
-    context.read<NavigationCubit>().updateUserRole('');
-
-    if (mounted) {
-      context.pushNamed('login');
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     if (isLoading) {
-      return Scaffold(
-        appBar: AppBar(
-          title: Text(translate(context)!.my_interests),
+      return SafeArea(
+        child: Scaffold(
+          backgroundColor: Colors.white,
+          body: Stack(
+            children: [
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 30),
+                child: Column(
+                  children: [
+                    Text(
+                      translate(context)!.my_interests,
+                      style: const TextStyle(
+                        fontSize: 28,
+                        fontWeight: FontWeight.bold,
+                        fontFamily: 'Readex Pro',
+                      ),
+                    ),
+                    const SizedBox(height: 40),
+                    const Center(
+                      child: CircularProgressIndicator(),
+                    ),
+                  ],
+                ),
+              ),
+              Positioned(
+                top: 25.0,
+                left: 20.0,
+                child: IconButton(
+                  icon: const Icon(
+                    Icons.arrow_back,
+                    color: Colors.black,
+                    size: 30,
+                  ),
+                  onPressed: () => context.pushReplacement(Routes.profileNamedPage),
+                ),
+              ),
+            ],
+          ),
         ),
-        body: const Center(child: CircularProgressIndicator()),
       );
     }
 
     if (errorMessage != null) {
-      return Scaffold(
-        appBar: AppBar(
-          title: Text(translate(context)!.my_interests),
+      return SafeArea(
+        child: Scaffold(
+          backgroundColor: Colors.white,
+          body: Stack(
+            children: [
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 30),
+                child: Column(
+                  children: [
+                    Text(
+                      translate(context)!.my_interests,
+                      style: const TextStyle(
+                        fontSize: 28,
+                        fontWeight: FontWeight.bold,
+                        fontFamily: 'Readex Pro',
+                      ),
+                    ),
+                    const SizedBox(height: 40),
+                    Center(
+                      child: Text(
+                        errorMessage!,
+                        style: const TextStyle(color: Colors.red),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Positioned(
+                top: 25.0,
+                left: 20.0,
+                child: IconButton(
+                  icon: const Icon(
+                    Icons.arrow_back,
+                    color: Colors.black,
+                    size: 30,
+                  ),
+                  onPressed: () => context.pushReplacement(Routes.profileNamedPage),
+                ),
+              ),
+            ],
+          ),
         ),
-        body: Center(child: Text(errorMessage!)),
       );
     }
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(translate(context)!.my_interests),
-        actions: [
-          TextButton(
-            onPressed: _logout,
-            child: Text(
-              translate(context)!.logout,
-              style: const TextStyle(color: Colors.red),
+    return SafeArea(
+      child: Scaffold(
+        backgroundColor: Colors.white,
+        body: Stack(
+          children: [
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 30),
+              child: Column(
+                children: [
+                  Text(
+                    translate(context)!.my_interests,
+                    style: const TextStyle(
+                      fontSize: 28,
+                      fontWeight: FontWeight.bold,
+                      fontFamily: 'Readex Pro',
+                    ),
+                  ),
+                  const SizedBox(height: 40),
+                  Center(
+                    child: Wrap(
+                      spacing: 10.0,
+                      runSpacing: 5.0,
+                      alignment: WrapAlignment.start,
+                      children: allInterests.map((interest) {
+                        bool isSelected = isInterestSelected(interest);
+                        return UserInterestChip(
+                          interest: interest,
+                          isSelected: isSelected,
+                          onSelected: toggleInterest,
+                        );
+                      }).toList(),
+                    ),
+                  )
+                ],
+              ),
             ),
-          ),
-        ],
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(10.0),
-        child: Wrap(
-          spacing: 10.0,
-          runSpacing: 5.0,
-          alignment: WrapAlignment.start,
-          children: allInterests.map((interest) {
-            bool isSelected = isInterestSelected(interest);
-            return UserInterestChip(
-              interest: interest,
-              isSelected: isSelected,
-              onSelected: toggleInterest,
-            );
-          }).toList(),
-        ),
+            Positioned(
+              top: 25.0,
+              left: 20.0,
+              child: IconButton(
+                icon: const Icon(
+                  Icons.arrow_back,
+                  color: Colors.black,
+                  size: 30,
+                ),
+                onPressed: () => context.pushReplacement(Routes.profileNamedPage),
+              ),
+            ),
+          ],
+        )
       ),
     );
   }

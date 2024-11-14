@@ -15,7 +15,8 @@ import 'package:weezemaster/login_register_screen.dart';
 import 'package:weezemaster/login_screen.dart';
 import 'package:weezemaster/my_tickets/my_tickets_screen.dart';
 import 'package:weezemaster/panel_admin.dart';
-import 'package:weezemaster/profile_screen.dart';
+import 'package:weezemaster/profile/edit_profile_screen.dart';
+import 'package:weezemaster/profile/profile_screen.dart';
 import 'package:weezemaster/queue_screen.dart';
 import 'package:weezemaster/register_concert_screen.dart';
 import 'package:weezemaster/register_organization_screen.dart';
@@ -209,6 +210,14 @@ class AppRouter {
               pageBuilder: (context, state) =>
               const NoTransitionPage(
                 child: ProfileScreen(),
+              ),
+            ),
+            GoRoute(
+              path: '/edit-profile',
+              name: 'edit-profile',
+              pageBuilder: (context, state) =>
+              const NoTransitionPage(
+                child: EditProfileScreen(),
               ),
             ),
             GoRoute(

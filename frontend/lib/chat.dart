@@ -510,6 +510,11 @@ class ChatScreenState extends State<ChatScreen> {
                     final authorId = message["authorId"] as String? ?? "";
                     final content = message["content"] as String? ?? "";
                     final isCurrentUser = authorId == userId;
+
+                    if (content.isEmpty) {
+                      return const SizedBox.shrink();
+                    }
+
                     return Column(
                       children: [
                         MessageBubble(

@@ -148,8 +148,8 @@ class ChatScreenState extends State<ChatScreen> {
       _isLoading = false;
     } else {
       concertName = "";
-      price = "";
-      maxPrice = "";
+      price = "0";
+      maxPrice = "0";
       otherUser = "";
       category = "";
       buyerId = "";

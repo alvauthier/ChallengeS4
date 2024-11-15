@@ -116,26 +116,28 @@ func HandleWebSocketChat(c echo.Context) error {
 			continue
 		}
 
-        // Vérifier et mettre à jour le prix si nécessaire
-        priceChanged, err := checkAndUpdatePrice(conversationID, msgPayload.Price)
-        if err != nil {
-           debugPrint("Erreur lors de la vérification du prix: ", err)
-           continue
+        if msgPayload.Price > 0 {
+            // Vérifier et mettre à jour le prix si nécessaire
+            priceChanged, err := checkAndUpdatePrice(conversationID, msgPayload.Price)
+            if err != nil {
+               debugPrint("Erreur lors de la vérification du prix: ", err)
+               continue
+            }
+
+            // Diffuser la mise à jour du prix si nécessaire
+            if priceChanged {
+               priceUpdateMessage := map[string]interface{}{
+                    "type":           "price_update",
+                    "conversation_id": conversationID,
+                    "new_price":      msgPayload.Price,
+               }
+               priceUpdateMessageJSON, _ := json.Marshal(priceUpdateMessage)
+               broadcastMessage(conversationID, priceUpdateMessageJSON)
+            }
         }
 
-		// Diffuser le message aux autres connexions dans la même room
-		broadcastMessage(conversationID, message)
-
-		// Diffuser la mise à jour du prix si nécessaire
-        if priceChanged {
-           priceUpdateMessage := map[string]interface{}{
-           	    "type":           "price_update",
-            	"conversation_id": conversationID,
-            	"new_price":      msgPayload.Price,
-           }
-           priceUpdateMessageJSON, _ := json.Marshal(priceUpdateMessage)
-           broadcastMessage(conversationID, priceUpdateMessageJSON)
-        }
+        // Diffuser le message aux autres connexions dans la même room
+        broadcastMessage(conversationID, message)
 	}
 	return nil
 }

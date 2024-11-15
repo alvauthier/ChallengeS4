@@ -7,6 +7,7 @@ import 'package:http/http.dart' as http;
 import 'package:http_parser/http_parser.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:omni_datetime_picker/omni_datetime_picker.dart';
+import 'package:weezemaster/core/models/artist.dart';
 import 'package:weezemaster/core/models/category.dart';
 import 'package:weezemaster/core/models/interest.dart';
 import 'package:weezemaster/core/services/api_services.dart';
@@ -51,10 +52,13 @@ class RegisterConcertScreenState extends State<RegisterConcertScreen> {
   final Map<int, bool> selectedCategories = {};
   List<Interest> interests = [];
   final Map<int, bool> selectedInterests = {};
+  List<Artist> artists = [];
+  final Map<String, bool> selectedArtists = {};
 
   @override
   void initState() {
     super.initState();
+    _fetchArtists();
     _fetchCategories();
     _fetchInterests();
   }
@@ -66,6 +70,15 @@ class RegisterConcertScreenState extends State<RegisterConcertScreen> {
         selectedCategories[category.id] = false;
         _categoriesController[category.id] = TextEditingController();
         _pricesController[category.id] = TextEditingController();
+      }
+    });
+  }
+
+  Future<void> _fetchArtists() async {
+    artists = await ApiServices.getAllArtists();
+    setState(() {
+      for (var artist in artists) {
+        selectedArtists[artist.id] = false;
       }
     });
   }
@@ -256,6 +269,37 @@ class RegisterConcertScreenState extends State<RegisterConcertScreen> {
                               ),
                             ],
                           ),
+
+                          const SizedBox(height: 30),
+                          const Text(
+                            "Artiste",
+                            style: TextStyle(
+                              fontFamily: 'Readex Pro',
+                              fontWeight: FontWeight.bold,
+                              fontSize: 20,
+                            ),
+                          ),
+                          const SizedBox(height: 10),
+                          ...artists.map((artist) {
+                            return Column(
+                              children: [
+                                CheckboxListTile(
+                                  title: Text(
+                                    artist.name,
+                                    style: const TextStyle(fontFamily: 'Readex Pro'),
+                                  ),
+                                  value: selectedArtists[artist.id],
+                                  onChanged: (bool? value) {
+                                    setState(() {
+                                      selectedArtists[artist.id] = value!;
+                                    });
+                                  },
+                                  activeColor: Colors.deepOrange,
+                                ),
+                              ],
+                            );
+                          }),
+
                           const SizedBox(height: 30),
                           Text(
                             translate(context)!.ticket_categories,

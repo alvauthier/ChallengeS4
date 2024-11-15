@@ -30,7 +30,7 @@ func LoadOrganizationFixtures() {
 	user := models.User{
 		ID:             uuid.New(),
 		Email:          "orga@user.fr",
-		Password:       "test",
+		Password:       "$2a$14$kA0gw8VhoFo4u4OLGT1.H.hrPa0C17ovGxSxN884DbMDXqO2Ks/IO",
 		Firstname:      "Liam",
 		Lastname:       "Neeson",
 		Role:           "organizer",

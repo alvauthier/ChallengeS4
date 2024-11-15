@@ -99,6 +99,12 @@ func main() {
 	authenticated.PATCH("/interests/:id", controller.UpdateInterest, middleware.CheckRole("admin"))
 	authenticated.DELETE("/interests/:id", controller.DeleteInterest, middleware.CheckRole("admin"))
 
+	router.GET("/artists", controller.GetAllArtists)
+	router.GET("/artists/:id", controller.GetArtist)
+	router.POST("/artists", controller.CreateArtist)
+	router.PATCH("/artists/:id", controller.UpdateArtist)
+	router.DELETE("/artists/:id", controller.DeleteArtist)
+
 	authenticated.GET("/categories", controller.GetAllCategories, middleware.CheckRole("user", "organizer", "admin"))
 	authenticated.GET("/categories/:id", controller.GetCategory, middleware.CheckRole("admin"))
 	authenticated.POST("/categories", controller.CreateCategory, middleware.CheckRole("admin"))

@@ -52,6 +52,7 @@ func Migrate() {
 		&models.Sale{},
 		&models.Conversation{},
 		&models.Message{},
+		&models.Artist{},
 	)
 	if err != nil {
 		log.Fatalf("Error migrating database schema: %v", err)

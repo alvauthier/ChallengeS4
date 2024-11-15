@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:weezemaster/admin/artists/artists.dart';
 import 'package:weezemaster/admin/ticket_listings/ticket_listings.dart';
 import 'package:weezemaster/admin/users/users.dart';
 import 'package:weezemaster/translation.dart';
@@ -13,7 +14,7 @@ class AdminPanel extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(
-      length: 6,
+      length: 7,
       child: Scaffold(
         appBar: AppBar(
           title: Text(translate(context)!.admin_panel),
@@ -25,6 +26,7 @@ class AdminPanel extends StatelessWidget {
               Tab(text: translate(context)!.users),
               Tab(text: 'Tickets'),
               Tab(text: 'Ticket Listings'),
+              Tab(text: 'Artists'),
               Tab(text: 'Interests'),
               Tab(text: 'Categories'),
               Tab(text: 'Concerts'),
@@ -36,6 +38,7 @@ class AdminPanel extends StatelessWidget {
             UsersScreen(),
             const TicketsScreen(),
             const TicketListingsScreen(),
+            ArtistsScreen(),
             InterestsScreen(),
             CategoriesScreen(),
             ConcertsScreen(),

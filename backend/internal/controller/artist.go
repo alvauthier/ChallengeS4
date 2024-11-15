@@ -37,7 +37,12 @@ func GetArtist(c echo.Context) error {
 	db := database.GetDB()
 	id := c.Param("id")
 	var artist models.Artist
-	db.First(&artist, id)
+	if err := db.Where("id = ?", id).First(&artist).Error; err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return echo.NewHTTPError(http.StatusNotFound, "Artist not found")
+		}
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
 	return c.JSON(http.StatusOK, artist)
 }
 

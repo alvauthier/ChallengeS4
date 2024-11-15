@@ -1,21 +1,21 @@
 package controller
 
 import (
-    "encoding/json"
-    "fmt"
-    "io"
-    "net/http"
-    "os"
-    "path/filepath"
-    "strings"
-    "time"
-    "weezemaster/internal/database"
-    "weezemaster/internal/models"
+	"encoding/json"
+	"fmt"
+	"io"
+	"net/http"
+	"os"
+	"path/filepath"
+	"strings"
+	"time"
+	"weezemaster/internal/database"
+	"weezemaster/internal/models"
 
-    "github.com/golang-jwt/jwt/v5"
-    "github.com/google/uuid"
-    "github.com/labstack/echo/v4"
-    "gorm.io/gorm"
+	"github.com/golang-jwt/jwt/v5"
+	"github.com/google/uuid"
+	"github.com/labstack/echo/v4"
+	"gorm.io/gorm"
 )
 
 // @Summary		Récupère tous les concerts
@@ -75,9 +75,9 @@ type RequestPayloadConcert struct {
 }
 
 type Category struct {
-    ID     int     `json:"id"`
-    Places int     `json:"places"`
-    Price  float64 `json:"price"`
+	ID     int     `json:"id"`
+	Places int     `json:"places"`
+	Price  float64 `json:"price"`
 }
 
 // @Summary		Créé un concert
@@ -88,150 +88,155 @@ type Category struct {
 // @Success		201	{object}	models.Concert
 // @Router			/concerts [post]
 func CreateConcert(c echo.Context) error {
-    db := database.GetDB()
+	fmt.Println("CreateConcert")
+	db := database.GetDB()
 
-    // Extraire les champs du form-data
-    name := c.FormValue("name")
-    description := c.FormValue("description")
-    location := c.FormValue("location")
-    dateStr := c.FormValue("date")
-    interestIDs := c.FormValue("InterestIDs")
-    categoriesIDs := c.FormValue("CategoriesIDs")
+	// Extraire les champs du form-data
+	name := c.FormValue("name")
+	description := c.FormValue("description")
+	location := c.FormValue("location")
+	dateStr := c.FormValue("date")
+	interestIDs := c.FormValue("InterestIDs")
+	categoriesIDs := c.FormValue("CategoriesIDs")
+	artistId := c.FormValue("artistId")
+	fmt.Println(artistId)
+	fmt.Println(uuid.MustParse(artistId))
 
-    date, _ := time.Parse("2006-01-02 15:04", dateStr)
+	date, _ := time.Parse("2006-01-02 15:04", dateStr)
 
-    token, ok := c.Get("user").(*jwt.Token)
-    if !ok {
-        return echo.NewHTTPError(http.StatusUnauthorized, "Invalid token")
-    }
+	token, ok := c.Get("user").(*jwt.Token)
+	if !ok {
+		return echo.NewHTTPError(http.StatusUnauthorized, "Invalid token")
+	}
 
-    claims, ok := token.Claims.(*jwt.MapClaims)
-    if !ok || !token.Valid {
-        return echo.NewHTTPError(http.StatusUnauthorized, "Invalid token claims")
-    }
+	claims, ok := token.Claims.(*jwt.MapClaims)
+	if !ok || !token.Valid {
+		return echo.NewHTTPError(http.StatusUnauthorized, "Invalid token claims")
+	}
 
-    userId, ok := (*claims)["id"].(string)
-    if !ok {
-        return echo.NewHTTPError(http.StatusForbidden, "User ID not found in token")
-    }
+	userId, ok := (*claims)["id"].(string)
+	if !ok {
+		return echo.NewHTTPError(http.StatusForbidden, "User ID not found in token")
+	}
 
-    user := &models.User{}
-    if err := db.Where("id = ?", userId).First(user).Error; err != nil {
-        return echo.NewHTTPError(http.StatusNotFound, "User not found")
-    }
+	user := &models.User{}
+	if err := db.Where("id = ?", userId).First(user).Error; err != nil {
+		return echo.NewHTTPError(http.StatusNotFound, "User not found")
+	}
 
-    // Récupérer le fichier image depuis le form-data
-    file, err := c.FormFile("image")
-    if err != nil {
-        return echo.NewHTTPError(http.StatusBadRequest, "Image file is required")
-    }
+	// Récupérer le fichier image depuis le form-data
+	file, err := c.FormFile("image")
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, "Image file is required")
+	}
 
-    // Ouvrir le fichier
-    src, err := file.Open()
-    if err != nil {
-        return echo.NewHTTPError(http.StatusInternalServerError, "Failed to open image file: "+err.Error())
-    }
-    defer src.Close()
+	// Ouvrir le fichier
+	src, err := file.Open()
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, "Failed to open image file: "+err.Error())
+	}
+	defer src.Close()
 
-    // Vérifier l'extension du fichier
-    fileExtension := strings.ToLower(filepath.Ext(file.Filename))
-    if fileExtension != ".jpg" && fileExtension != ".jpeg" && fileExtension != ".png" {
-        return echo.NewHTTPError(http.StatusBadRequest, "Invalid file extension")
-    }
+	// Vérifier l'extension du fichier
+	fileExtension := strings.ToLower(filepath.Ext(file.Filename))
+	if fileExtension != ".jpg" && fileExtension != ".jpeg" && fileExtension != ".png" {
+		return echo.NewHTTPError(http.StatusBadRequest, "Invalid file extension")
+	}
 
-    // Générer un UUID pour le nom du fichier
-    fileUUID := uuid.New().String()
-    fileName := fileUUID + fileExtension
-    filePath := filepath.Join("uploads", "concerts", fileName)
+	// Générer un UUID pour le nom du fichier
+	fileUUID := uuid.New().String()
+	fileName := fileUUID + fileExtension
+	filePath := filepath.Join("uploads", "concerts", fileName)
 
-    // Créer le dossier uploads/concerts s'il n'existe pas
-    if err := os.MkdirAll(filepath.Dir(filePath), os.ModePerm); err != nil {
-        return echo.NewHTTPError(http.StatusInternalServerError, "Failed to create directory: "+err.Error())
-    }
+	// Créer le dossier uploads/concerts s'il n'existe pas
+	if err := os.MkdirAll(filepath.Dir(filePath), os.ModePerm); err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, "Failed to create directory: "+err.Error())
+	}
 
-    // Créer le fichier de destination
-    dst, err := os.Create(filePath)
-    if err != nil {
-        return echo.NewHTTPError(http.StatusInternalServerError, "Failed to create destination file: "+err.Error())
-    }
-    defer dst.Close()
+	// Créer le fichier de destination
+	dst, err := os.Create(filePath)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, "Failed to create destination file: "+err.Error())
+	}
+	defer dst.Close()
 
-    // Copier les données de l'image dans le fichier de destination
-    if _, err := io.Copy(dst, src); err != nil {
-        return echo.NewHTTPError(http.StatusInternalServerError, "Failed to save image: "+err.Error())
-    }
+	// Copier les données de l'image dans le fichier de destination
+	if _, err := io.Copy(dst, src); err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, "Failed to save image: "+err.Error())
+	}
 
-    // Créer un nouvel objet Concert
-    concert := models.Concert{
-        ID:             uuid.New(),
-        Name:           name,
-        Description:    description,
-        Location:       location,
-        Date:           date,
-        Image:          fileName,
-        OrganizationId: user.OrganizationId,
-    }
+	// Créer un nouvel objet Concert
+	concert := models.Concert{
+		ID:             uuid.New(),
+		Name:           name,
+		Description:    description,
+		Location:       location,
+		Date:           date,
+		Image:          fileName,
+		OrganizationId: user.OrganizationId,
+		ArtistId:       uuid.MustParse(artistId),
+	}
 
-    // Récupérer les objets Interest correspondant aux IDs
-    var interests []models.Interest
-    if len(interestIDs) > 0 {
-        if err := db.Where("id IN ?", strings.Split(interestIDs, ",")).Find(&interests).Error; err != nil {
-            return echo.NewHTTPError(http.StatusInternalServerError, "Failed to find interests: "+err.Error())
-        }
-        concert.Interests = interests
-    }
+	// Récupérer les objets Interest correspondant aux IDs
+	var interests []models.Interest
+	if len(interestIDs) > 0 {
+		if err := db.Where("id IN ?", strings.Split(interestIDs, ",")).Find(&interests).Error; err != nil {
+			return echo.NewHTTPError(http.StatusInternalServerError, "Failed to find interests: "+err.Error())
+		}
+		concert.Interests = interests
+	}
 
-    var categories []Category
-    if err := json.Unmarshal([]byte(categoriesIDs), &categories); err != nil {
-        return echo.NewHTTPError(http.StatusBadRequest, "Failed to parse categories: "+err.Error())
-    }
+	var categories []Category
+	if err := json.Unmarshal([]byte(categoriesIDs), &categories); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, "Failed to parse categories: "+err.Error())
+	}
 
 	// Gérer les catégories
 	var concertCategories []models.ConcertCategory
-    for _, cat := range categories {
-        category := models.ConcertCategory{
-            ID:               uuid.New(),
-            ConcertId:        concert.ID,
-            CategoryId:       cat.ID,
-            Price:            cat.Price,
-            AvailableTickets: cat.Places,
-        }
-        concertCategories = append(concertCategories, category)
-    }
+	for _, cat := range categories {
+		category := models.ConcertCategory{
+			ID:               uuid.New(),
+			ConcertId:        concert.ID,
+			CategoryId:       cat.ID,
+			Price:            cat.Price,
+			AvailableTickets: cat.Places,
+		}
+		concertCategories = append(concertCategories, category)
+	}
 	// Créer le concert avec les associations
 	if err := db.Create(&concert).Error; err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, "Failed to create concert: "+err.Error())
 	}
 
-    // Enregistrer les catégories associées au concert
-    if err := db.Create(&concertCategories).Error; err != nil {
-        return echo.NewHTTPError(http.StatusInternalServerError, "Failed to create concert categories: "+err.Error())
-    }
+	// Enregistrer les catégories associées au concert
+	if err := db.Create(&concertCategories).Error; err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, "Failed to create concert categories: "+err.Error())
+	}
 
-    // Envoyer des notifications aux sujets correspondant aux centres d'intérêt
-    for _, interest := range interests {
-        data := map[string]string{
-            "concert_id": concert.ID.String(),
-            "name":       concert.Name,
-        }
-        notification := map[string]string{
-            "title": "Nouveau concert susceptible de vous intéresser",
-            "body":  fmt.Sprintf("Le concert \"%s\" vient d'être ajouté et pourrait vous plaire. Réservez vos places dès maintenant !", concert.Name),
-        }
+	// Envoyer des notifications aux sujets correspondant aux centres d'intérêt
+	for _, interest := range interests {
+		data := map[string]string{
+			"concert_id": concert.ID.String(),
+			"name":       concert.Name,
+		}
+		notification := map[string]string{
+			"title": "Nouveau concert susceptible de vous intéresser",
+			"body":  fmt.Sprintf("Le concert \"%s\" vient d'être ajouté et pourrait vous plaire. Réservez vos places dès maintenant !", concert.Name),
+		}
 
-        fmt.Printf("Sending notification for interest %s\n", interest.Name)
-        topic := sanitizeTopicName(interest.Name)
-        err := SendFCMNotification(topic, data, notification)
-        if err != nil {
-            fmt.Printf("Failed to send notification for interest %s: %v\n", interest.Name, err)
-        }
-    }
+		fmt.Printf("Sending notification for interest %s\n", interest.Name)
+		topic := sanitizeTopicName(interest.Name)
+		err := SendFCMNotification(topic, data, notification)
+		if err != nil {
+			fmt.Printf("Failed to send notification for interest %s: %v\n", interest.Name, err)
+		}
+	}
 
-    return c.JSON(http.StatusOK, map[string]interface{}{
-        "concert":    concert,
-        "categories": concertCategories,
-        "interests":  interests,
-    })
+	return c.JSON(http.StatusOK, map[string]interface{}{
+		"concert":    concert,
+		"categories": concertCategories,
+		"interests":  interests,
+	})
 }
 
 // @Summary		Modifie un concert

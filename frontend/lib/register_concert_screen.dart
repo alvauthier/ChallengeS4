@@ -53,7 +53,7 @@ class RegisterConcertScreenState extends State<RegisterConcertScreen> {
   List<Interest> interests = [];
   final Map<int, bool> selectedInterests = {};
   List<Artist> artists = [];
-  final Map<String, bool> selectedArtists = {};
+  Artist? selectedArtist;
 
   @override
   void initState() {
@@ -76,11 +76,7 @@ class RegisterConcertScreenState extends State<RegisterConcertScreen> {
 
   Future<void> _fetchArtists() async {
     artists = await ApiServices.getAllArtists();
-    setState(() {
-      for (var artist in artists) {
-        selectedArtists[artist.id] = false;
-      }
-    });
+    setState(() {});
   }
 
   Future<void> _fetchInterests() async {
@@ -280,25 +276,70 @@ class RegisterConcertScreenState extends State<RegisterConcertScreen> {
                             ),
                           ),
                           const SizedBox(height: 10),
-                          ...artists.map((artist) {
-                            return Column(
-                              children: [
-                                CheckboxListTile(
-                                  title: Text(
-                                    artist.name,
-                                    style: const TextStyle(fontFamily: 'Readex Pro'),
-                                  ),
-                                  value: selectedArtists[artist.id],
-                                  onChanged: (bool? value) {
-                                    setState(() {
-                                      selectedArtists[artist.id] = value!;
-                                    });
-                                  },
-                                  activeColor: Colors.deepOrange,
+                          Autocomplete<Artist>(
+                            optionsBuilder: (TextEditingValue textEditingValue) {
+                              if (textEditingValue.text.isEmpty) {
+                                return const Iterable<Artist>.empty();
+                              }
+                              return artists.where((Artist artist) {
+                                return artist.name.toLowerCase().startsWith(textEditingValue.text.toLowerCase());
+                              });
+                            },
+                            displayStringForOption: (Artist artist) => artist.name,
+                            onSelected: (Artist artist) {
+                              setState(() {
+                                selectedArtist = artist;
+                              });
+                            },
+                            fieldViewBuilder: (BuildContext context, TextEditingController fieldTextEditingController, FocusNode fieldFocusNode, VoidCallback onFieldSubmitted) {
+                              return TextFormField(
+                                controller: fieldTextEditingController,
+                                focusNode: fieldFocusNode,
+                                decoration: const InputDecoration(
+                                  labelText: "Rechercher artiste",
+                                  errorMaxLines: 3,
                                 ),
-                              ],
-                            );
-                          }),
+                              );
+                            },
+                            optionsViewBuilder: (BuildContext context, AutocompleteOnSelected<Artist> onSelected, Iterable<Artist> options) {
+                              return Align(
+                                alignment: Alignment.topLeft,
+                                child: Material(
+                                  child: Container(
+                                    width: MediaQuery.of(context).size.width * 0.9,
+                                    color: Colors.white,
+                                    child: ListView.builder(
+                                      padding: const EdgeInsets.all(10.0),
+                                      itemCount: options.length,
+                                      itemBuilder: (BuildContext context, int index) {
+                                        final Artist option = options.elementAt(index);
+                                        return GestureDetector(
+                                          onTap: () {
+                                            onSelected(option);
+                                          },
+                                          child: ListTile(
+                                            title: Text(option.name),
+                                          ),
+                                        );
+                                      },
+                                    ),
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
+                          if (selectedArtist != null)
+                            Padding(
+                              padding: const EdgeInsets.only(top: 10.0),
+                              child: Text(
+                                'Selected Artist: ${selectedArtist!.name}',
+                                style: const TextStyle(
+                                  fontFamily: 'Readex Pro',
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 16,
+                                ),
+                              ),
+                            ),
 
                           const SizedBox(height: 30),
                           Text(
@@ -439,6 +480,9 @@ class RegisterConcertScreenState extends State<RegisterConcertScreen> {
                                       request.fields['date'] = '${_selectedDate!.toLocal().toIso8601String().split('T')[0]} ${_selectedDate!.toLocal().toIso8601String().split('T')[1].split(':').sublist(0, 2).join(':')}';
                                       request.fields['InterestIDs'] = selectedInterestsList.join(',');
                                       request.fields['CategoriesIDs'] = jsonEncode(tabCategories);
+                                      if (selectedArtist != null) {
+                                        request.fields['artistId'] = selectedArtist!.id.toString();
+                                      }
 
                                       if (_image != null) {
                                         request.files.add(

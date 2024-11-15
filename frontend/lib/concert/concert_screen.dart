@@ -60,25 +60,40 @@ class ConcertScreen extends StatelessWidget {
                     for (var concertCategory in concert.concertCategories) {
                       if (concertCategory.tickets.isNotEmpty) {
                         for (var ticket in concertCategory.tickets) {
-                          if (ticket.ticketListing != null && ticket.ticketListing!.status == 'available') {
-                            resaleTickets.add(
-                                {
-                                  'reseller': {
-                                    'id': ticket.user.id,
-                                    'name': '${ticket.user.firstname} ${ticket.user.lastname}',
-                                    'avatar': ticket.user.image != ''
-                                        ? '${dotenv.env['API_PROTOCOL']}://${dotenv.env['API_HOST']}${dotenv.env['API_PORT']}/uploads/users/${ticket.user.image}'
-                                        : '',
-                                  },
-                                  'category': concertCategory.category.name,
-                                  'price': ticket.ticketListing!.price.toStringAsFixed(2),
-                                  'id': ticket.ticketListing!.id.toString(),
-                                  'concertName': concert.name,
-                                  'concertImage': concert.image != ''
-                                      ? '${dotenv.env['API_PROTOCOL']}://${dotenv.env['API_HOST']}${dotenv.env['API_PORT']}/uploads/concerts/${concert.image}'
-                                      : 'https://picsum.photos/seed/picsum/800/400',
-                                }
-                            );
+                          if (ticket.ticketListings.isNotEmpty) {
+                            ticket.ticketListings.sort((a, b) =>
+                                b.createdAt.compareTo(a.createdAt));
+                            if (ticket.ticketListings.first.status ==
+                                'available') {
+                              resaleTickets.add(
+                                  {
+                                    'reseller': {
+                                      'id': ticket.user.id,
+                                      'name': '${ticket.user.firstname} ${ticket
+                                          .user.lastname}',
+                                      'avatar': ticket.user.image != ''
+                                          ? '${dotenv
+                                          .env['API_PROTOCOL']}://${dotenv
+                                          .env['API_HOST']}${dotenv
+                                          .env['API_PORT']}/uploads/users/${ticket
+                                          .user.image}'
+                                          : '',
+                                    },
+                                    'category': concertCategory.category.name,
+                                    'price': ticket.ticketListings.first.price
+                                        .toStringAsFixed(2),
+                                    'id': ticket.ticketListings.first.id.toString(),
+                                    'concertName': concert.name,
+                                    'concertImage': concert.image != ''
+                                        ? '${dotenv
+                                        .env['API_PROTOCOL']}://${dotenv
+                                        .env['API_HOST']}${dotenv
+                                        .env['API_PORT']}/uploads/concerts/${concert
+                                        .image}'
+                                        : 'https://picsum.photos/seed/picsum/800/400',
+                                  }
+                              );
+                            }
                           }
                         }
                       }

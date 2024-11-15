@@ -67,7 +67,7 @@ func CreateTicket(c echo.Context) error {
 type TicketPatchInput struct {
 	UserId            *string `json:"user_id"`
 	ConcertCategoryId *string `json:"concert_category_id"`
-	TicketListing     *string `json:"ticket_listing"`
+	TicketListings    *[]models.TicketListing
 }
 
 // @Summary		Modifie un ticket
@@ -108,8 +108,8 @@ func UpdateTicket(c echo.Context) error {
 		}
 		ticket.ConcertCategoryId = concertCategoryID
 	}
-	if input.TicketListing != nil {
-		ticket.TicketListing = nil
+	if input.TicketListings != nil {
+		ticket.TicketListings = nil
 	}
 
 	ticket.UpdatedAt = time.Now()
@@ -170,7 +170,7 @@ func GetUserTickets(c echo.Context) error {
 	if err := db.Preload("ConcertCategory").
 		Preload("ConcertCategory.Concert").
 		Preload("ConcertCategory.Category").
-		Preload("TicketListing").
+		Preload("TicketListings").
 		Where("user_id = ?", user.ID).Find(&userTickets).Error; err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
 	}

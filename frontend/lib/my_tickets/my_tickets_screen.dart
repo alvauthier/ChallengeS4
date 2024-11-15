@@ -33,7 +33,7 @@ class MyTicketsScreenState extends State<MyTicketsScreen> {
 
   void _showResaleDialog(BuildContext context, ticket) {
     _priceController.text = '';
-    final maxPrice = ticket.concertCategory.price;
+    final maxPrice = ticket.maxPrice;
 
     showDialog(
       context: context,
@@ -97,7 +97,7 @@ class MyTicketsScreenState extends State<MyTicketsScreen> {
       }),
     );
 
-    if (response.statusCode == 201) {
+    if (response.statusCode == 201 || response.statusCode == 200) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
@@ -181,12 +181,16 @@ class MyTicketsScreenState extends State<MyTicketsScreen> {
                           final concert = concertCategory.concert;
                           final category = concertCategory.category;
 
+                          if (ticket.ticketListings.isNotEmpty) {
+                            ticket.ticketListings.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+                          }
+
                           Widget actionButton;
-                          if (ticket.ticketListing != null) {
-                            if (ticket.ticketListing!.status == 'available'){
+                          if (ticket.ticketListings.isNotEmpty) {
+                            if (ticket.ticketListings.first.status == 'available') {
                               actionButton = ElevatedButton(
                                 onPressed: () {
-                                  cancelTicketListing(ticket.ticketListing!.id);
+                                  cancelTicketListing(ticket.ticketListings.first.id);
                                 },
                                 style: ElevatedButton.styleFrom(
                                   foregroundColor: Colors.white,
@@ -295,9 +299,9 @@ class MyTicketsScreenState extends State<MyTicketsScreen> {
                                             ),
                                           ),
                                         ),
-                                        if (ticket.ticketListing != null && ticket.ticketListing!.status == 'available')
+                                        if (ticket.ticketListings.isNotEmpty && ticket.ticketListings.first.status == 'available')
                                           Text(
-                                            '${translate(context)!.offered_for_resale} ${ticket.ticketListing!.price.toStringAsFixed(2)} €',
+                                            '${translate(context)!.offered_for_resale} ${ticket.ticketListings.first.price.toStringAsFixed(2)} €',
                                             style: const TextStyle(color: Colors.green),
                                           ),
                                       ],

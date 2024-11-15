@@ -65,6 +65,7 @@ func CreateReservation(c echo.Context) error {
 		UpdatedAt:         time.Now(),
 		UserId:            user.ID,
 		ConcertCategoryId: reqBody.ConcertCategoryId,
+		MaxPrice:          concertCategory.Price,
 	}
 
 	if err := tx.Create(&ticket).Error; err != nil {
@@ -162,6 +163,7 @@ func CreateTicketListingReservation(c echo.Context) error {
 	}
 
 	ticket.UserId = user.ID
+	ticket.MaxPrice = ticketListing.Price
 	ticket.UpdatedAt = time.Now()
 
 	if err := tx.Save(&ticket).Error; err != nil {
@@ -255,6 +257,7 @@ func CreateTicketListingReservationFromConversation(c echo.Context) error {
 	}
 
 	ticket.UserId = user.ID
+	ticket.MaxPrice = conversation.Price
 	ticket.UpdatedAt = time.Now()
 
 	if err := tx.Save(&ticket).Error; err != nil {

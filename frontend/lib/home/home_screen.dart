@@ -218,7 +218,7 @@ class HomeScreenState extends State<HomeScreen> {
               if (state is HomeDataLoadingSuccess) {
                 // Filtrer les concerts en fonction de la recherche
                 _filteredConcerts = state.concerts.where((concert) {
-                  return concert.name.toLowerCase().contains(_searchController.text.toLowerCase());
+                  return concert.name.toLowerCase().contains(_searchController.text.toLowerCase()) || concert.artist.name.toLowerCase().contains(_searchController.text.toLowerCase());
                 }).toList();
 
                 // Appliquer le tri en fonction de l'option sélectionnée

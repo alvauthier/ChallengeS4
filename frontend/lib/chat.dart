@@ -211,7 +211,7 @@ class ChatScreenState extends State<ChatScreen> {
       "conversation_id": widget.id.isNotEmpty ? widget.id : "",
       "sender_id": userId,
       "receiver_id": widget.resellerId,
-      "price": widget.price,
+      "price": double.tryParse(widget.price ?? '0') ?? 0.0,
     };
 
     _channel?.sink.add(jsonEncode(payload));

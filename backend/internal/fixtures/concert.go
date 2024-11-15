@@ -13,6 +13,7 @@ func LoadConcertFixtures() {
 	db := database.GetDB()
 
 	organizationName := "Weezevent"
+	artistName := "Taylor Swift"
 
 	var organization models.Organization
 
@@ -20,6 +21,13 @@ func LoadConcertFixtures() {
 
 	if organization.ID == uuid.Nil {
 		log.Println("Organization not found")
+		return
+	}
+
+	var artist models.Artist
+	db.Where("name = ?", artistName).First(&artist)
+	if artist.ID == uuid.Nil {
+		log.Println("Artist not found")
 		return
 	}
 
@@ -32,6 +40,8 @@ func LoadConcertFixtures() {
 			Location:       "Paris La Défense Arena",
 			Organization:   &organization,
 			OrganizationId: organization.ID,
+			Artist:         &artist,
+			ArtistId:       artist.ID,
 		}
 		result := db.Create(&concert)
 		if result.Error != nil {

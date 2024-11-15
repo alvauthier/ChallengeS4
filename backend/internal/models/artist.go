@@ -14,5 +14,6 @@ type Artist struct {
 	UpdatedAt  time.Time
 	DeletedAt  *time.Time `gorm:"index"`
 	InterestId int
-	Interest   Interest `gorm:"foreignKey:InterestId;constraint:OnDelete:CASCADE;"`
+	Interest   *Interest `gorm:"foreignKey:InterestId"`
+	Concerts   []Concert `gorm:"foreignKey:ArtistId"`
 }

@@ -21,4 +21,6 @@ type Concert struct {
 	Organization      *Organization     `gorm:"not null;foreignKey:OrganizationId"`
 	Interests         []Interest        `gorm:"many2many:concert_interests;"`
 	ConcertCategories []ConcertCategory `gorm:"foreignKey:ConcertId"`
+	ArtistId          uuid.UUID         `gorm:"not null"`
+	Artist            *Artist           `gorm:"not null;foreignKey:ArtistId"`
 }

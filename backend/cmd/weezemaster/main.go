@@ -133,6 +133,7 @@ func main() {
 	authenticated.PATCH("/concerts/:id", controller.UpdateConcert, middleware.CheckRole("organizer", "admin"))
 	authenticated.DELETE("/concerts/:id", controller.DeleteConcert, middleware.CheckRole("organizer", "admin"))
 	authenticated.GET("/organization/concerts", controller.GetConcertByOrganizationID, middleware.CheckRole("organizer", "admin"))
+	router.GET("/concerts/artists/:id", controller.GetConcertsByArtistID)
 
 	authenticated.GET("/user/interests", controller.GetUserInterests, middleware.CheckRole("user"))
 	authenticated.POST("/user/interests/:id", controller.AddUserInterest, middleware.CheckRole("user, organizer, admin"))

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:weezemaster/artist_screen.dart';
 import 'package:weezemaster/core/utils/constants.dart';
 import 'package:weezemaster/logs_screen.dart';
 import 'package:weezemaster/navigation/main_screen.dart';
@@ -252,6 +253,11 @@ class AppRouter {
               const NoTransitionPage(
                 child: RegisterConcertScreen(),
               ),
+            ),
+            GoRoute(
+              path: '/artist/:id',
+              name: 'artist',
+              builder: (BuildContext context, GoRouterState state) => ArtistScreen(id: state.pathParameters['id'] ?? ''),
             ),
           ],
         ),

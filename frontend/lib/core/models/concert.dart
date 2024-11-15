@@ -41,7 +41,7 @@ class Concert {
     var concertCategoryListFromJson = json['ConcertCategories'] as List? ?? [];
     List<ConcertCategory> concertCategoryList = concertCategoryListFromJson.map((i) => ConcertCategory.fromJson(i)).toList();
 
-    var artistFromJson = json['Artist'] != null ? Artist.fromJson(json['Artist']) : Artist(id: '', name: '', interestId: 0);
+    var artistFromJson = json['Artist'] != null ? Artist.fromJson(json['Artist']) : Artist(id: '', name: '', interestId: 0, concerts: []);
 
     return Concert(
         id: json['ID'],

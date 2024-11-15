@@ -137,12 +137,21 @@ class ConcertScreen extends StatelessWidget {
                                 padding: const EdgeInsets.only(top: 15.0, right: 10.0, left: 10.0),
                                 child: Align(
                                   alignment: Alignment.centerLeft,
-                                  child: Text(
-                                    '${state.concert.artist.name} : ${state.concert.name}',
-                                    style: const TextStyle(
-                                      fontSize: 30,
-                                      fontFamily: 'Readex Pro',
-                                      fontWeight: FontWeight.w700,
+                                  child: GestureDetector(
+                                    onTap: () {
+                                      context.pushNamed(
+                                        'artist',
+                                        pathParameters: {'id': concert.artist.id},
+                                        extra: concert.artist,
+                                      );
+                                    },
+                                    child: Text(
+                                      '${state.concert.artist.name} : ${state.concert.name}',
+                                      style: const TextStyle(
+                                        fontSize: 30,
+                                        fontFamily: 'Readex Pro',
+                                        fontWeight: FontWeight.w700,
+                                      ),
                                     ),
                                   ),
                                 ),

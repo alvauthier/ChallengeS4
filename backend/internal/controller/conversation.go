@@ -80,6 +80,7 @@ func GetConversation(c echo.Context) error {
 			"Location": concert.Location,
 			"Image":    concert.Image,
 		},
+        "TicketListing": conversation.TicketListing,
 	}
 
 	return c.JSON(http.StatusOK, response)

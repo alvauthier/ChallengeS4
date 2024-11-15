@@ -124,5 +124,6 @@
     "update_profile_success": "Profil mis à jour",
     "update_profile_failed": "Erreur lors de la mise à jour du profil",
     "edit_profile": "Modifier le profil",
-    "hello": "Bonjour"
+    "hello": "Bonjour",
+    "new_price_exceed_initial_price": "Le nouveau prix ne peut pas dépasser le prix initial de revente"
 }

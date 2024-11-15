@@ -34,7 +34,7 @@ class ProfileScreenState extends State<ProfileScreen> {
     await clearTokens();
     if (mounted) {
       context.read<NavigationCubit>().updateUserRole('');
-      context.pushNamed('login');
+      GoRouter.of(context).go(Routes.loginRegisterNamedPage);
     }
   }
 

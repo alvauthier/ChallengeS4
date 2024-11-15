@@ -45,6 +45,7 @@ class ChatScreenState extends State<ChatScreen> {
   String? userId;
   late String concertName;
   late String price;
+  late String maxPrice;
   late String concertImage;
   late String resellerName;
   late String buyerName;
@@ -134,12 +135,12 @@ class ChatScreenState extends State<ChatScreen> {
   @override
   void initState() {
     super.initState();
-    debugPrint("ID: ${widget.id}");
 
     if (widget.id.isEmpty || widget.id == "newchat") {
       widget.id = '';
       concertName = widget.concertName ?? "Unknown Concert";
       price = widget.price ?? "0";
+      maxPrice = widget.price ?? "0";
       otherUser = widget.resellerName ?? "Unknown Reseller";
       category = widget.category ?? "Unknown Category";
       buyerId = widget.userId ?? "";
@@ -148,6 +149,7 @@ class ChatScreenState extends State<ChatScreen> {
     } else {
       concertName = "";
       price = "";
+      maxPrice = "";
       otherUser = "";
       category = "";
       buyerId = "";
@@ -209,6 +211,7 @@ class ChatScreenState extends State<ChatScreen> {
       "conversation_id": widget.id.isNotEmpty ? widget.id : "",
       "sender_id": userId,
       "receiver_id": widget.resellerId,
+      "price": widget.price,
     };
 
     _channel?.sink.add(jsonEncode(payload));
@@ -269,33 +272,30 @@ class ChatScreenState extends State<ChatScreen> {
   }
 
   Future<void> _fetchConversation() async {
-    debugPrint("Fetching conversation with id: ${widget.id}");
     if (widget.id.isNotEmpty) {
       try {
-        debugPrint("In try Fetching conversation with id: ${widget.id}");
         final conversation = await ApiServices.getConversation(widget.id);
-        debugPrint("Conversation: $conversation");
         setState(() {
           messages = conversation['Messages'].map((message) => {
             "authorId": message['AuthorId'],
             "content": message['Content'],
             "readed": message['Readed'],
           }).toList();
-          debugPrint("Messages: $messages");
           buyerId = conversation["BuyerId"];
           if (conversation['Concert'] != null) {
             concertName = conversation['Concert']['Name'] ?? "Unknown Concert";
-            price = conversation['Price'].toString();
+            price = conversation['Price'].toString() ?? "0";
+            maxPrice = conversation['TicketListing']['Price'].toString() ?? "0";
             resellerName = conversation['SellerName'] ?? "Unknown Seller";
             buyerName = conversation['BuyerName'] ?? "Unknown Buyer";
             category = conversation['Category'] ?? "Unknown Category";
             concertImage = conversation['Concert']['Image'] != ""
                 ? '${dotenv.env['API_PROTOCOL']}://${dotenv.env['API_HOST']}${dotenv.env['API_PORT']}/uploads/concerts/${conversation['Concert']['Image']}'
                 : "https://picsum.photos/seed/picsum/800/400";
-            debugPrint("concertImage: ${conversation['Concert']}");
           } else {
             concertName = "Fallback Concert";
             price = "10000000000";
+            maxPrice = "10000000000";
             resellerName = "Fallback Reseller";
             buyerName = "Fallback Buyer";
             category = "Fallback Category";
@@ -371,7 +371,7 @@ class ChatScreenState extends State<ChatScreen> {
               FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d{0,2}')),
               TextInputFormatter.withFunction((oldValue, newValue) {
                 final newPrice = double.tryParse(newValue.text);
-                if (newPrice != null && newPrice > double.parse(price)) {
+                if (newPrice != null && newPrice > double.parse(maxPrice)) {
                   return oldValue;
                 }
                 return newValue;

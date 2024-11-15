@@ -125,5 +125,6 @@
     "update_profile_success": "Profile updated successfully",
     "update_profile_failed": "Error updating profile",
     "edit_profile": "Edit profile",
-    "hello": "Hello"
+    "hello": "Hello",
+    "new_price_exceed_initial_price": "The new price cannot exceed the initial resale price"
 }

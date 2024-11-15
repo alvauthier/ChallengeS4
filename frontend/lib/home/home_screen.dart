@@ -394,7 +394,7 @@ class HomeScreenState extends State<HomeScreen> {
                                       Padding(
                                         padding: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 20.0),
                                         child: Text(
-                                          concert.name,
+                                          '${concert.artist.name} : ${concert.name}',
                                           style: const TextStyle(
                                             fontFamily: 'Readex Pro',
                                             fontWeight: FontWeight.w700,

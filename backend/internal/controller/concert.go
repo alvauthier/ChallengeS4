@@ -28,7 +28,7 @@ import (
 func GetAllConcerts(c echo.Context) error {
 	db := database.GetDB()
 	var concerts []models.Concert
-	db.Preload("Interests").Find(&concerts)
+	db.Preload("Interests").Preload("Artist").Find(&concerts)
 	return c.JSON(http.StatusOK, concerts)
 }
 
@@ -46,6 +46,7 @@ func GetConcert(c echo.Context) error {
 	var concert models.Concert
 	if err := db.Preload("Interests").
 		Preload("Organization").
+		Preload("Artist").
 		Preload("ConcertCategories").
 		Preload("ConcertCategories.Category").
 		Preload("ConcertCategories.Tickets", "EXISTS (SELECT 1 FROM ticket_listings WHERE tickets.id = ticket_listings.ticket_id)").

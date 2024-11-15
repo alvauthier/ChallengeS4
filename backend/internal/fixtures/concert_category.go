@@ -11,7 +11,7 @@ import (
 func LoadConcertCategoryFixtures() {
 	db := database.GetDB()
 
-	concertName := "Eras Tour - Taylor Swift"
+	concertName := "Eras Tour"
 
 	var concert models.Concert
 

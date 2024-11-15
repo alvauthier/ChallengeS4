@@ -138,7 +138,7 @@ class ConcertScreen extends StatelessWidget {
                                 child: Align(
                                   alignment: Alignment.centerLeft,
                                   child: Text(
-                                    state.concert.name,
+                                    '${state.concert.artist.name} : ${state.concert.name}',
                                     style: const TextStyle(
                                       fontSize: 30,
                                       fontFamily: 'Readex Pro',
@@ -253,10 +253,10 @@ class ConcertScreen extends StatelessWidget {
                               if (resaleTickets.length > 2)
                                 ElevatedButton(
                                   onPressed: () {
-                                   context.pushNamed(
-                                     'resale-tickets',
-                                     extra: resaleTickets
-                                   );
+                                    context.pushNamed(
+                                      'resale-tickets',
+                                      extra: resaleTickets
+                                    );
                                   },
                                   style: ElevatedButton.styleFrom(
                                     backgroundColor: Colors.deepOrange,

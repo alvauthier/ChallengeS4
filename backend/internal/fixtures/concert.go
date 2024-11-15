@@ -34,7 +34,7 @@ func LoadConcertFixtures() {
 	if organization.ID != uuid.Nil {
 		concert := models.Concert{
 			ID:             uuid.New(),
-			Name:           "Eras Tour - Taylor Swift",
+			Name:           "Eras Tour",
 			Description:    "The Eras Tour is the fifth concert tour by American singer-songwriter Taylor Swift, in support of her ninth studio album, Eras.",
 			Date:           time.Now().AddDate(0, 1, 0),
 			Location:       "Paris La Défense Arena",

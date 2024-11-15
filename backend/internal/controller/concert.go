@@ -42,21 +42,46 @@ func GetAllConcerts(c echo.Context) error {
 // @Router			/concerts/{id} [get]
 func GetConcert(c echo.Context) error {
 	db := database.GetDB()
-	id := c.Param("id")
-	var concert models.Concert
-	if err := db.Preload("Interests").
-		Preload("Organization").
-		Preload("ConcertCategories").
-		Preload("ConcertCategories.Category").
-		Preload("ConcertCategories.Tickets", "EXISTS (SELECT 1 FROM ticket_listings WHERE tickets.id = ticket_listings.ticket_id)").
-		Preload("ConcertCategories.Tickets.TicketListings").
-		Preload("ConcertCategories.Tickets.User").
-		Where("id = ?", id).First(&concert).Error; err != nil {
-		if err == gorm.ErrRecordNotFound {
-			return echo.NewHTTPError(http.StatusNotFound, "Concert not found")
+	authHeader := c.Request().Header.Get("Authorization")
+	var userID uuid.UUID
+
+	if authHeader != "" {
+		tokenString := authHeader
+		if len(authHeader) > 7 && authHeader[:7] == "Bearer " {
+			tokenString = authHeader[7:]
 		}
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+
+		claims, err := verifyToken(tokenString)
+		if err == nil {
+			userIdFromToken, ok := claims["id"].(string)
+			if ok {
+				userID, _ = uuid.Parse(userIdFromToken)
+			}
+		}
 	}
+
+	var concert models.Concert
+	if err := db.
+	Preload("Interests").
+	Preload("Organization").
+    Preload("ConcertCategories").
+    Preload("ConcertCategories.Category").
+    Preload("ConcertCategories.Tickets", "EXISTS (SELECT 1 FROM ticket_listings WHERE tickets.id = ticket_listings.ticket_id)").
+    Preload("ConcertCategories.Tickets.User").
+	Preload("ConcertCategories.Tickets.TicketListings",
+	func(db *gorm.DB) *gorm.DB {
+    	if userID != uuid.Nil {
+    		return db.Joins("JOIN tickets ON tickets.id = ticket_listings.ticket_id").
+    			Where("ticket_listings.status = ? AND tickets.user_id != ?", "available", userID)
+    	}
+    	return db.Where("ticket_listings.status = ?", "available")
+    }).Where("id = ?", c.Param("id")).First(&concert).Error; err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return c.JSON(http.StatusNotFound, map[string]string{"message": "Concert not found"})
+		}
+		return c.JSON(http.StatusInternalServerError, map[string]string{"message": err.Error()})
+	}
+
 	return c.JSON(http.StatusOK, concert)
 }
 

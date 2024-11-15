@@ -167,7 +167,6 @@ class ChatScreenState extends State<ChatScreen> {
 
   void _connectWebSocket() {
     final protocol = dotenv.env['API_PROTOCOL'] == 'http' ? 'ws' : 'wss';
-    // final protocol = 'ws';
     final wsUrl = Uri.parse('$protocol://${dotenv.env['API_HOST']}${dotenv.env['API_PORT']}/ws-chat');
     debugPrint('Attempting WebSocket connection to: $wsUrl');
 
@@ -185,6 +184,8 @@ class ChatScreenState extends State<ChatScreen> {
         setState(() {
           widget.id = decodedMessage['conversation_id'];
         });
+      } else if (decodedMessage['type'] == 'price_update') {
+        _handlePriceUpdate(decodedMessage);
       } else {
         setState(() {
           messages.add({
@@ -429,6 +430,14 @@ class ChatScreenState extends State<ChatScreen> {
         );
       },
     );
+  }
+
+  void _handlePriceUpdate(Map<String, dynamic> message) {
+    if (message.containsKey('new_price')) {
+      setState(() {
+        price = message['new_price'].toString();
+      });
+    }
   }
 
   @override

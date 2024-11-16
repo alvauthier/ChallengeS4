@@ -20,7 +20,7 @@ var upgraderQueue = websocket.Upgrader{
 var queue = make(map[string][]*UserConnection)
 var authorized = make(map[string][]*UserConnection)
 var queueMutex = sync.Mutex{}
-var maxUsers = 1 // Maximum d'utilisateurs autorisés par concert
+var maxUsers = 0 // Maximum d'utilisateurs autorisés par concert
 
 type UserConnection struct {
 	UserID string

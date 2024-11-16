@@ -397,7 +397,7 @@ func GetConcertByOrganizationID(c echo.Context) error {
 	}
 
 	var concerts []models.Concert
-    if result := db.Where("organization_id = ?", user.OrganizationId).Find(&concerts); result.Error != nil {
+    if result := db.Where("organization_id = ?", user.OrganizationId).Preload("Artist").Find(&concerts); result.Error != nil {
         return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Error retrieving concerts"})
     }
 

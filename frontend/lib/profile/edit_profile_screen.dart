@@ -13,6 +13,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:http/http.dart' as http;
 import 'package:http_parser/http_parser.dart';
 
+import '../controller/navigation_cubit.dart';
+
 class EditProfileScreen extends StatefulWidget {
   const EditProfileScreen({super.key});
 
@@ -54,6 +56,7 @@ class EditProfileScreenState extends State<EditProfileScreen> {
       Map<String, dynamic> decodedToken = _decodeToken(jwt);
       return decodedToken['id'] as String;
     } else {
+      context.read<NavigationCubit>().updateUserRole('');
       GoRouter.of(context).go(Routes.loginRegisterNamedPage);
       return '';
     }

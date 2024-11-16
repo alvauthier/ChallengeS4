@@ -45,6 +45,7 @@ class ProfileScreenState extends State<ProfileScreen> {
       Map<String, dynamic> decodedToken = _decodeToken(jwt);
       return decodedToken['id'] as String;
     } else {
+      context.read<NavigationCubit>().updateUserRole('');
       GoRouter.of(context).go(Routes.loginRegisterNamedPage);
       return '';
     }

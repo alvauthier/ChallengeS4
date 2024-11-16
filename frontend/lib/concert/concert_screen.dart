@@ -10,6 +10,8 @@ import 'package:weezemaster/components/interest_chip.dart';
 import 'package:weezemaster/translation.dart';
 import 'package:weezemaster/core/utils/constants.dart';
 
+import '../controller/navigation_cubit.dart';
+
 class ConcertScreen extends StatelessWidget {
   final String id;
 
@@ -327,6 +329,7 @@ class ConcertScreen extends StatelessWidget {
                                       final tokenService = TokenService();
                                       String? token = await tokenService.getValidAccessToken();
                                       if (token == null) {
+                                        context.read<NavigationCubit>().updateUserRole('');
                                         GoRouter.of(context).go(Routes.loginRegisterNamedPage);
                                       } else {
                                         context.pushNamed(

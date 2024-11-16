@@ -71,8 +71,4 @@ class NavigationCubit extends Cubit<NavigationState> {
     // Emit the actual state with the updated user role
     emit(NavigationState(bottomNavItems: state.bottomNavItems, index: index, userRole: userRole));
   }
-
-  void updateIndex(int index) {
-    emit(NavigationState(bottomNavItems: state.bottomNavItems, index: index, userRole: state.userRole));
-  }
 }

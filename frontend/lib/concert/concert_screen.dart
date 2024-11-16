@@ -138,12 +138,18 @@ class ConcertScreen extends StatelessWidget {
                                 child: Align(
                                   alignment: Alignment.centerLeft,
                                   child: GestureDetector(
-                                    onTap: () {
-                                      context.pushNamed(
-                                        'artist',
-                                        pathParameters: {'id': concert.artist.id},
-                                        extra: concert.artist,
-                                      );
+                                    onTap: () async {
+                                      final tokenService = TokenService();
+                                      String? token = await tokenService.getValidAccessToken();
+                                      if (token == null) {
+                                        GoRouter.of(context).go(Routes.loginRegisterNamedPage);
+                                      } else {
+                                        context.pushNamed(
+                                          'artist',
+                                          pathParameters: {'id': concert.artist.id},
+                                          extra: concert.artist,
+                                        );
+                                      }
                                     },
                                     child: Text(
                                       '${state.concert.artist.name} : ${state.concert.name}',

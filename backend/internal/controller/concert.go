@@ -286,7 +286,6 @@ func DeleteConcert(c echo.Context) error {
 }
 
 func GetConcertByOrganizationID(c echo.Context) error {
-	fmt.Println('a')
 	db := database.GetDB()
 	authHeader := c.Request().Header.Get("Authorization")
 	if authHeader == "" {
@@ -319,6 +318,22 @@ func GetConcertByOrganizationID(c echo.Context) error {
 
 	if len(concerts) == 0 {
 		return c.JSON(http.StatusNotFound, map[string]string{"message": "No concerts found for this organization"})
+	}
+
+	return c.JSON(http.StatusOK, concerts)
+}
+
+func GetConcertsByArtistID(c echo.Context) error {
+	db := database.GetDB()
+	id := c.Param("id")
+
+	var concerts []models.Concert
+	if result := db.Where("artist_id = ?", id).Find(&concerts); result.Error != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Error retrieving concerts"})
+	}
+
+	if len(concerts) == 0 {
+		return c.JSON(http.StatusNotFound, map[string]string{"message": "No concerts found for this artist"})
 	}
 
 	return c.JSON(http.StatusOK, concerts)

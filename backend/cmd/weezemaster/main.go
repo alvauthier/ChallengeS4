@@ -104,6 +104,12 @@ func main() {
 	authenticated.PATCH("/interests/:id", controller.UpdateInterest, middleware.CheckRole("admin"))
 	authenticated.DELETE("/interests/:id", controller.DeleteInterest, middleware.CheckRole("admin"))
 
+	router.GET("/artists", controller.GetAllArtists)
+	router.GET("/artists/:id", controller.GetArtist)
+	router.POST("/artists", controller.CreateArtist)
+	router.PATCH("/artists/:id", controller.UpdateArtist)
+	router.DELETE("/artists/:id", controller.DeleteArtist)
+
 	authenticated.GET("/categories", controller.GetAllCategories, middleware.CheckRole("user", "organizer", "admin"))
 	authenticated.GET("/categories/:id", controller.GetCategory, middleware.CheckRole("admin"))
 	authenticated.POST("/categories", controller.CreateCategory, middleware.CheckRole("admin"))
@@ -132,6 +138,7 @@ func main() {
 	authenticated.PATCH("/concerts/:id", controller.UpdateConcert, middleware.CheckRole("organizer", "admin"))
 	authenticated.DELETE("/concerts/:id", controller.DeleteConcert, middleware.CheckRole("organizer", "admin"))
 	authenticated.GET("/organization/concerts", controller.GetConcertByOrganizationID, middleware.CheckRole("organizer", "admin"))
+	router.GET("/concerts/artists/:id", controller.GetConcertsByArtistID)
 
 	authenticated.GET("/user/interests", controller.GetUserInterests, middleware.CheckRole("user"))
 	authenticated.POST("/user/interests/:id", controller.AddUserInterest, middleware.CheckRole("user", "organizer", "admin"))
@@ -154,6 +161,7 @@ func main() {
 	authenticated.POST("/conversations/check", controller.CheckConversation, middleware.CheckRole("user", "organizer", "admin"))
 	router.GET("/ws-chat", controller.HandleWebSocketChat)
 	router.GET("/ws-queue", controller.HandleWebSocketQueue)
+	router.GET("/ws-community", controller.HandleWebSocketCommunity)
 
 	router.GET("/logs", controller.GetLogs)
 

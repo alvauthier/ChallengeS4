@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:weezemaster/core/exceptions/api_exception.dart';
+import 'package:weezemaster/core/models/artist.dart';
 import 'package:weezemaster/core/models/concert.dart';
 import 'package:weezemaster/core/models/interest.dart';
 import 'package:weezemaster/core/models/category.dart';
@@ -661,6 +662,115 @@ class ApiServices {
     }
   }
 
+  static Future<List<Artist>> getAllArtists() async {
+    try {
+      final tokenService = TokenService();
+      String? jwtToken = await tokenService.getValidAccessToken();
+      final apiUrl = '${dotenv.env['API_PROTOCOL']}://${dotenv.env['API_HOST']}${dotenv.env['API_PORT']}/artists';
+      final response = await http.get(
+        Uri.parse(apiUrl),
+        headers: {
+          'Accept': 'application/json; charset=UTF-8',
+          'Authorization': 'Bearer $jwtToken',
+        },
+      );
+      if (response.statusCode < 200 || response.statusCode >= 400) {
+        throw ApiException(message: 'Bad request');
+      }
+
+      final data = json.decode(response.body) as List<dynamic>;
+      return data.mapList((e) => Artist.fromJson(e));
+    } on SocketException catch (error) {
+      log('Network error.', error: error);
+      throw ApiException(message: 'Network error');
+    } catch (error) {
+      log('An error occurred while fetching artists.', error: error);
+      throw ApiException(message: 'Unknown error');
+    }
+  }
+
+  static Future<Artist> addArtist(String name) async {
+    try {
+      final tokenService = TokenService();
+      String? jwtToken = await tokenService.getValidAccessToken();
+      final apiUrl = '${dotenv.env['API_PROTOCOL']}://${dotenv.env['API_HOST']}${dotenv.env['API_PORT']}/artists';
+      final response = await http.post(
+        Uri.parse(apiUrl),
+        headers: {
+          'Accept': 'application/json; charset=UTF-8',
+          'Authorization': 'Bearer $jwtToken',
+          'Content-Type': 'application/json',
+        },
+        body: json.encode({
+          'name': name
+        }),
+      );
+      if (response.statusCode != 201) {
+        throw ApiException(message: 'Failed to create artist');
+      }
+      return Artist.fromJson(json.decode(response.body));
+    } on SocketException catch (error) {
+      log('Network error.', error: error);
+      throw ApiException(message: 'Network error');
+    } catch (error) {
+      log('An error occurred while create artist.', error: error);
+      throw ApiException(message: 'Unknown error');
+    }
+  }
+
+  static Future<Artist> updateArtist(String id, String name) async {
+    try {
+      final tokenService = TokenService();
+      String? jwtToken = await tokenService.getValidAccessToken();
+      final apiUrl = '${dotenv.env['API_PROTOCOL']}://${dotenv.env['API_HOST']}${dotenv.env['API_PORT']}/artists/$id';
+      final response = await http.patch(
+        Uri.parse(apiUrl),
+        headers: {
+          'Accept': 'application/json; charset=UTF-8',
+          'Authorization': 'Bearer $jwtToken',
+          'Content-Type': 'application/json',
+        },
+        body: json.encode({
+          'name': name
+        }),
+      );
+      if (response.statusCode != 200) {
+        throw ApiException(message: 'Failed to update artist');
+      }
+      return Artist.fromJson(json.decode(response.body));
+    } on SocketException catch (error) {
+      log('Network error.', error: error);
+      throw ApiException(message: 'Network error');
+    } catch (error) {
+      log('An error occurred while updating artist.', error: error);
+      throw ApiException(message: 'Unknown error');
+    }
+  }
+
+  static Future<void> deleteArtist(String id) async {
+    try {
+      final tokenService = TokenService();
+      String? jwtToken = await tokenService.getValidAccessToken();
+      final apiUrl = '${dotenv.env['API_PROTOCOL']}://${dotenv.env['API_HOST']}${dotenv.env['API_PORT']}/artists/$id';
+      final response = await http.delete(
+        Uri.parse(apiUrl),
+        headers: {
+          'Accept': 'application/json; charset=UTF-8',
+          'Authorization': 'Bearer $jwtToken',
+        },
+      );
+      if (response.statusCode != 204) {
+        throw ApiException(message: 'Failed to delete artist');
+      }
+    } on SocketException catch (error) {
+      log('Network error.', error: error);
+      throw ApiException(message: 'Network error');
+    } catch (error) {
+      log('An error occurred while deleting artist.', error: error);
+      throw ApiException(message: 'Unknown error');
+    }
+  }
+
   static Future<Category> addCategory(String name) async {
     try {
       final tokenService = TokenService();
@@ -787,6 +897,62 @@ class ApiServices {
       throw ApiException(message: 'Network error');
     } catch (error) {
       log('An error occurred while getting logs.', error: error);
+      throw ApiException(message: 'Unknown error');
+    }
+  }
+
+  static Future<Artist> getArtist(String id) async {
+    try {
+      final tokenService = TokenService();
+      String? jwtToken = await tokenService.getAccessToken();
+      final apiUrl = '${dotenv.env['API_PROTOCOL']}://${dotenv.env['API_HOST']}${dotenv.env['API_PORT']}/artists/$id';
+      final response = await http.get(
+        Uri.parse(apiUrl),
+        headers: {
+          'Accept': 'application/json; charset=UTF-8',
+          'Authorization': 'Bearer $jwtToken',
+        },
+      );
+      await Future.delayed(const Duration(seconds: 1));
+      if (response.statusCode < 200 || response.statusCode >= 400) {
+        throw ApiException(message: 'Bad request');
+      }
+
+      final data = json.decode(response.body) as Map<String, dynamic>;
+      return Artist.fromJson(data);
+    } on SocketException catch (error) {
+      log('Network error.', error: error);
+      throw ApiException(message: 'Network error');
+    } catch (error) {
+      log('An error occurred while fetching artist.', error: error);
+      throw ApiException(message: 'Unknown error');
+    }
+  }
+
+  static Future<List<Concert>> getConcertsByArtist(String id) async {
+    try {
+      final tokenService = TokenService();
+      String? jwtToken = await tokenService.getValidAccessToken();
+      final apiUrl = '${dotenv.env['API_PROTOCOL']}://${dotenv.env['API_HOST']}${dotenv.env['API_PORT']}/concerts/artists/$id';
+      final response = await http.get(
+        Uri.parse(apiUrl),
+        headers: {
+          'Accept': 'application/json; charset=UTF-8',
+          'Authorization': 'Bearer $jwtToken',
+        },
+      );
+      await Future.delayed(const Duration(seconds: 1));
+      if (response.statusCode < 200 || response.statusCode >= 400) {
+        throw ApiException(message: 'Bad request');
+      }
+
+      final data = json.decode(response.body) as List<dynamic>;
+      return data.mapList((e) => Concert.fromJson(e));
+    } on SocketException catch (error) {
+      log('Network error.', error: error);
+      throw ApiException(message: 'Network error');
+    } catch (error) {
+      log('An error occurred while fetching concerts.', error: error);
       throw ApiException(message: 'Unknown error');
     }
   }

@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:weezemaster/core/models/interest.dart';
@@ -9,6 +8,7 @@ import 'package:weezemaster/home/blocs/home_bloc.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import 'package:weezemaster/components/search_bar.dart';
+import 'package:weezemaster/components/concert_list_item.dart';
 import 'package:weezemaster/translation.dart';
 import 'package:weezemaster/core/services/api_services.dart';
 
@@ -48,11 +48,18 @@ class HomeScreenState extends State<HomeScreen> {
     super.dispose();
   }
 
+  Future<String> getUserRoleFromJwt(accessToken) async {
+    Map<String, dynamic> decodedToken = _decodeToken(accessToken);
+
+    return decodedToken['role'];
+  }
+
   Future<void> checkUserConnection() async {
     final tokenService = TokenService();
     String? token = await tokenService.getValidAccessToken();
+    final userRole = await getUserRoleFromJwt(token);
 
-    if (token != null) {
+    if (token != null && userRole == 'user') {
       setState(() {
         isUserConnected = true;
       });
@@ -232,7 +239,7 @@ class HomeScreenState extends State<HomeScreen> {
               if (state is HomeDataLoadingSuccess) {
                 // Filtrer les concerts en fonction de la recherche
                 _filteredConcerts = state.concerts.where((concert) {
-                  return concert.name.toLowerCase().contains(_searchController.text.toLowerCase());
+                  return concert.name.toLowerCase().contains(_searchController.text.toLowerCase()) || concert.artist.name.toLowerCase().contains(_searchController.text.toLowerCase());
                 }).toList();
 
                 // Appliquer le tri en fonction de l'option sélectionnée
@@ -351,102 +358,7 @@ class HomeScreenState extends State<HomeScreen> {
                         child: ListView.builder(
                           itemBuilder: (context, index) {
                             final concert = _filteredConcerts[index];
-                            return GestureDetector(
-                              onTap: () async {
-                                final tokenService = TokenService();
-                                String? token = await tokenService.getValidAccessToken();
-                                if (token == null) {
-                                  context.pushNamed(
-                                    'concert',
-                                    pathParameters: {'id': concert.id},
-                                  );
-                                } else {
-                                  final parts = token.split('.');
-                                  if (parts.length != 3) {
-                                    throw Exception('Invalid token');
-                                  }
-
-                                  String output = parts[1].replaceAll('-', '+').replaceAll('_', '/');
-                                  switch (output.length % 4) {
-                                    case 0:
-                                      break;
-                                    case 2:
-                                      output += '==';
-                                      break;
-                                    case 3:
-                                      output += '=';
-                                      break;
-                                    default:
-                                      throw Exception('Illegal base64url string!"');
-                                  }
-
-                                  String userId = json.decode(utf8.decode(base64.decode(output)))['id'];
-
-                                  debugPrint('Joining queue or concert page for concert: ${concert.id} and user: $userId');
-                                  await joinQueueOrConcertPage(concert.id, userId);
-
-                                }
-                              },
-                              child: Padding(
-                                padding: const EdgeInsets.all(10.0),
-                                child: Card(
-                                  elevation: 0,
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(10),
-                                  ),
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      ClipRRect(
-                                        borderRadius: const BorderRadius.only(
-                                          topLeft: Radius.circular(10),
-                                          topRight: Radius.circular(10),
-                                        ),
-                                        child: Image.network(
-                                          (concert.image != null && concert.image.isNotEmpty)
-                                              ? '${dotenv.env['API_PROTOCOL']}://${dotenv.env['API_HOST']}${dotenv.env['API_PORT']}/uploads/concerts/${concert.image}'
-                                              : 'https://picsum.photos/seed/picsum/800/400',
-                                          width: double.infinity,
-                                          height: 200,
-                                          fit: BoxFit.cover,
-                                        ),
-                                      ),
-                                      Padding(
-                                        padding: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 20.0),
-                                        child: Text(
-                                          concert.name,
-                                          style: const TextStyle(
-                                            fontFamily: 'Readex Pro',
-                                            fontWeight: FontWeight.w700,
-                                            fontSize: 26,
-                                          ),
-                                        ),
-                                      ),
-                                      Padding(
-                                        padding: const EdgeInsets.symmetric(vertical: 2.0, horizontal: 20.0),
-                                        child: Text(
-                                          formatDate(concert.date),
-                                          style: const TextStyle(
-                                            color: Colors.black54,
-                                            fontFamily: 'Readex Pro',
-                                          ),
-                                        ),
-                                      ),
-                                      Padding(
-                                        padding: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 20.0),
-                                        child: Text(
-                                          concert.location,
-                                          style: const TextStyle(
-                                            color: Colors.grey,
-                                            fontFamily: 'Readex Pro',
-                                          ),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ),
-                            );
+                            return ConcertListItem(concert: concert);
                           },
                           itemCount: _filteredConcerts.length,
                         ),

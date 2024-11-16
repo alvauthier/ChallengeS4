@@ -1,3 +1,4 @@
+import 'package:weezemaster/core/models/artist.dart';
 import 'package:weezemaster/core/models/interest.dart';
 import 'package:weezemaster/core/models/organization.dart';
 import 'package:weezemaster/core/models/concert_category.dart';
@@ -13,6 +14,8 @@ class Concert {
   final Organization organization;
   final List<ConcertCategory> concertCategories;
   final String? createdAt;
+  final String artistId;
+  final Artist artist;
 
   Concert({
     required this.id,
@@ -24,6 +27,8 @@ class Concert {
     required this.interests,
     required this.organization,
     required this.concertCategories,
+    required this.artistId,
+    required this.artist,
     this.createdAt
   });
 
@@ -36,6 +41,8 @@ class Concert {
     var concertCategoryListFromJson = json['ConcertCategories'] as List? ?? [];
     List<ConcertCategory> concertCategoryList = concertCategoryListFromJson.map((i) => ConcertCategory.fromJson(i)).toList();
 
+    var artistFromJson = json['Artist'] != null ? Artist.fromJson(json['Artist']) : Artist(id: '', name: '', interestId: 0, concerts: []);
+
     return Concert(
         id: json['ID'],
         name: json['Name'],
@@ -46,6 +53,8 @@ class Concert {
         interests: interestList,
         organization: organizationFromJson,
         concertCategories: concertCategoryList,
+        artistId: json['ArtistId'],
+        artist: artistFromJson,
         createdAt: json['CreatedAt'],
     );
   }

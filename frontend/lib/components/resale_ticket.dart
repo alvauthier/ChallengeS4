@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:weezemaster/core/services/payment_services.dart';
 import 'package:weezemaster/core/services/token_services.dart';
@@ -8,6 +9,8 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:weezemaster/core/services/api_services.dart';
 import 'package:weezemaster/translation.dart';
 import 'package:weezemaster/core/utils/constants.dart';
+
+import '../controller/navigation_cubit.dart';
 
 class Ticket {
   final String id;
@@ -163,6 +166,7 @@ class ResaleTicket extends StatelessWidget {
                               final tokenService = TokenService();
                               String? token = await tokenService.getValidAccessToken();
                               if (token == null) {
+                                context.read<NavigationCubit>().updateUserRole('');
                                 GoRouter.of(context).go(Routes.loginRegisterNamedPage);
                               } else {
                                 final parts = token.split('.');
@@ -234,6 +238,7 @@ class ResaleTicket extends StatelessWidget {
                               final tokenService = TokenService();
                               String? token = await tokenService.getValidAccessToken();
                               if (token == null) {
+                                context.read<NavigationCubit>().updateUserRole('');
                                 GoRouter.of(context).go(Routes.loginRegisterNamedPage);
                               } else {
                                 final paymentIntentData = await paymentService.createPaymentIntent(ticket.id, 'tl_');

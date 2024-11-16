@@ -28,7 +28,6 @@ import 'package:weezemaster/reset_password_screen.dart';
 import 'package:weezemaster/thank_you_screen.dart';
 import 'package:weezemaster/core/models/concert_category.dart';
 import 'package:weezemaster/user_interests_screen.dart';
-import 'package:weezemaster/home_orga/concert_orga_screen.dart';
 import 'package:weezemaster/my_tickets/blocs/my_tickets_bloc.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'dart:convert';
@@ -60,7 +59,6 @@ class AppRouter {
   }
 
   static Future<void> initializeRouter() async {
-    final userRole = await getUserRoleFromJwt();
     _router = GoRouter(
       initialLocation: Routes.homeNamedPage,
       debugLogDiagnostics: true,
@@ -343,21 +341,6 @@ class AppRouter {
               redirect: (context, state) {
                 final userRole = context.read<NavigationCubit>().state.userRole;
                 if (userRole != 'admin') {
-                  return Routes.homeNamedPage;
-                }
-                return null;
-              },
-            ),
-            GoRoute(
-              path: Routes.organizerConcertNamedPage,
-              name: 'organizer-concert',
-              pageBuilder: (context, state) =>
-              const NoTransitionPage(
-                child: OrganizerConcertScreen(),
-              ),
-              redirect: (context, state) {
-                final userRole = context.read<NavigationCubit>().state.userRole;
-                if (userRole != 'organizer') {
                   return Routes.homeNamedPage;
                 }
                 return null;

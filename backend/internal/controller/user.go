@@ -106,83 +106,81 @@ type RegisterRequest struct {
 // @Success		201	{object}	models.User
 // @Router			/register [post]
 func Register(c echo.Context) error {
-	db := database.GetDB()
+    db := database.GetDB()
 
-	email := c.FormValue("email")
+    email := c.FormValue("email")
 
-	// Vérifier si l'email est déjà utilisé
-	var existingUser models.User
-	if err := db.Where("email = ?", email).First(&existingUser).Error; err != gorm.ErrRecordNotFound {
-	    return echo.NewHTTPError(http.StatusUnprocessableEntity, "Email already used")
+    // Vérifier si l'email est déjà utilisé
+    var existingUser models.User
+    if err := db.Where("email = ?", email).First(&existingUser).Error; err != gorm.ErrRecordNotFound {
+        return echo.NewHTTPError(http.StatusUnprocessableEntity, "Email already used")
     }
 
-	password := c.FormValue("password")
-	firstname := c.FormValue("firstname")
-	lastname := c.FormValue("lastname")
+    password := c.FormValue("password")
+    firstname := c.FormValue("firstname")
+    lastname := c.FormValue("lastname")
 
-    // Récupérer le fichier image depuis le form-data
+    var fileName string
     file, err := c.FormFile("image")
+    if err == nil {
+        // Ouvrir le fichier
+        src, err := file.Open()
+        if err != nil {
+            return echo.NewHTTPError(http.StatusInternalServerError, "Failed to open image file: "+err.Error())
+        }
+        defer src.Close()
+
+        // Vérifier l'extension du fichier
+        fileExtension := strings.ToLower(filepath.Ext(file.Filename))
+        if fileExtension != ".jpg" && fileExtension != ".jpeg" && fileExtension != ".png" {
+            return echo.NewHTTPError(http.StatusBadRequest, "Invalid file extension")
+        }
+
+        // Générer un UUID pour le nom du fichier
+        fileUUID := uuid.New().String()
+        fileName = fileUUID + fileExtension
+        filePath := filepath.Join("uploads", "users", fileName)
+
+        // Créer le dossier uploads/users s'il n'existe pas
+        if err := os.MkdirAll(filepath.Dir(filePath), os.ModePerm); err != nil {
+            return echo.NewHTTPError(http.StatusInternalServerError, "Failed to create directory: "+err.Error())
+        }
+
+        // Créer le fichier de destination
+        dst, err := os.Create(filePath)
+        if err != nil {
+            return echo.NewHTTPError(http.StatusInternalServerError, "Failed to create destination file: "+err.Error())
+        }
+        defer dst.Close()
+
+        // Copier les données de l'image dans le fichier de destination
+        if _, err := io.Copy(dst, src); err != nil {
+            return echo.NewHTTPError(http.StatusInternalServerError, "Failed to save image: "+err.Error())
+        }
+    }
+
+    user := &models.User{
+        ID:        uuid.New(),
+        Email:     email,
+        Firstname: firstname,
+        Lastname:  lastname,
+        Image:     fileName,
+        Role:      "user",
+    }
+
+    hashedPassword, err := HashPassword(password)
     if err != nil {
-        return echo.NewHTTPError(http.StatusBadRequest, "Image file is required")
+        return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+    }
+    user.Password = hashedPassword
+
+    if err := db.Omit("organization_id", "last_connexion").Create(&user).Error; err != nil {
+        return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
     }
 
-    // Ouvrir le fichier
-    src, err := file.Open()
-    if err != nil {
-        return echo.NewHTTPError(http.StatusInternalServerError, "Failed to open image file: "+err.Error())
-    }
-    defer src.Close()
-
-    // Vérifier l'extension du fichier
-    fileExtension := strings.ToLower(filepath.Ext(file.Filename))
-    if fileExtension != ".jpg" && fileExtension != ".jpeg" && fileExtension != ".png" {
-        return echo.NewHTTPError(http.StatusBadRequest, "Invalid file extension")
-    }
-
-    // Générer un UUID pour le nom du fichier
-    fileUUID := uuid.New().String()
-    fileName := fileUUID + fileExtension
-    filePath := filepath.Join("uploads", "users", fileName)
-
-    // Créer le dossier uploads/concerts s'il n'existe pas
-    if err := os.MkdirAll(filepath.Dir(filePath), os.ModePerm); err != nil {
-        return echo.NewHTTPError(http.StatusInternalServerError, "Failed to create directory: "+err.Error())
-    }
-
-    // Créer le fichier de destination
-    dst, err := os.Create(filePath)
-    if err != nil {
-        return echo.NewHTTPError(http.StatusInternalServerError, "Failed to create destination file: "+err.Error())
-    }
-    defer dst.Close()
-
-    // Copier les données de l'image dans le fichier de destination
-    if _, err := io.Copy(dst, src); err != nil {
-        return echo.NewHTTPError(http.StatusInternalServerError, "Failed to save image: "+err.Error())
-    }
-
-	user := &models.User{
-		ID:        uuid.New(),
-		Email:     email,
-		Firstname: firstname,
-		Lastname:  lastname,
-		Image:     fileName,
-		Role:      "user",
-	}
-
-	hashedPassword, err := HashPassword(password)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
-	}
-	user.Password = hashedPassword
-
-	if err := db.Omit("organization_id", "last_connexion").Create(&user).Error; err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
-	}
-
-	user.Password = ""
-	c.Logger().Infof("event=UserCreated user_id=%s timestamp=%s", user.ID, time.Now().Format(time.RFC3339))
-	return c.JSON(http.StatusCreated, user)
+    user.Password = ""
+    c.Logger().Infof("event=UserCreated user_id=%s timestamp=%s", user.ID, time.Now().Format(time.RFC3339))
+    return c.JSON(http.StatusCreated, user)
 }
 
 type UserPatchInput struct {
@@ -204,92 +202,91 @@ type RequestPayload struct {
 }
 
 func RegisterOrganizer(c echo.Context) error {
-	db := database.GetDB()
+    db := database.GetDB()
 
-	organizationName := c.FormValue("organization")
-	organizationDescription := c.FormValue("orgadescri")
-	userEmail := c.FormValue("email")
-	userPassword := c.FormValue("password")
-	userFirstname := c.FormValue("firstname")
-	userLastname := c.FormValue("lastname")
+    organizationName := c.FormValue("organization")
+    organizationDescription := c.FormValue("orgadescri")
+    userEmail := c.FormValue("email")
+    userPassword := c.FormValue("password")
+    userFirstname := c.FormValue("firstname")
+    userLastname := c.FormValue("lastname")
 
-    // Récupérer le fichier image depuis le form-data
+    var fileName string
     file, err := c.FormFile("image")
+    if err == nil {
+        // Ouvrir le fichier
+        src, err := file.Open()
+        if err != nil {
+            return echo.NewHTTPError(http.StatusInternalServerError, "Failed to open image file: "+err.Error())
+        }
+        defer src.Close()
+
+        // Vérifier l'extension du fichier
+        fileExtension := strings.ToLower(filepath.Ext(file.Filename))
+        if fileExtension != ".jpg" && fileExtension != ".jpeg" && fileExtension != ".png" {
+            return echo.NewHTTPError(http.StatusBadRequest, "Invalid file extension")
+        }
+
+        // Générer un UUID pour le nom du fichier
+        fileUUID := uuid.New().String()
+        fileName = fileUUID + fileExtension
+        filePath := filepath.Join("uploads", "users", fileName)
+
+        // Créer le dossier uploads/users s'il n'existe pas
+        if err := os.MkdirAll(filepath.Dir(filePath), os.ModePerm); err != nil {
+            return echo.NewHTTPError(http.StatusInternalServerError, "Failed to create directory: "+err.Error())
+        }
+
+        // Créer le fichier de destination
+        dst, err := os.Create(filePath)
+        if err != nil {
+            return echo.NewHTTPError(http.StatusInternalServerError, "Failed to create destination file: "+err.Error())
+        }
+        defer dst.Close()
+
+        // Copier les données de l'image dans le fichier de destination
+        if _, err := io.Copy(dst, src); err != nil {
+            return echo.NewHTTPError(http.StatusInternalServerError, "Failed to save image: "+err.Error())
+        }
+    }
+
+    org := models.Organization{
+        ID:          uuid.New(),
+        Name:        organizationName,
+        Description: organizationDescription,
+    }
+
+    if err := db.Create(&org).Error; err != nil {
+        return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+    }
+
+    user := models.User{
+        ID:             uuid.New(),
+        Email:          userEmail,
+        Password:       userPassword,
+        Firstname:      userFirstname,
+        Lastname:       userLastname,
+        Role:           "organizer",
+        OrganizationId: org.ID,
+        Image:          fileName,
+    }
+
+    hashedPassword, err := HashPassword(user.Password)
     if err != nil {
-        return echo.NewHTTPError(http.StatusBadRequest, "Image file is required")
+        return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+    }
+    user.Password = hashedPassword
+
+    if err := db.Omit("last_connexion").Create(&user).Error; err != nil {
+        return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
     }
 
-    // Ouvrir le fichier
-    src, err := file.Open()
-    if err != nil {
-        return echo.NewHTTPError(http.StatusInternalServerError, "Failed to open image file: "+err.Error())
-    }
-    defer src.Close()
-
-    // Vérifier l'extension du fichier
-    fileExtension := strings.ToLower(filepath.Ext(file.Filename))
-    if fileExtension != ".jpg" && fileExtension != ".jpeg" && fileExtension != ".png" {
-        return echo.NewHTTPError(http.StatusBadRequest, "Invalid file extension")
-    }
-
-    // Générer un UUID pour le nom du fichier
-    fileUUID := uuid.New().String()
-    fileName := fileUUID + fileExtension
-    filePath := filepath.Join("uploads", "users", fileName)
-
-    // Créer le dossier uploads/concerts s'il n'existe pas
-    if err := os.MkdirAll(filepath.Dir(filePath), os.ModePerm); err != nil {
-        return echo.NewHTTPError(http.StatusInternalServerError, "Failed to create directory: "+err.Error())
-    }
-
-    // Créer le fichier de destination
-    dst, err := os.Create(filePath)
-    if err != nil {
-        return echo.NewHTTPError(http.StatusInternalServerError, "Failed to create destination file: "+err.Error())
-    }
-    defer dst.Close()
-
-    // Copier les données de l'image dans le fichier de destination
-    if _, err := io.Copy(dst, src); err != nil {
-        return echo.NewHTTPError(http.StatusInternalServerError, "Failed to save image: "+err.Error())
-    }
-
-	org := models.Organization{
-		ID:          uuid.New(),
-		Name:        organizationName,
-		Description: organizationDescription,
-	}
-
-	if err := db.Create(&org).Error; err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
-	}
-
-	user := models.User{
-		ID:             uuid.New(),
-		Email:          userEmail,
-		Password:       userPassword,
-		Firstname:      userFirstname,
-		Lastname:       userLastname,
-		Role:           "organizer",
-		OrganizationId: org.ID,
-	}
-
-	hashedPassword, err := HashPassword(user.Password)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
-	}
-	user.Password = hashedPassword
-
-	if err := db.Omit("last_connexion").Create(&user).Error; err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
-	}
-
-	c.Logger().Infof("event=UserCreated user_id=%s timestamp=%s", user.ID, time.Now().Format(time.RFC3339))
-	c.Logger().Infof("event=OrganizationCreated organization_id=%s timestamp=%s", org.ID, time.Now().Format(time.RFC3339))
-	return c.JSON(http.StatusCreated, map[string]interface{}{
-		"organization": org,
-		"user":         user,
-	})
+    c.Logger().Infof("event=UserCreated user_id=%s timestamp=%s", user.ID, time.Now().Format(time.RFC3339))
+    c.Logger().Infof("event=OrganizationCreated organization_id=%s timestamp=%s", org.ID, time.Now().Format(time.RFC3339))
+    return c.JSON(http.StatusCreated, map[string]interface{}{
+        "organization": org,
+        "user":         user,
+    })
 }
 
 // @Summary		Se connecter

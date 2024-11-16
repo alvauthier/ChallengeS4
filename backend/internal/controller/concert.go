@@ -395,17 +395,13 @@ func GetConcertByOrganizationID(c echo.Context) error {
 	if err := db.Where("email = ?", email).First(user).Error; err != nil {
 		return echo.NewHTTPError(http.StatusNotFound, "User not found")
 	}
-	fmt.Println(user.OrganizationId)
+
 	var concerts []models.Concert
-	if result := db.Where("organization_id = ?", user.OrganizationId).Find(&concerts); result.Error != nil {
-		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Error retrieving concerts"})
-	}
+    if result := db.Where("organization_id = ?", user.OrganizationId).Find(&concerts); result.Error != nil {
+        return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Error retrieving concerts"})
+    }
 
-	if len(concerts) == 0 {
-		return c.JSON(http.StatusNotFound, map[string]string{"message": "No concerts found for this organization"})
-	}
-
-	return c.JSON(http.StatusOK, concerts)
+    return c.JSON(http.StatusOK, concerts)
 }
 
 func GetConcertsByArtistID(c echo.Context) error {

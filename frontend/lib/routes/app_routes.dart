@@ -69,10 +69,7 @@ class AppRouter {
           navigatorKey: _shellNavigatorKey,
           observers: [routeObserver],
           builder: (context, state, child) {
-            return BlocProvider(
-              create: (context) => NavigationCubit(userRole),
-              child: MainScreen(screen: child),
-            );
+            return MainScreen(screen: child);
           },
           routes: [
             GoRoute(
@@ -98,7 +95,7 @@ class AppRouter {
               redirect: (context, state) {
                 final userRole = context.read<NavigationCubit>().state.userRole;
                 if (userRole != 'user') {
-                  return '/';
+                  return Routes.homeNamedPage;
                 }
                 return null;
               },
@@ -136,7 +133,7 @@ class AppRouter {
               redirect: (context, state) {
                 final userRole = context.read<NavigationCubit>().state.userRole;
                 if (userRole != 'user') {
-                  return '/';
+                  return Routes.homeNamedPage;
                 }
                 return null;
               },
@@ -151,7 +148,7 @@ class AppRouter {
               redirect: (context, state) {
                 final userRole = context.read<NavigationCubit>().state.userRole;
                 if (userRole != '') {
-                  return '/';
+                  return Routes.homeNamedPage;
                 }
                 return null;
               },
@@ -163,7 +160,7 @@ class AppRouter {
               redirect: (context, state) {
                 final userRole = context.read<NavigationCubit>().state.userRole;
                 if (userRole != '') {
-                  return '/';
+                  return Routes.homeNamedPage;
                 }
                 return null;
               },
@@ -175,7 +172,7 @@ class AppRouter {
               redirect: (context, state) {
                 final userRole = context.read<NavigationCubit>().state.userRole;
                 if (userRole != '') {
-                  return '/';
+                  return Routes.homeNamedPage;
                 }
                 return null;
               },
@@ -187,7 +184,7 @@ class AppRouter {
               redirect: (context, state) {
                 final userRole = context.read<NavigationCubit>().state.userRole;
                 if (userRole != '') {
-                  return '/';
+                  return Routes.homeNamedPage;
                 }
                 return null;
               },
@@ -199,7 +196,7 @@ class AppRouter {
               redirect: (context, state) {
                 final userRole = context.read<NavigationCubit>().state.userRole;
                 if (userRole != '') {
-                  return '/';
+                  return Routes.homeNamedPage;
                 }
                 return null;
               },
@@ -211,7 +208,7 @@ class AppRouter {
               redirect: (context, state) {
                 final userRole = context.read<NavigationCubit>().state.userRole;
                 if (userRole != '') {
-                  return '/';
+                  return Routes.homeNamedPage;
                 }
                 return null;
               },
@@ -229,7 +226,7 @@ class AppRouter {
               redirect: (context, state) {
                 final userRole = context.read<NavigationCubit>().state.userRole;
                 if (userRole != 'user') {
-                  return '/';
+                  return Routes.homeNamedPage;
                 }
                 return null;
               },
@@ -244,7 +241,7 @@ class AppRouter {
               redirect: (context, state) {
                 final userRole = context.read<NavigationCubit>().state.userRole;
                 if (userRole != 'user') {
-                  return '/';
+                  return Routes.homeNamedPage;
                 }
                 return null;
               },
@@ -270,7 +267,7 @@ class AppRouter {
               redirect: (context, state) {
                 final userRole = context.read<NavigationCubit>().state.userRole;
                 if (userRole != 'user') {
-                  return '/';
+                  return Routes.homeNamedPage;
                 }
                 return null;
               },
@@ -285,7 +282,7 @@ class AppRouter {
               redirect: (context, state) {
                 final userRole = context.read<NavigationCubit>().state.userRole;
                 if (userRole != 'user') {
-                  return '/';
+                  return Routes.homeNamedPage;
                 }
                 return null;
               },
@@ -300,7 +297,7 @@ class AppRouter {
               redirect: (context, state) {
                 final userRole = context.read<NavigationCubit>().state.userRole;
                 if (userRole == '') {
-                  return '/';
+                  return Routes.homeNamedPage;
                 }
                 return null;
               },
@@ -315,7 +312,7 @@ class AppRouter {
               redirect: (context, state) {
                 final userRole = context.read<NavigationCubit>().state.userRole;
                 if (userRole == '') {
-                  return '/';
+                  return Routes.homeNamedPage;
                 }
                 return null;
               },
@@ -330,7 +327,7 @@ class AppRouter {
               redirect: (context, state) {
                 final userRole = context.read<NavigationCubit>().state.userRole;
                 if (userRole != 'admin') {
-                  return '/';
+                  return Routes.homeNamedPage;
                 }
                 return null;
               },
@@ -345,7 +342,7 @@ class AppRouter {
               redirect: (context, state) {
                 final userRole = context.read<NavigationCubit>().state.userRole;
                 if (userRole != 'admin') {
-                  return '/';
+                  return Routes.homeNamedPage;
                 }
                 return null;
               },
@@ -360,7 +357,7 @@ class AppRouter {
               redirect: (context, state) {
                 final userRole = context.read<NavigationCubit>().state.userRole;
                 if (userRole != 'organizer') {
-                  return '/';
+                  return Routes.homeNamedPage;
                 }
                 return null;
               },
@@ -375,7 +372,7 @@ class AppRouter {
               redirect: (context, state) {
                 final userRole = context.read<NavigationCubit>().state.userRole;
                 if (userRole != 'organizer') {
-                  return '/';
+                  return Routes.homeNamedPage;
                 }
                 return null;
               },

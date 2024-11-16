@@ -1,5 +1,8 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:go_router/go_router.dart';
 import 'package:weezemaster/concert/blocs/concert_bloc.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -21,6 +24,26 @@ class ConcertScreen extends StatelessWidget {
     DateTime dateTime = DateTime.parse(date);
     DateFormat dateFormat = DateFormat('dd/MM/yyyy HH:mm', 'fr_FR');
     return dateFormat.format(dateTime);
+  }
+
+  static Future<String> getUserRoleFromJwt() async {
+    const storage = FlutterSecureStorage();
+    String? jwt = await storage.read(key: 'access_token');
+    if (jwt != null) {
+      final parts = jwt.split('.');
+      if (parts.length != 3) {
+        throw Exception('Invalid token');
+      }
+
+      final payload = utf8.decode(base64Url.decode(base64Url.normalize(parts[1])));
+      final payloadMap = json.decode(payload);
+      if (payloadMap is! Map<String, dynamic>) {
+        throw Exception('Invalid payload');
+      }
+
+      return payloadMap['role'];
+    }
+    return '';
   }
 
   @override
@@ -273,10 +296,10 @@ class ConcertScreen extends StatelessWidget {
                               if (resaleTickets.length > 2)
                                 ElevatedButton(
                                   onPressed: () {
-                                   context.pushNamed(
-                                     'resale-tickets',
-                                     extra: resaleTickets
-                                   );
+                                    context.pushNamed(
+                                        'resale-tickets',
+                                        extra: resaleTickets
+                                    );
                                   },
                                   style: ElevatedButton.styleFrom(
                                     backgroundColor: Colors.deepOrange,
@@ -292,7 +315,7 @@ class ConcertScreen extends StatelessWidget {
                                     ),
                                   ),
                                 ),
-                                const SizedBox(height: 80),
+                              const SizedBox(height: 80),
                             ],
                           ),
                         ),
@@ -311,49 +334,62 @@ class ConcertScreen extends StatelessWidget {
                               ),
                               color: Colors.white,
                             ),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: <Widget>[
-                                Text(
-                                  priceText,
-                                  style: const TextStyle(
-                                    fontSize: 20,
-                                    fontFamily: 'Readex Pro',
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                ),
-                                SizedBox(
-                                  width: 150,
-                                  child: ElevatedButton(
-                                    onPressed: remainingCategories.isEmpty ? null : () async {
-                                      final tokenService = TokenService();
-                                      String? token = await tokenService.getValidAccessToken();
-                                      if (token == null) {
-                                        context.read<NavigationCubit>().updateUserRole('');
-                                        GoRouter.of(context).go(Routes.loginRegisterNamedPage);
-                                      } else {
-                                        context.pushNamed(
-                                          'booking',
-                                          extra: state.concert.concertCategories
-                                        );
-                                      }
-                                    },
-                                    style: ElevatedButton.styleFrom(
-                                      foregroundColor: Colors.white,
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(6.0),
-                                      ),
-                                      backgroundColor: Colors.deepOrange,
-                                    ),
-                                    child: Text(
-                                      translate(context)!.book,
+                            child: FutureBuilder<String>(
+                              future: getUserRoleFromJwt(),
+                              builder: (context, snapshot) {
+                                if (!snapshot.hasData) {
+                                  return const Center(
+                                    child: CircularProgressIndicator(),
+                                  );
+                                }
+
+                                final userRole = snapshot.data ?? '';
+
+                                return Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  children: <Widget>[
+                                    Text(
+                                      priceText,
                                       style: const TextStyle(
+                                        fontSize: 20,
                                         fontFamily: 'Readex Pro',
+                                        fontWeight: FontWeight.w600,
                                       ),
                                     ),
-                                  )
-                                ),
-                              ],
+                                    SizedBox(
+                                        width: 150,
+                                        child: ElevatedButton(
+                                          onPressed: remainingCategories.isEmpty || (userRole != 'user' && userRole != '') ? null : () async {
+                                            final tokenService = TokenService();
+                                            String? token = await tokenService.getValidAccessToken();
+                                            if (token == null) {
+                                              context.read<NavigationCubit>().updateUserRole('');
+                                              GoRouter.of(context).go(Routes.loginRegisterNamedPage);
+                                            } else {
+                                              context.pushNamed(
+                                                  'booking',
+                                                  extra: state.concert.concertCategories
+                                              );
+                                            }
+                                          },
+                                          style: ElevatedButton.styleFrom(
+                                            foregroundColor: Colors.white,
+                                            shape: RoundedRectangleBorder(
+                                              borderRadius: BorderRadius.circular(6.0),
+                                            ),
+                                            backgroundColor: Colors.deepOrange,
+                                          ),
+                                          child: Text(
+                                            translate(context)!.book,
+                                            style: const TextStyle(
+                                              fontFamily: 'Readex Pro',
+                                            ),
+                                          ),
+                                        )
+                                    ),
+                                  ],
+                                );
+                              },
                             ),
                           ),
                         ),

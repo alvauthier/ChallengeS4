@@ -95,6 +95,13 @@ class AppRouter {
                 final concertCategories = state.extra as List<ConcertCategory>;
                 return BookingScreen(concertCategories: concertCategories);
               },
+              redirect: (context, state) {
+                final userRole = context.read<NavigationCubit>().state.userRole;
+                if (userRole != 'user') {
+                  return '/';
+                }
+                return null;
+              },
             ),
             GoRoute(
               path: '/resale-tickets',
@@ -126,6 +133,13 @@ class AppRouter {
                   ),
                 );
               },
+              redirect: (context, state) {
+                final userRole = context.read<NavigationCubit>().state.userRole;
+                if (userRole != 'user') {
+                  return '/';
+                }
+                return null;
+              },
             ),
             GoRoute(
               path: Routes.loginRegisterNamedPage,
@@ -134,42 +148,91 @@ class AppRouter {
               const NoTransitionPage(
                 child: LoginRegisterScreen(),
               ),
+              redirect: (context, state) {
+                final userRole = context.read<NavigationCubit>().state.userRole;
+                if (userRole != '') {
+                  return '/';
+                }
+                return null;
+              },
             ),
             GoRoute(
               path: '/login',
               name: 'login',
               builder: (context, state) => const LoginScreen(),
+              redirect: (context, state) {
+                final userRole = context.read<NavigationCubit>().state.userRole;
+                if (userRole != '') {
+                  return '/';
+                }
+                return null;
+              },
             ),
             GoRoute(
               path: '/register',
               name: 'register',
               builder: (context, state) => const RegisterScreen(),
+              redirect: (context, state) {
+                final userRole = context.read<NavigationCubit>().state.userRole;
+                if (userRole != '') {
+                  return '/';
+                }
+                return null;
+              },
             ),
             GoRoute(
               path: '/forgot-password',
               name: 'forgot-password',
               builder: (context, state) => const ForgotPasswordScreen(),
+              redirect: (context, state) {
+                final userRole = context.read<NavigationCubit>().state.userRole;
+                if (userRole != '') {
+                  return '/';
+                }
+                return null;
+              },
             ),
             GoRoute(
               path: '/reset-password',
               name: 'reset-password',
               builder: (context, state) => const ResetPasswordScreen(),
+              redirect: (context, state) {
+                final userRole = context.read<NavigationCubit>().state.userRole;
+                if (userRole != '') {
+                  return '/';
+                }
+                return null;
+              },
             ),
             GoRoute(
               path: '/register-organization',
               name: 'register-organization',
               builder: (context, state) => const RegisterOrganisationScreen(),
+              redirect: (context, state) {
+                final userRole = context.read<NavigationCubit>().state.userRole;
+                if (userRole != '') {
+                  return '/';
+                }
+                return null;
+              },
             ),
             GoRoute(
               path: Routes.myTicketsNamedPage,
               name: 'my-tickets',
               pageBuilder: (context, state) =>
-                  NoTransitionPage(
-                    child: BlocProvider(
-                      create: (context) => MyTicketsBloc()..add(MyTicketsDataLoaded()),
-                      child: const MyTicketsScreen(),
-                    ),
+                NoTransitionPage(
+                  child: BlocProvider(
+                    create: (context) => MyTicketsBloc()..add(MyTicketsDataLoaded()),
+                    child: const MyTicketsScreen(),
                   ),
+                ),
+              redirect: (context, state) {
+                final userRole = context.read<NavigationCubit>().state.userRole;
+                if (userRole != 'user') {
+                  return '/';
+                }
+                return null;
+              },
             ),
             GoRoute(
               path: Routes.conversationsNamedPage,
@@ -178,6 +241,13 @@ class AppRouter {
               const NoTransitionPage(
                 child: ConversationsScreen(),
               ),
+              redirect: (context, state) {
+                final userRole = context.read<NavigationCubit>().state.userRole;
+                if (userRole != 'user') {
+                  return '/';
+                }
+                return null;
+              },
             ),
             GoRoute(
               path: '/chat/:id',
@@ -197,6 +267,13 @@ class AppRouter {
                   concertImage: extras?['concertImage'] ?? '',
                 );
               },
+              redirect: (context, state) {
+                final userRole = context.read<NavigationCubit>().state.userRole;
+                if (userRole != 'user') {
+                  return '/';
+                }
+                return null;
+              },
             ),
             GoRoute(
               path: Routes.userInterestsNamedPage,
@@ -205,6 +282,13 @@ class AppRouter {
               const NoTransitionPage(
                 child: UserInterestsScreen(),
               ),
+              redirect: (context, state) {
+                final userRole = context.read<NavigationCubit>().state.userRole;
+                if (userRole != 'user') {
+                  return '/';
+                }
+                return null;
+              },
             ),
             GoRoute(
               path: Routes.profileNamedPage,
@@ -213,6 +297,13 @@ class AppRouter {
               const NoTransitionPage(
                 child: ProfileScreen(),
               ),
+              redirect: (context, state) {
+                final userRole = context.read<NavigationCubit>().state.userRole;
+                if (userRole == '') {
+                  return '/';
+                }
+                return null;
+              },
             ),
             GoRoute(
               path: '/edit-profile',
@@ -221,6 +312,13 @@ class AppRouter {
               const NoTransitionPage(
                 child: EditProfileScreen(),
               ),
+              redirect: (context, state) {
+                final userRole = context.read<NavigationCubit>().state.userRole;
+                if (userRole == '') {
+                  return '/';
+                }
+                return null;
+              },
             ),
             GoRoute(
               path: Routes.adminNamedPage,
@@ -229,6 +327,13 @@ class AppRouter {
               const NoTransitionPage(
                 child: AdminPanel(),
               ),
+              redirect: (context, state) {
+                final userRole = context.read<NavigationCubit>().state.userRole;
+                if (userRole != 'admin') {
+                  return '/';
+                }
+                return null;
+              },
             ),
             GoRoute(
               path: Routes.logsNamedPage,
@@ -237,6 +342,13 @@ class AppRouter {
               const NoTransitionPage(
                 child: LogsScreen(),
               ),
+              redirect: (context, state) {
+                final userRole = context.read<NavigationCubit>().state.userRole;
+                if (userRole != 'admin') {
+                  return '/';
+                }
+                return null;
+              },
             ),
             GoRoute(
               path: Routes.organizerConcertNamedPage,
@@ -245,6 +357,13 @@ class AppRouter {
               const NoTransitionPage(
                 child: OrganizerConcertScreen(),
               ),
+              redirect: (context, state) {
+                final userRole = context.read<NavigationCubit>().state.userRole;
+                if (userRole != 'organizer') {
+                  return '/';
+                }
+                return null;
+              },
             ),
             GoRoute(
               path: Routes.registerConcertNamedPage,
@@ -253,6 +372,13 @@ class AppRouter {
               const NoTransitionPage(
                 child: RegisterConcertScreen(),
               ),
+              redirect: (context, state) {
+                final userRole = context.read<NavigationCubit>().state.userRole;
+                if (userRole != 'organizer') {
+                  return '/';
+                }
+                return null;
+              },
             ),
           ],
         ),

@@ -234,7 +234,6 @@ class RegisterOrganisationScreenState extends State<RegisterOrganisationScreen> 
                                       ),
                                     );
                                     if (response.statusCode == 201) {
-                                      context.read<NavigationCubit>().updateUserRole('organizer');
                                       context.pushNamed('login');
                                     }
                                   } catch (e) {

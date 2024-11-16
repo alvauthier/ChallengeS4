@@ -62,6 +62,11 @@ func main() {
 		Output: logFile,
 	}))
 
+	router.Use(echoMiddleware.CORSWithConfig(echoMiddleware.CORSConfig{
+		AllowOrigins: []string{"*"},
+		AllowMethods: []string{http.MethodGet, http.MethodPost, http.MethodPut, http.MethodPatch, http.MethodDelete, http.MethodOptions},
+	}))
+
 	router.Logger.Info("Logger initialized successfully.")
 
 	database.InitDB()
@@ -136,8 +141,8 @@ func main() {
 	router.GET("/concerts/artists/:id", controller.GetConcertsByArtistID)
 
 	authenticated.GET("/user/interests", controller.GetUserInterests, middleware.CheckRole("user"))
-	authenticated.POST("/user/interests/:id", controller.AddUserInterest, middleware.CheckRole("user, organizer, admin"))
-	authenticated.DELETE("/user/interests/:id", controller.RemoveUserInterest, middleware.CheckRole("user, organizer, admin"))
+	authenticated.POST("/user/interests/:id", controller.AddUserInterest, middleware.CheckRole("user", "organizer", "admin"))
+	authenticated.DELETE("/user/interests/:id", controller.RemoveUserInterest, middleware.CheckRole("user", "organizer", "admin"))
 
 	authenticated.POST("/reservation", controller.CreateReservation, middleware.CheckRole("user"))
 	authenticated.POST("/ticket_listing_reservation/:ticketListingId", controller.CreateTicketListingReservation, middleware.CheckRole("user"))

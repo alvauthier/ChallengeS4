@@ -41,6 +41,7 @@ func LoadTicketFixtures() {
 		UpdatedAt:         time.Now(),
 		UserId:            user.ID,
 		ConcertCategoryId: concertCategory.ID,
+		MaxPrice:          concertCategory.Price,
 	}
 
 	result := db.Create(&ticket)

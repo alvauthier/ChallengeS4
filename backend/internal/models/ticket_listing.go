@@ -21,7 +21,7 @@ type TicketListing struct {
 	CreatedAt     time.Time
 	UpdatedAt     time.Time
 	DeletedAt     *time.Time      `gorm:"index"`
-	TicketId      uuid.UUID       `gorm:"not null;uniqueIndex"`
+	TicketId      uuid.UUID       `gorm:"not null;"`
 	Ticket        Ticket          `gorm:"foreignKey:TicketId"`
 	Conversations *[]Conversation `gorm:"foreignKey:TicketListingId"`
 	Sale          *Sale           `gorm:"foreignKey:TicketListingId"`

@@ -94,19 +94,25 @@ func CreateTicketListings(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, map[string]string{"error": "Price exceeds the original ticket price"})
 	}
 
-	ticketListing := models.TicketListing{
-		ID:        uuid.New(),
-		Price:     reqBody.Price,
-		Status:    "available",
-		TicketId:  reqBody.TicketId,
-		CreatedAt: time.Now(),
-		UpdatedAt: time.Now(),
-	}
+    var existingListing models.TicketListing
+    if err := db.Where("ticket_id = ? AND status = ?", reqBody.TicketId, "available").First(&existingListing).Error; err == nil {
+        return c.JSON(http.StatusConflict, map[string]string{"error": "Ticket listing already exists with status available"})
+    }
 
-	if res := db.Create(&ticketListing); res.Error != nil {
-		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Internal server error"})
-	}
-	return c.JSON(http.StatusCreated, ticketListing)
+    newListing := models.TicketListing{
+        ID:        uuid.New(),
+        Price:     reqBody.Price,
+        Status:    "available",
+        CreatedAt: time.Now(),
+        UpdatedAt: time.Now(),
+        TicketId:  reqBody.TicketId,
+    }
+
+    if err := db.Create(&newListing).Error; err != nil {
+        return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to create ticket listing"})
+    }
+
+	return c.JSON(http.StatusOK, newListing)
 }
 
 func UpdateTicketListing(c echo.Context) error {

@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:weezemaster/translation.dart';
 
 class TicketDetails extends StatelessWidget {
-  final String imageUrl;
   final String concertName;
   final String category;
   final String price;
+  final String concertImage;
   final VoidCallback onCancel;
   final String secondActionText;
   final VoidCallback secondAction;
@@ -13,10 +13,10 @@ class TicketDetails extends StatelessWidget {
 
   const TicketDetails({
     super.key,
-    required this.imageUrl,
     required this.concertName,
     required this.category,
     required this.price,
+    required this.concertImage,
     required this.onCancel,
     required this.secondActionText,
     required this.secondAction,
@@ -34,7 +34,7 @@ class TicketDetails extends StatelessWidget {
               ClipRRect(
                 borderRadius: BorderRadius.circular(10),
                 child: Image.network(
-                  'https://picsum.photos/250?image=9',
+                  concertImage,
                   width: 90,
                   height: 90,
                   fit: BoxFit.cover,

@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:go_router/go_router.dart';
@@ -17,6 +18,8 @@ import 'package:weezemaster/core/services/payment_services.dart';
 import 'package:weezemaster/core/services/token_services.dart';
 import 'package:weezemaster/core/utils/constants.dart';
 
+import 'controller/navigation_cubit.dart';
+
 class ChatScreen extends StatefulWidget {
   String id;
   final String? userId;
@@ -26,26 +29,27 @@ class ChatScreen extends StatefulWidget {
   final String? price;
   final String? resellerName;
   final String? category;
+  final String? concertImage;
 
-  ChatScreen({super.key, required this.id, this.userId, this.resellerId, this.ticketId, this.concertName, this.price, this.resellerName, this.category});
+  ChatScreen({super.key, required this.id, this.userId, this.resellerId, this.ticketId, this.concertName, this.price, this.resellerName, this.category, this.concertImage});
 
   @override
   ChatScreenState createState() => ChatScreenState();
 }
 
 class ChatScreenState extends State<ChatScreen> {
+  bool _isLoading = true;
+
   late String otherUser = "";
   late String buyerId = "";
-  late Map<String, String> ticket = {
-    "imageUrl": "https://picsum.photos/250?image=9",
-    "maxPrice": "150",
-  };
   late List messages = [];
   final TextEditingController _controller = TextEditingController();
   final storage = const FlutterSecureStorage();
   String? userId;
   late String concertName;
   late String price;
+  late String maxPrice;
+  late String concertImage;
   late String resellerName;
   late String buyerName;
   late String category;
@@ -134,21 +138,25 @@ class ChatScreenState extends State<ChatScreen> {
   @override
   void initState() {
     super.initState();
-    debugPrint("ID: ${widget.id}");
 
     if (widget.id.isEmpty || widget.id == "newchat") {
       widget.id = '';
-      concertName = widget.concertName!;
-      price = widget.price!;
-      otherUser = widget.resellerName!;
-      category = widget.category!;
-      buyerId = widget.userId!;
+      concertName = widget.concertName ?? "Unknown Concert";
+      price = widget.price ?? "0";
+      maxPrice = widget.price ?? "0";
+      otherUser = widget.resellerName ?? "Unknown Reseller";
+      category = widget.category ?? "Unknown Category";
+      buyerId = widget.userId ?? "";
+      concertImage = widget.concertImage ?? "https://picsum.photos/seed/picsum/800/400";
+      _isLoading = false;
     } else {
       concertName = "";
-      price = "";
+      price = "0";
+      maxPrice = "0";
       otherUser = "";
       category = "";
       buyerId = "";
+      concertImage = "";
       _fetchConversation();
     }
     _loadUserId().then((_) {
@@ -164,7 +172,6 @@ class ChatScreenState extends State<ChatScreen> {
 
   void _connectWebSocket() {
     final protocol = dotenv.env['API_PROTOCOL'] == 'http' ? 'ws' : 'wss';
-    // final protocol = 'ws';
     final wsUrl = Uri.parse('$protocol://${dotenv.env['API_HOST']}${dotenv.env['API_PORT']}/ws-chat');
     debugPrint('Attempting WebSocket connection to: $wsUrl');
 
@@ -182,6 +189,8 @@ class ChatScreenState extends State<ChatScreen> {
         setState(() {
           widget.id = decodedMessage['conversation_id'];
         });
+      } else if (decodedMessage['type'] == 'price_update') {
+        _handlePriceUpdate(decodedMessage);
       } else {
         setState(() {
           messages.add({
@@ -205,6 +214,7 @@ class ChatScreenState extends State<ChatScreen> {
       "conversation_id": widget.id.isNotEmpty ? widget.id : "",
       "sender_id": userId,
       "receiver_id": widget.resellerId,
+      "price": double.tryParse(widget.price ?? '0') ?? 0.0,
     };
 
     _channel?.sink.add(jsonEncode(payload));
@@ -220,6 +230,7 @@ class ChatScreenState extends State<ChatScreen> {
       });
     } else {
       if (mounted) {
+        context.read<NavigationCubit>().updateUserRole('');
         GoRouter.of(context).go(Routes.loginRegisterNamedPage);
       }
     }
@@ -265,32 +276,34 @@ class ChatScreenState extends State<ChatScreen> {
   }
 
   Future<void> _fetchConversation() async {
-    debugPrint("Fetching conversation with id: ${widget.id}");
     if (widget.id.isNotEmpty) {
       try {
-        debugPrint("In try Fetching conversation with id: ${widget.id}");
         final conversation = await ApiServices.getConversation(widget.id);
-        debugPrint("Conversation: $conversation");
         setState(() {
           messages = conversation['Messages'].map((message) => {
             "authorId": message['AuthorId'],
             "content": message['Content'],
             "readed": message['Readed'],
           }).toList();
-          debugPrint("Messages: $messages");
           buyerId = conversation["BuyerId"];
           if (conversation['Concert'] != null) {
             concertName = conversation['Concert']['Name'] ?? "Unknown Concert";
-            price = conversation['Price'].toString();
+            price = conversation['Price'].toString() ?? "0";
+            maxPrice = conversation['TicketListing']['Price'].toString() ?? "0";
             resellerName = conversation['SellerName'] ?? "Unknown Seller";
             buyerName = conversation['BuyerName'] ?? "Unknown Buyer";
             category = conversation['Category'] ?? "Unknown Category";
+            concertImage = conversation['Concert']['Image'] != ""
+                ? '${dotenv.env['API_PROTOCOL']}://${dotenv.env['API_HOST']}${dotenv.env['API_PORT']}/uploads/concerts/${conversation['Concert']['Image']}'
+                : "https://picsum.photos/seed/picsum/800/400";
           } else {
             concertName = "Fallback Concert";
             price = "10000000000";
+            maxPrice = "10000000000";
             resellerName = "Fallback Reseller";
             buyerName = "Fallback Buyer";
             category = "Fallback Category";
+            concertImage = "https://picsum.photos/seed/picsum/800/400";
           }
           if(userId == buyerId) {
             otherUser = resellerName;
@@ -298,12 +311,16 @@ class ChatScreenState extends State<ChatScreen> {
             otherUser = buyerName;
           }
         });
+        _isLoading = false;
       } catch (e) {
         if (e is ApiException) {
           debugPrint("Failed to fetch conversation: ${e.toString()}");
         } else {
           debugPrint("Unexpected error: ${e.toString()}");
         }
+        setState(() {
+          _isLoading = false;
+        });
       }
     }
   }
@@ -345,7 +362,7 @@ class ChatScreenState extends State<ChatScreen> {
     showDialog(
       context: context,
       builder: (BuildContext context) {
-        final TextEditingController priceController = TextEditingController(text: ticket["price"]);
+        final TextEditingController priceController = TextEditingController(text: price);
         return AlertDialog(
           title: Text(
               translate(context)!.new_price,
@@ -358,7 +375,7 @@ class ChatScreenState extends State<ChatScreen> {
               FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d{0,2}')),
               TextInputFormatter.withFunction((oldValue, newValue) {
                 final newPrice = double.tryParse(newValue.text);
-                if (newPrice != null && newPrice > double.parse(price)) {
+                if (newPrice != null && newPrice > double.parse(maxPrice)) {
                   return oldValue;
                 }
                 return newValue;
@@ -419,6 +436,14 @@ class ChatScreenState extends State<ChatScreen> {
     );
   }
 
+  void _handlePriceUpdate(Map<String, dynamic> message) {
+    if (message.containsKey('new_price')) {
+      setState(() {
+        price = message['new_price'].toString();
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final paymentService = PaymentService();
@@ -433,111 +458,119 @@ class ChatScreenState extends State<ChatScreen> {
           ),
         ),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: Column(
-          children: [
-            TicketDetails(
-              imageUrl: ticket["imageUrl"] as String,
-              concertName: concertName,
-              category: category,
-              price: price,
-              showButtons: widget.id.isEmpty || widget.id == 'newchat' ? false : true,
-              onCancel: () {
-                // Handle cancel action
-                context.pop();
-              },
-              secondAction: () async {
-                debugPrint('BuyerId: $buyerId');
-                debugPrint('UserId: $userId');
-                if (buyerId == userId) {
-                  debugPrint('Buy');
-                  final tokenService = TokenService();
-                  String? token = await tokenService.getValidAccessToken();
-                  if (token == null) {
-                    GoRouter.of(context).go(Routes.loginRegisterNamedPage);
-                  } else {
-                    final paymentIntentData = await paymentService.createPaymentIntent(widget.id, 'cv_');
-                    if (paymentIntentData != null) {
-                      try {
-                        await paymentService.initAndPresentPaymentSheet(
-                          context,
-                          paymentIntentData['client_secret'],
-                        );
+      body: _isLoading
+        ? const Center(child: CircularProgressIndicator())
+        : Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Column(
+            children: [
+              TicketDetails(
+                concertName: concertName,
+                category: category,
+                price: price,
+                concertImage: concertImage,
+                showButtons: widget.id.isEmpty || widget.id == 'newchat' ? false : true,
+                onCancel: () {
+                  // Handle cancel action
+                  context.pop();
+                },
+                secondAction: () async {
+                  debugPrint('BuyerId: $buyerId');
+                  debugPrint('UserId: $userId');
+                  if (buyerId == userId) {
+                    debugPrint('Buy');
+                    final tokenService = TokenService();
+                    String? token = await tokenService.getValidAccessToken();
+                    if (token == null) {
+                      context.read<NavigationCubit>().updateUserRole('');
+                      GoRouter.of(context).go(Routes.loginRegisterNamedPage);
+                    } else {
+                      final paymentIntentData = await paymentService.createPaymentIntent(widget.id, 'cv_');
+                      if (paymentIntentData != null) {
+                        try {
+                          await paymentService.initAndPresentPaymentSheet(
+                            context,
+                            paymentIntentData['client_secret'],
+                          );
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text(translate(context)!.payment_success)),
+                          );
+                          await updateTicketListingStatus(context, widget.id);
+                        } catch (e) {
+                          debugPrint('Error presenting payment sheet: $e');
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text(translate(context)!.payment_failed)),
+                          );
+                        }
+                      } else {
                         ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text(translate(context)!.payment_success)),
-                        );
-                        await updateTicketListingStatus(context, widget.id);
-                      } catch (e) {
-                        debugPrint('Error presenting payment sheet: $e');
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text(translate(context)!.payment_failed)),
+                          SnackBar(content: Text(translate(context)!.payment_error)),
                         );
                       }
-                    } else {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text(translate(context)!.payment_error)),
-                      );
                     }
-                  }
-                } else {
-                  _showChangePriceDialog();
+                  } else {
+                    _showChangePriceDialog();
 
-                }
-              },
-              secondActionText: buyerId == userId ? translate(context)!.buy : translate(context)!.change_price,
-            ),
-            Expanded(
-              child: ListView.builder(
-                padding: const EdgeInsets.symmetric(vertical: 16.0),
-                itemCount: messages.length,
-                itemBuilder: (context, index) {
-                  final message = messages[index];
-                  final authorId = message["authorId"] as String? ?? "";
-                  final content = message["content"] as String? ?? "";
-                  final isCurrentUser = authorId == userId;
-                  return Column(
-                    children: [
-                      MessageBubble(
-                        authorId: authorId,
-                        content: content,
-                        isCurrentUser: isCurrentUser,
-                        readed: message["readed"] as bool? ?? false,
-                      ),
-                      const SizedBox(height: 10),
-                    ],
-                  );
+                  }
                 },
+                secondActionText: buyerId == userId ? translate(context)!.buy : translate(context)!.change_price,
               ),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: TextField(
-                      controller: _controller,
-                      decoration: InputDecoration(
-                        hintText: translate(context)!.enter_message,
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
+              Expanded(
+                child: ListView.builder(
+                  padding: const EdgeInsets.symmetric(vertical: 16.0),
+                  itemCount: messages.length,
+                  itemBuilder: (context, index) {
+                    final message = messages[index];
+                    final authorId = message["authorId"] as String? ?? "";
+                    final content = message["content"] as String? ?? "";
+                    final isCurrentUser = authorId == userId;
+
+                    if (content.isEmpty) {
+                      return const SizedBox.shrink();
+                    }
+
+                    return Column(
+                      children: [
+                        MessageBubble(
+                          authorId: authorId,
+                          content: content,
+                          isCurrentUser: isCurrentUser,
+                          readed: message["readed"] as bool? ?? false,
+                        ),
+                        const SizedBox(height: 10),
+                      ],
+                    );
+                  },
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: TextField(
+                        controller: _controller,
+                        decoration: InputDecoration(
+                          hintText: translate(context)!.enter_message,
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                  IconButton(
-                    icon: const Icon(
-                        Icons.send,
-                        color: Colors.deepOrange,
+                    IconButton(
+                      icon: const Icon(
+                          Icons.send,
+                          color: Colors.deepOrange,
+                      ),
+                      onPressed: _sendMessage,
                     ),
-                    onPressed: _sendMessage,
-                  ),
-                ],
+                  ],
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
-      ),
     );
   }
 }

@@ -9,6 +9,8 @@ import 'package:weezemaster/components/search_bar.dart';
 import 'package:weezemaster/translation.dart';
 import 'package:weezemaster/core/utils/constants.dart';
 
+import '../controller/navigation_cubit.dart';
+
 class OrganizerConcertScreen extends StatefulWidget {
   const OrganizerConcertScreen({super.key});
 
@@ -50,6 +52,7 @@ class OrganizerConcertScreenState extends State<OrganizerConcertScreen> {
       Map<String, dynamic> decodedToken = _decodeToken(jwt);
       return decodedToken['id'] as String;
     } else {
+      context.read<NavigationCubit>().updateUserRole('');
       GoRouter.of(context).go(Routes.loginRegisterNamedPage);
       return '';
     }

@@ -42,22 +42,47 @@ func GetAllConcerts(c echo.Context) error {
 // @Router			/concerts/{id} [get]
 func GetConcert(c echo.Context) error {
 	db := database.GetDB()
-	id := c.Param("id")
-	var concert models.Concert
-	if err := db.Preload("Interests").
-		Preload("Organization").
-		Preload("Artist").
-		Preload("ConcertCategories").
-		Preload("ConcertCategories.Category").
-		Preload("ConcertCategories.Tickets", "EXISTS (SELECT 1 FROM ticket_listings WHERE tickets.id = ticket_listings.ticket_id)").
-		Preload("ConcertCategories.Tickets.TicketListing").
-		Preload("ConcertCategories.Tickets.User").
-		Where("id = ?", id).First(&concert).Error; err != nil {
-		if err == gorm.ErrRecordNotFound {
-			return echo.NewHTTPError(http.StatusNotFound, "Concert not found")
+	authHeader := c.Request().Header.Get("Authorization")
+	var userID uuid.UUID
+
+	if authHeader != "" {
+		tokenString := authHeader
+		if len(authHeader) > 7 && authHeader[:7] == "Bearer " {
+			tokenString = authHeader[7:]
 		}
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+
+		claims, err := verifyToken(tokenString)
+		if err == nil {
+			userIdFromToken, ok := claims["id"].(string)
+			if ok {
+				userID, _ = uuid.Parse(userIdFromToken)
+			}
+		}
 	}
+
+	var concert models.Concert
+	if err := db.
+	Preload("Interests").
+	Preload("Organization").
+	Preload("Artist").
+    Preload("ConcertCategories").
+    Preload("ConcertCategories.Category").
+    Preload("ConcertCategories.Tickets", "EXISTS (SELECT 1 FROM ticket_listings WHERE tickets.id = ticket_listings.ticket_id)").
+    Preload("ConcertCategories.Tickets.User").
+	Preload("ConcertCategories.Tickets.TicketListings",
+	func(db *gorm.DB) *gorm.DB {
+    	if userID != uuid.Nil {
+    		return db.Joins("JOIN tickets ON tickets.id = ticket_listings.ticket_id").
+    			Where("ticket_listings.status = ? AND tickets.user_id != ?", "available", userID)
+    	}
+    	return db.Where("ticket_listings.status = ?", "available")
+    }).Where("id = ?", c.Param("id")).First(&concert).Error; err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return c.JSON(http.StatusNotFound, map[string]string{"message": "Concert not found"})
+		}
+		return c.JSON(http.StatusInternalServerError, map[string]string{"message": err.Error()})
+	}
+
 	return c.JSON(http.StatusOK, concert)
 }
 
@@ -261,6 +286,66 @@ func UpdateConcert(c echo.Context) error {
 	if err := c.Bind(&concert); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
+
+    name := c.FormValue("name")
+    location := c.FormValue("location")
+    dateStr := c.FormValue("date")
+
+    date, _ := time.Parse("2006-01-02 15:04", dateStr)
+
+    // Vérifier si une nouvelle image est fournie
+    file, err := c.FormFile("image")
+    if err == nil {
+        // Supprimer l'ancienne image si elle existe
+        if concert.Image != "" {
+            oldImagePath := filepath.Join("uploads", "concerts", concert.Image)
+            if err := os.Remove(oldImagePath); err != nil {
+                return c.JSON(http.StatusInternalServerError, map[string]string{"message": "Failed to delete old image: " + err.Error()})
+            }
+        }
+
+        // Ouvrir le fichier
+        src, err := file.Open()
+        if err != nil {
+            return c.JSON(http.StatusInternalServerError, map[string]string{"message": "Failed to open image file: " + err.Error()})
+        }
+        defer src.Close()
+
+        // Vérifier l'extension du fichier
+        fileExtension := strings.ToLower(filepath.Ext(file.Filename))
+        if fileExtension != ".jpg" && fileExtension != ".jpeg" && fileExtension != ".png" {
+            return c.JSON(http.StatusBadRequest, map[string]string{"message": "Invalid file extension"})
+        }
+
+        // Générer un UUID pour le nom du fichier
+        fileUUID := uuid.New().String()
+        fileName := fileUUID + fileExtension
+        filePath := filepath.Join("uploads", "users", fileName)
+
+        // Créer le dossier uploads/concerts s'il n'existe pas
+        if err := os.MkdirAll(filepath.Dir(filePath), os.ModePerm); err != nil {
+            return c.JSON(http.StatusInternalServerError, map[string]string{"message": "Failed to create directory: " + err.Error()})
+        }
+
+        // Créer le fichier de destination
+        dst, err := os.Create(filePath)
+        if err != nil {
+            return c.JSON(http.StatusInternalServerError, map[string]string{"message": "Failed to create destination file: " + err.Error()})
+        }
+        defer dst.Close()
+
+        // Copier les données de l'image dans le fichier de destination
+        if _, err := io.Copy(dst, src); err != nil {
+            return c.JSON(http.StatusInternalServerError, map[string]string{"message": "Failed to save image: " + err.Error()})
+        }
+
+        concert.Image = fileName
+    }
+
+    concert.Name = name
+    concert.Location = location
+    concert.Date = date
+
 	if err := db.Save(&concert).Error; err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}

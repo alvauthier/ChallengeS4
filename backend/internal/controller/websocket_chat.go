@@ -8,7 +8,6 @@ import (
 	"time"
 	"weezemaster/internal/database"
 	"weezemaster/internal/models"
-
 	"github.com/google/uuid"
 	"github.com/gorilla/websocket"
 	"github.com/labstack/echo/v4"
@@ -30,6 +29,7 @@ type MessagePayload struct {
 	SenderID       string `json:"sender_id,omitempty"`
 	ReceiverID     string `json:"receiver_id,omitempty"`
 	Content        string `json:"content,omitempty"`
+	Price          float64 `json:"price,omitempty"`
 }
 
 // HandleWebSocket gère les connexions WebSocket pour toutes les conversations
@@ -39,23 +39,19 @@ func HandleWebSocketChat(c echo.Context) error {
 		return err
 	}
 	defer conn.Close()
-
 	var conversationID string
 	var authorID uuid.UUID
-
 	// Lire le premier message pour initialiser la conversation
 	_, message, err := conn.ReadMessage()
 	if err != nil {
 		debugPrint("Erreur lors de la lecture du premier message: ", err)
 		return err
 	}
-
 	var payload MessagePayload
 	if err := json.Unmarshal(message, &payload); err != nil {
 		debugPrint("Erreur de parsing du message initial: ", err)
 		return err
 	}
-
 	// Vérifier si une conversation existe déjà
 	if payload.ConversationID != "" {
 		conversationUUID, err := uuid.Parse(payload.ConversationID)
@@ -63,7 +59,6 @@ func HandleWebSocketChat(c echo.Context) error {
 			debugPrint("Format de conversation ID invalide: ", err)
 			return err
 		}
-
 		var conversation models.Conversation
 		err = database.GetDB().Where("id = ?", conversationUUID).First(&conversation).Error
 		if err != nil {
@@ -81,19 +76,16 @@ func HandleWebSocketChat(c echo.Context) error {
 		// Si conversationID n'est pas fourni, créer une nouvelle conversation
 		conversationID = createNewConversation(payload.SenderID, payload.ReceiverID)
 	}
-
 	// Assigner l'authorID
 	authorID, err = uuid.Parse(payload.SenderID)
 	if err != nil {
 		debugPrint("Format de sender ID invalide: ", err)
 		return err
 	}
-
 	// Ajouter la connexion à la room de la conversation
 	mutex.Lock()
 	rooms[conversationID] = append(rooms[conversationID], conn)
 	mutex.Unlock()
-
 	// Informer le client de l'ID de la conversation (si une nouvelle conversation a été créée)
 	responsePayload := MessagePayload{
 		ConversationID: conversationID,
@@ -104,7 +96,6 @@ func HandleWebSocketChat(c echo.Context) error {
 	}
 	responseMessage, _ := json.Marshal(responsePayload)
 	conn.WriteMessage(websocket.TextMessage, responseMessage)
-
 	for {
 		// Lire les messages suivants
 		_, message, err := conn.ReadMessage()
@@ -113,13 +104,11 @@ func HandleWebSocketChat(c echo.Context) error {
 			removeConnection(conversationID, conn)
 			break
 		}
-
 		var msgPayload MessagePayload
 		if err := json.Unmarshal(message, &msgPayload); err != nil {
 			debugPrint("Erreur de parsing du message: ", err)
 			continue
 		}
-
 		// Sauvegarder le message dans la base de données
 		if err := saveMessageToDatabase(conversationID, msgPayload.Content, authorID); err != nil {
 			// Gérer l'erreur de sauvegarde
@@ -127,29 +116,65 @@ func HandleWebSocketChat(c echo.Context) error {
 			continue
 		}
 
-		// Diffuser le message aux autres connexions dans la même room
-		broadcastMessage(conversationID, message)
-	}
+        if msgPayload.Price > 0 {
+            // Vérifier et mettre à jour le prix si nécessaire
+            priceChanged, err := checkAndUpdatePrice(conversationID, msgPayload.Price)
+            if err != nil {
+               debugPrint("Erreur lors de la vérification du prix: ", err)
+               continue
+            }
 
+            // Diffuser la mise à jour du prix si nécessaire
+            if priceChanged {
+               priceUpdateMessage := map[string]interface{}{
+                    "type":           "price_update",
+                    "conversation_id": conversationID,
+                    "new_price":      msgPayload.Price,
+               }
+               priceUpdateMessageJSON, _ := json.Marshal(priceUpdateMessage)
+               broadcastMessage(conversationID, priceUpdateMessageJSON)
+            }
+        }
+
+        // Diffuser le message aux autres connexions dans la même room
+        broadcastMessage(conversationID, message)
+	}
 	return nil
+}
+
+// Fonction pour vérifier et mettre à jour le prix
+func checkAndUpdatePrice(conversationID string, newPrice float64) (bool, error) {
+    db := database.GetDB()
+
+    var conversation models.Conversation
+    if err := db.Where("id = ?", conversationID).First(&conversation).Error; err != nil {
+        return false, err
+    }
+
+    if conversation.Price != newPrice {
+        conversation.Price = newPrice
+        if err := db.Save(&conversation).Error; err != nil {
+            return false, err
+        }
+        return true, nil
+    }
+
+    return false, nil
 }
 
 // Fonction pour créer une nouvelle conversation
 func createNewConversation(senderID string, receiverID string) string {
 	db := database.GetDB()
-
 	senderUUID, err := uuid.Parse(senderID)
 	if err != nil {
 		debugPrint("Format de sender ID invalide: ", err)
 		return ""
 	}
-
 	receiverUUID, err := uuid.Parse(receiverID)
 	if err != nil {
 		debugPrint("Format de receiver ID invalide: ", err)
 		return ""
 	}
-
 	newConversation := models.Conversation{
 		ID:        uuid.New(),
 		BuyerId:   senderUUID,   // Selon la logique de votre application
@@ -157,12 +182,10 @@ func createNewConversation(senderID string, receiverID string) string {
 		CreatedAt: time.Now(),
 		UpdatedAt: time.Now(),
 	}
-
 	if err := db.Create(&newConversation).Error; err != nil {
 		debugPrint("Erreur lors de la création de la conversation: ", err)
 		return ""
 	}
-
 	return newConversation.ID.String()
 }
 
@@ -170,7 +193,6 @@ func createNewConversation(senderID string, receiverID string) string {
 func broadcastMessage(conversationID string, message []byte) {
 	mutex.Lock()
 	defer mutex.Unlock()
-
 	conns := rooms[conversationID]
 	for _, conn := range conns {
 		if err := conn.WriteMessage(websocket.TextMessage, message); err != nil {
@@ -183,7 +205,6 @@ func broadcastMessage(conversationID string, message []byte) {
 func removeConnection(conversationID string, conn *websocket.Conn) {
 	mutex.Lock()
 	defer mutex.Unlock()
-
 	conns := rooms[conversationID]
 	for i, c := range conns {
 		if c == conn {
@@ -196,12 +217,10 @@ func removeConnection(conversationID string, conn *websocket.Conn) {
 // Sauvegarder le message dans la base de données
 func saveMessageToDatabase(conversationID string, message string, authorID uuid.UUID) error {
 	db := database.GetDB()
-
 	conversationUUID, err := uuid.Parse(conversationID)
 	if err != nil {
 		return err
 	}
-
 	var conversation models.Conversation
 	err = db.Where("id = ?", conversationUUID).First(&conversation).Error
 	if err != nil {
@@ -212,7 +231,6 @@ func saveMessageToDatabase(conversationID string, message string, authorID uuid.
 			return err
 		}
 	}
-
 	// Créer un nouveau message
 	newMessage := models.Message{
 		ID:             uuid.New(),
@@ -224,12 +242,10 @@ func saveMessageToDatabase(conversationID string, message string, authorID uuid.
 		CreatedAt:      time.Now(), // Heure de création
 		UpdatedAt:      time.Now(), // Heure de mise à jour
 	}
-
 	// Sauvegarder le message dans la base
 	if err := db.Create(&newMessage).Error; err != nil {
 		return err
 	}
-
 	return nil
 }
 

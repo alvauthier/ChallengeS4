@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:go_router/go_router.dart';
 import 'package:http/http.dart' as http;
@@ -15,6 +16,8 @@ import 'package:weezemaster/core/services/token_services.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:weezemaster/translation.dart';
 import 'package:weezemaster/core/utils/constants.dart';
+
+import 'controller/navigation_cubit.dart';
 
 class RegisterConcertScreen extends StatefulWidget {
   const RegisterConcertScreen({super.key});
@@ -113,6 +116,7 @@ class RegisterConcertScreenState extends State<RegisterConcertScreen> {
       return decodedToken['id'] as String;
     } else {
       if (mounted) {
+        context.read<NavigationCubit>().updateUserRole('');
         GoRouter.of(context).go(Routes.loginRegisterNamedPage);
       }
       return '';

@@ -27,6 +27,8 @@ class HomeScreenState extends State<HomeScreen> {
   List _filteredConcerts = [];
   List<Interest> userInterests = [];
   bool isUserConnected = false;
+  bool userHasInterests = false;
+  String userRole = '';
 
   // Ajouter une variable d'état pour suivre l'option de tri actuelle
   SortOption _currentSortOption = SortOption.none;
@@ -36,6 +38,7 @@ class HomeScreenState extends State<HomeScreen> {
     super.initState();
     _searchController.addListener(_onSearchChanged);
     checkUserConnection();
+    getUserRole();
   }
 
   @override
@@ -102,10 +105,61 @@ class HomeScreenState extends State<HomeScreen> {
       final interests = await ApiServices.getUserInterests();
       setState(() {
         userInterests = interests;
+
+        if(userInterests.isNotEmpty){
+          userHasInterests = true;
+        }
       });
     } catch (e) {
       debugPrint('Erreur lors du chargement des centres d\'intérêts: $e');
     }
+  }
+
+  Future<void> getUserRole() async {
+    final tokenService = TokenService();
+    String? jwtToken = await tokenService.getValidAccessToken();
+
+    if (jwtToken != null) {
+      Map<String, dynamic> decodedToken = _decodeToken(jwtToken);
+
+      final user = await ApiServices.getUser(decodedToken['id'] as String);
+      setState(() {
+        userRole = user.role;
+      });
+    }
+  }
+
+  Map<String, dynamic> _decodeToken(String token) {
+    final parts = token.split('.');
+    if (parts.length != 3) {
+      throw Exception('Invalid token');
+    }
+
+    final payload = _decodeBase64(parts[1]);
+    final payloadMap = json.decode(payload);
+    if (payloadMap is! Map<String, dynamic>) {
+      throw Exception('Invalid payload');
+    }
+
+    return payloadMap;
+  }
+
+  String _decodeBase64(String str) {
+    String output = str.replaceAll('-', '+').replaceAll('_', '/');
+    switch (output.length % 4) {
+      case 0:
+        break;
+      case 2:
+        output += '==';
+        break;
+      case 3:
+        output += '=';
+        break;
+      default:
+        throw Exception('Illegal base64url string!"');
+    }
+
+    return utf8.decode(base64Url.decode(output));
   }
 
   void _onSearchChanged() {
@@ -237,7 +291,7 @@ class HomeScreenState extends State<HomeScreen> {
                     if (!aHasInterest && bHasInterest) return 1;
                     return 0;
                   });
-                } else if (_currentSortOption == SortOption.recent) {
+                } else if (_currentSortOption == SortOption.recent || !userHasInterests) {
                   _filteredConcerts.sort((a, b) {
                     return DateTime.parse(b.createdAt).compareTo(DateTime.parse(a.createdAt));
                   });
@@ -277,14 +331,15 @@ class HomeScreenState extends State<HomeScreen> {
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                Text(
-                                  '${translate(context)!.my_interests} : ${userInterests.length}',
-                                  style: const TextStyle(
-                                    fontSize: 18,
-                                    fontFamily: 'Readex Pro',
-                                    fontWeight: FontWeight.w600,
+                                if (userRole == 'user')
+                                  Text(
+                                    '${translate(context)!.my_interests} : ${userInterests.length}',
+                                    style: const TextStyle(
+                                      fontSize: 18,
+                                      fontFamily: 'Readex Pro',
+                                      fontWeight: FontWeight.w600,
+                                    ),
                                   ),
-                                ),
                                 PopupMenuButton<String>(
                                   onSelected: (String value) {
                                     setState(() {
@@ -300,7 +355,12 @@ class HomeScreenState extends State<HomeScreen> {
                                     });
                                   },
                                   itemBuilder: (BuildContext context) {
-                                    return {translate(context)!.interests, translate(context)!.recent, translate(context)!.ancient}.map((String choice) {
+                                    final choices = <String>[
+                                      if (userRole == 'user') translate(context)!.interests,
+                                      translate(context)!.recent,
+                                      translate(context)!.ancient,
+                                    ];
+                                    return choices.map((String choice) {
                                       return PopupMenuItem<String>(
                                         value: choice,
                                         child: Text(choice),

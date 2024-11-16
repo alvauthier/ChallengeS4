@@ -60,9 +60,15 @@ class NavigationCubit extends Cubit<NavigationState> {
   }
 
   void updateUserRole(String userRole) {
+    int index = 0;
+
+    if(userRole == '') {
+      index = 1;
+    }
+
     // Emit a temporary state with a different index to force a rebuild
     emit(NavigationState(bottomNavItems: state.bottomNavItems, index: -1, userRole: state.userRole));
     // Emit the actual state with the updated user role
-    emit(NavigationState(bottomNavItems: state.bottomNavItems, index: 0, userRole: userRole));
+    emit(NavigationState(bottomNavItems: state.bottomNavItems, index: index, userRole: userRole));
   }
 }

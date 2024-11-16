@@ -78,7 +78,9 @@ func GetConversation(c echo.Context) error {
 			"Name":     concert.Name,
 			"Date":     concert.Date,
 			"Location": concert.Location,
+			"Image":    concert.Image,
 		},
+        "TicketListing": conversation.TicketListing,
 	}
 
 	return c.JSON(http.StatusOK, response)

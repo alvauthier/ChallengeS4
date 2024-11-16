@@ -156,6 +156,7 @@ func main() {
 	authenticated.POST("/conversations/check", controller.CheckConversation, middleware.CheckRole("user", "organizer", "admin"))
 	router.GET("/ws-chat", controller.HandleWebSocketChat)
 	router.GET("/ws-queue", controller.HandleWebSocketQueue)
+	router.GET("/ws-community", controller.HandleWebSocketCommunity)
 
 	router.GET("/logs", controller.GetLogs)
 

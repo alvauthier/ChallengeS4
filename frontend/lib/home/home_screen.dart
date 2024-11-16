@@ -345,11 +345,13 @@ class HomeScreenState extends State<HomeScreen> {
                         child: Align(
                           alignment: Alignment.centerLeft,
                           child: Text(
-                            '${_filteredConcerts.length} ${_filteredConcerts.length == 1 ? 'concert' : 'concerts'}',
+                            userRole == 'organizer'
+                                ? ' ${_filteredConcerts.length == 1 ? translate(context)!.my_concert : translate(context)!.my_concerts} (${_filteredConcerts.length})'
+                                : '${_filteredConcerts.length} ${_filteredConcerts.length == 1 ? 'concert' : 'concerts'}',
                             style: const TextStyle(
                               fontSize: 30,
                               fontFamily: 'Readex Pro',
-                              fontWeight: FontWeight.w600
+                              fontWeight: FontWeight.w600,
                             ),
                           ),
                         ),

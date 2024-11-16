@@ -26,7 +26,7 @@ class NavigationCubit extends Cubit<NavigationState> {
     } else if (userRole == 'organizer') {
       switch (index) {
         case 0:
-          emit(const NavigationState(bottomNavItems: Routes.organizerConcertNamedPage, index: 0, userRole: 'organizer'));
+          emit(const NavigationState(bottomNavItems: Routes.homeNamedPage, index: 0, userRole: 'organizer'));
           break;
         case 1:
           emit(const NavigationState(bottomNavItems: Routes.registerConcertNamedPage, index: 1, userRole: 'organizer'));

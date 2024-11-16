@@ -8,6 +8,5 @@ class Routes {
   static const adminNamedPage = '/admin';
   static const logsNamedPage = '/logs';
   static const registerConcertNamedPage = '/register-concert';
-  static const organizerConcertNamedPage = '/organizer-concert';
 }
 

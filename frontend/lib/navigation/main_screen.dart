@@ -66,7 +66,7 @@ BlocBuilder<NavigationCubit, NavigationState> _buildBottomNavigation(BuildContex
       } else if (state.userRole == 'organizer') {
         tabs = [
           NamedNavigationBarItemWidget(
-            initialLocation: Routes.organizerConcertNamedPage,
+            initialLocation: Routes.homeNamedPage,
             icon: const Icon(Icons.event),
             label: translate(context)!.my_concerts,
           ),

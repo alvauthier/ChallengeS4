@@ -19,8 +19,8 @@ class UserInterestChip extends StatelessWidget {
       label: Text(interest.name),
       selected: isSelected,
       onSelected: (_) => onSelected(interest),
-      selectedColor: Colors.blue,
-      backgroundColor: Colors.grey,
+      selectedColor: Colors.deepOrange,
+      backgroundColor: Colors.white,
       labelStyle: TextStyle(color: isSelected ? Colors.white : Colors.black),
     );
   }

@@ -128,7 +128,7 @@ class ProfileScreenState extends State<ProfileScreen> {
                                   Text(
                                     '${translate(context)!.hello} ${state.user.firstname} ${state.user.lastname}',
                                     style: const TextStyle(
-                                      fontSize: 28,
+                                      fontSize: 24,
                                       fontWeight: FontWeight.bold,
                                       fontFamily: 'Readex Pro',
                                     ),

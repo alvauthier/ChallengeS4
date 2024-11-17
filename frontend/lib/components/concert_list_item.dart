@@ -192,7 +192,7 @@ class _ConcertListItemState extends State<ConcertListItem> {
                   style: const TextStyle(
                     fontFamily: 'Readex Pro',
                     fontWeight: FontWeight.w700,
-                    fontSize: 26,
+                    fontSize: 20,
                   ),
                 ),
               ),

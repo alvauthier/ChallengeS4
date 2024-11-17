@@ -32,7 +32,7 @@ class LoginRegisterScreen extends StatelessWidget {
                         translate(context)!.welcome,
                         style: const TextStyle(
                           color: Colors.white,
-                          fontSize: 48,
+                          fontSize: 40,
                           fontFamily: 'Readex Pro',
                           fontWeight: FontWeight.bold,
                           height: 0.9,

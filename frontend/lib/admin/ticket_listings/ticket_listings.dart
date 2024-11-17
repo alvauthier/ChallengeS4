@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:weezemaster/core/models/ticket_listing.dart';
 import 'package:weezemaster/core/services/api_services.dart';
+import 'package:weezemaster/translation.dart';
 import 'blocs/ticket_listings_bloc.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -35,12 +36,12 @@ class _TicketListingsScreenState extends State<TicketListingsScreen> {
         return StatefulBuilder(
           builder: (BuildContext context, StateSetter setState) {
             return AlertDialog(
-              title: const Text('Modifier les informations du ticket listing'),
+              title: Text(translate(context)!.update_ticket_listing),
               content: Column(
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Text('Prix (max ${ticketListing.ticket.concertCategory.price}€)'),
+                  Text('${translate(context)!.price} (max ${ticketListing.ticket.concertCategory.price}€)'),
                   TextField(
                     controller: _price,
                     keyboardType: TextInputType.number,
@@ -56,7 +57,7 @@ class _TicketListingsScreenState extends State<TicketListingsScreen> {
                     ],
                   ),
                   const SizedBox(height: 8),
-                  const Text('Statut'),
+                  Text(translate(context)!.status),
                   DropdownButton<String>(
                     value: _status,
                     onChanged: (String? value) {
@@ -64,14 +65,14 @@ class _TicketListingsScreenState extends State<TicketListingsScreen> {
                         _status = value;
                       });
                     },
-                    items: const [
+                    items: [
                       DropdownMenuItem(
                         value: 'available',
-                        child: Text('Disponible'),
+                        child: Text(translate(context)!.available),
                       ),
                       DropdownMenuItem(
                         value: 'sold',
-                        child: Text('Vendu'),
+                        child: Text(translate(context)!.sold),
                       ),
                     ],
                   ),
@@ -82,7 +83,7 @@ class _TicketListingsScreenState extends State<TicketListingsScreen> {
                   onPressed: () {
                     Navigator.of(dialogContext).pop();
                   },
-                  child: const Text('Annuler'),
+                  child: Text(translate(context)!.cancel),
                 ),
                 TextButton(
                   onPressed: () async {
@@ -95,7 +96,7 @@ class _TicketListingsScreenState extends State<TicketListingsScreen> {
                     Navigator.of(dialogContext).pop();
                     ticketListingsBloc.add(TicketListingsDataLoaded());
                   },
-                  child: const Text('Mettre à jour'),
+                  child: Text(translate(context)!.update),
                 ),
               ],
             );

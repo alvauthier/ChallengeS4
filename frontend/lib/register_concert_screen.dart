@@ -271,9 +271,9 @@ class RegisterConcertScreenState extends State<RegisterConcertScreen> {
                           ),
 
                           const SizedBox(height: 30),
-                          const Text(
-                            "Artiste",
-                            style: TextStyle(
+                          Text(
+                            translate(context)!.artist,
+                            style: const TextStyle(
                               fontFamily: 'Readex Pro',
                               fontWeight: FontWeight.bold,
                               fontSize: 20,
@@ -299,8 +299,8 @@ class RegisterConcertScreenState extends State<RegisterConcertScreen> {
                               return TextFormField(
                                 controller: fieldTextEditingController,
                                 focusNode: fieldFocusNode,
-                                decoration: const InputDecoration(
-                                  labelText: "Rechercher artiste",
+                                decoration: InputDecoration(
+                                  labelText: translate(context)!.search_artist,
                                   errorMaxLines: 3,
                                 ),
                               );
@@ -336,7 +336,7 @@ class RegisterConcertScreenState extends State<RegisterConcertScreen> {
                             Padding(
                               padding: const EdgeInsets.only(top: 10.0),
                               child: Text(
-                                'Selected Artist: ${selectedArtist!.name}',
+                                '${translate(context)!.selected_artist} ${selectedArtist!.name}',
                                 style: const TextStyle(
                                   fontFamily: 'Readex Pro',
                                   fontWeight: FontWeight.bold,

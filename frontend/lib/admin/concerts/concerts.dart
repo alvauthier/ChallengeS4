@@ -68,7 +68,7 @@ class ConcertsScreenState extends State<ConcertsScreen> {
         return StatefulBuilder(
           builder: (context, setState) {
             return AlertDialog(
-              title: const Text('Modifier les informations du concert'),
+              title: Text(translate(context)!.update_concert),
               content: Column(
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -147,7 +147,7 @@ class ConcertsScreenState extends State<ConcertsScreen> {
 
                     Navigator.of(dialogContext).pop();
                   },
-                  child: const Text('Annuler'),
+                  child: Text(translate(context)!.cancel),
                 ),
                 TextButton(
                   onPressed: () async {
@@ -181,13 +181,13 @@ class ConcertsScreenState extends State<ConcertsScreen> {
                       Navigator.of(dialogContext).pop();
                       concertsBloc.add(ConcertsDataLoaded());
                     } catch (e) {
-                      print('An error occurred while updating concert: $e');
+                      debugPrint('An error occurred while updating concert: $e');
                       ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text('Failed to update concert: $e')),
+                        SnackBar(content: Text('${translate(context)!.update_concert_failed} $e')),
                       );
                     }
                   },
-                  child: const Text('Mettre à jour'),
+                  child: Text(translate(context)!.update),
                 ),
               ],
             );
@@ -215,8 +215,8 @@ class ConcertsScreenState extends State<ConcertsScreen> {
                   subtitle: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('Date: ${concert.date}'),
-                      Text('Location: ${concert.location}'),
+                      Text('Date : ${concert.date}'),
+                      Text('${translate(context)!.location} : ${concert.location}'),
                     ],
                   ),
                   trailing: Row(

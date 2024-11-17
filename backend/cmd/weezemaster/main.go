@@ -109,7 +109,7 @@ func main() {
 	authenticated.PATCH("/interests/:id", controller.UpdateInterest, middleware.CheckRole("admin"))
 	authenticated.DELETE("/interests/:id", controller.DeleteInterest, middleware.CheckRole("admin"))
 
-	authenticated.GET("/artists", controller.GetAllArtists, middleware.CheckRole("admin"))
+	authenticated.GET("/artists", controller.GetAllArtists, middleware.CheckRole("organizer", "admin"))
 	router.GET("/artists/:id", controller.GetArtist)
 	authenticated.POST("/artists", controller.CreateArtist, middleware.CheckRole("admin"))
 	authenticated.PATCH("/artists/:id", controller.UpdateArtist, middleware.CheckRole("admin"))

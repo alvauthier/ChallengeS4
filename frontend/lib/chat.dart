@@ -44,6 +44,7 @@ class ChatScreenState extends State<ChatScreen> {
   late String buyerId = "";
   late List messages = [];
   final TextEditingController _controller = TextEditingController();
+  final ScrollController _scrollController = ScrollController();
   final storage = const FlutterSecureStorage();
   String? userId;
   late String concertName;
@@ -173,7 +174,20 @@ class ChatScreenState extends State<ChatScreen> {
   @override
   void dispose() {
     _channel?.sink.close(status.goingAway);
+    _scrollController.dispose();
     super.dispose();
+  }
+
+  void _scrollToBottom() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (_scrollController.hasClients) {
+        _scrollController.animateTo(
+          _scrollController.position.maxScrollExtent,
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeOut,
+        );
+      }
+    });
   }
 
   void _connectWebSocket() {
@@ -209,6 +223,7 @@ class ChatScreenState extends State<ChatScreen> {
             "readed": decodedMessage["Readed"],
           });
         });
+        _scrollToBottom();
       }
     }, onError: (error) {
       debugPrint('Erreur WebSocket: $error');
@@ -321,6 +336,7 @@ class ChatScreenState extends State<ChatScreen> {
           }
         });
         _isLoading = false;
+        _scrollToBottom();
       } catch (e) {
         if (e is ApiException) {
           debugPrint("Failed to fetch conversation: ${e.toString()}");
@@ -523,6 +539,7 @@ class ChatScreenState extends State<ChatScreen> {
               ),
               Expanded(
                 child: ListView.builder(
+                  controller: _scrollController,
                   padding: const EdgeInsets.symmetric(vertical: 16.0),
                   itemCount: messages.length,
                   itemBuilder: (context, index) {

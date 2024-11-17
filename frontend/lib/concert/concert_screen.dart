@@ -1,4 +1,8 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:go_router/go_router.dart';
 import 'package:weezemaster/concert/blocs/concert_bloc.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -7,6 +11,9 @@ import 'package:intl/intl.dart';
 import 'package:weezemaster/components/resale_ticket.dart';
 import 'package:weezemaster/components/interest_chip.dart';
 import 'package:weezemaster/translation.dart';
+import 'package:weezemaster/core/utils/constants.dart';
+
+import '../controller/navigation_cubit.dart';
 
 class ConcertScreen extends StatelessWidget {
   final String id;
@@ -17,6 +24,26 @@ class ConcertScreen extends StatelessWidget {
     DateTime dateTime = DateTime.parse(date);
     DateFormat dateFormat = DateFormat('dd/MM/yyyy HH:mm', 'fr_FR');
     return dateFormat.format(dateTime);
+  }
+
+  static Future<String> getUserRoleFromJwt() async {
+    const storage = FlutterSecureStorage();
+    String? jwt = await storage.read(key: 'access_token');
+    if (jwt != null) {
+      final parts = jwt.split('.');
+      if (parts.length != 3) {
+        throw Exception('Invalid token');
+      }
+
+      final payload = utf8.decode(base64Url.decode(base64Url.normalize(parts[1])));
+      final payloadMap = json.decode(payload);
+      if (payloadMap is! Map<String, dynamic>) {
+        throw Exception('Invalid payload');
+      }
+
+      return payloadMap['role'];
+    }
+    return '';
   }
 
   @override
@@ -58,20 +85,40 @@ class ConcertScreen extends StatelessWidget {
                     for (var concertCategory in concert.concertCategories) {
                       if (concertCategory.tickets.isNotEmpty) {
                         for (var ticket in concertCategory.tickets) {
-                          if (ticket.ticketListing != null && ticket.ticketListing!.status == 'available') {
-                            resaleTickets.add(
-                                {
-                                  'reseller': {
-                                    'id': ticket.user.id,
-                                    'name': '${ticket.user.firstname} ${ticket.user.lastname}',
-                                    'avatar': 'https://thispersondoesnotexist.com/',
-                                  },
-                                  'category': concertCategory.category.name,
-                                  'price': ticket.ticketListing!.price.toStringAsFixed(2),
-                                  'id': ticket.ticketListing!.id.toString(),
-                                  'concertName': concert.name,
-                                }
-                            );
+                          if (ticket.ticketListings.isNotEmpty) {
+                            ticket.ticketListings.sort((a, b) =>
+                                b.createdAt.compareTo(a.createdAt));
+                            if (ticket.ticketListings.first.status ==
+                                'available') {
+                              resaleTickets.add(
+                                  {
+                                    'reseller': {
+                                      'id': ticket.user.id,
+                                      'name': '${ticket.user.firstname} ${ticket
+                                          .user.lastname}',
+                                      'avatar': ticket.user.image != ''
+                                          ? '${dotenv
+                                          .env['API_PROTOCOL']}://${dotenv
+                                          .env['API_HOST']}${dotenv
+                                          .env['API_PORT']}/uploads/users/${ticket
+                                          .user.image}'
+                                          : '',
+                                    },
+                                    'category': concertCategory.category.name,
+                                    'price': ticket.ticketListings.first.price
+                                        .toStringAsFixed(2),
+                                    'id': ticket.ticketListings.first.id.toString(),
+                                    'concertName': concert.name,
+                                    'concertImage': concert.image != ''
+                                        ? '${dotenv
+                                        .env['API_PROTOCOL']}://${dotenv
+                                        .env['API_HOST']}${dotenv
+                                        .env['API_PORT']}/uploads/concerts/${concert
+                                        .image}'
+                                        : 'https://picsum.photos/seed/picsum/800/400',
+                                  }
+                              );
+                            }
                           }
                         }
                       }
@@ -109,9 +156,11 @@ class ConcertScreen extends StatelessWidget {
                           child: Column(
                             children: <Widget>[
                               Image.network(
-                                'https://picsum.photos/seed/picsum/800/400',
+                                concert.image != ''
+                                    ? '${dotenv.env['API_PROTOCOL']}://${dotenv.env['API_HOST']}${dotenv.env['API_PORT']}/uploads/concerts/${concert.image}'
+                                    : 'https://picsum.photos/seed/picsum/800/400',
                                 width: double.infinity,
-                                height: 200,
+                                height: 250,
                                 fit: BoxFit.cover,
                               ),
                               Padding(
@@ -131,12 +180,27 @@ class ConcertScreen extends StatelessWidget {
                                 padding: const EdgeInsets.only(top: 15.0, right: 10.0, left: 10.0),
                                 child: Align(
                                   alignment: Alignment.centerLeft,
-                                  child: Text(
-                                    state.concert.name,
-                                    style: const TextStyle(
-                                      fontSize: 30,
-                                      fontFamily: 'Readex Pro',
-                                      fontWeight: FontWeight.w700,
+                                  child: GestureDetector(
+                                    onTap: () async {
+                                      final tokenService = TokenService();
+                                      String? token = await tokenService.getValidAccessToken();
+                                      if (token == null) {
+                                        GoRouter.of(context).go(Routes.loginRegisterNamedPage);
+                                      } else {
+                                        context.pushNamed(
+                                          'artist',
+                                          pathParameters: {'id': concert.artist.id},
+                                          extra: concert.artist,
+                                        );
+                                      }
+                                    },
+                                    child: Text(
+                                      '${state.concert.artist.name} : ${state.concert.name}',
+                                      style: const TextStyle(
+                                        fontSize: 24,
+                                        fontFamily: 'Readex Pro',
+                                        fontWeight: FontWeight.w700,
+                                      ),
                                     ),
                                   ),
                                 ),
@@ -176,7 +240,7 @@ class ConcertScreen extends StatelessWidget {
                                   child: Text(
                                     translate(context)!.about_event,
                                     style: const TextStyle(
-                                      fontSize: 25,
+                                      fontSize: 24,
                                       fontFamily: 'Readex Pro',
                                       fontWeight: FontWeight.w600,
                                     ),
@@ -219,7 +283,7 @@ class ConcertScreen extends StatelessWidget {
                                   child: Text(
                                     translate(context)!.tickets_available_resale,
                                     style: const TextStyle(
-                                      fontSize: 25,
+                                      fontSize: 24,
                                       fontFamily: 'Readex Pro',
                                       fontWeight: FontWeight.w600,
                                     ),
@@ -247,10 +311,10 @@ class ConcertScreen extends StatelessWidget {
                               if (resaleTickets.length > 2)
                                 ElevatedButton(
                                   onPressed: () {
-                                   context.pushNamed(
-                                     'resale-tickets',
-                                     extra: resaleTickets
-                                   );
+                                    context.pushNamed(
+                                        'resale-tickets',
+                                        extra: resaleTickets
+                                    );
                                   },
                                   style: ElevatedButton.styleFrom(
                                     backgroundColor: Colors.deepOrange,
@@ -266,7 +330,7 @@ class ConcertScreen extends StatelessWidget {
                                     ),
                                   ),
                                 ),
-                                const SizedBox(height: 80),
+                              const SizedBox(height: 80),
                             ],
                           ),
                         ),
@@ -285,48 +349,62 @@ class ConcertScreen extends StatelessWidget {
                               ),
                               color: Colors.white,
                             ),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: <Widget>[
-                                Text(
-                                  priceText,
-                                  style: const TextStyle(
-                                    fontSize: 20,
-                                    fontFamily: 'Readex Pro',
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                ),
-                                SizedBox(
-                                  width: 150,
-                                  child: ElevatedButton(
-                                    onPressed: remainingCategories.isEmpty ? null : () async {
-                                      final tokenService = TokenService();
-                                      String? token = await tokenService.getValidAccessToken();
-                                      if (token == null) {
-                                        context.pushNamed('login-register');
-                                      } else {
-                                        context.pushNamed(
-                                          'booking',
-                                          extra: state.concert.concertCategories
-                                        );
-                                      }
-                                    },
-                                    style: ElevatedButton.styleFrom(
-                                      foregroundColor: Colors.white,
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(6.0),
-                                      ),
-                                      backgroundColor: Colors.deepOrange,
-                                    ),
-                                    child: Text(
-                                      translate(context)!.book,
+                            child: FutureBuilder<String>(
+                              future: getUserRoleFromJwt(),
+                              builder: (context, snapshot) {
+                                if (!snapshot.hasData) {
+                                  return const Center(
+                                    child: CircularProgressIndicator(),
+                                  );
+                                }
+
+                                final userRole = snapshot.data ?? '';
+
+                                return Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  children: <Widget>[
+                                    Text(
+                                      priceText,
                                       style: const TextStyle(
+                                        fontSize: 20,
                                         fontFamily: 'Readex Pro',
+                                        fontWeight: FontWeight.w600,
                                       ),
                                     ),
-                                  )
-                                ),
-                              ],
+                                    SizedBox(
+                                        width: 150,
+                                        child: ElevatedButton(
+                                          onPressed: remainingCategories.isEmpty || (userRole != 'user' && userRole != '') ? null : () async {
+                                            final tokenService = TokenService();
+                                            String? token = await tokenService.getValidAccessToken();
+                                            if (token == null) {
+                                              context.read<NavigationCubit>().updateUserRole('');
+                                              GoRouter.of(context).go(Routes.loginRegisterNamedPage);
+                                            } else {
+                                              context.pushNamed(
+                                                  'booking',
+                                                  extra: state.concert.concertCategories
+                                              );
+                                            }
+                                          },
+                                          style: ElevatedButton.styleFrom(
+                                            foregroundColor: Colors.white,
+                                            shape: RoundedRectangleBorder(
+                                              borderRadius: BorderRadius.circular(6.0),
+                                            ),
+                                            backgroundColor: Colors.deepOrange,
+                                          ),
+                                          child: Text(
+                                            translate(context)!.book,
+                                            style: const TextStyle(
+                                              fontFamily: 'Readex Pro',
+                                            ),
+                                          ),
+                                        )
+                                    ),
+                                  ],
+                                );
+                              },
                             ),
                           ),
                         ),
@@ -347,7 +425,7 @@ class ConcertScreen extends StatelessWidget {
                 left: 10.0,
                 child: FloatingActionButton(
                   child: const Icon(Icons.arrow_back),
-                  onPressed: () => context.pushNamed('home'),
+                  onPressed: () => context.pop(),
                 ),
               ),
             ],

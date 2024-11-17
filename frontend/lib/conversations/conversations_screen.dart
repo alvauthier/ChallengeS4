@@ -6,6 +6,9 @@ import 'package:intl/intl.dart';
 import 'dart:convert';
 import 'package:weezemaster/core/services/token_services.dart';
 import 'package:weezemaster/translation.dart';
+import 'package:weezemaster/core/utils/constants.dart';
+
+import '../controller/navigation_cubit.dart';
 
 class ConversationsScreen extends StatefulWidget {
   const ConversationsScreen({super.key});
@@ -27,7 +30,8 @@ class ConversationsScreenState extends State<ConversationsScreen> {
       Map<String, dynamic> decodedToken = _decodeToken(jwt);
       return decodedToken['id'] as String;
     } else {
-      context.pushNamed('login-register');
+      context.read<NavigationCubit>().updateUserRole('');
+      GoRouter.of(context).go(Routes.loginRegisterNamedPage);
       return '';
     }
   }

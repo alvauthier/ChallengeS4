@@ -1,16 +1,23 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:go_router/go_router.dart';
 import 'package:http/http.dart' as http;
+import 'package:http_parser/http_parser.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:omni_datetime_picker/omni_datetime_picker.dart';
+import 'package:weezemaster/core/models/artist.dart';
 import 'package:weezemaster/core/models/category.dart';
 import 'package:weezemaster/core/models/interest.dart';
 import 'package:weezemaster/core/services/api_services.dart';
 import 'package:weezemaster/core/services/token_services.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:weezemaster/translation.dart';
+import 'package:weezemaster/core/utils/constants.dart';
+
+import 'controller/navigation_cubit.dart';
 
 class RegisterConcertScreen extends StatefulWidget {
   const RegisterConcertScreen({super.key});
@@ -48,25 +55,32 @@ class RegisterConcertScreenState extends State<RegisterConcertScreen> {
   final Map<int, bool> selectedCategories = {};
   List<Interest> interests = [];
   final Map<int, bool> selectedInterests = {};
+  List<Artist> artists = [];
+  Artist? selectedArtist;
 
   @override
   void initState() {
     super.initState();
+    _fetchArtists();
     _fetchCategories();
     _fetchInterests();
   }
 
-Future<void> _fetchCategories() async {
-  categories = await ApiServices.getCategories();
-  setState(() {
-    for (var category in categories) {
-      selectedCategories[category.id] = false;
-      _categoriesController[category.id] = TextEditingController();
-      _pricesController[category.id] = TextEditingController();
-    }
-  });
-}
+  Future<void> _fetchCategories() async {
+    categories = await ApiServices.getCategories();
+    setState(() {
+      for (var category in categories) {
+        selectedCategories[category.id] = false;
+        _categoriesController[category.id] = TextEditingController();
+        _pricesController[category.id] = TextEditingController();
+      }
+    });
+  }
 
+  Future<void> _fetchArtists() async {
+    artists = await ApiServices.getAllArtists();
+    setState(() {});
+  }
 
   Future<void> _fetchInterests() async {
     interests = await ApiServices.getAllInterests();
@@ -79,15 +93,18 @@ Future<void> _fetchCategories() async {
   }
 
   Future<void> _selectDate(BuildContext context) async {
-    final DateTime? picked = await showDatePicker(
+    DateTime? dateTime = await showOmniDateTimePicker(
       context: context,
-      initialDate: _selectedDate ?? DateTime.now(),
-      firstDate: DateTime(2000),
-      lastDate: DateTime(2101),
+      initialDate: _selectedDate ?? DateTime.now().add(const Duration(days: 1)),
+      firstDate: DateTime.now().add(const Duration(days: 1)),
+      lastDate: DateTime.now().add(
+        const Duration(days: 3652),
+      ),
+      is24HourMode: true,
     );
-    if (picked != null) {
+    if (dateTime != null) {
       setState(() {
-        _selectedDate = picked;
+        _selectedDate = dateTime;
       });
     }
   }
@@ -99,7 +116,8 @@ Future<void> _fetchCategories() async {
       return decodedToken['id'] as String;
     } else {
       if (mounted) {
-        context.pushNamed('login-register');
+        context.read<NavigationCubit>().updateUserRole('');
+        GoRouter.of(context).go(Routes.loginRegisterNamedPage);
       }
       return '';
     }
@@ -146,7 +164,14 @@ Future<void> _fetchCategories() async {
           Column(
             children: <Widget>[
               AppBar(
-                title: Text(translate(context)!.create_a_concert),
+                title: Text(
+                  translate(context)!.create_a_concert,
+                  style: const TextStyle(
+                    fontFamily: 'Readex Pro',
+                    fontWeight: FontWeight.bold,
+                    fontSize: 24,
+                  ),
+                ),
                 elevation: 0,
               ),
               Expanded(
@@ -162,15 +187,15 @@ Future<void> _fetchCategories() async {
                             onTap: getImage,
                             child: _image == null
                                 ? Container(
-                                    width: 100,
-                                    height: 100,
+                                    width: double.infinity,
+                                    height: 200,
                                     color: Colors.grey[300],
                                     child: const Icon(Icons.camera_alt),
                                   )
                                 : Image.file(
                                     File(_image!.path),
-                                    width: 100,
-                                    height: 100,
+                                    width: double.infinity,
+                                    height: 200,
                                   ),
                           ),
                           const SizedBox(height: 20),
@@ -178,6 +203,7 @@ Future<void> _fetchCategories() async {
                             controller: _nameController,
                             decoration: InputDecoration(
                               labelText: translate(context)!.concert_name,
+                              errorMaxLines: 3,
                             ),
                             validator: (value) {
                               if (value == null || value.isEmpty) {
@@ -190,6 +216,7 @@ Future<void> _fetchCategories() async {
                             controller: _descriptionController,
                             decoration: InputDecoration(
                               labelText: translate(context)!.concert_description,
+                              errorMaxLines: 3,
                             ),
                             validator: (value) {
                               if (value == null || value.isEmpty) {
@@ -202,6 +229,7 @@ Future<void> _fetchCategories() async {
                             controller: _cityController,
                             decoration: InputDecoration(
                               labelText: translate(context)!.location,
+                              errorMaxLines: 3,
                             ),
                             validator: (value) {
                               if (value == null || value.isEmpty) {
@@ -217,31 +245,131 @@ Future<void> _fetchCategories() async {
                                 child: Text(
                                   _selectedDate == null
                                       ? translate(context)!.select_date_empty
-                                      : 'Date: ${_selectedDate!.toLocal().toIso8601String().split('T')[0]}',
+                                      : '${translate(context)!.selected_date} ${_selectedDate!.toLocal().toIso8601String().split('T')[0]} ${_selectedDate!.toLocal().toIso8601String().split('T')[1].split(':').sublist(0, 2).join(':')}',
+                                  style: const TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontFamily: 'Readex Pro',
+                                      fontSize: 16
+                                  ),
                                 ),
                               ),
                               ElevatedButton(
                                 onPressed: () => _selectDate(context),
-                                child: Text(translate(context)!.select_date),
+                                style: ElevatedButton.styleFrom(
+                                  foregroundColor: Colors.white,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(6.0),
+                                  ),
+                                  backgroundColor: Colors.deepOrange,
+                                ),
+                                child: Text(
+                                    translate(context)!.select_date,
+                                    style: const TextStyle(fontFamily: 'Readex Pro'),
+                                ),
                               ),
                             ],
                           ),
-                          const SizedBox(height: 20),
+
+                          const SizedBox(height: 30),
+                          Text(
+                            translate(context)!.artist,
+                            style: const TextStyle(
+                              fontFamily: 'Readex Pro',
+                              fontWeight: FontWeight.bold,
+                              fontSize: 20,
+                            ),
+                          ),
+                          const SizedBox(height: 10),
+                          Autocomplete<Artist>(
+                            optionsBuilder: (TextEditingValue textEditingValue) {
+                              if (textEditingValue.text.isEmpty) {
+                                return const Iterable<Artist>.empty();
+                              }
+                              return artists.where((Artist artist) {
+                                return artist.name.toLowerCase().startsWith(textEditingValue.text.toLowerCase());
+                              });
+                            },
+                            displayStringForOption: (Artist artist) => artist.name,
+                            onSelected: (Artist artist) {
+                              setState(() {
+                                selectedArtist = artist;
+                              });
+                            },
+                            fieldViewBuilder: (BuildContext context, TextEditingController fieldTextEditingController, FocusNode fieldFocusNode, VoidCallback onFieldSubmitted) {
+                              return TextFormField(
+                                controller: fieldTextEditingController,
+                                focusNode: fieldFocusNode,
+                                decoration: InputDecoration(
+                                  labelText: translate(context)!.search_artist,
+                                  errorMaxLines: 3,
+                                ),
+                              );
+                            },
+                            optionsViewBuilder: (BuildContext context, AutocompleteOnSelected<Artist> onSelected, Iterable<Artist> options) {
+                              return Align(
+                                alignment: Alignment.topLeft,
+                                child: Material(
+                                  child: Container(
+                                    width: MediaQuery.of(context).size.width * 0.9,
+                                    color: Colors.white,
+                                    child: ListView.builder(
+                                      padding: const EdgeInsets.all(10.0),
+                                      itemCount: options.length,
+                                      itemBuilder: (BuildContext context, int index) {
+                                        final Artist option = options.elementAt(index);
+                                        return GestureDetector(
+                                          onTap: () {
+                                            onSelected(option);
+                                          },
+                                          child: ListTile(
+                                            title: Text(option.name),
+                                          ),
+                                        );
+                                      },
+                                    ),
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
+                          if (selectedArtist != null)
+                            Padding(
+                              padding: const EdgeInsets.only(top: 10.0),
+                              child: Text(
+                                '${translate(context)!.selected_artist} ${selectedArtist!.name}',
+                                style: const TextStyle(
+                                  fontFamily: 'Readex Pro',
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 16,
+                                ),
+                              ),
+                            ),
+
+                          const SizedBox(height: 30),
                           Text(
                             translate(context)!.ticket_categories,
-                            style: const TextStyle(fontWeight: FontWeight.bold),
+                            style: const TextStyle(
+                              fontFamily: 'Readex Pro',
+                              fontWeight: FontWeight.bold,
+                              fontSize: 20,
+                            ),
                           ),
+                          const SizedBox(height: 10),
                           ...categories.map((category) {
                             return Column(
                               children: [
                                 CheckboxListTile(
-                                  title: Text(category.name),
+                                  title: Text(
+                                    category.name,
+                                    style: const TextStyle(fontFamily: 'Readex Pro'),
+                                  ),
                                   value: selectedCategories[category.id],
                                   onChanged: (bool? value) {
                                     setState(() {
                                       selectedCategories[category.id] = value!;
                                     });
                                   },
+                                  activeColor: Colors.deepOrange,
                                 ),
                                 if (selectedCategories[category.id]!)
                                   Column(
@@ -250,6 +378,7 @@ Future<void> _fetchCategories() async {
                                         controller: _categoriesController[category.id],
                                         decoration: InputDecoration(
                                           labelText: '${translate(context)!.number_of_tickets_for} ${category.name}',
+                                          errorMaxLines: 3,
                                         ),
                                         validator: (value) {
                                           if (value == null || value.isEmpty) {
@@ -266,6 +395,7 @@ Future<void> _fetchCategories() async {
                                         controller: _pricesController[category.id],
                                         decoration: InputDecoration(
                                           labelText: '${translate(context)!.tickets_prices_for} ${category.name}',
+                                          errorMaxLines: 3,
                                         ),
                                         validator: (value) {
                                           if (value == null || value.isEmpty) {
@@ -284,16 +414,26 @@ Future<void> _fetchCategories() async {
                             );
                           }),
 
-                          const SizedBox(height: 20),
+                          const SizedBox(height: 30),
                           Text(
                             translate(context)!.interests,
-                            style: const TextStyle(fontWeight: FontWeight.bold),
+                            style: const TextStyle(
+                              fontFamily: 'Readex Pro',
+                              fontWeight: FontWeight.bold,
+                              fontSize: 20,
+                            ),
                           ),
+                          const SizedBox(height: 10),
                           Wrap(
                             spacing: 10,
                             children: interests.map((interest) {
                               return ChoiceChip(
-                                label: Text(interest.name),
+                                label: Text(
+                                  interest.name,
+                                  style: const TextStyle(
+                                    fontFamily: 'Readex Pro',
+                                  ),
+                                ),
                                 selected: selectedInterests[interest.id]!,
                                 selectedColor: Colors.deepOrangeAccent,
                                 onSelected: (bool selected) {
@@ -330,24 +470,36 @@ Future<void> _fetchCategories() async {
                                     try {
                                       final tokenService = TokenService();
                                       String? jwtToken = await tokenService.getValidAccessToken();
-                                      String userId = await getUserIdFromJwt();
-                                      var response = await http.post(
-                                        Uri.parse('http://${dotenv.env['API_HOST']}${dotenv.env['API_PORT']}/concerts'),
-                                        headers: <String, String>{
-                                          'Content-Type': 'application/json; charset=UTF-8',
-                                          'Authorization': 'Bearer $jwtToken', // HOT FIX : ajout du jwt manquant pour la création de concert...
-                                        },
-                                        body: jsonEncode(<String, dynamic>{
-                                          'name': _nameController.text,
-                                          'image': _base64Image,
-                                          'description': _descriptionController.text,
-                                          'location': _cityController.text,
-                                          'date': _selectedDate!.toIso8601String().split('T')[0],
-                                          'userId': userId,
-                                          'InterestIDs': selectedInterestsList,
-                                          'CategoriesIDs': tabCategories,
-                                        }),
+
+                                      var request = http.MultipartRequest(
+                                        'POST',
+                                        Uri.parse('${dotenv.env['API_PROTOCOL']}://${dotenv.env['API_HOST']}${dotenv.env['API_PORT']}/concerts'),
                                       );
+
+                                      request.headers['Authorization'] = 'Bearer $jwtToken';
+
+                                      request.fields['name'] = _nameController.text;
+                                      request.fields['description'] = _descriptionController.text;
+                                      request.fields['location'] = _cityController.text;
+                                      request.fields['date'] = '${_selectedDate!.toLocal().toIso8601String().split('T')[0]} ${_selectedDate!.toLocal().toIso8601String().split('T')[1].split(':').sublist(0, 2).join(':')}';
+                                      request.fields['InterestIDs'] = selectedInterestsList.join(',');
+                                      request.fields['CategoriesIDs'] = jsonEncode(tabCategories);
+                                      if (selectedArtist != null) {
+                                        request.fields['artistId'] = selectedArtist!.id.toString();
+                                      }
+
+                                      if (_image != null) {
+                                        request.files.add(
+                                          await http.MultipartFile.fromPath(
+                                            'image',
+                                            _image!.path,
+                                            contentType: MediaType('image', _image!.path.split('.').last),
+                                          ),
+                                        );
+                                      }
+
+                                      var response = await request.send();
+
                                       ScaffoldMessenger.of(context).showSnackBar(
                                         SnackBar(
                                           content: Text(response.statusCode == 200
@@ -356,20 +508,31 @@ Future<void> _fetchCategories() async {
                                           duration: const Duration(seconds: 5),
                                         ),
                                       );
+
                                       if (response.statusCode == 200) {
-                                        context.pop();
+                                        GoRouter.of(context).go(Routes.homeNamedPage);
                                       }
                                     } catch (e) {
                                       ScaffoldMessenger.of(context).showSnackBar(
                                         SnackBar(
-                                          content: Text(translate(context)!.generic_error),
+                                          content: Text(e.toString()),
                                           duration: const Duration(seconds: 5),
                                         ),
                                       );
                                     }
                                   }
                                 },
-                                child: Text(translate(context)!.create_the_concert),
+                                style: ElevatedButton.styleFrom(
+                                  foregroundColor: Colors.white,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(6.0),
+                                  ),
+                                  backgroundColor: Colors.deepOrange,
+                                ),
+                                child: Text(
+                                    translate(context)!.create_the_concert,
+                                    style: const TextStyle(fontFamily: 'Readex Pro'),
+                                ),
                               ),
                             ),
                           ),

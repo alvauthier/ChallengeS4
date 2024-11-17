@@ -1,11 +1,14 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:weezemaster/core/models/interest.dart';
 import 'package:weezemaster/core/services/token_services.dart';
+import 'package:weezemaster/core/services/websocket_service.dart';
 import 'package:weezemaster/home/blocs/home_bloc.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import 'package:weezemaster/components/search_bar.dart';
+import 'package:weezemaster/components/concert_list_item.dart';
 import 'package:weezemaster/translation.dart';
 import 'package:weezemaster/core/services/api_services.dart';
 
@@ -24,6 +27,8 @@ class HomeScreenState extends State<HomeScreen> {
   List _filteredConcerts = [];
   List<Interest> userInterests = [];
   bool isUserConnected = false;
+  bool userHasInterests = false;
+  String userRole = '';
 
   // Ajouter une variable d'état pour suivre l'option de tri actuelle
   SortOption _currentSortOption = SortOption.none;
@@ -33,6 +38,7 @@ class HomeScreenState extends State<HomeScreen> {
     super.initState();
     _searchController.addListener(_onSearchChanged);
     checkUserConnection();
+    getUserRole();
   }
 
   @override
@@ -42,11 +48,18 @@ class HomeScreenState extends State<HomeScreen> {
     super.dispose();
   }
 
+  Future<String> getUserRoleFromJwt(accessToken) async {
+    Map<String, dynamic> decodedToken = _decodeToken(accessToken);
+
+    return decodedToken['role'];
+  }
+
   Future<void> checkUserConnection() async {
     final tokenService = TokenService();
     String? token = await tokenService.getValidAccessToken();
+    final userRole = await getUserRoleFromJwt(token);
 
-    if (token != null) {
+    if (token != null && userRole == 'user') {
       setState(() {
         isUserConnected = true;
       });
@@ -59,10 +72,61 @@ class HomeScreenState extends State<HomeScreen> {
       final interests = await ApiServices.getUserInterests();
       setState(() {
         userInterests = interests;
+
+        if(userInterests.isNotEmpty){
+          userHasInterests = true;
+        }
       });
     } catch (e) {
       debugPrint('Erreur lors du chargement des centres d\'intérêts: $e');
     }
+  }
+
+  Future<void> getUserRole() async {
+    final tokenService = TokenService();
+    String? jwtToken = await tokenService.getValidAccessToken();
+
+    if (jwtToken != null) {
+      Map<String, dynamic> decodedToken = _decodeToken(jwtToken);
+
+      final user = await ApiServices.getUser(decodedToken['id'] as String);
+      setState(() {
+        userRole = user.role;
+      });
+    }
+  }
+
+  Map<String, dynamic> _decodeToken(String token) {
+    final parts = token.split('.');
+    if (parts.length != 3) {
+      throw Exception('Invalid token');
+    }
+
+    final payload = _decodeBase64(parts[1]);
+    final payloadMap = json.decode(payload);
+    if (payloadMap is! Map<String, dynamic>) {
+      throw Exception('Invalid payload');
+    }
+
+    return payloadMap;
+  }
+
+  String _decodeBase64(String str) {
+    String output = str.replaceAll('-', '+').replaceAll('_', '/');
+    switch (output.length % 4) {
+      case 0:
+        break;
+      case 2:
+        output += '==';
+        break;
+      case 3:
+        output += '=';
+        break;
+      default:
+        throw Exception('Illegal base64url string!"');
+    }
+
+    return utf8.decode(base64Url.decode(output));
   }
 
   void _onSearchChanged() {
@@ -77,6 +141,50 @@ class HomeScreenState extends State<HomeScreen> {
     DateTime dateTime = DateTime.parse(date);
     DateFormat dateFormat = DateFormat('dd/MM/yyyy HH:mm', 'fr_FR');
     return dateFormat.format(dateTime);
+  }
+
+  final webSocketService = WebSocketService();
+  
+  Future<void> joinQueueOrConcertPage(String concertId, String userId) async {
+    webSocketService.connect(concertId, userId);
+
+    // Accès au flux de diffusion
+    final broadcastStream = webSocketService.stream;
+    
+    if (broadcastStream == null) {
+      debugPrint('Failed to get WebSocket broadcast stream.');
+      return;
+    }
+
+    broadcastStream.listen(
+      (event) {
+        final data = jsonDecode(event);
+
+        if (data['isFirstMessage'] == true && data['status'] == 'access_granted') {
+          context.pushNamed(
+            'concert',
+            pathParameters: {'id': concertId},
+            extra: {
+              'webSocketService': webSocketService,
+            },
+          );
+        } else if (data['isFirstMessage'] == true && data['status'] == 'in_queue') {
+          context.pushNamed(
+            'queue',
+            extra: {
+              'position': data['position'],
+              'webSocketService': webSocketService,
+            },
+          );
+        }
+      },
+      onError: (error) {
+        debugPrint('WebSocket error: $error');
+      },
+      onDone: () {
+        debugPrint('WebSocket connection closed.');
+      },
+    );
   }
 
   @override
@@ -131,7 +239,7 @@ class HomeScreenState extends State<HomeScreen> {
               if (state is HomeDataLoadingSuccess) {
                 // Filtrer les concerts en fonction de la recherche
                 _filteredConcerts = state.concerts.where((concert) {
-                  return concert.name.toLowerCase().contains(_searchController.text.toLowerCase());
+                  return concert.name.toLowerCase().contains(_searchController.text.toLowerCase()) || concert.artist.name.toLowerCase().contains(_searchController.text.toLowerCase());
                 }).toList();
 
                 // Appliquer le tri en fonction de l'option sélectionnée
@@ -150,7 +258,7 @@ class HomeScreenState extends State<HomeScreen> {
                     if (!aHasInterest && bHasInterest) return 1;
                     return 0;
                   });
-                } else if (_currentSortOption == SortOption.recent) {
+                } else if (_currentSortOption == SortOption.recent || !userHasInterests) {
                   _filteredConcerts.sort((a, b) {
                     return DateTime.parse(b.createdAt).compareTo(DateTime.parse(a.createdAt));
                   });
@@ -190,14 +298,15 @@ class HomeScreenState extends State<HomeScreen> {
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                Text(
-                                  '${translate(context)!.my_interests} : ${userInterests.length}',
-                                  style: const TextStyle(
-                                    fontSize: 18,
-                                    fontFamily: 'Readex Pro',
-                                    fontWeight: FontWeight.w600,
+                                if (userRole == 'user')
+                                  Text(
+                                    '${translate(context)!.my_interests} : ${userInterests.length}',
+                                    style: const TextStyle(
+                                      fontSize: 18,
+                                      fontFamily: 'Readex Pro',
+                                      fontWeight: FontWeight.w600,
+                                    ),
                                   ),
-                                ),
                                 PopupMenuButton<String>(
                                   onSelected: (String value) {
                                     setState(() {
@@ -213,7 +322,12 @@ class HomeScreenState extends State<HomeScreen> {
                                     });
                                   },
                                   itemBuilder: (BuildContext context) {
-                                    return {translate(context)!.interests, translate(context)!.recent, translate(context)!.ancient}.map((String choice) {
+                                    final choices = <String>[
+                                      if (userRole == 'user') translate(context)!.interests,
+                                      translate(context)!.recent,
+                                      translate(context)!.ancient,
+                                    ];
+                                    return choices.map((String choice) {
                                       return PopupMenuItem<String>(
                                         value: choice,
                                         child: Text(choice),
@@ -231,11 +345,13 @@ class HomeScreenState extends State<HomeScreen> {
                         child: Align(
                           alignment: Alignment.centerLeft,
                           child: Text(
-                            '${_filteredConcerts.length} ${_filteredConcerts.length == 1 ? 'concert' : 'concerts'}',
+                            userRole == 'organizer'
+                                ? ' ${_filteredConcerts.length == 1 ? translate(context)!.my_concert : translate(context)!.my_concerts} (${_filteredConcerts.length})'
+                                : '${_filteredConcerts.length} ${_filteredConcerts.length == 1 ? 'concert' : 'concerts'}',
                             style: const TextStyle(
                               fontSize: 30,
                               fontFamily: 'Readex Pro',
-                              fontWeight: FontWeight.w600
+                              fontWeight: FontWeight.w600,
                             ),
                           ),
                         ),
@@ -244,71 +360,7 @@ class HomeScreenState extends State<HomeScreen> {
                         child: ListView.builder(
                           itemBuilder: (context, index) {
                             final concert = _filteredConcerts[index];
-                            return GestureDetector(
-                              onTap: () {
-                                context.pushNamed(
-                                  'concert',
-                                  pathParameters: {'id': concert.id},
-                                );
-                              },
-                              child: Padding(
-                                padding: const EdgeInsets.symmetric(vertical: 20.0, horizontal: 10.0),
-                                child: Card(
-                                  elevation: 0,
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(10),
-                                  ),
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      ClipRRect(
-                                        borderRadius: const BorderRadius.only(
-                                          topLeft: Radius.circular(10),
-                                          topRight: Radius.circular(10),
-                                        ),
-                                        child: Image.network(
-                                          'https://picsum.photos/seed/picsum/800/400', // URL de l'image unique
-                                          width: double.infinity,
-                                          height: 200,
-                                          fit: BoxFit.cover,
-                                        ),
-                                      ),
-                                      Padding(
-                                        padding: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 20.0),
-                                        child: Text(
-                                          concert.name,
-                                          style: const TextStyle(
-                                            fontFamily: 'Readex Pro',
-                                            fontWeight: FontWeight.w700,
-                                            fontSize: 26,
-                                          ),
-                                        ),
-                                      ),
-                                      Padding(
-                                        padding: const EdgeInsets.symmetric(vertical: 2.0, horizontal: 20.0),
-                                        child: Text(
-                                          formatDate(concert.date),
-                                          style: const TextStyle(
-                                            color: Colors.black54,
-                                            fontFamily: 'Readex Pro',
-                                          ),
-                                        ),
-                                      ),
-                                      Padding(
-                                        padding: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 20.0),
-                                        child: Text(
-                                          concert.location,
-                                          style: const TextStyle(
-                                            color: Colors.grey,
-                                            fontFamily: 'Readex Pro',
-                                          ),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ),
-                            );
+                            return ConcertListItem(concert: concert);
                           },
                           itemCount: _filteredConcerts.length,
                         ),

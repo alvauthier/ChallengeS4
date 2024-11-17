@@ -7,9 +7,10 @@ import (
 
 func main() {
 	database.InitDB()
+	fixtures.LoadInterestFixtures()
+	fixtures.LoadArtistFixtures()
 	fixtures.LoadOrganizationFixtures()
 	fixtures.LoadUserFixtures()
-	fixtures.LoadInterestFixtures()
 	fixtures.LoadUserInterestFixtures()
 	fixtures.LoadConcertFixtures()
 	fixtures.LoadCategoryFixtures()

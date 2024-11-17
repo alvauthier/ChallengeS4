@@ -32,6 +32,7 @@ type User struct {
 	// example: Doe
 	Lastname              string `gorm:"not null"`
 	Role                  string `gorm:"not null;default:user"`
+	Image                 string
 	LastConnexion         time.Time
 	CreatedAt             time.Time
 	UpdatedAt             time.Time

@@ -1,15 +1,28 @@
 import 'package:flutter/material.dart';
-import 'package:weezemaster/core/services/api_services.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:weezemaster/core/models/user.dart';
+import 'package:weezemaster/core/services/token_services.dart';
+import 'package:weezemaster/translation.dart';
 import 'blocs/users_bloc.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:http/http.dart' as http;
 
-class UsersScreen extends StatelessWidget {
+class UsersScreen extends StatefulWidget {
+  const UsersScreen({super.key});
+
+  @override
+  UsersScreenState createState() => UsersScreenState();
+}
+
+class UsersScreenState extends State<UsersScreen> {
   final TextEditingController _firstnameController = TextEditingController();
   final TextEditingController _lastnameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
 
-  UsersScreen({super.key});
+  @override
+  void initState() {
+    super.initState();
+  }
 
   void _showUpdateDialog(BuildContext context, User user) {
     final usersBloc = context.read<UsersBloc>();
@@ -21,56 +34,69 @@ class UsersScreen extends StatelessWidget {
     showDialog(
       context: context,
       builder: (BuildContext dialogContext) {
-        return AlertDialog(
-          title: const Text('Modifier les informations de l\'utilisateur'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              TextField(
-                controller: _firstnameController,
-                decoration: const InputDecoration(labelText: 'Prénom'),
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return AlertDialog(
+              title: Text(translate(context)!.update_user),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  TextField(
+                    controller: _firstnameController,
+                    decoration: InputDecoration(labelText: translate(context)!.firstname),
+                  ),
+                  const SizedBox(height: 8),
+                  TextField(
+                    controller: _lastnameController,
+                    decoration: InputDecoration(labelText: translate(context)!.lastname),
+                  ),
+                  const SizedBox(height: 8),
+                  TextField(
+                    controller: _emailController,
+                    decoration: InputDecoration(labelText: translate(context)!.email),
+                  ),
+                ],
               ),
-              const SizedBox(height: 8),
-              TextField(
-                controller: _lastnameController,
-                decoration: const InputDecoration(labelText: 'Nom'),
-              ),
-              const SizedBox(height: 8),
-              TextField(
-                controller: _emailController,
-                decoration: const InputDecoration(labelText: 'Email'),
-              ),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(dialogContext).pop();
-              },
-              child: const Text('Annuler'),
-            ),
-            TextButton(
-              onPressed: () async {
-                try {
-                  await ApiServices.updateUser(
-                    user.id,
-                    _firstnameController.text,
-                    _lastnameController.text,
-                    _emailController.text,
-                  );
-                  Navigator.of(dialogContext).pop();
-                  usersBloc.add(UsersDataLoaded());
-                } catch (e) {
-                  print('An error occurred while updating user: $e');
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Failed to update user: $e')),
-                  );
-                }
-              },
-              child: const Text('Mettre à jour'),
-            ),
-          ],
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    Navigator.of(dialogContext).pop();
+                  },
+                  child: Text(translate(context)!.cancel),
+                ),
+                TextButton(
+                  onPressed: () async {
+                    try {
+                      final tokenService = TokenService();
+                      String? jwtToken = await tokenService.getValidAccessToken();
+
+                      var request = http.MultipartRequest(
+                        'PATCH',
+                        Uri.parse('${dotenv.env['API_PROTOCOL']}://${dotenv.env['API_HOST']}${dotenv.env['API_PORT']}/users/${user.id}'),
+                      );
+
+                      request.headers['Authorization'] = 'Bearer $jwtToken';
+
+                      request.fields['email'] = _emailController.text;
+                      request.fields['firstname'] = _firstnameController.text;
+                      request.fields['lastname'] = _lastnameController.text;
+
+                      await request.send();
+
+                      Navigator.of(dialogContext).pop();
+                      usersBloc.add(UsersDataLoaded());
+                    } catch (e) {
+                      debugPrint('An error occurred while updating user: $e');
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text('${translate(context)!.update_user_failed} $e')),
+                      );
+                    }
+                  },
+                  child: Text(translate(context)!.update),
+                ),
+              ],
+            );
+          },
         );
       },
     );
@@ -94,8 +120,8 @@ class UsersScreen extends StatelessWidget {
                     subtitle: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('Email: ${user.email}'),
-                        Text('Role: ${user.role}'),
+                        Text('${translate(context)!.email} : ${user.email}'),
+                        Text('${translate(context)!.role} : ${user.role}'),
                       ],
                     ),
                     trailing: user.role != 'admin'

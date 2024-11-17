@@ -30,6 +30,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  provider: ^6.0.5
 
 
   # The following adds the Cupertino Icons font to your application.
@@ -53,6 +54,7 @@ dependencies:
   go_router: ^14.3.0
   web_socket_channel: ^3.0.1
   flutter_stripe_web: ^5.2.0
+  omni_datetime_picker: ^2.0.5
 
 dev_dependencies:
   flutter_test:
@@ -88,6 +90,7 @@ flutter:
     - .env
     - assets/thanks_purchase.png
     - assets/thanks.gif
+    - assets/user-placeholder.jpg
 
   fonts:
     - family: Readex Pro

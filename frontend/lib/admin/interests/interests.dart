@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:weezemaster/core/services/api_services.dart';
 import 'package:weezemaster/core/models/interest.dart';
+import 'package:weezemaster/translation.dart';
 import 'blocs/interests_bloc.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -18,7 +19,7 @@ class InterestsScreen extends StatelessWidget {
       context: context,
       builder: (BuildContext dialogContext) {
         return AlertDialog(
-          title: const Text('Ajouter un intérêt'),
+          title: Text(translate(context)!.add_interest),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -35,7 +36,7 @@ class InterestsScreen extends StatelessWidget {
               onPressed: () {
                 Navigator.of(dialogContext).pop();
               },
-              child: const Text('Annuler'),
+              child: Text(translate(context)!.cancel),
             ),
             TextButton(
               onPressed: () async {
@@ -46,13 +47,13 @@ class InterestsScreen extends StatelessWidget {
                   Navigator.of(dialogContext).pop();
                   interestsBloc.add(InterestsDataLoaded());
                 } catch (e) {
-                  print('An error occurred while adding interest: $e');
+                  debugPrint('An error occurred while adding interest: $e');
                   ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Failed to add interest: $e')),
+                    SnackBar(content: Text('${translate(context)!.add_interest_failed} $e')),
                   );
                 }
               },
-              child: const Text('Ajouter'),
+              child: Text(translate(context)!.add),
             ),
           ],
         );
@@ -69,14 +70,14 @@ class InterestsScreen extends StatelessWidget {
       context: context,
       builder: (BuildContext dialogContext) {
         return AlertDialog(
-          title: const Text('Modifier les informations de l\'intérêt'),
+          title: Text(translate(context)!.update_interest),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               TextField(
                 controller: _nameController,
-                decoration: const InputDecoration(labelText: 'Nom'),
+                decoration: InputDecoration(labelText: translate(context)!.lastname),
               ),
               const SizedBox(height: 8),
             ],
@@ -86,7 +87,7 @@ class InterestsScreen extends StatelessWidget {
               onPressed: () {
                 Navigator.of(dialogContext).pop();
               },
-              child: const Text('Annuler'),
+              child: Text(translate(context)!.cancel),
             ),
             TextButton(
               onPressed: () async {
@@ -98,13 +99,13 @@ class InterestsScreen extends StatelessWidget {
                   Navigator.of(dialogContext).pop();
                   interestsBloc.add(InterestsDataLoaded());
                 } catch (e) {
-                  print('An error occurred while updating interest: $e');
+                  debugPrint('An error occurred while updating interest: $e');
                   ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Failed to update interest: $e')),
+                    SnackBar(content: Text('${translate(context)!.update_interest_failed} $e')),
                   );
                 }
               },
-              child: const Text('Mettre à jour'),
+              child: Text(translate(context)!.update),
             ),
           ],
         );
@@ -119,14 +120,14 @@ class InterestsScreen extends StatelessWidget {
       context: context,
       builder: (BuildContext dialogContext) {
         return AlertDialog(
-          title: const Text('Supprimer l\'intérêt'),
-          content: Text('Êtes-vous sûr de vouloir supprimer ${interest.name} ?'),
+          title: Text(translate(context)!.delete_interest),
+          content: Text('${translate(context)!.confirm_delete} ${interest.name} ?'),
           actions: [
             TextButton(
               onPressed: () {
                 Navigator.of(dialogContext).pop();
               },
-              child: const Text('Annuler'),
+              child: Text(translate(context)!.cancel),
             ),
             TextButton(
               onPressed: () async {
@@ -135,13 +136,13 @@ class InterestsScreen extends StatelessWidget {
                   Navigator.of(dialogContext).pop();
                   interestsBloc.add(InterestsDataLoaded());
                 } catch (e) {
-                  print('An error occurred while deleting interest: $e');
+                  debugPrint('An error occurred while deleting interest: $e');
                   ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Failed to delete interest: $e')),
+                    SnackBar(content: Text('${translate(context)!.delete_interest_failed} $e')),
                   );
                 }
               },
-              child: const Text('Supprimer'),
+              child: Text(translate(context)!.delete),
             ),
           ],
         );

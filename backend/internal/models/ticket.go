@@ -16,5 +16,6 @@ type Ticket struct {
 	User              User `gorm:"foreignKey:UserId"`
 	ConcertCategoryId uuid.UUID
 	ConcertCategory   ConcertCategory `gorm:"foreignKey:ConcertCategoryId"`
-	TicketListing     *TicketListing  `gorm:"foreignKey:TicketId"`
+	TicketListings     *[]TicketListing  `gorm:"foreignKey:TicketId"`
+	MaxPrice         float64   `gorm:"not null"`
 }

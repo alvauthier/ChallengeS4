@@ -22,7 +22,7 @@ func LoadTicketFixtures() {
 		return
 	}
 
-	concertName := "Eras Tour - Taylor Swift"
+	concertName := "Eras Tour"
 	categoryName := "Catégorie 4"
 	var concertCategory models.ConcertCategory
 	db.Joins("JOIN concerts ON concert_categories.concert_id = concerts.id").
@@ -41,6 +41,7 @@ func LoadTicketFixtures() {
 		UpdatedAt:         time.Now(),
 		UserId:            user.ID,
 		ConcertCategoryId: concertCategory.ID,
+		MaxPrice:          concertCategory.Price,
 	}
 
 	result := db.Create(&ticket)

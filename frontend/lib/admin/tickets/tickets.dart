@@ -3,6 +3,7 @@ import 'package:weezemaster/core/models/concert_category.dart';
 import 'package:weezemaster/core/services/api_services.dart';
 import 'package:weezemaster/core/models/ticket.dart';
 import 'package:weezemaster/core/models/user.dart';
+import 'package:weezemaster/translation.dart';
 import 'blocs/tickets_bloc.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -32,7 +33,7 @@ class _TicketsScreenState extends State<TicketsScreen> {
         _users = users..sort((a, b) => '${a.firstname} ${a.lastname}'.compareTo('${b.firstname} ${b.lastname}'));
       });
     } catch (e) {
-      print('Failed to fetch users: $e');
+      debugPrint('Failed to fetch users: $e');
     }
   }
 
@@ -43,7 +44,7 @@ class _TicketsScreenState extends State<TicketsScreen> {
         _concertCategories = concert.concertCategories;
       });
     } catch (e) {
-      print('Failed to fetch concert: $e');
+      debugPrint('Failed to fetch concert: $e');
     }
   }
 
@@ -63,12 +64,12 @@ class _TicketsScreenState extends State<TicketsScreen> {
         return StatefulBuilder(
           builder: (BuildContext context, StateSetter setState) {
             return AlertDialog(
-              title: const Text('Modifier les informations du ticket'),
+              title: Text(translate(context)!.update_ticket),
               content: Column(
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  const Text('Utilisateur'),
+                  Text(translate(context)!.user),
                   DropdownButton<String>(
                     value: _selectedUserId,
                     items: _users.map((User user) {
@@ -84,7 +85,7 @@ class _TicketsScreenState extends State<TicketsScreen> {
                     },
                   ),
                   const SizedBox(height: 8),
-                  const Text('Categorie'),
+                  Text(translate(context)!.category),
                   DropdownButton<String>(
                     value: _selectedConcertCategoryId,
                     items: _concertCategories.map((ConcertCategory concertCategory) {
@@ -106,7 +107,7 @@ class _TicketsScreenState extends State<TicketsScreen> {
                   onPressed: () {
                     Navigator.of(dialogContext).pop();
                   },
-                  child: const Text('Annuler'),
+                  child: Text(translate(context)!.cancel),
                 ),
                 TextButton(
                   onPressed: () async {
@@ -119,7 +120,7 @@ class _TicketsScreenState extends State<TicketsScreen> {
                     Navigator.of(dialogContext).pop();
                     ticketsBloc.add(TicketsDataLoaded());
                   },
-                  child: const Text('Mettre à jour'),
+                  child: Text(translate(context)!.update),
                 ),
               ],
             );
@@ -146,9 +147,9 @@ class _TicketsScreenState extends State<TicketsScreen> {
                   subtitle: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('User: ${ticket.user.firstname} ${ticket.user.lastname}'),
-                      Text('Concert: ${ticket.concertCategory.concert.name}'),
-                      Text('Category: ${ticket.concertCategory.category.name}'),
+                      Text('${translate(context)!.user} : ${ticket.user.firstname} ${ticket.user.lastname}'),
+                      Text('${translate(context)!.concert_name} : ${ticket.concertCategory.concert.name}'),
+                      Text('${translate(context)!.category} : ${ticket.concertCategory.category.name}'),
                     ],
                   ),
                   trailing: Row(

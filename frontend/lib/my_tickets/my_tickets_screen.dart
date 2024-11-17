@@ -33,38 +33,40 @@ class MyTicketsScreenState extends State<MyTicketsScreen> {
 
   void _showResaleDialog(BuildContext context, ticket) {
     _priceController.text = '';
-    final maxPrice = ticket.concertCategory.price;
+    final maxPrice = ticket.maxPrice;
 
     showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text('Revendre le ticket'),
+          title: Text(translate(context)!.resell_ticket),
           content: TextField(
             controller: _priceController,
             keyboardType: TextInputType.number,
             decoration: InputDecoration(
-              hintText: 'Entrez le prix (max ${maxPrice.toStringAsFixed(2)} €)',
+              hintText: '${translate(context)!.enter_price} (max ${maxPrice.toStringAsFixed(2)} €)',
             ),
           ),
           actions: <Widget>[
             TextButton(
-              child: const Text('Annuler'),
+              child: Text(translate(context)!.cancel),
               onPressed: () {
                 context.pop();
               },
             ),
             TextButton(
-              child: const Text('Revendre'),
+              child: Text(translate(context)!.resell),
               onPressed: () async {
                 final enteredPrice = double.tryParse(_priceController.text);
                 if (enteredPrice != null && enteredPrice <= maxPrice) {
                   await _resellTicket(ticket.id, enteredPrice);
+                  context.pop();
                   context.pushNamed('my-tickets');
                 } else {
+                  context.pop();
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Le prix de revente ne peut pas dépasser le prix d\'achat.'),
+                    SnackBar(
+                      content: Text(translate(context)!.resale_price_not_superior_to_buy_price),
                     ),
                   );
                 }
@@ -95,11 +97,11 @@ class MyTicketsScreenState extends State<MyTicketsScreen> {
       }),
     );
 
-    if (response.statusCode == 201) {
+    if (response.statusCode == 201 || response.statusCode == 200) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Ticket mis en vente avec succès!'),
+          SnackBar(
+            content: Text(translate(context)!.ticket_add_sale_success),
           ),
         );
         context.pushNamed('my-tickets');
@@ -107,8 +109,8 @@ class MyTicketsScreenState extends State<MyTicketsScreen> {
     } else {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Erreur lors de la mise en vente du ticket.'),
+          SnackBar(
+            content: Text(translate(context)!.ticket_add_sale_failed),
           ),
         );
       }
@@ -132,8 +134,8 @@ class MyTicketsScreenState extends State<MyTicketsScreen> {
     if (response.statusCode == 204) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Annulation de la mise en vente réussie !'),
+          SnackBar(
+            content: Text(translate(context)!.ticket_cancel_sale_success),
           ),
         );
         context.pushNamed('my-tickets');
@@ -141,8 +143,8 @@ class MyTicketsScreenState extends State<MyTicketsScreen> {
     } else {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Erreur lors de l\'annulation de la mise en vente.'),
+          SnackBar(
+            content: Text(translate(context)!.ticket_cancel_sale_failed),
           ),
         );
       }
@@ -164,7 +166,7 @@ class MyTicketsScreenState extends State<MyTicketsScreen> {
                 return Column(
                   children: [
                     Padding(
-                      padding: const EdgeInsets.all(8.0),
+                      padding: const EdgeInsets.all(20.0),
                       child: Text(
                         translate(context)!.my_tickets,
                         style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
@@ -179,12 +181,16 @@ class MyTicketsScreenState extends State<MyTicketsScreen> {
                           final concert = concertCategory.concert;
                           final category = concertCategory.category;
 
+                          if (ticket.ticketListings.isNotEmpty) {
+                            ticket.ticketListings.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+                          }
+
                           Widget actionButton;
-                          if (ticket.ticketListing != null) {
-                            if (ticket.ticketListing!.status == 'available'){
+                          if (ticket.ticketListings.isNotEmpty) {
+                            if (ticket.ticketListings.first.status == 'available') {
                               actionButton = ElevatedButton(
                                 onPressed: () {
-                                  cancelTicketListing(ticket.ticketListing!.id);
+                                  cancelTicketListing(ticket.ticketListings.first.id);
                                 },
                                 style: ElevatedButton.styleFrom(
                                   foregroundColor: Colors.white,
@@ -236,23 +242,75 @@ class MyTicketsScreenState extends State<MyTicketsScreen> {
                             );
                           }
 
-                          return Card(
-                            child: ListTile(
-                              title: Text(concert.name),
-                              subtitle: Column(
+                          return Padding(
+                            padding: const EdgeInsets.all(10.0),
+                            child: Card(
+                              elevation: 0,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Text(category.name),
-                                  Text('${concert.location} - ${formatDate(concert.date)}'),
-                                  if (ticket.ticketListing != null && ticket.ticketListing!.status == 'available')
-                                    Text(
-                                      '${translate(context)!.offered_for_resale} ${ticket.ticketListing!.price.toStringAsFixed(2)} €',
-                                      style: const TextStyle(color: Colors.green),
+                                  ClipRRect(
+                                    borderRadius: const BorderRadius.only(
+                                      topLeft: Radius.circular(10),
+                                      topRight: Radius.circular(10),
                                     ),
+                                    child: Image.network(
+                                      (concert.image != null && concert.image != '')
+                                          ? '${dotenv.env['API_PROTOCOL']}://${dotenv.env['API_HOST']}${dotenv.env['API_PORT']}/uploads/concerts/${concert.image}'
+                                          : 'https://picsum.photos/seed/picsum/800/400',
+                                      width: double.infinity,
+                                      height: 200,
+                                      fit: BoxFit.cover,
+                                    ),
+                                  ),
+                                  ListTile(
+                                    contentPadding: const EdgeInsets.all(10),
+                                    title: Text(
+                                        concert.name,
+                                        style: const TextStyle(
+                                          fontSize: 20,
+                                          fontWeight: FontWeight.bold,
+                                          fontFamily: 'Readex Pro'
+                                        ),
+                                    ),
+                                    subtitle: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Padding(
+                                          padding: const EdgeInsets.symmetric(vertical: 2.0),
+                                          child: Text(
+                                            category.name,
+                                            style: const TextStyle(
+                                              color: Colors.black54,
+                                              fontFamily: 'Readex Pro',
+                                            ),
+                                          ),
+                                        ),
+                                        Padding(
+                                          padding: const EdgeInsets.symmetric(vertical: 4.0),
+                                          child: Text(
+                                            '${concert.location} - ${formatDate(concert.date)}',
+                                            style: const TextStyle(
+                                              color: Colors.grey,
+                                              fontFamily: 'Readex Pro',
+                                            ),
+                                          ),
+                                        ),
+                                        if (ticket.ticketListings.isNotEmpty && ticket.ticketListings.first.status == 'available')
+                                          Text(
+                                            '${translate(context)!.offered_for_resale} ${ticket.ticketListings.first.price.toStringAsFixed(2)} €',
+                                            style: const TextStyle(color: Colors.green),
+                                          ),
+                                      ],
+                                    ),
+                                    trailing: actionButton,
+                                  ),
                                 ],
                               ),
-                              trailing: actionButton,
-                            ),
+                            )
                           );
                         },
                       ),

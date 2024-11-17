@@ -4,9 +4,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:omni_datetime_picker/omni_datetime_picker.dart';
-import 'package:weezemaster/core/services/api_services.dart';
 import 'package:weezemaster/core/models/concert.dart';
-import '../../translation.dart';
+import 'package:weezemaster/core/services/token_services.dart';
+import 'package:weezemaster/translation.dart';
+import 'package:http/http.dart' as http;
+import 'package:http_parser/http_parser.dart';
 import 'blocs/concerts_bloc.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -150,11 +152,32 @@ class ConcertsScreenState extends State<ConcertsScreen> {
                 TextButton(
                   onPressed: () async {
                     try {
-                      await ApiServices.updateConcert(
-                        concert.id,
-                        _nameController.text,
-                        _locationController.text,
+                      final tokenService = TokenService();
+                      String? jwtToken = await tokenService.getValidAccessToken();
+
+                      var request = http.MultipartRequest(
+                        'PATCH',
+                        Uri.parse('${dotenv.env['API_PROTOCOL']}://${dotenv.env['API_HOST']}${dotenv.env['API_PORT']}/concerts/${concert.id}'),
                       );
+
+                      request.headers['Authorization'] = 'Bearer $jwtToken';
+
+                      request.fields['name'] = _nameController.text;
+                      request.fields['location'] = _locationController.text;
+                      request.fields['date'] = '${_selectedDate!.toLocal().toIso8601String().split('T')[0]} ${_selectedDate!.toLocal().toIso8601String().split('T')[1].split(':').sublist(0, 2).join(':')}';
+
+                      if (_image != null) {
+                        request.files.add(
+                          await http.MultipartFile.fromPath(
+                            'image',
+                            _image!.path,
+                            contentType: MediaType('image', _image!.path.split('.').last),
+                          ),
+                        );
+                      }
+
+                      await request.send();
+
                       Navigator.of(dialogContext).pop();
                       concertsBloc.add(ConcertsDataLoaded());
                     } catch (e) {

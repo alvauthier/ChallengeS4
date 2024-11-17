@@ -18,14 +18,14 @@ import (
 	"gorm.io/gorm"
 )
 
-//	@Summary		Récupère tous les concerts
-//	@Description	Récupère tous les concerts
-//	@ID				get-all-concerts
-//	@Tags			Concerts
-//	@Produce		json
-//	@Success		200	{array}		models.Concert
-//	@Failure		500	{object}	string
-//	@Router			/concerts [get]
+// @Summary		Récupère tous les concerts
+// @Description	Récupère tous les concerts
+// @ID				get-all-concerts
+// @Tags			Concerts
+// @Produce		json
+// @Success		200	{array}		models.Concert
+// @Failure		500	{object}	string
+// @Router			/concerts [get]
 func GetAllConcerts(c echo.Context) error {
 	db := database.GetDB()
 	var concerts []models.Concert
@@ -33,16 +33,16 @@ func GetAllConcerts(c echo.Context) error {
 	return c.JSON(http.StatusOK, concerts)
 }
 
-//	@Summary		Récupère un concert
-//	@Description	Récupère un concert par ID
-//	@ID				get-concert
-//	@Tags			Concerts
-//	@Produce		json
-//	@Param			id	path		string	true	"ID du concert"	format(uuid)
-//	@Success		200	{object}	models.Concert
-//	@Failure		404	{object}	string
-//	@Failure		500	{object}	string
-//	@Router			/concerts/{id} [get]
+// @Summary		Récupère un concert
+// @Description	Récupère un concert par ID
+// @ID				get-concert
+// @Tags			Concerts
+// @Produce		json
+// @Param			id	path		string	true	"ID du concert"	format(uuid)
+// @Success		200	{object}	models.Concert
+// @Failure		404	{object}	string
+// @Failure		500	{object}	string
+// @Router			/concerts/{id} [get]
 func GetConcert(c echo.Context) error {
 	db := database.GetDB()
 	authHeader := c.Request().Header.Get("Authorization")
@@ -109,19 +109,19 @@ type Category struct {
 	Price  float64 `json:"price"`
 }
 
-//	@Summary		Créé un concert
-//	@Description	Créé un concert
-//	@ID				create-concert
-//	@Tags			Concerts
-//	@Produce		json
-//	@Param			name	formData	string	true	"Nom du concert"
-//	@Success		201		{object}	models.Concert
-//	@Failure		400		{object}	string
-//	@Failure		401		{object}	string
-//	@Failure		403		{object}	string
-//	@Failure		500		{object}	string
-//	@Router			/concerts [post]
-//	@Security		Bearer
+// @Summary		Créé un concert
+// @Description	Créé un concert
+// @ID				create-concert
+// @Tags			Concerts
+// @Produce		json
+// @Param			name	formData	string	true	"Nom du concert"
+// @Success		201		{object}	models.Concert
+// @Failure		400		{object}	string
+// @Failure		401		{object}	string
+// @Failure		403		{object}	string
+// @Failure		500		{object}	string
+// @Router			/concerts [post]
+// @Security		Bearer
 func CreateConcert(c echo.Context) error {
 	fmt.Println("CreateConcert")
 	db := database.GetDB()
@@ -174,8 +174,21 @@ func CreateConcert(c echo.Context) error {
 
 	// Vérifier l'extension du fichier
 	fileExtension := strings.ToLower(filepath.Ext(file.Filename))
-	if fileExtension != ".jpg" && fileExtension != ".jpeg" && fileExtension != ".png" {
-		return echo.NewHTTPError(http.StatusBadRequest, "Invalid file extension")
+	// if fileExtension != ".jpg" && fileExtension != ".jpeg" && fileExtension != ".png" {
+	// 	return echo.NewHTTPError(http.StatusBadRequest, "Invalid file extension")
+	// }
+
+	// Vérifier le type MIME du fichier
+	buffer := make([]byte, 512)
+	if _, err := src.Read(buffer); err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, "Failed to read image file: "+err.Error())
+	}
+	if _, err := src.Seek(0, io.SeekStart); err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, "Failed to seek image file: "+err.Error())
+	}
+	fileType := http.DetectContentType(buffer)
+	if fileType != "image/jpeg" && fileType != "image/png" && fileType != "image/jpg" && fileType != "image/webp" {
+		return echo.NewHTTPError(http.StatusBadRequest, "Invalid file type")
 	}
 
 	// Générer un UUID pour le nom du fichier
@@ -274,19 +287,19 @@ func CreateConcert(c echo.Context) error {
 	})
 }
 
-//	@Summary		Modifie un concert
-//	@Description	Modifie un concert par ID
-//	@ID				update-concert
-//	@Tags			Concerts
-//	@Produce		json
-//	@Param			id		path		string	true	"ID du concert"	format(uuid)
-//	@Param			name	formData	string	false	"Nom du concert"
-//	@Success		200		{object}	models.Concert
-//	@Failure		400		{object}	string
-//	@Failure		404		{object}	string
-//	@Failure		500		{object}	string
-//	@Router			/concerts/{id} [patch]
-//	@Security		Bearer
+// @Summary		Modifie un concert
+// @Description	Modifie un concert par ID
+// @ID				update-concert
+// @Tags			Concerts
+// @Produce		json
+// @Param			id		path		string	true	"ID du concert"	format(uuid)
+// @Param			name	formData	string	false	"Nom du concert"
+// @Success		200		{object}	models.Concert
+// @Failure		400		{object}	string
+// @Failure		404		{object}	string
+// @Failure		500		{object}	string
+// @Router			/concerts/{id} [patch]
+// @Security		Bearer
 func UpdateConcert(c echo.Context) error {
 	db := database.GetDB()
 	id := c.Param("id")
@@ -327,8 +340,21 @@ func UpdateConcert(c echo.Context) error {
 
 		// Vérifier l'extension du fichier
 		fileExtension := strings.ToLower(filepath.Ext(file.Filename))
-		if fileExtension != ".jpg" && fileExtension != ".jpeg" && fileExtension != ".png" {
-			return c.JSON(http.StatusBadRequest, map[string]string{"message": "Invalid file extension"})
+		// if fileExtension != ".jpg" && fileExtension != ".jpeg" && fileExtension != ".png" {
+		// 	return echo.NewHTTPError(http.StatusBadRequest, "Invalid file extension")
+		// }
+
+		// Vérifier le type MIME du fichier
+		buffer := make([]byte, 512)
+		if _, err := src.Read(buffer); err != nil {
+			return echo.NewHTTPError(http.StatusInternalServerError, "Failed to read image file: "+err.Error())
+		}
+		if _, err := src.Seek(0, io.SeekStart); err != nil {
+			return echo.NewHTTPError(http.StatusInternalServerError, "Failed to seek image file: "+err.Error())
+		}
+		fileType := http.DetectContentType(buffer)
+		if fileType != "image/jpeg" && fileType != "image/png" && fileType != "image/jpg" && fileType != "image/webp" {
+			return echo.NewHTTPError(http.StatusBadRequest, "Invalid file type")
 		}
 
 		// Générer un UUID pour le nom du fichier
@@ -366,17 +392,17 @@ func UpdateConcert(c echo.Context) error {
 	return c.JSON(http.StatusOK, concert)
 }
 
-//	@Summary		Supprime un concert
-//	@Description	Supprime un concert par ID
-//	@ID				delete-concert
-//	@Tags			Concerts
-//	@Produce		json
-//	@Param			id	path	string	true	"ID du concert"	format(uuid)
-//	@Success		204
-//	@Failure		404	{object}	string
-//	@Failure		500	{object}	string
-//	@Router			/concerts/{id} [delete]
-//	@Security		Bearer
+// @Summary		Supprime un concert
+// @Description	Supprime un concert par ID
+// @ID				delete-concert
+// @Tags			Concerts
+// @Produce		json
+// @Param			id	path	string	true	"ID du concert"	format(uuid)
+// @Success		204
+// @Failure		404	{object}	string
+// @Failure		500	{object}	string
+// @Router			/concerts/{id} [delete]
+// @Security		Bearer
 func DeleteConcert(c echo.Context) error {
 	db := database.GetDB()
 	id := c.Param("id")
@@ -387,17 +413,17 @@ func DeleteConcert(c echo.Context) error {
 	return c.NoContent(http.StatusNoContent)
 }
 
-//	@Summary		Récupère les concerts par ID d'organisation
-//	@Description	Récupère les concerts par ID d'organisation
-//	@ID				get-concerts-by-organization-id
-//	@Tags			Concerts
-//	@Produce		json
-//	@Success		200	{array}		models.Concert
-//	@Failure		401	{object}	string
-//	@Failure		403	{object}	string
-//	@Failure		500	{object}	string
-//	@Router			/organization/concerts [get]
-//	@Security		Bearer
+// @Summary		Récupère les concerts par ID d'organisation
+// @Description	Récupère les concerts par ID d'organisation
+// @ID				get-concerts-by-organization-id
+// @Tags			Concerts
+// @Produce		json
+// @Success		200	{array}		models.Concert
+// @Failure		401	{object}	string
+// @Failure		403	{object}	string
+// @Failure		500	{object}	string
+// @Router			/organization/concerts [get]
+// @Security		Bearer
 func GetConcertByOrganizationID(c echo.Context) error {
 	db := database.GetDB()
 	authHeader := c.Request().Header.Get("Authorization")
@@ -432,16 +458,16 @@ func GetConcertByOrganizationID(c echo.Context) error {
 	return c.JSON(http.StatusOK, concerts)
 }
 
-//	@Summary		Récupère les concerts par ID d'artiste
-//	@Description	Récupère les concerts par ID d'artiste
-//	@ID				get-concerts-by-artist-id
-//	@Tags			Concerts
-//	@Produce		json
-//	@Param			id	path		string	true	"ID de l'artiste"	format(uuid)
-//	@Success		200	{array}		models.Concert
-//	@Failure		404	{object}	string
-//	@Failure		500	{object}	string
-//	@Router			/concerts/artist/{id} [get]
+// @Summary		Récupère les concerts par ID d'artiste
+// @Description	Récupère les concerts par ID d'artiste
+// @ID				get-concerts-by-artist-id
+// @Tags			Concerts
+// @Produce		json
+// @Param			id	path		string	true	"ID de l'artiste"	format(uuid)
+// @Success		200	{array}		models.Concert
+// @Failure		404	{object}	string
+// @Failure		500	{object}	string
+// @Router			/concerts/artist/{id} [get]
 func GetConcertsByArtistID(c echo.Context) error {
 	db := database.GetDB()
 	id := c.Param("id")

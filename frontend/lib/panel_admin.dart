@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:weezemaster/admin/artists/artists.dart';
+import 'package:weezemaster/admin/config_queue/config_queue_screen.dart';
 import 'package:weezemaster/admin/ticket_listings/ticket_listings.dart';
 import 'package:weezemaster/admin/users/users.dart';
 import 'package:weezemaster/translation.dart';
@@ -14,7 +15,7 @@ class AdminPanel extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(
-      length: 7,
+      length: 8,
       child: Scaffold(
         appBar: AppBar(
           title: Text(translate(context)!.admin_panel),
@@ -23,6 +24,7 @@ class AdminPanel extends StatelessWidget {
             labelColor: Colors.deepOrange,
             indicatorColor: Colors.deepOrange,
             tabs: [
+              Tab(text: 'File d\'attente'),
               Tab(text: translate(context)!.users),
               Tab(text: 'Tickets'),
               Tab(text: 'Ticket Listings'),
@@ -35,6 +37,7 @@ class AdminPanel extends StatelessWidget {
         ),
         body: TabBarView(
           children: [
+            ConfigQueueScreen(),
             UsersScreen(),
             const TicketsScreen(),
             const TicketListingsScreen(),

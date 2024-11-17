@@ -4,8 +4,10 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"strconv"
 	"sync"
 	"time"
+	"weezemaster/internal/config"
 
 	"github.com/gorilla/websocket"
 	"github.com/labstack/echo/v4"
@@ -20,7 +22,6 @@ var upgraderQueue = websocket.Upgrader{
 var queue = make(map[string][]*UserConnection)
 var authorized = make(map[string][]*UserConnection)
 var queueMutex = sync.Mutex{}
-var maxUsers = 1 // Maximum d'utilisateurs autorisés par concert
 
 type UserConnection struct {
 	UserID string
@@ -37,6 +38,20 @@ type Message struct {
 
 // Intervalle pour les pings en secondes
 const pingInterval = 30 * time.Second
+
+func getMaxUsers() int {
+	err := config.LoadConfig("../../cmd/weezemaster/config/weezemaster.config")
+	if err != nil {
+		fmt.Println("Erreur lors du chargement de la configuration :", err)
+		return 100
+	}
+	maxUsers, err := strconv.Atoi(config.Config["CONCERTS_MAX_USERS_BEFORE_QUEUE"])
+	if err != nil {
+		fmt.Println("Erreur lors de la conversion de CONCERTS_MAX_USERS_BEFORE_QUEUE :", err)
+		return 100
+	}
+	return maxUsers
+}
 
 // HandleWebSocketQueue gère les connexions WebSocket pour la file d'attente des concerts
 func HandleWebSocketQueue(c echo.Context) error {
@@ -87,6 +102,8 @@ func handleQueue(userID, concertID string, conn *websocket.Conn) error {
 	queueMutex.Lock()
 	defer queueMutex.Unlock()
 
+	maxUsers := getMaxUsers()
+
 	// Vérifie si l'utilisateur est déjà dans la liste des utilisateurs autorisés
 	for _, uc := range authorized[concertID] {
 		if uc.UserID == userID {
@@ -130,6 +147,8 @@ func handleQueue(userID, concertID string, conn *websocket.Conn) error {
 func removeUserFromQueue(concertID, userID string) {
 	queueMutex.Lock()
 	defer queueMutex.Unlock()
+
+	maxUsers := getMaxUsers()
 
 	// Vérifie d'abord si l'utilisateur est dans la liste des utilisateurs autorisés
 	if authorizedUsers, ok := authorized[concertID]; ok {

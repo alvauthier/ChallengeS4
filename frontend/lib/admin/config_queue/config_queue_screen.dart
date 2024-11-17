@@ -111,10 +111,27 @@ class _ConfigQueueScreenState extends State<ConfigQueueScreen> {
                       labelText: 'Number max of users before queue',
                     ),
                   ),
-                  const SizedBox(height: 20),
-                  ElevatedButton(
-                    onPressed: _updateValue,
-                    child: const Text('Update'),
+                  Padding(
+                    padding: const EdgeInsets.only(top: 15.0),
+                    child: SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton(
+                        onPressed: _updateValue,
+                        style: ElevatedButton.styleFrom(
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(6.0),
+                          ),
+                          backgroundColor: Colors.deepOrange,
+                        ),
+                        child: const Text(
+                          'Update',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontFamily: 'Readex Pro',
+                          ),
+                        ),
+                      ),
+                    ),
                   ),
                 ],
               ),

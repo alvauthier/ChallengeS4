@@ -119,6 +119,12 @@ class ChatScreenState extends State<ChatScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(translate(context)!.price_success)),
         );
+        final priceMessage = {
+          "conversation_id": widget.id,
+          "new_price": price,
+        };
+        _channel?.sink.add(jsonEncode(priceMessage));
+        debugPrint('Price update message WebSocket sent: $priceMessage');
       } else {
         debugPrint('Failed to update price: ${response.body}');
         ScaffoldMessenger.of(context).showSnackBar(
@@ -184,14 +190,18 @@ class ChatScreenState extends State<ChatScreen> {
 
     _channel!.stream.listen((message) {
       final decodedMessage = jsonDecode(message);
-
+      debugPrint('WebSocket message received: $decodedMessage');
       if (decodedMessage.containsKey('conversation_id')) {
         setState(() {
           widget.id = decodedMessage['conversation_id'];
         });
-      } else if (decodedMessage['type'] == 'price_update') {
-        _handlePriceUpdate(decodedMessage);
+        if (decodedMessage.containsKey('new_price')) {
+          setState(() {
+            price = decodedMessage['new_price'].toString();
+          });
+        }
       } else {
+        debugPrint(decodedMessage["Content"]);
         setState(() {
           messages.add({
             "authorId": decodedMessage["AuthorId"],
@@ -214,7 +224,6 @@ class ChatScreenState extends State<ChatScreen> {
       "conversation_id": widget.id.isNotEmpty ? widget.id : "",
       "sender_id": userId,
       "receiver_id": widget.resellerId,
-      "price": double.tryParse(widget.price ?? '0') ?? 0.0,
     };
 
     _channel?.sink.add(jsonEncode(payload));
@@ -410,9 +419,6 @@ class ChatScreenState extends State<ChatScreen> {
                       final newPrice = priceController.text;
                       if (newPrice.isNotEmpty) {
                         await updateConversationPrice(widget.id, double.parse(newPrice));
-                        setState(() {
-                          price = newPrice.toString();
-                        });
                       }
                       context.pop();
                     },
@@ -436,13 +442,13 @@ class ChatScreenState extends State<ChatScreen> {
     );
   }
 
-  void _handlePriceUpdate(Map<String, dynamic> message) {
-    if (message.containsKey('new_price')) {
-      setState(() {
-        price = message['new_price'].toString();
-      });
-    }
-  }
+  // void _handlePriceUpdate(Map<String, dynamic> message) {
+  //   if (message.containsKey('new_price')) {
+  //     setState(() {
+  //       price = message['new_price'].toString();
+  //     });
+  //   }
+  // }
 
   @override
   Widget build(BuildContext context) {

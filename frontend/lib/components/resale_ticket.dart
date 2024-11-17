@@ -234,6 +234,7 @@ class ResaleTicket extends StatelessWidget {
                                       userId,
                                     );
                                     debugPrint('existingConversationId: $existingConversationId');
+                                    debugPrint('concertImage: ${ticket.concertImage}');
 
                                     if (existingConversationId != null && existingConversationId.isNotEmpty) {
                                       debugPrint('Conversation found in the database, access it');
@@ -241,11 +242,18 @@ class ResaleTicket extends StatelessWidget {
                                         '/chat/$existingConversationId',
                                       );
                                     } else {
+                                      debugPrint('No conversation found in the database');
                                       context.push(
                                         '/chat/newchat',
                                         extra: {
-                                          'ticketId': ticket.id,
+                                          'userId': userId,
                                           'resellerId': ticket.reseller.id,
+                                          'ticketId': ticket.id,
+                                          'concertName': ticket.concertName,
+                                          'price': ticket.price,
+                                          'resellerName': ticket.reseller.name,
+                                          'category': ticket.category,
+                                          'concertImage': ticket.concertImage,
                                         },
                                       );
                                     }

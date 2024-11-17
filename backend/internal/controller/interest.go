@@ -18,10 +18,30 @@ import (
 // @Success		200	{array}	models.Interest
 // @Router			/interests [get]
 func GetAllInterests(c echo.Context) error {
-	db := database.GetDB()
-	var interests []models.Interest
-	db.Find(&interests)
-	return c.JSON(http.StatusOK, interests)
+    db := database.GetDB()
+    var interests []models.Interest
+    db.Find(&interests)
+
+    var artists []models.Artist
+    db.Preload("Interest").Find(&artists)
+
+    // Créer une map pour stocker les intérêts des artistes
+    artistInterests := make(map[int]struct{})
+    for _, artist := range artists {
+        if artist.Interest != nil {
+            artistInterests[artist.Interest.ID] = struct{}{}
+        }
+    }
+
+    // Filtrer les intérêts pour enlever ceux des artistes
+    filteredInterests := []models.Interest{}
+    for _, interest := range interests {
+        if _, exists := artistInterests[interest.ID]; !exists {
+            filteredInterests = append(filteredInterests, interest)
+        }
+    }
+
+    return c.JSON(http.StatusOK, filteredInterests)
 }
 
 // @Summary		Récupère un centre d'intérêt

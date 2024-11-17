@@ -81,6 +81,18 @@ func GetAmountById(id string) (int64, error) {
 	}
 }
 
+// @Summary		Create a payment intent
+// @Description	Create a payment intent
+// @ID				create-payment-intent
+// @Tags			Payment
+// @Accept			json
+// @Produce		json
+// @Param			body	body		CreatePaymentIntentRequest	true	"Request body"
+// @Success		200		{object}	map[string]string
+// @Failure		400		{object}	map[string]string
+// @Failure		500		{object}	map[string]string
+// @Router			/create-payment-intent [post]
+// @Security		Bearer
 func CreatePaymentIntent(c echo.Context) error {
 	req := new(CreatePaymentIntentRequest)
 	if err := c.Bind(req); err != nil {

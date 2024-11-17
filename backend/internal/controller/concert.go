@@ -18,13 +18,14 @@ import (
 	"gorm.io/gorm"
 )
 
-// @Summary		Récupère tous les concerts
-// @Description	Récupère tous les concerts
-// @ID				get-all-concerts
-// @Tags			Concerts
-// @Produce		json
-// @Success		200	{array}	models.Concert
-// @Router			/concerts [get]
+//	@Summary		Récupère tous les concerts
+//	@Description	Récupère tous les concerts
+//	@ID				get-all-concerts
+//	@Tags			Concerts
+//	@Produce		json
+//	@Success		200	{array}		models.Concert
+//	@Failure		500	{object}	string
+//	@Router			/concerts [get]
 func GetAllConcerts(c echo.Context) error {
 	db := database.GetDB()
 	var concerts []models.Concert
@@ -32,14 +33,16 @@ func GetAllConcerts(c echo.Context) error {
 	return c.JSON(http.StatusOK, concerts)
 }
 
-// @Summary		Récupère un concert
-// @Description	Récupère un concert par ID
-// @ID				get-concert
-// @Tags			Concerts
-// @Produce		json
-// @Param			id	path		string	true	"ID du concert"	format(uuid)
-// @Success		200	{object}	models.Concert
-// @Router			/concerts/{id} [get]
+//	@Summary		Récupère un concert
+//	@Description	Récupère un concert par ID
+//	@ID				get-concert
+//	@Tags			Concerts
+//	@Produce		json
+//	@Param			id	path		string	true	"ID du concert"	format(uuid)
+//	@Success		200	{object}	models.Concert
+//	@Failure		404	{object}	string
+//	@Failure		500	{object}	string
+//	@Router			/concerts/{id} [get]
 func GetConcert(c echo.Context) error {
 	db := database.GetDB()
 	authHeader := c.Request().Header.Get("Authorization")
@@ -62,21 +65,21 @@ func GetConcert(c echo.Context) error {
 
 	var concert models.Concert
 	if err := db.
-	Preload("Interests").
-	Preload("Organization").
-	Preload("Artist").
-    Preload("ConcertCategories").
-    Preload("ConcertCategories.Category").
-    Preload("ConcertCategories.Tickets", "EXISTS (SELECT 1 FROM ticket_listings WHERE tickets.id = ticket_listings.ticket_id)").
-    Preload("ConcertCategories.Tickets.User").
-	Preload("ConcertCategories.Tickets.TicketListings",
-	func(db *gorm.DB) *gorm.DB {
-    	if userID != uuid.Nil {
-    		return db.Joins("JOIN tickets ON tickets.id = ticket_listings.ticket_id").
-    			Where("ticket_listings.status = ? AND tickets.user_id != ?", "available", userID)
-    	}
-    	return db.Where("ticket_listings.status = ?", "available")
-    }).Where("id = ?", c.Param("id")).First(&concert).Error; err != nil {
+		Preload("Interests").
+		Preload("Organization").
+		Preload("Artist").
+		Preload("ConcertCategories").
+		Preload("ConcertCategories.Category").
+		Preload("ConcertCategories.Tickets", "EXISTS (SELECT 1 FROM ticket_listings WHERE tickets.id = ticket_listings.ticket_id)").
+		Preload("ConcertCategories.Tickets.User").
+		Preload("ConcertCategories.Tickets.TicketListings",
+			func(db *gorm.DB) *gorm.DB {
+				if userID != uuid.Nil {
+					return db.Joins("JOIN tickets ON tickets.id = ticket_listings.ticket_id").
+						Where("ticket_listings.status = ? AND tickets.user_id != ?", "available", userID)
+				}
+				return db.Where("ticket_listings.status = ?", "available")
+			}).Where("id = ?", c.Param("id")).First(&concert).Error; err != nil {
 		if err == gorm.ErrRecordNotFound {
 			return c.JSON(http.StatusNotFound, map[string]string{"message": "Concert not found"})
 		}
@@ -106,13 +109,19 @@ type Category struct {
 	Price  float64 `json:"price"`
 }
 
-// @Summary		Créé un concert
-// @Description	Créé un concert
-// @ID				create-concert
-// @Tags			Concerts
-// @Produce		json
-// @Success		201	{object}	models.Concert
-// @Router			/concerts [post]
+//	@Summary		Créé un concert
+//	@Description	Créé un concert
+//	@ID				create-concert
+//	@Tags			Concerts
+//	@Produce		json
+//	@Param			name	formData	string	true	"Nom du concert"
+//	@Success		201		{object}	models.Concert
+//	@Failure		400		{object}	string
+//	@Failure		401		{object}	string
+//	@Failure		403		{object}	string
+//	@Failure		500		{object}	string
+//	@Router			/concerts [post]
+//	@Security		Bearer
 func CreateConcert(c echo.Context) error {
 	fmt.Println("CreateConcert")
 	db := database.GetDB()
@@ -265,14 +274,19 @@ func CreateConcert(c echo.Context) error {
 	})
 }
 
-// @Summary		Modifie un concert
-// @Description	Modifie un concert par ID
-// @ID				update-concert
-// @Tags			Concerts
-// @Produce		json
-// @Param			id	path		string	true	"ID du concert"	format(uuid)
-// @Success		200	{object}	models.Concert
-// @Router			/concerts/{id} [patch]
+//	@Summary		Modifie un concert
+//	@Description	Modifie un concert par ID
+//	@ID				update-concert
+//	@Tags			Concerts
+//	@Produce		json
+//	@Param			id		path		string	true	"ID du concert"	format(uuid)
+//	@Param			name	formData	string	false	"Nom du concert"
+//	@Success		200		{object}	models.Concert
+//	@Failure		400		{object}	string
+//	@Failure		404		{object}	string
+//	@Failure		500		{object}	string
+//	@Router			/concerts/{id} [patch]
+//	@Security		Bearer
 func UpdateConcert(c echo.Context) error {
 	db := database.GetDB()
 	id := c.Param("id")
@@ -287,64 +301,64 @@ func UpdateConcert(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
-    name := c.FormValue("name")
-    location := c.FormValue("location")
-    dateStr := c.FormValue("date")
+	name := c.FormValue("name")
+	location := c.FormValue("location")
+	dateStr := c.FormValue("date")
 
-    date, _ := time.Parse("2006-01-02 15:04", dateStr)
+	date, _ := time.Parse("2006-01-02 15:04", dateStr)
 
-    // Vérifier si une nouvelle image est fournie
-    file, err := c.FormFile("image")
-    if err == nil {
-        // Supprimer l'ancienne image si elle existe
-        if concert.Image != "" {
-            oldImagePath := filepath.Join("uploads", "concerts", concert.Image)
-            if err := os.Remove(oldImagePath); err != nil {
-                return c.JSON(http.StatusInternalServerError, map[string]string{"message": "Failed to delete old image: " + err.Error()})
-            }
-        }
+	// Vérifier si une nouvelle image est fournie
+	file, err := c.FormFile("image")
+	if err == nil {
+		// Supprimer l'ancienne image si elle existe
+		if concert.Image != "" {
+			oldImagePath := filepath.Join("uploads", "concerts", concert.Image)
+			if err := os.Remove(oldImagePath); err != nil {
+				return c.JSON(http.StatusInternalServerError, map[string]string{"message": "Failed to delete old image: " + err.Error()})
+			}
+		}
 
-        // Ouvrir le fichier
-        src, err := file.Open()
-        if err != nil {
-            return c.JSON(http.StatusInternalServerError, map[string]string{"message": "Failed to open image file: " + err.Error()})
-        }
-        defer src.Close()
+		// Ouvrir le fichier
+		src, err := file.Open()
+		if err != nil {
+			return c.JSON(http.StatusInternalServerError, map[string]string{"message": "Failed to open image file: " + err.Error()})
+		}
+		defer src.Close()
 
-        // Vérifier l'extension du fichier
-        fileExtension := strings.ToLower(filepath.Ext(file.Filename))
-        if fileExtension != ".jpg" && fileExtension != ".jpeg" && fileExtension != ".png" {
-            return c.JSON(http.StatusBadRequest, map[string]string{"message": "Invalid file extension"})
-        }
+		// Vérifier l'extension du fichier
+		fileExtension := strings.ToLower(filepath.Ext(file.Filename))
+		if fileExtension != ".jpg" && fileExtension != ".jpeg" && fileExtension != ".png" {
+			return c.JSON(http.StatusBadRequest, map[string]string{"message": "Invalid file extension"})
+		}
 
-        // Générer un UUID pour le nom du fichier
-        fileUUID := uuid.New().String()
-        fileName := fileUUID + fileExtension
-        filePath := filepath.Join("uploads", "concerts", fileName)
+		// Générer un UUID pour le nom du fichier
+		fileUUID := uuid.New().String()
+		fileName := fileUUID + fileExtension
+		filePath := filepath.Join("uploads", "concerts", fileName)
 
-        // Créer le dossier uploads/concerts s'il n'existe pas
-        if err := os.MkdirAll(filepath.Dir(filePath), os.ModePerm); err != nil {
-            return c.JSON(http.StatusInternalServerError, map[string]string{"message": "Failed to create directory: " + err.Error()})
-        }
+		// Créer le dossier uploads/concerts s'il n'existe pas
+		if err := os.MkdirAll(filepath.Dir(filePath), os.ModePerm); err != nil {
+			return c.JSON(http.StatusInternalServerError, map[string]string{"message": "Failed to create directory: " + err.Error()})
+		}
 
-        // Créer le fichier de destination
-        dst, err := os.Create(filePath)
-        if err != nil {
-            return c.JSON(http.StatusInternalServerError, map[string]string{"message": "Failed to create destination file: " + err.Error()})
-        }
-        defer dst.Close()
+		// Créer le fichier de destination
+		dst, err := os.Create(filePath)
+		if err != nil {
+			return c.JSON(http.StatusInternalServerError, map[string]string{"message": "Failed to create destination file: " + err.Error()})
+		}
+		defer dst.Close()
 
-        // Copier les données de l'image dans le fichier de destination
-        if _, err := io.Copy(dst, src); err != nil {
-            return c.JSON(http.StatusInternalServerError, map[string]string{"message": "Failed to save image: " + err.Error()})
-        }
+		// Copier les données de l'image dans le fichier de destination
+		if _, err := io.Copy(dst, src); err != nil {
+			return c.JSON(http.StatusInternalServerError, map[string]string{"message": "Failed to save image: " + err.Error()})
+		}
 
-        concert.Image = fileName
-    }
+		concert.Image = fileName
+	}
 
-    concert.Name = name
-    concert.Location = location
-    concert.Date = date
+	concert.Name = name
+	concert.Location = location
+	concert.Date = date
 
 	if err := db.Save(&concert).Error; err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
@@ -352,14 +366,17 @@ func UpdateConcert(c echo.Context) error {
 	return c.JSON(http.StatusOK, concert)
 }
 
-// @Summary		Supprime un concert
-// @Description	Supprime un concert par ID
-// @ID				delete-concert
-// @Tags			Concerts
-// @Produce		json
-// @Param			id	path	string	true	"ID du concert"	format(uuid)
-// @Success		204
-// @Router			/concerts/{id} [delete]
+//	@Summary		Supprime un concert
+//	@Description	Supprime un concert par ID
+//	@ID				delete-concert
+//	@Tags			Concerts
+//	@Produce		json
+//	@Param			id	path	string	true	"ID du concert"	format(uuid)
+//	@Success		204
+//	@Failure		404	{object}	string
+//	@Failure		500	{object}	string
+//	@Router			/concerts/{id} [delete]
+//	@Security		Bearer
 func DeleteConcert(c echo.Context) error {
 	db := database.GetDB()
 	id := c.Param("id")
@@ -370,6 +387,17 @@ func DeleteConcert(c echo.Context) error {
 	return c.NoContent(http.StatusNoContent)
 }
 
+//	@Summary		Récupère les concerts par ID d'organisation
+//	@Description	Récupère les concerts par ID d'organisation
+//	@ID				get-concerts-by-organization-id
+//	@Tags			Concerts
+//	@Produce		json
+//	@Success		200	{array}		models.Concert
+//	@Failure		401	{object}	string
+//	@Failure		403	{object}	string
+//	@Failure		500	{object}	string
+//	@Router			/organization/concerts [get]
+//	@Security		Bearer
 func GetConcertByOrganizationID(c echo.Context) error {
 	db := database.GetDB()
 	authHeader := c.Request().Header.Get("Authorization")
@@ -397,13 +425,23 @@ func GetConcertByOrganizationID(c echo.Context) error {
 	}
 
 	var concerts []models.Concert
-    if result := db.Where("organization_id = ?", user.OrganizationId).Preload("Artist").Find(&concerts); result.Error != nil {
-        return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Error retrieving concerts"})
-    }
+	if result := db.Where("organization_id = ?", user.OrganizationId).Preload("Artist").Find(&concerts); result.Error != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Error retrieving concerts"})
+	}
 
-    return c.JSON(http.StatusOK, concerts)
+	return c.JSON(http.StatusOK, concerts)
 }
 
+//	@Summary		Récupère les concerts par ID d'artiste
+//	@Description	Récupère les concerts par ID d'artiste
+//	@ID				get-concerts-by-artist-id
+//	@Tags			Concerts
+//	@Produce		json
+//	@Param			id	path		string	true	"ID de l'artiste"	format(uuid)
+//	@Success		200	{array}		models.Concert
+//	@Failure		404	{object}	string
+//	@Failure		500	{object}	string
+//	@Router			/concerts/artist/{id} [get]
 func GetConcertsByArtistID(c echo.Context) error {
 	db := database.GetDB()
 	id := c.Param("id")

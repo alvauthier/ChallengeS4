@@ -27,6 +27,14 @@ type CommunityMessagePayload struct {
 }
 
 // HandleWebSocketCommunity gère les connexions WebSocket pour les rooms d'artistes
+// @Summary Gère les connexions WebSocket pour les chats des artistes
+// @Description Gère les connexions WebSocket pour les chats des artistes
+// @ID websocket-community
+// @Tags WebSockets
+// @Accept json
+// @Param artistId query string true "ID de l'artiste" format(uuid)
+// @Success 101 {string} string "Switching Protocols"
+// @Router /ws-community [get]
 func HandleWebSocketCommunity(c echo.Context) error {
 	conn, err := upgraderCommunity.Upgrade(c.Response(), c.Request(), nil)
 	if err != nil {

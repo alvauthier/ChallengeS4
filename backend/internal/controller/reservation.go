@@ -10,6 +10,19 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
+// @Summary		Create a reservation
+// @Description	Create a reservation for a concert category
+// @ID				create-reservation
+// @Tags			Reservation
+// @Accept			json
+// @Produce		json
+// @Param			body	body string true "Id de la catégorie de concert" format(uuid)
+// @Success		201		{object}	models.Ticket
+// @Failure		400		{object}	map[string]string
+// @Failure		401		{object}	map[string]string
+// @Failure		500		{object}	map[string]string
+// @Router			/reservation [post]
+// @Security		Bearer
 func CreateReservation(c echo.Context) error {
 	db := database.GetDB()
 
@@ -89,6 +102,20 @@ func CreateReservation(c echo.Context) error {
 	return c.JSON(http.StatusOK, ticket)
 }
 
+// @Summary		Create a ticket listing reservation
+// @Description	Create a reservation for a ticket listing
+// @ID				create-ticket-listing-reservation
+// @Tags			Reservation
+// @Accept			json
+// @Produce		json
+// @Param			id		path		string									true	"Ticket listing ID"	format(uuid)
+// @Param			body	body		string	true	"Id du ticket listing" format(uuid)
+// @Success		201		{object}	models.Sale
+// @Failure		400		{object}	map[string]string
+// @Failure		401		{object}	map[string]string
+// @Failure		500		{object}	map[string]string
+// @Router			/ticket_listing_reservation/{id} [post]
+// @Security		Bearer
 func CreateTicketListingReservation(c echo.Context) error {
 	db := database.GetDB()
 
@@ -178,6 +205,20 @@ func CreateTicketListingReservation(c echo.Context) error {
 	return c.JSON(http.StatusOK, sale)
 }
 
+// @Summary		Create a ticket listing reservation from conversation
+// @Description	Create a reservation for a ticket listing from a conversation
+// @ID				create-ticket-listing-reservation-from-conversation
+// @Tags			Reservation
+// @Accept			json
+// @Produce		json
+// @Param			id		path		string													true	"Conversation ID"	format(uuid)
+// @Param			body	body	string	true	"id de la conversation" format(uuid)
+// @Success		201		{object}	models.Sale
+// @Failure		400		{object}	map[string]string
+// @Failure		401		{object}	map[string]string
+// @Failure		500		{object}	map[string]string
+// @Router			/ticket_listing_reservation_conversation/{id} [post]
+// @Security		Bearer
 func CreateTicketListingReservationFromConversation(c echo.Context) error {
 	db := database.GetDB()
 

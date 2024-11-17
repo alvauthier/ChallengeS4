@@ -11,13 +11,15 @@ import (
 	"gorm.io/gorm"
 )
 
-// @Summary		Récupère tous les tickets
-// @Description	Récupère tous les tickets
-// @ID				get-all-tickets
-// @Tags			Tickets
-// @Produce		json
-// @Success		200	{array}	models.Ticket
-// @Router			/tickets [get]
+//	@Summary		Récupère tous les tickets
+//	@Description	Récupère tous les tickets
+//	@ID				get-all-tickets
+//	@Tags			Tickets
+//	@Produce		json
+//	@Success		200	{array}		models.Ticket
+//	@Failure		500	{object}	string
+//	@Router			/tickets [get]
+//	@Security		Bearer
 func GetAllTickets(c echo.Context) error {
 	db := database.GetDB()
 	var tickets []models.Ticket
@@ -25,15 +27,17 @@ func GetAllTickets(c echo.Context) error {
 	return c.JSON(http.StatusOK, tickets)
 }
 
-// @Summary		Récupère un ticket
-// @Description	Récupère un ticket par ID
-// @ID				get-ticket
-// @Tags			Tickets
-// @Produce		json
-// @Param			id	path		string	true	"ID du ticket"	format(uuid)
-// @Success		200	{object}	models.Ticket
-// @Router			/tickets/{id} [get]
-
+//	@Summary		Récupère un ticket
+//	@Description	Récupère un ticket par ID
+//	@ID				get-ticket
+//	@Tags			Tickets
+//	@Produce		json
+//	@Param			id	path		string	true	"ID du ticket"	format(uuid)
+//	@Success		200	{object}	models.Ticket
+//	@Failure		404	{object}	string
+//	@Failure		500	{object}	string
+//	@Router			/tickets/{id} [get]
+//	@Security		Bearer
 func GetTicket(c echo.Context) error {
 	db := database.GetDB()
 	id := c.Param("id")
@@ -47,13 +51,17 @@ func GetTicket(c echo.Context) error {
 	return c.JSON(http.StatusOK, ticket)
 }
 
-// @Summary		Créé un ticket
-// @Description	Créé un ticket
-// @ID				create-ticket
-// @Tags			Tickets
-// @Produce		json
-// @Success		201	{object}	models.Ticket
-// @Router			/tickets [post]
+//	@Summary		Créé un ticket
+//	@Description	Créé un ticket
+//	@ID				create-ticket
+//	@Tags			Tickets
+//	@Produce		json
+//	@Param			ticket	body		models.Ticket	true	"Ticket à créer"
+//	@Success		201		{object}	models.Ticket
+//	@Failure		400		{object}	string
+//	@Failure		500		{object}	string
+//	@Router			/tickets [post]
+//	@Security		Bearer
 func CreateTicket(c echo.Context) error {
 	db := database.GetDB()
 	ticket := new(models.Ticket)
@@ -70,14 +78,19 @@ type TicketPatchInput struct {
 	TicketListings    *[]models.TicketListing
 }
 
-// @Summary		Modifie un ticket
-// @Description	Modifie un ticket par ID
-// @ID				update-ticket
-// @Tags			Tickets
-// @Produce		json
-// @Param			id	path		string	true	"ID du ticket"	format(uuid)
-// @Success		200	{object}	models.Ticket
-// @Router			/tickets/{id} [patch]
+//	@Summary		Modifie un ticket
+//	@Description	Modifie un ticket par ID
+//	@ID				update-ticket
+//	@Tags			Tickets
+//	@Produce		json
+//	@Param			id		path		string				true	"ID du ticket"	format(uuid)
+//	@Param			ticket	body		TicketPatchInput	true	"Champs à modifier"
+//	@Success		200		{object}	models.Ticket
+//	@Failure		400		{object}	string
+//	@Failure		404		{object}	string
+//	@Failure		500		{object}	string
+//	@Router			/tickets/{id} [patch]
+//	@Security		Bearer
 func UpdateTicket(c echo.Context) error {
 	db := database.GetDB()
 	id := c.Param("id")
@@ -117,14 +130,17 @@ func UpdateTicket(c echo.Context) error {
 	return c.JSON(http.StatusOK, ticket)
 }
 
-// @Summary		Supprime un ticket
-// @Description	Supprime un ticket par ID
-// @ID				delete-ticket
-// @Tags			Tickets
-// @Produce		json
-// @Param			id	path		string	true	"ID du ticket"	format(uuid)
-// @Success		200	{object}	models.Ticket
-// @Router			/tickets/{id} [delete]
+//	@Summary		Supprime un ticket
+//	@Description	Supprime un ticket par ID
+//	@ID				delete-ticket
+//	@Tags			Tickets
+//	@Produce		json
+//	@Param			id	path		string	true	"ID du ticket"	format(uuid)
+//	@Success		204	{object}	models.Ticket
+//	@Failure		404	{object}	string
+//	@Failure		500	{object}	string
+//	@Router			/tickets/{id} [delete]
+//	@Security		Bearer
 func DeleteTicket(c echo.Context) error {
 	db := database.GetDB()
 	id := c.Param("id")
@@ -139,6 +155,16 @@ func DeleteTicket(c echo.Context) error {
 	return c.JSON(http.StatusOK, ticket)
 }
 
+//	@Summary		Récupère les tickets d'un utilisateur
+//	@Description	Récupère les tickets d'un utilisateur
+//	@ID				get-user-tickets
+//	@Tags			Tickets
+//	@Produce		json
+//	@Success		200	{array}		models.Ticket
+//	@Failure		401	{object}	string
+//	@Failure		500	{object}	string
+//	@Router			/tickets/mytickets [get]
+//	@Security		Bearer
 func GetUserTickets(c echo.Context) error {
 	db := database.GetDB()
 	authHeader := c.Request().Header.Get("Authorization")

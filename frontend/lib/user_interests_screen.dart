@@ -156,9 +156,10 @@ class UserInterestsScreenState extends State<UserInterestsScreen> {
                 child: Column(
                   children: [
                     Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 40.0),
+                      padding: const EdgeInsets.symmetric(horizontal: 50.0),
                       child: Text(
                         translate(context)!.my_interests,
+                        textAlign: TextAlign.center,
                         style: const TextStyle(
                           fontSize: 24,
                           fontWeight: FontWeight.bold,
@@ -202,9 +203,10 @@ class UserInterestsScreenState extends State<UserInterestsScreen> {
                 child: Column(
                   children: [
                     Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 40.0),
+                      padding: const EdgeInsets.symmetric(horizontal: 50.0),
                       child: Text(
                         translate(context)!.my_interests,
+                        textAlign: TextAlign.center,
                         style: const TextStyle(
                           fontSize: 24,
                           fontWeight: FontWeight.bold,
@@ -250,9 +252,10 @@ class UserInterestsScreenState extends State<UserInterestsScreen> {
               child: Column(
                 children: [
                   Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 40.0),
+                    padding: const EdgeInsets.symmetric(horizontal: 50.0),
                     child: Text(
                       translate(context)!.my_interests,
+                      textAlign: TextAlign.center,
                       style: const TextStyle(
                         fontSize: 24,
                         fontWeight: FontWeight.bold,

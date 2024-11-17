@@ -104,6 +104,8 @@ class _LogsScreenState extends State<LogsScreen> with SingleTickerProviderStateM
         bottom: TabBar(
           controller: _tabController,
           isScrollable: true,
+          labelColor: Colors.deepOrange,
+          indicatorColor: Colors.deepOrange,
           tabs: const [
             Tab(text: "Tous les logs"),
             Tab(text: "Tickets réservés"),
@@ -181,7 +183,14 @@ class _LogsScreenState extends State<LogsScreen> with SingleTickerProviderStateM
                 subtitle: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text("Heure : ${(log.time).toLocal()}"),
+                    Text(
+                        "Heure : ${log.time.toLocal().toIso8601String().split('T')[1].substring(0, 8)}",
+                        style: const TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                            color: Colors.deepOrange
+                        )
+                    ),
                     if (log.level != null) Text("Niveau : ${log.level}"),
                     if (log.method != null) Text("Méthode : ${log.method}"),
                     if (log.status != null) Text("Statut : ${log.status}"),

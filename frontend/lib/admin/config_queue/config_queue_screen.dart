@@ -112,10 +112,27 @@ class _ConfigQueueScreenState extends State<ConfigQueueScreen> {
                       labelText: translate(context)!.nb_max_users_queue,
                     ),
                   ),
-                  const SizedBox(height: 20),
-                  ElevatedButton(
-                    onPressed: _updateValue,
-                    child: Text(translate(context)!.update),
+                  Padding(
+                    padding: const EdgeInsets.only(top: 15.0),
+                    child: SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton(
+                        onPressed: _updateValue,
+                        style: ElevatedButton.styleFrom(
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(6.0),
+                          ),
+                          backgroundColor: Colors.deepOrange,
+                        ),
+                        child: Text(
+                          translate(context)!.update,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontFamily: 'Readex Pro',
+                          ),
+                        ),
+                      ),
+                    ),
                   ),
                 ],
               ),

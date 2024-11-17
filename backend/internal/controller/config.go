@@ -10,6 +10,18 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
+// @Summary		Récupérer la valeur d'une configuration
+// @Description	Récupérer la valeur d'une configuration
+// @ID				get-config
+// @Tags			Configurations
+// @Produce		json
+// @Param			key	path	string	true	"Clé de la configuration"
+// @Success		200	{object}	map[string]string
+// @Failure		400	"default"
+// @Failure		404	"default"
+// @Failure		500	"default"
+// @Router			/config/{key} [get]
+// @Security		Bearer
 func GetConfigValue(c echo.Context) error {
 	key := c.Param("key")
 	if key != "CONCERTS_MAX_USERS_BEFORE_QUEUE" {
@@ -29,6 +41,19 @@ func GetConfigValue(c echo.Context) error {
 	return c.JSON(http.StatusOK, map[string]string{"value": value})
 }
 
+// @Summary		Mettre à jour la valeur d'une configuration
+// @Description	Mettre à jour la valeur d'une configuration
+// @ID				update-config
+// @Tags			Configurations
+// @Accept			json
+// @Produce		json
+// @Param			key	path	string	true	"Clé de la configuration"
+// @Param			value	body	string	true	"Valeur de la configuration"
+// @Success		200	{object}	map[string]string
+// @Failure		400	"default"
+// @Failure		500	"default"
+// @Router			/config/{key} [patch]
+// @Security		Bearer
 func UpdateConfigValue(c echo.Context) error {
 	key := c.Param("key")
 	if key != "CONCERTS_MAX_USERS_BEFORE_QUEUE" {

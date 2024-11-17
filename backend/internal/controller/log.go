@@ -33,6 +33,18 @@ type LogEntry struct {
 	BytesOut     int    `json:"bytes_out,omitempty"`
 }
 
+// @Summary		Récupérer les logs
+// @Description	Récupérer les logs
+// @ID				get-logs
+// @Tags			Logs
+// @Produce		json
+// @Param			date	query	string	false	"Date des logs (format: 2006-01-02)"
+// @Param			event	query	string	false	"Type d'événement à filtrer"
+// @Success		200	{array}	LogEntry
+// @Failure		400	"default"
+// @Failure		500	"default"
+// @Router			/logs [get]
+// @Security		Bearer
 func GetLogs(c echo.Context) error {
 	dateParam := c.QueryParam("date")
 	eventType := c.QueryParam("event")

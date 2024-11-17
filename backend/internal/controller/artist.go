@@ -11,13 +11,15 @@ import (
 	"gorm.io/gorm"
 )
 
-// @Summary		Récupère tous les artistes
-// @Description	Récupère tous les artistes
-// @ID				get-all-artists
-// @Tags			Artists
-// @Produce		json
-// @Success		200	{array}	models.Artist
-// @Router			/artists [get]
+//	@Summary		Récupère tous les artistes
+//	@Description	Récupère tous les artistes
+//	@ID				get-all-artists
+//	@Tags			Artists
+//	@Produce		json
+//	@Success		200	{array}		models.Artist
+//	@Failure		500	{object}	string
+//	@Router			/artists [get]
+//	@Security		Bearer
 func GetAllArtists(c echo.Context) error {
 	db := database.GetDB()
 	var artists []models.Artist
@@ -25,14 +27,16 @@ func GetAllArtists(c echo.Context) error {
 	return c.JSON(http.StatusOK, artists)
 }
 
-// @Summary		Récupère un artiste
-// @Description	Récupère un artiste par ID
-// @ID				get-artist
-// @Tags			Artists
-// @Produce		json
-// @Param			id	path		int	true	"ID de l'artiste"
-// @Success		200	{object}	models.Artist
-// @Router			/artists/{id} [get]
+//	@Summary		Récupère un artiste
+//	@Description	Récupère un artiste par ID
+//	@ID				get-artist
+//	@Tags			Artists
+//	@Produce		json
+//	@Param			id	path		string	true	"ID de l'artiste"	format(uuid)
+//	@Success		200	{object}	models.Artist
+//	@Failure		404	{object}	string
+//	@Failure		500	{object}	string
+//	@Router			/artists/{id} [get]
 func GetArtist(c echo.Context) error {
 	db := database.GetDB()
 	id := c.Param("id")
@@ -46,13 +50,15 @@ func GetArtist(c echo.Context) error {
 	return c.JSON(http.StatusOK, artist)
 }
 
-// @Summary		Créé un artiste
-// @Description	Créé un artiste
-// @ID				create-artist
-// @Tags			Artists
-// @Produce		json
-// @Success		200	{array}	models.Artist
-// @Router			/artists [post]
+//	@Summary		Créé un artiste
+//	@Description	Créé un artiste
+//	@ID				create-artist
+//	@Tags			Artists
+//	@Produce		json
+//	@Success		201	{array}		models.Artist
+//	@Failure		500	{object}	string
+//	@Router			/artists [post]
+//	@Security		Bearer
 func CreateArtist(c echo.Context) error {
 	db := database.GetDB()
 	artist := new(models.Artist)
@@ -96,14 +102,18 @@ type ArtistPatchInput struct {
 	Name string `json:"name"`
 }
 
-// @Summary		Met à jour un artiste
-// @Description	Met à jour un artiste par ID
-// @ID				update-artist
-// @Tags			Artists
-// @Produce		json
-// @Param			id	path		int	true	"ID de l'artiste"
-// @Success		200	{object}	models.Artist
-// @Router			/artists/{id} [patch]
+//	@Summary		Met à jour un artiste
+//	@Description	Met à jour un artiste par ID
+//	@ID				update-artist
+//	@Tags			Artists
+//	@Produce		json
+//	@Param			id		path		string				true	"ID de l'artiste"	format(uuid)
+//	@Param			artist	body		ArtistPatchInput	true	"Nom de l'artiste"
+//	@Success		200		{object}	models.Artist
+//	@Failure		404		{object}	string
+//	@Failure		500		{object}	string
+//	@Router			/artists/{id} [patch]
+//	@Security		Bearer
 func UpdateArtist(c echo.Context) error {
 	db := database.GetDB()
 	id := c.Param("id")
@@ -154,14 +164,17 @@ func UpdateArtist(c echo.Context) error {
 	return c.JSON(http.StatusOK, artist)
 }
 
-// @Summary		Supprime un artiste
-// @Description	Supprime un artiste par ID
-// @ID				delete-artist
-// @Tags			Artists
-// @Produce		json
-// @Param			id	path		int	true	"ID de l'artiste"
-// @Success		200	{object}	models.Artist
-// @Router			/artists/{id} [delete]
+//	@Summary		Supprime un artiste
+//	@Description	Supprime un artiste par ID
+//	@ID				delete-artist
+//	@Tags			Artists
+//	@Produce		json
+//	@Param			id	path		string	true	"ID de l'artiste"	format(uuid)
+//	@Success		204	{object}	models.Artist
+//	@Failure		404	{object}	string
+//	@Failure		500	{object}	string
+//	@Router			/artists/{id} [delete]
+//	@Security		Bearer
 func DeleteArtist(c echo.Context) error {
 	db := database.GetDB()
 	id := c.Param("id")

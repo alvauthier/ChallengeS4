@@ -33,6 +33,11 @@ import (
 //	@host		localhost:8080
 //	@BasePath	/
 
+//	@securityDefinitions.apikey	Bearer
+//	@in							header
+//	@name						Authorization
+//	@description				Provide your JWT token in the format: Bearer {token}
+
 func main() {
 	fmt.Println("Starting server...")
 
@@ -138,7 +143,7 @@ func main() {
 	authenticated.PATCH("/concerts/:id", controller.UpdateConcert, middleware.CheckRole("organizer", "admin"))
 	authenticated.DELETE("/concerts/:id", controller.DeleteConcert, middleware.CheckRole("organizer", "admin"))
 	authenticated.GET("/organization/concerts", controller.GetConcertByOrganizationID, middleware.CheckRole("organizer", "admin"))
-	router.GET("/concerts/artists/:id", controller.GetConcertsByArtistID)
+	router.GET("/concerts/artist/:id", controller.GetConcertsByArtistID)
 
 	authenticated.GET("/user/interests", controller.GetUserInterests, middleware.CheckRole("user"))
 	authenticated.POST("/user/interests/:id", controller.AddUserInterest, middleware.CheckRole("user", "organizer", "admin"))
@@ -165,7 +170,7 @@ func main() {
 
 	authenticated.GET("/logs", controller.GetLogs, middleware.CheckRole("admin"))
 	authenticated.GET("/config/:key", controller.GetConfigValue, middleware.CheckRole("admin"))
-	authenticated.POST("/config/:key", controller.UpdateConfigValue, middleware.CheckRole("admin"))
+	authenticated.PATCH("/config/:key", controller.UpdateConfigValue, middleware.CheckRole("admin"))
 
 	// router.Start(":8080")
 	server := &http.Server{

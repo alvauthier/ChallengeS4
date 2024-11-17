@@ -11,14 +11,18 @@ import (
 	"gorm.io/gorm"
 )
 
-// GetConversation @Summary		Récupère une conversation
+// @Summary		Récupère une conversation
 // @Description	Récupère une conversation par ID
 // @ID				get-conversation
 // @Tags			Conversations
 // @Produce		json
 // @Param			id	path		string	true	"ID de la conversation"	format(uuid)
 // @Success		200	{object}	models.Conversation
+// @Failure		401	{object}	string
+// @Failure		404	{object}	string
+// @Failure		500	{object}	string
 // @Router			/conversations/{id} [get]
+// @Security		Bearer
 func GetConversation(c echo.Context) error {
 	db := database.GetDB()
 	id := c.Param("id")
@@ -80,21 +84,25 @@ func GetConversation(c echo.Context) error {
 			"Location": concert.Location,
 			"Image":    concert.Image,
 		},
-        "TicketListing": conversation.TicketListing,
+		"TicketListing": conversation.TicketListing,
 	}
 
 	return c.JSON(http.StatusOK, response)
 }
 
-// CreateConversation @Summary		Créé une conversation
+// @Summary		Créé une conversation
 // @Description	Créé une conversation
 // @ID				create-conversation
 // @Tags			Conversations
-// @Accept		json
+// @Accept			json
 // @Produce		json
 // @Param			conversation	body		object	true	"Conversation à créer"
-// @Success		200	{object}	models.Conversation
+// @Success		201				{object}	models.Conversation
+// @Failure		400				{object}	string
+// @Failure		401				{object}	string
+// @Failure		500				{object}	string
 // @Router			/conversations [post]
+// @Security		Bearer
 func CreateConversation(c echo.Context) error {
 	db := database.GetDB()
 
@@ -164,6 +172,18 @@ type CheckConversationResponse struct {
 	Price           float64          `json:"price"`
 }
 
+// @Summary		Vérifie si une conversation existe
+// @Description	Vérifie si une conversation existe
+// @ID				check-conversation
+// @Tags			Conversations
+// @Accept			json
+// @Produce		json
+// @Param			ticket_listing_id	query	CheckConversationRequest	true	"Request"
+// @Success		200				{object}	string "ID" "ID de la conversation"
+// @Failure		400				{object}	string
+// @Failure		500				{object}	string
+// @Router			/conversations/check [get]
+// @Security		Bearer
 func CheckConversation(c echo.Context) error {
 	fmt.Println("CheckConversation")
 	var req CheckConversationRequest
@@ -186,6 +206,21 @@ func CheckConversation(c echo.Context) error {
 	return c.JSON(http.StatusOK, map[string]string{"ID": conversation.ID.String()})
 }
 
+// @Summary		Met à jour une conversation
+// @Description	Met à jour une conversation
+// @ID				update-conversation
+// @Tags			Conversations
+// @Accept			json
+// @Produce		json
+// @Param			id	path		string	true	"ID de la conversation"	format(uuid)
+// @Param			conversation	body		float64	true	"Price"
+// @Success		200				{object}	models.Conversation
+// @Failure		400				{object}	string
+// @Failure		401				{object}	string
+// @Failure		404				{object}	string
+// @Failure		500				{object}	string
+// @Router			/conversations/{id} [patch]
+// @Security		Bearer
 func UpdateConversation(c echo.Context) error {
 	db := database.GetDB()
 	id := c.Param("id")

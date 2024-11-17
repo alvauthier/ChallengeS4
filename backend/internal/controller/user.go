@@ -22,13 +22,15 @@ import (
 	"gorm.io/gorm"
 )
 
-// @Summary		Récupère tous les utilisateurs
-// @Description	Récupère tous les utilisateurs
-// @ID				get-all-users
-// @Tags			Users
-// @Produce		json
-// @Success		200	{array}	models.User
-// @Router			/users [get]
+//	@Summary		Récupère tous les utilisateurs
+//	@Description	Récupère tous les utilisateurs
+//	@ID				get-all-users
+//	@Tags			Users
+//	@Produce		json
+//	@Success		200	{array}		map[string]interface{}
+//	@Failure		500	{object}	error
+//	@Router			/users [get]
+//	@Security		Bearer
 func GetAllUsers(c echo.Context) error {
 	db := database.GetDB()
 
@@ -40,14 +42,17 @@ func GetAllUsers(c echo.Context) error {
 	return c.JSON(http.StatusOK, users)
 }
 
-// @Summary		Récupère un utilisateur
-// @Description	Récupère un utilisateur par ID
-// @ID				get-user
-// @Tags			Users
-// @Produce		json
-// @Param			id	path		string	true	"ID de l'utilisateur"	format(uuid)
-// @Success		200	{object}	models.User
-// @Router			/users/{id} [get]
+//	@Summary		Récupère un utilisateur
+//	@Description	Récupère un utilisateur par ID
+//	@ID				get-user
+//	@Tags			Users
+//	@Produce		json
+//	@Param			id	path		string	true	"ID de l'utilisateur"	format(uuid)
+//	@Success		200	{object}	map[string]interface{}
+//	@Failure		404	{object}	error
+//	@Failure		500	{object}	string
+//	@Router			/users/{id} [get]
+//	@Security		Bearer
 func GetUser(c echo.Context) error {
 	db := database.GetDB()
 
@@ -98,13 +103,17 @@ type RegisterRequest struct {
 	Image     string `json:"image"`
 }
 
-// @Summary		Créé un utilisateur
-// @Description	Créé un utilisateur
-// @ID				create-user
-// @Tags			Users
-// @Produce		json
-// @Success		201	{object}	models.User
-// @Router			/register [post]
+//	@Summary		Créé un utilisateur
+//	@Description	Créé un utilisateur
+//	@ID				create-user
+//	@Tags			Users
+//	@Produce		json
+//	@Param			formData	body		RegisterRequest			true	"Requête de création d'utilisateur"
+//	@Success		201			{object}	map[string]interface{}	"OK"	"example":	{ "ID": "uuid", "email": "user@example.com", "firstname": "John", "lastname": "Doe", "role": "user", "image": "image.jpg" }
+//	@Failure		422			{object}	error
+//	@Failure		500			{object}	string
+//	@Router			/register [post]
+//	@Example		{ "ID": "uuid", "email": "user@example.com", "firstname": "John", "lastname": "Doe", "role": "user", "image": "image.jpg" }
 func Register(c echo.Context) error {
 	db := database.GetDB()
 
@@ -201,6 +210,16 @@ type RequestPayload struct {
 	Image                   string `json:"image"`
 }
 
+//	@Summary		Créé une organisation et son utilisateur
+//	@Description	Créé une organisation et son utilisateur
+//	@ID				create-organization-user
+//	@Tags			Organization
+//	@Produce		json
+//	@Param			formData	body		RequestPayload		true	"Requête de création d'organisation et d'utilisateur"
+//	@Success		201			{object}	map[string]string	"OK"	{ "organization": { "ID": "uuid", "name": "Organization", "description": "Organization description" }, "user": {"ID": "uuid", "email": "user@example.com", "firstname": "John", "lastname": "Doe", "role": "organizer", "image": "image.jpg" } }
+//	@Failure		422			{object}	error
+//	@Failure		500			{object}	string
+//	@Router			/registerorganizer [post]
 func RegisterOrganizer(c echo.Context) error {
 	db := database.GetDB()
 
@@ -289,15 +308,16 @@ func RegisterOrganizer(c echo.Context) error {
 	})
 }
 
-// @Summary		Se connecter
-// @Description	Se connecter avec un email et un mot de passe
-// @ID				login
-// @Tags			Users
-// @Produce		json
-// @Param			email		query		string	true	"Email de l'utilisateur"
-// @Param			password	query		string	true	"Mot de passe de l'utilisateur"
-// @Success		200	{object}	models.User
-// @Router			/login [post]
+//	@Summary		Se connecter
+//	@Description	Se connecter avec un email et un mot de passe
+//	@ID				login
+//	@Tags			Users
+//	@Produce		json
+//	@Param			email		query		string				true	"Email de l'utilisateur"
+//	@Param			password	query		string				true	"Mot de passe de l'utilisateur"
+//	@Success		200			{object}	map[string]string	"OK"	{ "access_token": "token", "refresh_token": "token" }
+//	@Failure		500			{object}	string
+//	@Router			/login [post]
 func Login(c echo.Context) error {
 	db := database.GetDB()
 
@@ -335,14 +355,18 @@ func Login(c echo.Context) error {
 	})
 }
 
-// @Summary		Modifie un utilisateur
-// @Description	Modifie un utilisateur par ID
-// @ID				update-user
-// @Tags			Users
-// @Produce		json
-// @Param			id	path		string	true	"ID de l'utilisateur"	format(uuid)
-// @Success		200	{object}	models.User
-// @Router			/users/{id} [patch]
+//	@Summary		Modifie un utilisateur
+//	@Description	Modifie un utilisateur par ID
+//	@ID				update-user
+//	@Tags			Users
+//	@Produce		json
+//	@Param			id			path		string				true	"ID de l'utilisateur"	format(uuid)
+//	@Param			formData	body		map[string]string	true	"Requête de modification d'utilisateur"
+//	@Success		200			{object}	map[string]string
+//	@Failure		404			{object}	error
+//	@Failure		500			{object}	string
+//	@Router			/users/{id} [patch]
+//	@Security		Bearer
 func UpdateUser(c echo.Context) error {
 	db := database.GetDB()
 
@@ -458,14 +482,16 @@ func UpdateUser(c echo.Context) error {
 	return c.JSON(http.StatusOK, user)
 }
 
-// @Summary		Supprime un utilisateur
-// @Description	Supprime un utilisateur par ID
-// @ID				delete-user
-// @Tags			Users
-// @Produce		json
-// @Param			id	path	string	true	"ID de l'utilisateur"	format(uuid)
-// @Success		204
-// @Router			/users/{id} [delete]
+//	@Summary		Supprime un utilisateur
+//	@Description	Supprime un utilisateur par ID
+//	@ID				delete-user
+//	@Tags			Users
+//	@Produce		json
+//	@Param			id	path	string	true	"ID de l'utilisateur"	format(uuid)
+//	@Success		204
+//	@Failure		500	{object}	string
+//	@Router			/users/{id} [delete]
+//	@Security		Bearer
 func DeleteUser(c echo.Context) error {
 	db := database.GetDB()
 
@@ -556,6 +582,16 @@ func verifyToken(tokenString string) (jwt.MapClaims, error) {
 	return *claims, nil
 }
 
+//	@Summary		Récupère un nouvel access token
+//	@Description	Récupère un nouvel access token à partir d'un refresh token
+//	@ID				refresh-user
+//	@Tags			Users
+//	@Produce		json
+//	@Param			refresh_token	body	string	true	"Refresh token"
+//	@Success		200
+//	@Failure		401
+//	@Failure		500	{object}	string
+//	@Router			/refresh [post]
 func RefreshAccessToken(c echo.Context) error {
 	var requestBody map[string]string
 	if err := c.Bind(&requestBody); err != nil {
@@ -617,6 +653,16 @@ type ForgotPasswordRequest struct {
 	Email string `json:"email"`
 }
 
+//	@Summary		Envoie un email de réinitialisation de mot de passe
+//	@Description	Envoie un email de réinitialisation de mot de passe
+//	@ID				forgot-password
+//	@Tags			Users
+//	@Produce		json
+//	@Param			email	query	string	true	"Email de l'utilisateur"
+//	@Success		200
+//	@Failure		400
+//	@Failure		500	{object}	string
+//	@Router			/forgot-password [post]
 func EmailForgotPassword(c echo.Context) error {
 	req := new(ForgotPasswordRequest)
 	if err := c.Bind(req); err != nil {
@@ -709,6 +755,19 @@ func EmailForgotPassword(c echo.Context) error {
 	return c.JSON(http.StatusOK, map[string]string{"message": "Ok"})
 }
 
+//	@Summary		Réinitialise le mot de passe
+//	@Description	Réinitialise le mot de passe avec un code de réinitialisation
+//	@ID				reset-password
+//	@Tags			Users
+//	@Produce		json
+//	@Param			reset_code		query		string	true	"Code de réinitialisation"
+//	@Param			new_password	query		string	true	"Nouveau mot de passe"
+//	@Success		200				{object}	string
+//	@Failure		400				{object}	string
+//	@Failure		401				{object}	string
+//	@Failure		404				{object}	string
+//	@Failure		500				{object}	string
+//	@Router			/reset-password [post]
 func ResetPassword(c echo.Context) error {
 	var requestBody map[string]string
 	if err := c.Bind(&requestBody); err != nil {
@@ -731,10 +790,6 @@ func ResetPassword(c echo.Context) error {
 		}
 		return c.JSON(http.StatusInternalServerError, map[string]string{"message": err.Error()})
 	}
-
-	// if user.ResetCode != resetCode {
-	// 	return c.JSON(http.StatusUnauthorized, map[string]string{"message": "Invalid reset code"})
-	// }
 
 	if user.ResetCodeExpiration.Before(time.Now()) {
 		return c.JSON(http.StatusUnauthorized, map[string]string{"message": "Reset code expired"})

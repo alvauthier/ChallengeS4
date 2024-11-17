@@ -11,6 +11,15 @@ import (
 	"gorm.io/gorm"
 )
 
+// @Summary		Get all ticket listings
+// @Description	Get all ticket listings
+// @Tags			Ticket listing
+// @Accept			json
+// @Produce		json
+// @Success		200	{array}		models.TicketListing
+// @Failure		500	{object}	map[string]string
+// @Router			/ticketlistings [get]
+// @Security		Bearer
 func GetAllTicketListings(c echo.Context) error {
 	db := database.GetDB()
 	var ticketListing []models.TicketListing
@@ -18,6 +27,17 @@ func GetAllTicketListings(c echo.Context) error {
 	return c.JSON(http.StatusOK, ticketListing)
 }
 
+// @Summary		Get ticket listing by ID
+// @Description	Get ticket listing by ID
+// @Tags			Ticket listing
+// @Accept			json
+// @Produce		json
+// @Param			id	path		string	true	"TicketListing ID"
+// @Success		200	{object}	models.TicketListing
+// @Failure		404	{object}	map[string]string
+// @Failure		500	{object}	map[string]string
+// @Router			/ticketlistings/{id} [get]
+// @Security		Bearer
 func GetTicketListings(c echo.Context) error {
 	db := database.GetDB()
 	id := c.Param("id")
@@ -31,6 +51,16 @@ func GetTicketListings(c echo.Context) error {
 	return c.JSON(http.StatusOK, ticketListing)
 }
 
+// @Summary		Get ticket listing by concert ID
+// @Description	Get ticket listing by concert ID
+// @Tags			Ticket listing
+// @Accept			json
+// @Produce		json
+// @Param			id	path		string	true	"Concert ID"
+// @Success		200	{array}		models.TicketListing
+// @Failure		500	{object}	map[string]string
+// @Router			/ticketlistings/concert/{id} [get]
+// @Security		Bearer
 func GetTicketListingByConcertId(c echo.Context) error {
 	db := database.GetDB()
 	concertId := c.Param("id")
@@ -44,6 +74,19 @@ func GetTicketListingByConcertId(c echo.Context) error {
 	return c.JSON(http.StatusOK, ticketListings)
 }
 
+// @Summary		Create ticket listings
+// @Description	Create ticket listings
+// @Tags			Ticket listing
+// @Accept			json
+// @Produce		json
+// @Param			ticketId	body		string	true	"Ticket ID"
+// @Param			price		body		float64	true	"Price"
+// @Success		201			{object}	models.TicketListing
+// @Failure		400			{object}	map[string]string
+// @Failure		401			{object}	map[string]string
+// @Failure		500			{object}	map[string]string
+// @Router			/ticketlistings [post]
+// @Security		Bearer
 func CreateTicketListings(c echo.Context) error {
 	db := database.GetDB()
 
@@ -94,27 +137,41 @@ func CreateTicketListings(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, map[string]string{"error": "Price exceeds the original ticket price"})
 	}
 
-    var existingListing models.TicketListing
-    if err := db.Where("ticket_id = ? AND status = ?", reqBody.TicketId, "available").First(&existingListing).Error; err == nil {
-        return c.JSON(http.StatusConflict, map[string]string{"error": "Ticket listing already exists with status available"})
-    }
+	var existingListing models.TicketListing
+	if err := db.Where("ticket_id = ? AND status = ?", reqBody.TicketId, "available").First(&existingListing).Error; err == nil {
+		return c.JSON(http.StatusConflict, map[string]string{"error": "Ticket listing already exists with status available"})
+	}
 
-    newListing := models.TicketListing{
-        ID:        uuid.New(),
-        Price:     reqBody.Price,
-        Status:    "available",
-        CreatedAt: time.Now(),
-        UpdatedAt: time.Now(),
-        TicketId:  reqBody.TicketId,
-    }
+	newListing := models.TicketListing{
+		ID:        uuid.New(),
+		Price:     reqBody.Price,
+		Status:    "available",
+		CreatedAt: time.Now(),
+		UpdatedAt: time.Now(),
+		TicketId:  reqBody.TicketId,
+	}
 
-    if err := db.Create(&newListing).Error; err != nil {
-        return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to create ticket listing"})
-    }
+	if err := db.Create(&newListing).Error; err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to create ticket listing"})
+	}
 
 	return c.JSON(http.StatusOK, newListing)
 }
 
+// @Summary		Update ticket listing
+// @Description	Update ticket listing
+// @Tags			Ticket listing
+// @Accept			json
+// @Produce		json
+// @Param			id		path		string	true	"TicketListing ID"
+// @Param			price	body		float64	false	"Price"
+// @Param			status	body		string	false	"Status"
+// @Success		200		{object}	models.TicketListing
+// @Failure		400		{object}	map[string]string
+// @Failure		404		{object}	map[string]string
+// @Failure		500		{object}	map[string]string
+// @Router			/ticketlistings/{id} [patch]
+// @Security		Bearer
 func UpdateTicketListing(c echo.Context) error {
 	db := database.GetDB()
 	id := c.Param("id")
@@ -148,6 +205,17 @@ func UpdateTicketListing(c echo.Context) error {
 	return c.JSON(http.StatusOK, ticketListing)
 }
 
+// @Summary		Delete ticket listing
+// @Description	Delete ticket listing
+// @Tags			Ticket listing
+// @Accept			json
+// @Produce		json
+// @Param			id	path	string	true	"TicketListing ID"
+// @Success		204
+// @Failure		404	{object}	map[string]string
+// @Failure		500	{object}	map[string]string
+// @Router			/ticketlistings/{id} [delete]
+// @Security		Bearer
 func DeleteTicketListing(c echo.Context) error {
 	db := database.GetDB()
 	id := c.Param("id")

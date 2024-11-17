@@ -67,7 +67,7 @@ class _ConfigQueueScreenState extends State<ConfigQueueScreen> {
       final tokenService = TokenService();
       String? jwtToken = await tokenService.getAccessToken();
       final apiUrl = '${dotenv.env['API_PROTOCOL']}://${dotenv.env['API_HOST']}${dotenv.env['API_PORT']}/config/CONCERTS_MAX_USERS_BEFORE_QUEUE';
-      final response = await http.post(
+      final response = await http.patch(
         Uri.parse(apiUrl),
         headers: {
           'Accept': 'application/json; charset=UTF-8',

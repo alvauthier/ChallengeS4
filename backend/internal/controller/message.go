@@ -1,29 +1,27 @@
 package controller
 
 import (
-	"github.com/google/uuid"
-	"github.com/labstack/echo/v4"
 	"net/http"
 	"weezemaster/internal/database"
 	"weezemaster/internal/models"
+
+	"github.com/google/uuid"
+	"github.com/labstack/echo/v4"
 )
 
-// PostMessage @Summary		Créer un message
-// @Description	Créer un message
-// @ID				post-message
-// @Tags			Messages
-// @Produce		json
-// @Param			message	body		models.Message	true	"Message"
-// @Success		201	{object}	models.Message
-// @Router			/messages [post]
-// PostMessage @Summary		Créer un message
-// @Description	Créer un message
-// @ID				post-message
-// @Tags			Messages
-// @Produce		json
-// @Param			message	body		models.Message	true	"Message"
-// @Success		201	{object}	models.Message
-// @Router			/messages [post]
+//	 @Summary		Créer un message
+//		@Description	Créer un message
+//		@ID				post-message
+//		@Tags			Messages
+//		@Produce		json
+//		@Param			content		body		string		true	"Contenu du message"
+//		@Param			conversation_id	body		string	true	"Message" format(uuid)
+//		@Success		201		{object}	models.Message
+//		@Failure		400	    {object}	string
+//		@Failure		401		{object}	string
+//		@Failure		500		{object}	string
+//		@Router			/messages [post]
+//		@Security		Bearer
 func PostMessage(c echo.Context) error {
 	db := database.GetDB()
 	var newMessage models.Message

@@ -38,6 +38,13 @@ type PriceUpdatePayload struct {
 }
 
 // HandleWebSocket gère les connexions WebSocket pour toutes les conversations
+// @Summary Gérer les connexions WebSocket pour le chat
+// @Description Gère les connexions WebSocket pour le chat entre les utilisateurs
+// @ID handle-websocket-chat
+// @Tags WebSockets
+// @Accept json
+// @Success 101 {string} string "Switching Protocols"
+// @Router /ws-chat [get]
 func HandleWebSocketChat(c echo.Context) error {
 	conn, err := upgrader.Upgrade(c.Response(), c.Request(), nil)
 	if err != nil {

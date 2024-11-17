@@ -10,48 +10,53 @@ import (
 	"gorm.io/gorm"
 )
 
-// @Summary		Récupère tous les centres d'intérêts
-// @Description	Récupère tous les centres d'intérêts
-// @ID				get-all-interests
-// @Tags			Interests
-// @Produce		json
-// @Success		200	{array}	models.Interest
-// @Router			/interests [get]
+//	@Summary		Récupère tous les centres d'intérêts
+//	@Description	Récupère tous les centres d'intérêts
+//	@ID				get-all-interests
+//	@Tags			Interests
+//	@Produce		json
+//	@Success		200	{array}		models.Interest
+//	@Failure		500	{object}	string
+//	@Router			/interests [get]
+//	@Security		Bearer
 func GetAllInterests(c echo.Context) error {
-    db := database.GetDB()
-    var interests []models.Interest
-    db.Find(&interests)
+	db := database.GetDB()
+	var interests []models.Interest
+	db.Find(&interests)
 
-    var artists []models.Artist
-    db.Preload("Interest").Find(&artists)
+	var artists []models.Artist
+	db.Preload("Interest").Find(&artists)
 
-    // Créer une map pour stocker les intérêts des artistes
-    artistInterests := make(map[int]struct{})
-    for _, artist := range artists {
-        if artist.Interest != nil {
-            artistInterests[artist.Interest.ID] = struct{}{}
-        }
-    }
+	// Créer une map pour stocker les intérêts des artistes
+	artistInterests := make(map[int]struct{})
+	for _, artist := range artists {
+		if artist.Interest != nil {
+			artistInterests[artist.Interest.ID] = struct{}{}
+		}
+	}
 
-    // Filtrer les intérêts pour enlever ceux des artistes
-    filteredInterests := []models.Interest{}
-    for _, interest := range interests {
-        if _, exists := artistInterests[interest.ID]; !exists {
-            filteredInterests = append(filteredInterests, interest)
-        }
-    }
+	// Filtrer les intérêts pour enlever ceux des artistes
+	filteredInterests := []models.Interest{}
+	for _, interest := range interests {
+		if _, exists := artistInterests[interest.ID]; !exists {
+			filteredInterests = append(filteredInterests, interest)
+		}
+	}
 
-    return c.JSON(http.StatusOK, filteredInterests)
+	return c.JSON(http.StatusOK, filteredInterests)
 }
 
-// @Summary		Récupère un centre d'intérêt
-// @Description	Récupère un centre d'intérêt par ID
-// @ID				get-interest
-// @Tags			Interests
-// @Produce		json
-// @Param			id	path		int	true	"ID du centre d'intérêt"
-// @Success		200	{object}	models.Interest
-// @Router			/interests/{id} [get]
+//	@Summary		Récupère un centre d'intérêt
+//	@Description	Récupère un centre d'intérêt par ID
+//	@ID				get-interest
+//	@Tags			Interests
+//	@Produce		json
+//	@Param			id	path		int	true	"ID du centre d'intérêt"
+//	@Success		200	{object}	models.Interest
+//	@Failure		404	{object}	string
+//	@Failure		500	{object}	string
+//	@Router			/interests/{id} [get]
+//	@Security		Bearer
 func GetInterest(c echo.Context) error {
 	db := database.GetDB()
 	id := c.Param("id")
@@ -60,13 +65,18 @@ func GetInterest(c echo.Context) error {
 	return c.JSON(http.StatusOK, interest)
 }
 
-// @Summary		Créé un centre d'intérêt
-// @Description	Créé un centre d'intérêt
-// @ID				create-interest
-// @Tags			Interests
-// @Produce		json
-// @Success		200	{array}	models.Interest
-// @Router			/interests [post]
+//	@Summary		Créé un centre d'intérêt
+//	@Description	Créé un centre d'intérêt
+//	@ID				create-interest
+//	@Tags			Interests
+//	@Produce		json
+//	@Param			interest	body		models.Interest	true	"Centre d'intérêt à créer"
+//	@Success		201			{array}		models.Interest
+//	@Failure		400			{object}	string
+//	@Failure		401			{object}	string
+//	@Failure		500			{object}	string
+//	@Router			/interests [post]
+//	@Security		Bearer
 func CreateInterest(c echo.Context) error {
 	db := database.GetDB()
 	interest := new(models.Interest)
@@ -81,14 +91,20 @@ type InterestPatchInput struct {
 	Name *string `json:"name"`
 }
 
-// @Summary		Modifie un centre d'intérêt
-// @Description	Modifie un centre d'intérêt par ID
-// @ID				update-interest
-// @Tags			Interests
-// @Produce		json
-// @Param			id	path		int	true	"ID du centre d'intérêt"
-// @Success		200	{object}	models.Interest
-// @Router			/interests/{id} [patch]
+//	@Summary		Modifie un centre d'intérêt
+//	@Description	Modifie un centre d'intérêt par ID
+//	@ID				update-interest
+//	@Tags			Interests
+//	@Produce		json
+//	@Param			id			path		int					true	"ID du centre d'intérêt"
+//	@Param			interest	body		InterestPatchInput	true	"Centre d'intérêt à modifier"
+//	@Success		200			{object}	models.Interest
+//	@Failure		400			{object}	string
+//	@Failure		401			{object}	string
+//	@Failure		404			{object}	string
+//	@Failure		500			{object}	string
+//	@Router			/interests/{id} [patch]
+//	@Security		Bearer
 func UpdateInterest(c echo.Context) error {
 	db := database.GetDB()
 	id := c.Param("id")
@@ -114,14 +130,18 @@ func UpdateInterest(c echo.Context) error {
 	return c.JSON(http.StatusOK, interest)
 }
 
-// @Summary		Supprime un centre d'intérêt
-// @Description	Supprime un centre d'intérêt par ID
-// @ID				delete-interest
-// @Tags			Interests
-// @Produce		json
-// @Param			id	path		int	true	"ID du centre d'intérêt"
-// @Success		204
-// @Router			/interests/{id} [delete]
+//	@Summary		Supprime un centre d'intérêt
+//	@Description	Supprime un centre d'intérêt par ID
+//	@ID				delete-interest
+//	@Tags			Interests
+//	@Produce		json
+//	@Param			id	path	int	true	"ID du centre d'intérêt"
+//	@Success		204
+//	@Failure		401	{object}	string
+//	@Failure		404	{object}	string
+//	@Failure		500	{object}	string
+//	@Router			/interests/{id} [delete]
+//	@Security		Bearer
 func DeleteInterest(c echo.Context) error {
 	db := database.GetDB()
 	id := c.Param("id")
@@ -131,6 +151,16 @@ func DeleteInterest(c echo.Context) error {
 	return c.NoContent(http.StatusNoContent)
 }
 
+//	@Summary		Récupère les centres d'intérêt de l'utilisateur
+//	@Description	Récupère les centres d'intérêt de l'utilisateur
+//	@ID				get-user-interests
+//	@Tags			Interests
+//	@Produce		json
+//	@Success		200	{array}		models.Interest
+//	@Failure		401	{object}	string
+//	@Failure		500	{object}	string
+//	@Router			/user/interests [get]
+//	@Security		Bearer
 func GetUserInterests(c echo.Context) error {
 	db := database.GetDB()
 	authHeader := c.Request().Header.Get("Authorization")
@@ -166,6 +196,18 @@ func GetUserInterests(c echo.Context) error {
 	return c.JSON(http.StatusOK, userInterests)
 }
 
+//	@Summary		Ajoute un centre d'intérêt à l'utilisateur
+//	@Description	Ajoute un centre d'intérêt à l'utilisateur
+//	@ID				add-user-interest
+//	@Tags			Interests
+//	@Produce		json
+//	@Param			id	path		int	true	"ID du centre d'intérêt"
+//	@Success		200	{object}	models.Interest
+//	@Failure		401	{object}	string
+//	@Failure		404	{object}	string
+//	@Failure		500	{object}	string
+//	@Router			/user/interests/{id} [post]
+//	@Security		Bearer
 func AddUserInterest(c echo.Context) error {
 	db := database.GetDB()
 	authHeader := c.Request().Header.Get("Authorization")
@@ -209,6 +251,18 @@ func AddUserInterest(c echo.Context) error {
 	return c.JSON(http.StatusOK, interest)
 }
 
+//	@Summary		Supprime un centre d'intérêt de l'utilisateur
+//	@Description	Supprime un centre d'intérêt de l'utilisateur
+//	@ID				remove-user-interest
+//	@Tags			Interests
+//	@Produce		json
+//	@Param			id	path	int	true	"ID du centre d'intérêt"
+//	@Success		204
+//	@Failure		401	{object}	string
+//	@Failure		404	{object}	string
+//	@Failure		500	{object}	string
+//	@Router			/user/interests/{id} [delete]
+//	@Security		Bearer
 func RemoveUserInterest(c echo.Context) error {
 	db := database.GetDB()
 	authHeader := c.Request().Header.Get("Authorization")

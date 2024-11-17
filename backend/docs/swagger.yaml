@@ -1,5 +1,138 @@
 basePath: /
 definitions:
+  controller.ArtistPatchInput:
+    properties:
+      name:
+        type: string
+    type: object
+  controller.CategoryPatchInput:
+    properties:
+      name:
+        type: string
+    type: object
+  controller.CreatePaymentIntentRequest:
+    properties:
+      id:
+        type: string
+    type: object
+  controller.InterestPatchInput:
+    properties:
+      name:
+        type: string
+    type: object
+  controller.LogEntry:
+    properties:
+      bytes_in:
+        type: integer
+      bytes_out:
+        type: integer
+      error:
+        type: string
+      event:
+        type: string
+      host:
+        type: string
+      id:
+        type: string
+      latency:
+        type: integer
+      latency_human:
+        type: string
+      level:
+        type: string
+      message:
+        type: string
+      method:
+        type: string
+      prefix:
+        type: string
+      remote_ip:
+        type: string
+      status:
+        type: integer
+      time:
+        type: string
+      uri:
+        type: string
+      user_agent:
+        type: string
+      user_id:
+        type: string
+    type: object
+  controller.Message:
+    properties:
+      concertId:
+        type: string
+      isFirstMessage:
+        type: boolean
+      position:
+        type: integer
+      status:
+        type: string
+    type: object
+  controller.RegisterRequest:
+    properties:
+      email:
+        type: string
+      firstname:
+        type: string
+      image:
+        type: string
+      lastname:
+        type: string
+      password:
+        type: string
+    type: object
+  controller.RequestPayload:
+    properties:
+      email:
+        type: string
+      firstname:
+        type: string
+      image:
+        type: string
+      lastname:
+        type: string
+      orgadescri:
+        type: string
+      organization:
+        type: string
+      password:
+        type: string
+    type: object
+  controller.TicketPatchInput:
+    properties:
+      concert_category_id:
+        type: string
+      ticketListings:
+        items:
+          $ref: '#/definitions/models.TicketListing'
+        type: array
+      user_id:
+        type: string
+    type: object
+  models.Artist:
+    properties:
+      concerts:
+        items:
+          $ref: '#/definitions/models.Concert'
+        type: array
+      createdAt:
+        type: string
+      deletedAt:
+        type: string
+      id:
+        description: gorm.Model
+        type: string
+      interest:
+        $ref: '#/definitions/models.Interest'
+      interestId:
+        type: integer
+      name:
+        type: string
+      updatedAt:
+        type: string
+    type: object
   models.Category:
     properties:
       concertCategories:
@@ -20,6 +153,10 @@ definitions:
     type: object
   models.Concert:
     properties:
+      artist:
+        $ref: '#/definitions/models.Artist'
+      artistId:
+        type: string
       concertCategories:
         items:
           $ref: '#/definitions/models.ConcertCategory'
@@ -34,6 +171,8 @@ definitions:
         type: string
       id:
         description: gorm.Model
+        type: string
+      image:
         type: string
       interests:
         items:
@@ -52,12 +191,16 @@ definitions:
     type: object
   models.ConcertCategory:
     properties:
+      availableTickets:
+        type: integer
       category:
         $ref: '#/definitions/models.Category'
       categoryId:
         type: integer
       concert:
-        $ref: '#/definitions/models.Concert'
+        allOf:
+        - $ref: '#/definitions/models.Concert'
+        description: Tickets          []Ticket `gorm:"-"`
       concertId:
         type: string
       createdAt:
@@ -67,10 +210,10 @@ definitions:
       id:
         description: gorm.Model
         type: string
-      nbTickets:
-        type: integer
       price:
         type: number
+      soldTickets:
+        type: integer
       tickets:
         items:
           $ref: '#/definitions/models.Ticket'
@@ -95,6 +238,12 @@ definitions:
         items:
           $ref: '#/definitions/models.Message'
         type: array
+      price:
+        type: number
+      seller:
+        $ref: '#/definitions/models.User'
+      sellerId:
+        type: string
       ticketListing:
         $ref: '#/definitions/models.TicketListing'
       ticketListingId:
@@ -165,6 +314,8 @@ definitions:
       id:
         description: gorm.Model
         type: string
+      image:
+        type: string
       name:
         type: string
       updatedAt:
@@ -213,8 +364,12 @@ definitions:
       id:
         description: gorm.Model
         type: string
-      ticketListing:
-        $ref: '#/definitions/models.TicketListing'
+      maxPrice:
+        type: number
+      ticketListings:
+        items:
+          $ref: '#/definitions/models.TicketListing'
+        type: array
       updatedAt:
         type: string
       user:
@@ -233,7 +388,15 @@ definitions:
       deletedAt:
         type: string
       id:
-        description: gorm.Model
+        description: |-
+          gorm.Model
+          ID            uuid.UUID       `gorm:"unique;type:uuid;primaryKey;default:uuid_generate_v4()" json:"id"`
+          Price         float64         `gorm:"not null" json:"price"`
+          Status        string          `gorm:"not null" json:"status"`
+          CreatedAt     time.Time       `json:"createdAt"`
+          UpdatedAt     time.Time       `json:"updatedAt"`
+          DeletedAt     *time.Time      `gorm:"index"`
+          TicketId      uuid.UUID       `gorm:"not null" json:"ticketId"`
         type: string
       price:
         type: number
@@ -250,7 +413,11 @@ definitions:
     type: object
   models.User:
     properties:
-      conversations:
+      conversationsAsBuyer:
+        items:
+          $ref: '#/definitions/models.Conversation'
+        type: array
+      conversationsAsSeller:
         items:
           $ref: '#/definitions/models.Conversation'
         type: array
@@ -280,6 +447,8 @@ definitions:
           required: true
           example: 123e4567-e89b-12d3-a456-426614174000
         type: string
+      image:
+        type: string
       interests:
         items:
           $ref: '#/definitions/models.Interest'
@@ -301,7 +470,7 @@ definitions:
         $ref: '#/definitions/models.Organization'
       organizationId:
         type: string
-      password:
+      resetCodeExpiration:
         type: string
       role:
         type: string
@@ -334,6 +503,144 @@ info:
   title: Weezemaster API
   version: "1.0"
 paths:
+  /artists:
+    get:
+      description: Récupère tous les artistes
+      operationId: get-all-artists
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.Artist'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      security:
+      - Bearer: []
+      summary: Récupère tous les artistes
+      tags:
+      - Artists
+    post:
+      description: Créé un artiste
+      operationId: create-artist
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            items:
+              $ref: '#/definitions/models.Artist'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      security:
+      - Bearer: []
+      summary: Créé un artiste
+      tags:
+      - Artists
+  /artists/{id}:
+    delete:
+      description: Supprime un artiste par ID
+      operationId: delete-artist
+      parameters:
+      - description: ID de l'artiste
+        format: uuid
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+          schema:
+            $ref: '#/definitions/models.Artist'
+        "404":
+          description: Not Found
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      security:
+      - Bearer: []
+      summary: Supprime un artiste
+      tags:
+      - Artists
+    get:
+      description: Récupère un artiste par ID
+      operationId: get-artist
+      parameters:
+      - description: ID de l'artiste
+        format: uuid
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Artist'
+        "404":
+          description: Not Found
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: Récupère un artiste
+      tags:
+      - Artists
+    patch:
+      description: Met à jour un artiste par ID
+      operationId: update-artist
+      parameters:
+      - description: ID de l'artiste
+        format: uuid
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Nom de l'artiste
+        in: body
+        name: artist
+        required: true
+        schema:
+          $ref: '#/definitions/controller.ArtistPatchInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Artist'
+        "404":
+          description: Not Found
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      security:
+      - Bearer: []
+      summary: Met à jour un artiste
+      tags:
+      - Artists
   /categories:
     get:
       description: Récupère toutes les catégories
@@ -347,6 +654,12 @@ paths:
             items:
               $ref: '#/definitions/models.Category'
             type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      security:
+      - Bearer: []
       summary: Récupère toutes les catégories
       tags:
       - Categories
@@ -362,6 +675,16 @@ paths:
             items:
               $ref: '#/definitions/models.Category'
             type: array
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      security:
+      - Bearer: []
       summary: Créé une catégorie
       tags:
       - Categories
@@ -380,6 +703,16 @@ paths:
       responses:
         "204":
           description: No Content
+        "404":
+          description: Not Found
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      security:
+      - Bearer: []
       summary: Supprime une catégorie
       tags:
       - Categories
@@ -399,6 +732,16 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/models.Category'
+        "404":
+          description: Not Found
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      security:
+      - Bearer: []
       summary: Récupère une catégorie
       tags:
       - Categories
@@ -411,6 +754,12 @@ paths:
         name: id
         required: true
         type: integer
+      - description: Nom de la catégorie
+        in: body
+        name: name
+        required: true
+        schema:
+          $ref: '#/definitions/controller.CategoryPatchInput'
       produces:
       - application/json
       responses:
@@ -418,6 +767,24 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/models.Category'
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "404":
+          description: Not Found
+          schema:
+            type: string
+        "422":
+          description: Unprocessable Entity
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      security:
+      - Bearer: []
       summary: Modifie une catégorie
       tags:
       - Categories
@@ -434,12 +801,22 @@ paths:
             items:
               $ref: '#/definitions/models.Concert'
             type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
       summary: Récupère tous les concerts
       tags:
       - Concerts
     post:
       description: Créé un concert
       operationId: create-concert
+      parameters:
+      - description: Nom du concert
+        in: formData
+        name: name
+        required: true
+        type: string
       produces:
       - application/json
       responses:
@@ -447,6 +824,24 @@ paths:
           description: Created
           schema:
             $ref: '#/definitions/models.Concert'
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+        "403":
+          description: Forbidden
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      security:
+      - Bearer: []
       summary: Créé un concert
       tags:
       - Concerts
@@ -466,6 +861,16 @@ paths:
       responses:
         "204":
           description: No Content
+        "404":
+          description: Not Found
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      security:
+      - Bearer: []
       summary: Supprime un concert
       tags:
       - Concerts
@@ -486,6 +891,14 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/models.Concert'
+        "404":
+          description: Not Found
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
       summary: Récupère un concert
       tags:
       - Concerts
@@ -499,6 +912,10 @@ paths:
         name: id
         required: true
         type: string
+      - description: Nom du concert
+        in: formData
+        name: name
+        type: string
       produces:
       - application/json
       responses:
@@ -506,9 +923,333 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/models.Concert'
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "404":
+          description: Not Found
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      security:
+      - Bearer: []
       summary: Modifie un concert
       tags:
       - Concerts
+  /concerts/artist/{id}:
+    get:
+      description: Récupère les concerts par ID d'artiste
+      operationId: get-concerts-by-artist-id
+      parameters:
+      - description: ID de l'artiste
+        format: uuid
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.Concert'
+            type: array
+        "404":
+          description: Not Found
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: Récupère les concerts par ID d'artiste
+      tags:
+      - Concerts
+  /config/{key}:
+    get:
+      description: Récupérer la valeur d'une configuration
+      operationId: get-config
+      parameters:
+      - description: Clé de la configuration
+        in: path
+        name: key
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: default
+        "404":
+          description: default
+        "500":
+          description: default
+      security:
+      - Bearer: []
+      summary: Récupérer la valeur d'une configuration
+      tags:
+      - Configurations
+    patch:
+      consumes:
+      - application/json
+      description: Mettre à jour la valeur d'une configuration
+      operationId: update-config
+      parameters:
+      - description: Clé de la configuration
+        in: path
+        name: key
+        required: true
+        type: string
+      - description: Valeur de la configuration
+        in: body
+        name: value
+        required: true
+        schema:
+          type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: default
+        "500":
+          description: default
+      security:
+      - Bearer: []
+      summary: Mettre à jour la valeur d'une configuration
+      tags:
+      - Configurations
+  /conversations:
+    post:
+      consumes:
+      - application/json
+      description: Créé une conversation
+      operationId: create-conversation
+      parameters:
+      - description: Conversation à créer
+        in: body
+        name: conversation
+        required: true
+        schema:
+          type: object
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.Conversation'
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      security:
+      - Bearer: []
+      summary: Créé une conversation
+      tags:
+      - Conversations
+  /conversations/{id}:
+    get:
+      description: Récupère une conversation par ID
+      operationId: get-conversation
+      parameters:
+      - description: ID de la conversation
+        format: uuid
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Conversation'
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+        "404":
+          description: Not Found
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      security:
+      - Bearer: []
+      summary: Récupère une conversation
+      tags:
+      - Conversations
+    patch:
+      consumes:
+      - application/json
+      description: Met à jour une conversation
+      operationId: update-conversation
+      parameters:
+      - description: ID de la conversation
+        format: uuid
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Price
+        in: body
+        name: conversation
+        required: true
+        schema:
+          type: number
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Conversation'
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+        "404":
+          description: Not Found
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      security:
+      - Bearer: []
+      summary: Met à jour une conversation
+      tags:
+      - Conversations
+  /conversations/check:
+    get:
+      consumes:
+      - application/json
+      description: Vérifie si une conversation existe
+      operationId: check-conversation
+      parameters:
+      - in: query
+        name: buyer_id
+        type: string
+      - in: query
+        name: ticket_listing_id
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: ID" "ID de la conversation
+          schema:
+            type: string
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      security:
+      - Bearer: []
+      summary: Vérifie si une conversation existe
+      tags:
+      - Conversations
+  /create-payment-intent:
+    post:
+      consumes:
+      - application/json
+      description: Create a payment intent
+      operationId: create-payment-intent
+      parameters:
+      - description: Request body
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/controller.CreatePaymentIntentRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - Bearer: []
+      summary: Create a payment intent
+      tags:
+      - Payment
+  /forgot-password:
+    post:
+      description: Envoie un email de réinitialisation de mot de passe
+      operationId: forgot-password
+      parameters:
+      - description: Email de l'utilisateur
+        in: query
+        name: email
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: Envoie un email de réinitialisation de mot de passe
+      tags:
+      - Users
   /interests:
     get:
       description: Récupère tous les centres d'intérêts
@@ -522,21 +1263,48 @@ paths:
             items:
               $ref: '#/definitions/models.Interest'
             type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      security:
+      - Bearer: []
       summary: Récupère tous les centres d'intérêts
       tags:
       - Interests
     post:
       description: Créé un centre d'intérêt
       operationId: create-interest
+      parameters:
+      - description: Centre d'intérêt à créer
+        in: body
+        name: interest
+        required: true
+        schema:
+          $ref: '#/definitions/models.Interest'
       produces:
       - application/json
       responses:
-        "200":
-          description: OK
+        "201":
+          description: Created
           schema:
             items:
               $ref: '#/definitions/models.Interest'
             type: array
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      security:
+      - Bearer: []
       summary: Créé un centre d'intérêt
       tags:
       - Interests
@@ -555,6 +1323,20 @@ paths:
       responses:
         "204":
           description: No Content
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+        "404":
+          description: Not Found
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      security:
+      - Bearer: []
       summary: Supprime un centre d'intérêt
       tags:
       - Interests
@@ -574,6 +1356,16 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/models.Interest'
+        "404":
+          description: Not Found
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      security:
+      - Bearer: []
       summary: Récupère un centre d'intérêt
       tags:
       - Interests
@@ -586,6 +1378,12 @@ paths:
         name: id
         required: true
         type: integer
+      - description: Centre d'intérêt à modifier
+        in: body
+        name: interest
+        required: true
+        schema:
+          $ref: '#/definitions/controller.InterestPatchInput'
       produces:
       - application/json
       responses:
@@ -593,6 +1391,24 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/models.Interest'
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+        "404":
+          description: Not Found
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      security:
+      - Bearer: []
       summary: Modifie un centre d'intérêt
       tags:
       - Interests
@@ -615,26 +1431,886 @@ paths:
       - application/json
       responses:
         "200":
-          description: OK
+          description: "OK\"\t{ \"access_token\": \"token\", \"refresh_token\": \"token\"
+            }"
           schema:
-            $ref: '#/definitions/models.User'
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
       summary: Se connecter
       tags:
       - Users
-  /register:
+  /logs:
+    get:
+      description: Récupérer les logs
+      operationId: get-logs
+      parameters:
+      - description: 'Date des logs (format: 2006-01-02)'
+        in: query
+        name: date
+        type: string
+      - description: Type d'événement à filtrer
+        in: query
+        name: event
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/controller.LogEntry'
+            type: array
+        "400":
+          description: default
+        "500":
+          description: default
+      security:
+      - Bearer: []
+      summary: Récupérer les logs
+      tags:
+      - Logs
+  /messages:
     post:
-      description: Créé un utilisateur
-      operationId: create-user
+      description: Créer un message
+      operationId: post-message
+      parameters:
+      - description: Contenu du message
+        in: body
+        name: content
+        required: true
+        schema:
+          type: string
+      - description: Message
+        format: uuid
+        in: body
+        name: conversation_id
+        required: true
+        schema:
+          type: string
       produces:
       - application/json
       responses:
         "201":
           description: Created
           schema:
-            $ref: '#/definitions/models.User'
+            $ref: '#/definitions/models.Message'
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      security:
+      - Bearer: []
+      summary: Créer un message
+      tags:
+      - Messages
+  /organization/concerts:
+    get:
+      description: Récupère les concerts par ID d'organisation
+      operationId: get-concerts-by-organization-id
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.Concert'
+            type: array
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+        "403":
+          description: Forbidden
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      security:
+      - Bearer: []
+      summary: Récupère les concerts par ID d'organisation
+      tags:
+      - Concerts
+  /refresh:
+    post:
+      description: Récupère un nouvel access token à partir d'un refresh token
+      operationId: refresh-user
+      parameters:
+      - description: Refresh token
+        in: body
+        name: refresh_token
+        required: true
+        schema:
+          type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "401":
+          description: Unauthorized
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: Récupère un nouvel access token
+      tags:
+      - Users
+  /register:
+    post:
+      description: Créé un utilisateur
+      operationId: create-user
+      parameters:
+      - description: Requête de création d'utilisateur
+        in: body
+        name: formData
+        required: true
+        schema:
+          $ref: '#/definitions/controller.RegisterRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: "OK\"\t\"example\":\t{ \"ID\": \"uuid\", \"email\": \"user@example.com\",
+            \"firstname\": \"John\", \"lastname\": \"Doe\", \"role\": \"user\", \"image\":
+            \"image.jpg\" }"
+          schema:
+            additionalProperties: true
+            type: object
+        "422":
+          description: Unprocessable Entity
+          schema: {}
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
       summary: Créé un utilisateur
       tags:
       - Users
+  /registerorganizer:
+    post:
+      description: Créé une organisation et son utilisateur
+      operationId: create-organization-user
+      parameters:
+      - description: Requête de création d'organisation et d'utilisateur
+        in: body
+        name: formData
+        required: true
+        schema:
+          $ref: '#/definitions/controller.RequestPayload'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: "OK\"\t{ \"organization\": { \"ID\": \"uuid\", \"name\": \"Organization\",
+            \"description\": \"Organization description\" }, \"user\": {\"ID\": \"uuid\",
+            \"email\": \"user@example.com\", \"firstname\": \"John\", \"lastname\":
+            \"Doe\", \"role\": \"organizer\", \"image\": \"image.jpg\" } }"
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "422":
+          description: Unprocessable Entity
+          schema: {}
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: Créé une organisation et son utilisateur
+      tags:
+      - Organization
+  /reservation:
+    post:
+      consumes:
+      - application/json
+      description: Create a reservation for a concert category
+      operationId: create-reservation
+      parameters:
+      - description: Id de la catégorie de concert
+        format: uuid
+        in: body
+        name: body
+        required: true
+        schema:
+          type: string
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.Ticket'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - Bearer: []
+      summary: Create a reservation
+      tags:
+      - Reservation
+  /reset-password:
+    post:
+      description: Réinitialise le mot de passe avec un code de réinitialisation
+      operationId: reset-password
+      parameters:
+      - description: Code de réinitialisation
+        in: query
+        name: reset_code
+        required: true
+        type: string
+      - description: Nouveau mot de passe
+        in: query
+        name: new_password
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+        "404":
+          description: Not Found
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: Réinitialise le mot de passe
+      tags:
+      - Users
+  /ticket_listing_reservation/{id}:
+    post:
+      consumes:
+      - application/json
+      description: Create a reservation for a ticket listing
+      operationId: create-ticket-listing-reservation
+      parameters:
+      - description: Ticket listing ID
+        format: uuid
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Id du ticket listing
+        format: uuid
+        in: body
+        name: body
+        required: true
+        schema:
+          type: string
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.Sale'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - Bearer: []
+      summary: Create a ticket listing reservation
+      tags:
+      - Reservation
+  /ticket_listing_reservation_conversation/{id}:
+    post:
+      consumes:
+      - application/json
+      description: Create a reservation for a ticket listing from a conversation
+      operationId: create-ticket-listing-reservation-from-conversation
+      parameters:
+      - description: Conversation ID
+        format: uuid
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: id de la conversation
+        format: uuid
+        in: body
+        name: body
+        required: true
+        schema:
+          type: string
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.Sale'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - Bearer: []
+      summary: Create a ticket listing reservation from conversation
+      tags:
+      - Reservation
+  /ticketlistings:
+    get:
+      consumes:
+      - application/json
+      description: Get all ticket listings
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.TicketListing'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - Bearer: []
+      summary: Get all ticket listings
+      tags:
+      - Ticket listing
+    post:
+      consumes:
+      - application/json
+      description: Create ticket listings
+      parameters:
+      - description: Ticket ID
+        in: body
+        name: ticketId
+        required: true
+        schema:
+          type: string
+      - description: Price
+        in: body
+        name: price
+        required: true
+        schema:
+          type: number
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.TicketListing'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - Bearer: []
+      summary: Create ticket listings
+      tags:
+      - Ticket listing
+  /ticketlistings/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete ticket listing
+      parameters:
+      - description: TicketListing ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - Bearer: []
+      summary: Delete ticket listing
+      tags:
+      - Ticket listing
+    get:
+      consumes:
+      - application/json
+      description: Get ticket listing by ID
+      parameters:
+      - description: TicketListing ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.TicketListing'
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - Bearer: []
+      summary: Get ticket listing by ID
+      tags:
+      - Ticket listing
+    patch:
+      consumes:
+      - application/json
+      description: Update ticket listing
+      parameters:
+      - description: TicketListing ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Price
+        in: body
+        name: price
+        schema:
+          type: number
+      - description: Status
+        in: body
+        name: status
+        schema:
+          type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.TicketListing'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - Bearer: []
+      summary: Update ticket listing
+      tags:
+      - Ticket listing
+  /ticketlistings/concert/{id}:
+    get:
+      consumes:
+      - application/json
+      description: Get ticket listing by concert ID
+      parameters:
+      - description: Concert ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.TicketListing'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - Bearer: []
+      summary: Get ticket listing by concert ID
+      tags:
+      - Ticket listing
+  /tickets:
+    get:
+      description: Récupère tous les tickets
+      operationId: get-all-tickets
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.Ticket'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      security:
+      - Bearer: []
+      summary: Récupère tous les tickets
+      tags:
+      - Tickets
+    post:
+      description: Créé un ticket
+      operationId: create-ticket
+      parameters:
+      - description: Ticket à créer
+        in: body
+        name: ticket
+        required: true
+        schema:
+          $ref: '#/definitions/models.Ticket'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.Ticket'
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      security:
+      - Bearer: []
+      summary: Créé un ticket
+      tags:
+      - Tickets
+  /tickets/{id}:
+    delete:
+      description: Supprime un ticket par ID
+      operationId: delete-ticket
+      parameters:
+      - description: ID du ticket
+        format: uuid
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+          schema:
+            $ref: '#/definitions/models.Ticket'
+        "404":
+          description: Not Found
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      security:
+      - Bearer: []
+      summary: Supprime un ticket
+      tags:
+      - Tickets
+    get:
+      description: Récupère un ticket par ID
+      operationId: get-ticket
+      parameters:
+      - description: ID du ticket
+        format: uuid
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Ticket'
+        "404":
+          description: Not Found
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      security:
+      - Bearer: []
+      summary: Récupère un ticket
+      tags:
+      - Tickets
+    patch:
+      description: Modifie un ticket par ID
+      operationId: update-ticket
+      parameters:
+      - description: ID du ticket
+        format: uuid
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Champs à modifier
+        in: body
+        name: ticket
+        required: true
+        schema:
+          $ref: '#/definitions/controller.TicketPatchInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Ticket'
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "404":
+          description: Not Found
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      security:
+      - Bearer: []
+      summary: Modifie un ticket
+      tags:
+      - Tickets
+  /tickets/mytickets:
+    get:
+      description: Récupère les tickets d'un utilisateur
+      operationId: get-user-tickets
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.Ticket'
+            type: array
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      security:
+      - Bearer: []
+      summary: Récupère les tickets d'un utilisateur
+      tags:
+      - Tickets
+  /user/interests:
+    get:
+      description: Récupère les centres d'intérêt de l'utilisateur
+      operationId: get-user-interests
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.Interest'
+            type: array
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      security:
+      - Bearer: []
+      summary: Récupère les centres d'intérêt de l'utilisateur
+      tags:
+      - Interests
+  /user/interests/{id}:
+    delete:
+      description: Supprime un centre d'intérêt de l'utilisateur
+      operationId: remove-user-interest
+      parameters:
+      - description: ID du centre d'intérêt
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+        "404":
+          description: Not Found
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      security:
+      - Bearer: []
+      summary: Supprime un centre d'intérêt de l'utilisateur
+      tags:
+      - Interests
+    post:
+      description: Ajoute un centre d'intérêt à l'utilisateur
+      operationId: add-user-interest
+      parameters:
+      - description: ID du centre d'intérêt
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Interest'
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+        "404":
+          description: Not Found
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      security:
+      - Bearer: []
+      summary: Ajoute un centre d'intérêt à l'utilisateur
+      tags:
+      - Interests
   /users:
     get:
       description: Récupère tous les utilisateurs
@@ -646,8 +2322,14 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/models.User'
+              additionalProperties: true
+              type: object
             type: array
+        "500":
+          description: Internal Server Error
+          schema: {}
+      security:
+      - Bearer: []
       summary: Récupère tous les utilisateurs
       tags:
       - Users
@@ -667,6 +2349,12 @@ paths:
       responses:
         "204":
           description: No Content
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      security:
+      - Bearer: []
       summary: Supprime un utilisateur
       tags:
       - Users
@@ -686,7 +2374,17 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/models.User'
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema: {}
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      security:
+      - Bearer: []
       summary: Récupère un utilisateur
       tags:
       - Users
@@ -700,14 +2398,99 @@ paths:
         name: id
         required: true
         type: string
+      - description: Requête de modification d'utilisateur
+        in: body
+        name: formData
+        required: true
+        schema:
+          additionalProperties:
+            type: string
+          type: object
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/models.User'
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema: {}
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      security:
+      - Bearer: []
       summary: Modifie un utilisateur
       tags:
       - Users
+  /ws-chat:
+    get:
+      consumes:
+      - application/json
+      description: Gère les connexions WebSocket pour le chat entre les utilisateurs
+      operationId: handle-websocket-chat
+      responses:
+        "101":
+          description: Switching Protocols
+          schema:
+            type: string
+      summary: Gérer les connexions WebSocket pour le chat
+      tags:
+      - WebSockets
+  /ws-community:
+    get:
+      consumes:
+      - application/json
+      description: Gère les connexions WebSocket pour les chats des artistes
+      operationId: websocket-community
+      parameters:
+      - description: ID de l'artiste
+        format: uuid
+        in: query
+        name: artistId
+        required: true
+        type: string
+      responses:
+        "101":
+          description: Switching Protocols
+          schema:
+            type: string
+      summary: Gère les connexions WebSocket pour les chats des artistes
+      tags:
+      - WebSockets
+  /ws-queue:
+    get:
+      description: Gère les connexions WebSocket pour la file d'attente des concerts
+      operationId: handle-websocket-queue
+      parameters:
+      - description: ID du concert
+        format: uuid
+        in: query
+        name: concertId
+        required: true
+        type: string
+      - description: ID de l'utilisateur
+        format: uuid
+        in: query
+        name: userId
+        required: true
+        type: string
+      responses:
+        "101":
+          description: Switching Protocols
+          schema:
+            $ref: '#/definitions/controller.Message'
+      summary: Gère les connexions WebSocket pour la file d'attente des concerts
+      tags:
+      - WebSockets
+securityDefinitions:
+  Bearer:
+    description: 'Provide your JWT token in the format: Bearer {token}'
+    in: header
+    name: Authorization
+    type: apiKey
 swagger: "2.0"

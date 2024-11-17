@@ -54,6 +54,14 @@ func getMaxUsers() int {
 }
 
 // HandleWebSocketQueue gère les connexions WebSocket pour la file d'attente des concerts
+// @Summary Gère les connexions WebSocket pour la file d'attente des concerts
+// @Description Gère les connexions WebSocket pour la file d'attente des concerts
+// @ID handle-websocket-queue
+// @Tags WebSockets
+// @Param concertId query string true "ID du concert" format(uuid)
+// @Param userId query string true "ID de l'utilisateur" format(uuid)
+// @Success 101 {object} Message
+// @Router /ws-queue [get]
 func HandleWebSocketQueue(c echo.Context) error {
 	concertID := c.QueryParam("concertId")
 	userID := c.QueryParam("userId")

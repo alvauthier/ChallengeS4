@@ -425,7 +425,7 @@ class ConcertScreen extends StatelessWidget {
                 left: 10.0,
                 child: FloatingActionButton(
                   child: const Icon(Icons.arrow_back),
-                  onPressed: () => GoRouter.of(context).go(Routes.homeNamedPage),
+                  onPressed: () => context.pop(),
                 ),
               ),
             ],

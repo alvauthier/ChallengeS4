@@ -14,30 +14,6 @@ func LoadInterestFixtures() {
 			Name: "Taylor Swift",
 		},
 		{
-			Name: "Ed Sheeran",
-		},
-		{
-			Name: "Werenoi",
-		},
-		{
-			Name: "Mickeal Jackson",
-		},
-		{
-			Name: "Queen",
-		},
-		{
-			Name: "The Beatles",
-		},
-		{
-			Name: "The Rolling Stones",
-		},
-		{
-			Name: "Elton John",
-		},
-		{
-			Name: "David Bowie",
-		},
-		{
 			Name: "Rock",
 		},
 		{

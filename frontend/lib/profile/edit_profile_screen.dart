@@ -120,12 +120,15 @@ class EditProfileScreenState extends State<EditProfileScreen> {
                             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 30),
                             child: Column(
                               children: [
-                                Text(
-                                  translate(context)!.edit_profile,
-                                  style: const TextStyle(
-                                    fontSize: 28,
-                                    fontWeight: FontWeight.bold,
-                                    fontFamily: 'Readex Pro',
+                                Padding(
+                                  padding: const EdgeInsets.symmetric(horizontal: 40.0),
+                                  child: Text(
+                                    translate(context)!.edit_profile,
+                                    style: const TextStyle(
+                                      fontSize: 24,
+                                      fontWeight: FontWeight.bold,
+                                      fontFamily: 'Readex Pro',
+                                    ),
                                   ),
                                 ),
                                 const SizedBox(height: 40),
@@ -142,12 +145,15 @@ class EditProfileScreenState extends State<EditProfileScreen> {
                             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 30),
                             child: Column(
                               children: [
-                                Text(
-                                  translate(context)!.edit_profile,
-                                  style: const TextStyle(
-                                    fontSize: 28,
-                                    fontWeight: FontWeight.bold,
-                                    fontFamily: 'Readex Pro',
+                                Padding(
+                                  padding: const EdgeInsets.symmetric(horizontal: 40.0),
+                                  child: Text(
+                                    translate(context)!.edit_profile,
+                                    style: const TextStyle(
+                                      fontSize: 24,
+                                      fontWeight: FontWeight.bold,
+                                      fontFamily: 'Readex Pro',
+                                    ),
                                   ),
                                 ),
                                 const SizedBox(height: 40),
@@ -167,12 +173,15 @@ class EditProfileScreenState extends State<EditProfileScreen> {
                               key: _formKey,
                               child: Column(
                                 children: [
-                                  Text(
-                                    translate(context)!.edit_profile,
-                                    style: const TextStyle(
-                                      fontSize: 28,
-                                      fontWeight: FontWeight.bold,
-                                      fontFamily: 'Readex Pro',
+                                  Padding(
+                                    padding: const EdgeInsets.symmetric(horizontal: 40.0),
+                                    child: Text(
+                                      translate(context)!.edit_profile,
+                                      style: const TextStyle(
+                                        fontSize: 24,
+                                        fontWeight: FontWeight.bold,
+                                        fontFamily: 'Readex Pro',
+                                      ),
                                     ),
                                   ),
                                   const SizedBox(height: 40),

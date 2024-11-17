@@ -320,7 +320,7 @@ func UpdateConcert(c echo.Context) error {
         // Générer un UUID pour le nom du fichier
         fileUUID := uuid.New().String()
         fileName := fileUUID + fileExtension
-        filePath := filepath.Join("uploads", "users", fileName)
+        filePath := filepath.Join("uploads", "concerts", fileName)
 
         // Créer le dossier uploads/concerts s'il n'existe pas
         if err := os.MkdirAll(filepath.Dir(filePath), os.ModePerm); err != nil {

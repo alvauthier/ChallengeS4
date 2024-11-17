@@ -1,15 +1,35 @@
+import 'dart:convert';
+import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:weezemaster/core/services/api_services.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:weezemaster/core/models/user.dart';
+import 'package:weezemaster/core/services/token_services.dart';
 import 'blocs/users_bloc.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:http/http.dart' as http;
+import 'package:http_parser/http_parser.dart';
 
-class UsersScreen extends StatelessWidget {
+class UsersScreen extends StatefulWidget {
+  const UsersScreen({super.key});
+
+  @override
+  UsersScreenState createState() => UsersScreenState();
+}
+
+class UsersScreenState extends State<UsersScreen> {
   final TextEditingController _firstnameController = TextEditingController();
   final TextEditingController _lastnameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
 
-  UsersScreen({super.key});
+  File? _image;
+  String? _base64Image;
+  final picker = ImagePicker();
+
+  @override
+  void initState() {
+    super.initState();
+  }
 
   void _showUpdateDialog(BuildContext context, User user) {
     final usersBloc = context.read<UsersBloc>();
@@ -17,60 +37,151 @@ class UsersScreen extends StatelessWidget {
     _firstnameController.text = user.firstname;
     _lastnameController.text = user.lastname;
     _emailController.text = user.email;
+    _image = null;
+
+    Future<void> getImage() async {
+      final pickedImage = await picker.pickImage(source: ImageSource.gallery);
+      if (pickedImage != null) {
+        setState(() {
+          _image = File(pickedImage.path);
+          _base64Image = base64Encode(_image!.readAsBytesSync());
+        });
+      }
+    }
 
     showDialog(
       context: context,
       builder: (BuildContext dialogContext) {
-        return AlertDialog(
-          title: const Text('Modifier les informations de l\'utilisateur'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              TextField(
-                controller: _firstnameController,
-                decoration: const InputDecoration(labelText: 'Prénom'),
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return AlertDialog(
+              title: const Text('Modifier les informations de l\'utilisateur'),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  GestureDetector(
+                    onTap: () async {
+                      await getImage();
+                      setState(() {});
+                    },
+                    child: Stack(
+                      children: [
+                        ClipOval(
+                          child: _image != null
+                              ? Image.file(
+                            _image!,
+                            width: 120,
+                            height: 120,
+                            fit: BoxFit.cover,
+                          )
+                              : (user.image != ""
+                              ? Image.network(
+                            '${dotenv.env['API_PROTOCOL']}://${dotenv.env['API_HOST']}${dotenv.env['API_PORT']}/uploads/users/${user.image}',
+                            width: 120,
+                            height: 120,
+                            fit: BoxFit.cover,
+                          )
+                              : const Image(
+                            image: AssetImage("assets/user-placeholder.jpg"),
+                            width: 120,
+                            height: 120,
+                            fit: BoxFit.cover,
+                          )),
+                        ),
+                        Positioned(
+                          bottom: 0,
+                          right: 0,
+                          child: Container(
+                            width: 30,
+                            height: 30,
+                            decoration: const BoxDecoration(
+                              color: Colors.deepOrange,
+                              shape: BoxShape.circle,
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black26,
+                                  offset: Offset(0, 2),
+                                  blurRadius: 6.0,
+                                ),
+                              ],
+                            ),
+                            child: const Icon(
+                              Icons.edit,
+                              color: Colors.white,
+                              size: 16,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  TextField(
+                    controller: _firstnameController,
+                    decoration: const InputDecoration(labelText: 'Prénom'),
+                  ),
+                  const SizedBox(height: 8),
+                  TextField(
+                    controller: _lastnameController,
+                    decoration: const InputDecoration(labelText: 'Nom'),
+                  ),
+                  const SizedBox(height: 8),
+                  TextField(
+                    controller: _emailController,
+                    decoration: const InputDecoration(labelText: 'Email'),
+                  ),
+                ],
               ),
-              const SizedBox(height: 8),
-              TextField(
-                controller: _lastnameController,
-                decoration: const InputDecoration(labelText: 'Nom'),
-              ),
-              const SizedBox(height: 8),
-              TextField(
-                controller: _emailController,
-                decoration: const InputDecoration(labelText: 'Email'),
-              ),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(dialogContext).pop();
-              },
-              child: const Text('Annuler'),
-            ),
-            TextButton(
-              onPressed: () async {
-                try {
-                  await ApiServices.updateUser(
-                    user.id,
-                    _firstnameController.text,
-                    _lastnameController.text,
-                    _emailController.text,
-                  );
-                  Navigator.of(dialogContext).pop();
-                  usersBloc.add(UsersDataLoaded());
-                } catch (e) {
-                  print('An error occurred while updating user: $e');
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Failed to update user: $e')),
-                  );
-                }
-              },
-              child: const Text('Mettre à jour'),
-            ),
-          ],
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    Navigator.of(dialogContext).pop();
+                  },
+                  child: const Text('Annuler'),
+                ),
+                TextButton(
+                  onPressed: () async {
+                    try {
+                      final tokenService = TokenService();
+                      String? jwtToken = await tokenService.getValidAccessToken();
+
+                      var request = http.MultipartRequest(
+                        'PATCH',
+                        Uri.parse('${dotenv.env['API_PROTOCOL']}://${dotenv.env['API_HOST']}${dotenv.env['API_PORT']}/users/${user.id}'),
+                      );
+
+                      request.headers['Authorization'] = 'Bearer $jwtToken';
+
+                      request.fields['email'] = _emailController.text;
+                      request.fields['firstname'] = _firstnameController.text;
+                      request.fields['lastname'] = _lastnameController.text;
+
+                      if (_image != null) {
+                        request.files.add(
+                          await http.MultipartFile.fromPath(
+                            'image',
+                            _image!.path,
+                            contentType: MediaType('image', _image!.path.split('.').last),
+                          ),
+                        );
+                      }
+
+                      await request.send();
+
+                      Navigator.of(dialogContext).pop();
+                      usersBloc.add(UsersDataLoaded());
+                    } catch (e) {
+                      print('An error occurred while updating user: $e');
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text('Failed to update user: $e')),
+                      );
+                    }
+                  },
+                  child: const Text('Mettre à jour'),
+                ),
+              ],
+            );
+          },
         );
       },
     );

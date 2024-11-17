@@ -80,90 +80,80 @@ class RegisterScreenState extends State<RegisterScreen> {
                             ),
                           ),
                         ),
-                        Flexible(
-                          child: TextFormField(
-                            controller: _firstnameController,
-                            decoration: InputDecoration(
-                              labelText: translate(context)!.firstname,
-                              errorMaxLines: 3,
-                            ),
-                            validator: (value) {
-                              if (value == null || value.isEmpty) {
-                                return translate(context)!.firstname_empty;
-                              }
-                              return null;
-                            },
+                        TextFormField(
+                          controller: _firstnameController,
+                          decoration: InputDecoration(
+                            labelText: translate(context)!.firstname,
+                            errorMaxLines: 3,
                           ),
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return translate(context)!.firstname_empty;
+                            }
+                            return null;
+                          },
                         ),
-                        Flexible(
-                          child: TextFormField(
-                            controller: _lastnameController,
-                            decoration: InputDecoration(
-                              labelText: translate(context)!.lastname,
-                              errorMaxLines: 3,
-                            ),
-                            validator: (value) {
-                              if (value == null || value.isEmpty) {
-                                return translate(context)!.lastname_empty;
-                              }
-                              return null;
-                            },
+                        TextFormField(
+                          controller: _lastnameController,
+                          decoration: InputDecoration(
+                            labelText: translate(context)!.lastname,
+                            errorMaxLines: 3,
                           ),
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return translate(context)!.lastname_empty;
+                            }
+                            return null;
+                          },
                         ),
-                        Flexible(
-                          child: TextFormField(
-                            controller: _emailController,
-                            decoration: InputDecoration(
-                              labelText: translate(context)!.email,
-                              errorMaxLines: 3,
-                            ),
-                            validator: (value) {
-                              if (value == null || value.isEmpty) {
-                                return translate(context)!.email_empty;
-                              } else if (!emailRegExp.hasMatch(value)) {
-                                return translate(context)!.email_invalid;
-                              }
-                              return null;
-                            },
+                        TextFormField(
+                          controller: _emailController,
+                          decoration: InputDecoration(
+                            labelText: translate(context)!.email,
+                            errorMaxLines: 3,
                           ),
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return translate(context)!.email_empty;
+                            } else if (!emailRegExp.hasMatch(value)) {
+                              return translate(context)!.email_invalid;
+                            }
+                            return null;
+                          },
                         ),
-                        Flexible(
-                          child: TextFormField(
-                            controller: _passwordController,
-                            decoration: InputDecoration(
-                              labelText: translate(context)!.password,
-                              errorMaxLines: 3,
-                            ),
-                            obscureText: true,
-                            validator: (value) {
-                              if (value == null || value.isEmpty) {
-                                return translate(context)!.password_empty;
-                              } else if (!passwordRegExp.hasMatch(value)) {
-                                return translate(context)!.password_invalid;
-                              }
-                              return null;
-                            },
-                            autovalidateMode: AutovalidateMode.onUserInteraction,
+                        TextFormField(
+                          controller: _passwordController,
+                          decoration: InputDecoration(
+                            labelText: translate(context)!.password,
+                            errorMaxLines: 3,
                           ),
+                          obscureText: true,
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return translate(context)!.password_empty;
+                            } else if (!passwordRegExp.hasMatch(value)) {
+                              return translate(context)!.password_invalid;
+                            }
+                            return null;
+                          },
+                          autovalidateMode: AutovalidateMode.onUserInteraction,
                         ),
-                        Flexible(
-                          child: TextFormField(
-                            controller: _confirmPasswordController,
-                            decoration: InputDecoration(
-                              labelText: translate(context)!.confirm_password,
-                              errorMaxLines: 3,
-                            ),
-                            obscureText: true,
-                            validator: (value) {
-                              if (value == null || value.isEmpty) {
-                                return translate(context)!.confirm_password_empty;
-                              }
-                              if (value != _passwordController.text) {
-                                return translate(context)!.password_no_match;
-                              }
-                              return null;
-                            },
+                        TextFormField(
+                          controller: _confirmPasswordController,
+                          decoration: InputDecoration(
+                            labelText: translate(context)!.confirm_password,
+                            errorMaxLines: 3,
                           ),
+                          obscureText: true,
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return translate(context)!.confirm_password_empty;
+                            }
+                            if (value != _passwordController.text) {
+                              return translate(context)!.password_no_match;
+                            }
+                            return null;
+                          },
                         ),
                         Padding(
                           padding: const EdgeInsets.only(top: 15.0),

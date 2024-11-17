@@ -197,7 +197,7 @@ class ConcertScreen extends StatelessWidget {
                                     child: Text(
                                       '${state.concert.artist.name} : ${state.concert.name}',
                                       style: const TextStyle(
-                                        fontSize: 30,
+                                        fontSize: 24,
                                         fontFamily: 'Readex Pro',
                                         fontWeight: FontWeight.w700,
                                       ),
@@ -240,7 +240,7 @@ class ConcertScreen extends StatelessWidget {
                                   child: Text(
                                     translate(context)!.about_event,
                                     style: const TextStyle(
-                                      fontSize: 25,
+                                      fontSize: 24,
                                       fontFamily: 'Readex Pro',
                                       fontWeight: FontWeight.w600,
                                     ),
@@ -283,7 +283,7 @@ class ConcertScreen extends StatelessWidget {
                                   child: Text(
                                     translate(context)!.tickets_available_resale,
                                     style: const TextStyle(
-                                      fontSize: 25,
+                                      fontSize: 24,
                                       fontFamily: 'Readex Pro',
                                       fontWeight: FontWeight.w600,
                                     ),

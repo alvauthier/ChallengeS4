@@ -138,195 +138,175 @@ class ResaleTicket extends StatelessWidget {
 
         return Padding(
           padding: const EdgeInsets.all(8.0),
-          child: SizedBox(
-            height: 150,
-            width: double.infinity,
-            child: Card(
-              elevation: 0,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10),
-              ),
+          child: Card(
+            elevation: 0,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
               child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   ClipRRect(
-                    borderRadius: BorderRadius.circular(10),
+                    borderRadius: BorderRadius.circular(2),
                     child: ticket.reseller.avatar.isNotEmpty
                         ? Image.network(
                       ticket.reseller.avatar,
-                      width: 140,
-                      height: 140,
+                      width: 100,
+                      height: 100,
                       fit: BoxFit.cover,
                     )
                         : const Image(
                       image: AssetImage("assets/user-placeholder.jpg"),
-                      width: 140,
-                      height: 140,
+                      width: 100,
+                      height: 100,
                       fit: BoxFit.cover,
                     ),
                   ),
+                  const SizedBox(width: 12.0),
                   Expanded(
-                    child: Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            children: [
-                              Text(
-                                ticket.reseller.name,
-                                style: const TextStyle(
-                                  fontWeight: FontWeight.w600,
-                                  fontSize: 20,
-                                ),
-                              ),
-                              const Spacer(),
-                              Text(
-                                '${ticket.price} €',
-                                style: const TextStyle(
-                                    fontWeight: FontWeight.w700,
-                                    fontSize: 26,
-                                    color: Colors.deepOrangeAccent
-                                ),
-                              ),
-                            ],
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.only(right: 30.0),
+                          child: Text(
+                            ticket.reseller.name,
+                            style: const TextStyle(
+                              fontWeight: FontWeight.w600,
+                              fontSize: 20,
+                            ),
                           ),
-                          Row(
-                            children: [
-                              const Icon(Icons.location_on),
-                              Text(ticket.category),
-                            ],
+                        ),
+                        Text(
+                          '${ticket.price} €',
+                          style: const TextStyle(
+                            fontWeight: FontWeight.w700,
+                            fontSize: 24,
+                            color: Colors.deepOrangeAccent,
                           ),
-                          const Spacer(),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.end,
-                            children: [
-                              ElevatedButton(
-                                onPressed: userRole != 'user' && userRole != '' ? null : () async {
-                                  final tokenService = TokenService();
-                                  String? token = await tokenService.getValidAccessToken();
-                                  if (token == null) {
-                                    context.read<NavigationCubit>().updateUserRole('');
-                                    GoRouter.of(context).go(Routes.loginRegisterNamedPage);
-                                  } else {
-                                    final parts = token.split('.');
-                                    if (parts.length != 3) {
-                                      throw Exception('Invalid token');
-                                    }
-
-                                    String output = parts[1].replaceAll('-', '+').replaceAll('_', '/');
-                                    switch (output.length % 4) {
-                                      case 0:
-                                        break;
-                                      case 2:
-                                        output += '==';
-                                        break;
-                                      case 3:
-                                        output += '=';
-                                        break;
-                                      default:
-                                        throw Exception('Illegal base64url string!"');
-                                    }
-
-                                    String userId = json.decode(utf8.decode(base64.decode(output)))['id'];
-
-                                    final existingConversationId = await ApiServices.checkConversationExists(
-                                      ticket.id,
-                                      userId,
-                                    );
-                                    debugPrint('existingConversationId: $existingConversationId');
-                                    debugPrint('concertImage: ${ticket.concertImage}');
-
-                                    if (existingConversationId != null && existingConversationId.isNotEmpty) {
-                                      debugPrint('Conversation found in the database, access it');
-                                      context.push(
-                                        '/chat/$existingConversationId',
-                                      );
-                                    } else {
-                                      debugPrint('No conversation found in the database');
-                                      context.push(
-                                        '/chat/newchat',
-                                        extra: {
-                                          'userId': userId,
-                                          'resellerId': ticket.reseller.id,
-                                          'ticketId': ticket.id,
-                                          'concertName': ticket.concertName,
-                                          'price': ticket.price,
-                                          'resellerName': ticket.reseller.name,
-                                          'category': ticket.category,
-                                          'concertImage': ticket.concertImage,
-                                        },
-                                      );
-                                    }
-                                  }
-                                },
-                                style: userRole != 'user' && userRole != '' ? disabledButtonStyle : ElevatedButton.styleFrom(
-                                  foregroundColor: Colors.white,
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(6.0),
-                                  ),
-                                ),
-                                child: Text(
-                                    translate(context)!.contact,
-                                    style: TextStyle(
-                                      fontFamily: 'Readex Pro',
-                                      color: userRole != 'user' && userRole != '' ? Colors.grey : Colors.black,
-                                    )
-                                ),
-                              ),
-                              const SizedBox(width: 10),
-                              ElevatedButton(
-                                onPressed: userRole != 'user' && userRole != '' ? null : () async {
-                                  final tokenService = TokenService();
-                                  String? token = await tokenService.getValidAccessToken();
-                                  if (token == null) {
-                                    context.read<NavigationCubit>().updateUserRole('');
-                                    GoRouter.of(context).go(Routes.loginRegisterNamedPage);
-                                  } else {
-                                    final paymentIntentData = await paymentService.createPaymentIntent(ticket.id, 'tl_');
-                                    if (paymentIntentData != null) {
-                                      try {
-                                        await paymentService.initAndPresentPaymentSheet(
-                                          context,
-                                          paymentIntentData['client_secret'],
-                                        );
-                                        ScaffoldMessenger.of(context).showSnackBar(
-                                          SnackBar(content: Text(translate(context)!.payment_success)),
-                                        );
-                                        await updateTicketListingStatus(context, ticket.id);
-                                      } catch (e) {
-                                        debugPrint('Error presenting payment sheet: $e');
-                                        ScaffoldMessenger.of(context).showSnackBar(
-                                          SnackBar(content: Text(translate(context)!.payment_failed)),
-                                        );
-                                      }
-                                    } else {
-                                      ScaffoldMessenger.of(context).showSnackBar(
-                                        SnackBar(content: Text(translate(context)!.payment_error)),
-                                      );
-                                    }
-                                  }
-                                },
-                                style: userRole != 'user' && userRole != '' ? disabledButtonStyle : ElevatedButton.styleFrom(
-                                  foregroundColor: Colors.white,
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(6.0),
-                                  ),
-                                  backgroundColor: Colors.deepOrange,
-                                ),
-                                child: Text(
-                                    translate(context)!.buy,
-                                    style: TextStyle(
-                                      fontFamily: 'Readex Pro',
-                                      color: userRole != 'user' && userRole != '' ? Colors.grey : Colors.white,
-                                    )
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
+                        ),
+                        const SizedBox(height: 8.0),
+                        Row(
+                          children: [
+                            const Icon(Icons.location_on),
+                            Text(ticket.category),
+                          ],
+                        ),
+                      ],
                     ),
                   ),
+                  Positioned(
+                    top: 0,
+                    right: 0,
+                    child: PopupMenuButton<String>(
+                      onSelected: (value) async {
+                        if (value == 'contact') {
+                          final tokenService = TokenService();
+                          String? token = await tokenService.getValidAccessToken();
+                          if (token == null) {
+                            context.read<NavigationCubit>().updateUserRole('');
+                            GoRouter.of(context).go(Routes.loginRegisterNamedPage);
+                          } else {
+                            final parts = token.split('.');
+                            if (parts.length != 3) {
+                              throw Exception('Invalid token');
+                            }
+
+                            String output = parts[1].replaceAll('-', '+').replaceAll('_', '/');
+                            switch (output.length % 4) {
+                              case 0:
+                                break;
+                              case 2:
+                                output += '==';
+                                break;
+                              case 3:
+                                output += '=';
+                                break;
+                              default:
+                                throw Exception('Illegal base64url string!"');
+                            }
+
+                            String userId = json.decode(utf8.decode(base64.decode(output)))['id'];
+
+                            final existingConversationId = await ApiServices.checkConversationExists(
+                              ticket.id,
+                              userId,
+                            );
+                            debugPrint('existingConversationId: $existingConversationId');
+                            debugPrint('concertImage: ${ticket.concertImage}');
+
+                            if (existingConversationId != null && existingConversationId.isNotEmpty) {
+                              debugPrint('Conversation found in the database, access it');
+                              context.push(
+                                '/chat/$existingConversationId',
+                              );
+                            } else {
+                              debugPrint('No conversation found in the database');
+                              context.push(
+                                '/chat/newchat',
+                                extra: {
+                                  'userId': userId,
+                                  'resellerId': ticket.reseller.id,
+                                  'ticketId': ticket.id,
+                                  'concertName': ticket.concertName,
+                                  'price': ticket.price,
+                                  'resellerName': ticket.reseller.name,
+                                  'category': ticket.category,
+                                  'concertImage': ticket.concertImage,
+                                },
+                              );
+                            }
+                          }
+                        } else if (value == 'buy') {
+                          final tokenService = TokenService();
+                          String? token = await tokenService.getValidAccessToken();
+                          if (token == null) {
+                            context.read<NavigationCubit>().updateUserRole('');
+                            GoRouter.of(context).go(Routes.loginRegisterNamedPage);
+                          } else {
+                            final paymentIntentData = await paymentService.createPaymentIntent(ticket.id, 'tl_');
+                            if (paymentIntentData != null) {
+                              try {
+                                await paymentService.initAndPresentPaymentSheet(
+                                  context,
+                                  paymentIntentData['client_secret'],
+                                );
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(content: Text(translate(context)!.payment_success)),
+                                );
+                                await updateTicketListingStatus(context, ticket.id);
+                              } catch (e) {
+                                debugPrint('Error presenting payment sheet: $e');
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(content: Text(translate(context)!.payment_failed)),
+                                );
+                              }
+                            } else {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(content: Text(translate(context)!.payment_error)),
+                              );
+                            }
+                          }
+                        }
+                      },
+                      itemBuilder: (BuildContext context) {
+                        return [
+                          PopupMenuItem<String>(
+                            value: 'contact',
+                            child: Text(translate(context)!.contact),
+                          ),
+                          PopupMenuItem<String>(
+                            value: 'buy',
+                            child: Text(translate(context)!.buy),
+                          ),
+                        ];
+                      },
+                      icon: Icon(Icons.more_vert),
+                      enabled: userRole == 'user' || userRole == '',
+                    ),
+                  )
                 ],
               ),
             ),

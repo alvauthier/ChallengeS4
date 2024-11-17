@@ -145,57 +145,61 @@ class ResaleTicket extends StatelessWidget {
             ),
             child: Padding(
               padding: const EdgeInsets.all(8.0),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
+              child: Stack(
                 children: [
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(2),
-                    child: ticket.reseller.avatar.isNotEmpty
-                        ? Image.network(
-                      ticket.reseller.avatar,
-                      width: 100,
-                      height: 100,
-                      fit: BoxFit.cover,
-                    )
-                        : const Image(
-                      image: AssetImage("assets/user-placeholder.jpg"),
-                      width: 100,
-                      height: 100,
-                      fit: BoxFit.cover,
-                    ),
-                  ),
-                  const SizedBox(width: 12.0),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.only(right: 30.0),
-                          child: Text(
-                            ticket.reseller.name,
-                            style: const TextStyle(
-                              fontWeight: FontWeight.w600,
-                              fontSize: 20,
-                            ),
-                          ),
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(2),
+                        child: ticket.reseller.avatar.isNotEmpty
+                            ? Image.network(
+                          ticket.reseller.avatar,
+                          width: 100,
+                          height: 100,
+                          fit: BoxFit.cover,
+                        )
+                            : const Image(
+                          image: AssetImage("assets/user-placeholder.jpg"),
+                          width: 100,
+                          height: 100,
+                          fit: BoxFit.cover,
                         ),
-                        Text(
-                          '${ticket.price} €',
-                          style: const TextStyle(
-                            fontWeight: FontWeight.w700,
-                            fontSize: 24,
-                            color: Colors.deepOrangeAccent,
-                          ),
-                        ),
-                        const SizedBox(height: 8.0),
-                        Row(
+                      ),
+                      const SizedBox(width: 12.0),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Icon(Icons.location_on),
-                            Text(ticket.category),
+                            Padding(
+                              padding: const EdgeInsets.only(right: 30.0),
+                              child: Text(
+                                ticket.reseller.name,
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 20,
+                                ),
+                              ),
+                            ),
+                            Text(
+                              '${ticket.price} €',
+                              style: const TextStyle(
+                                fontWeight: FontWeight.w700,
+                                fontSize: 24,
+                                color: Colors.deepOrangeAccent,
+                              ),
+                            ),
+                            const SizedBox(height: 8.0),
+                            Row(
+                              children: [
+                                const Icon(Icons.location_on),
+                                Text(ticket.category),
+                              ],
+                            ),
                           ],
                         ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
                   Positioned(
                     top: 0,
@@ -306,7 +310,7 @@ class ResaleTicket extends StatelessWidget {
                       icon: Icon(Icons.more_vert),
                       enabled: userRole == 'user' || userRole == '',
                     ),
-                  )
+                  ),
                 ],
               ),
             ),

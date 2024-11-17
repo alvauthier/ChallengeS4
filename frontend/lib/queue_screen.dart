@@ -53,7 +53,7 @@ class _QueueScreenState extends State<QueueScreen> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 50.0),
+                        padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 5.0),
                         child: Text(
                           translate(context)!.queue_info,
                           style: const TextStyle(
@@ -75,7 +75,7 @@ class _QueueScreenState extends State<QueueScreen> {
                         ),
                       ),
                       Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 40.0),
+                        padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 25.0),
                         child: Text(
                           '${translate(context)!.queue_position} $position',
                           style: const TextStyle(
@@ -86,7 +86,7 @@ class _QueueScreenState extends State<QueueScreen> {
                         ),
                       ),
                       const CircularProgressIndicator(),
-                      const SizedBox(height: 90),
+                      const SizedBox(height: 50),
                       GestureDetector(
                         onTap: () {
                           setState(() {
@@ -162,7 +162,7 @@ class _QueueScreenState extends State<QueueScreen> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 50.0),
+                    padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 5.0),
                     child: Text(
                       translate(context)!.queue_info,
                       style: const TextStyle(
@@ -184,7 +184,7 @@ class _QueueScreenState extends State<QueueScreen> {
                     ),
                   ),
                   Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 40.0),
+                    padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 25.0),
                     child: Text(
                       '${translate(context)!.queue_position} ${widget.initialPosition}',
                       style: const TextStyle(
@@ -195,7 +195,7 @@ class _QueueScreenState extends State<QueueScreen> {
                     ),
                   ),
                   const CircularProgressIndicator(),
-                  const SizedBox(height: 90),
+                  const SizedBox(height: 50),
                   GestureDetector(
                     onTap: () {
                       setState(() {

@@ -44,7 +44,10 @@ class NavigationCubit extends Cubit<NavigationState> {
           emit(const NavigationState(bottomNavItems: Routes.adminNamedPage, index: 1, userRole: 'admin'));
           break;
         case 2:
-          emit(const NavigationState(bottomNavItems: Routes.profileNamedPage, index: 2, userRole: 'admin'));
+          emit(const NavigationState(bottomNavItems: Routes.logsNamedPage, index: 2, userRole: 'admin'));
+          break;
+        case 3:
+          emit(const NavigationState(bottomNavItems: Routes.profileNamedPage, index: 3, userRole: 'admin'));
           break;
       }
     } else {

@@ -213,6 +213,12 @@ func CreateConcert(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, "Failed to save image: "+err.Error())
 	}
 
+	// récupérer l'artiste dans la base de données en utilisant l'artiste id
+	var artist models.Artist
+	if err := db.Where("id = ?", artistId).First(&artist).Error; err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, "Failed to find artist: "+err.Error())
+	}
+
 	// Créer un nouvel objet Concert
 	concert := models.Concert{
 		ID:             uuid.New(),
@@ -223,6 +229,7 @@ func CreateConcert(c echo.Context) error {
 		Image:          fileName,
 		OrganizationId: user.OrganizationId,
 		ArtistId:       uuid.MustParse(artistId),
+		Artist:         &artist,
 	}
 
 	// Récupérer les objets Interest correspondant aux IDs
@@ -266,10 +273,11 @@ func CreateConcert(c echo.Context) error {
 		data := map[string]string{
 			"concert_id": concert.ID.String(),
 			"name":       concert.Name,
+			"artiste":    concert.Artist.Name,
 		}
 		notification := map[string]string{
 			"title": "Nouveau concert susceptible de vous intéresser",
-			"body":  fmt.Sprintf("Le concert \"%s\" vient d'être ajouté et pourrait vous plaire. Réservez vos places dès maintenant !", concert.Name),
+			"body":  fmt.Sprintf("Le concert \"%s\" de l'artiste %s vient d'être ajouté et pourrait vous plaire. Réservez vos places dès maintenant !", concert.Name, concert.Artist.Name),
 		}
 
 		fmt.Printf("Sending notification for interest %s\n", interest.Name)

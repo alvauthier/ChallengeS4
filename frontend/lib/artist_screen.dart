@@ -10,8 +10,8 @@ import 'package:web_socket_channel/web_socket_channel.dart';
 import 'package:web_socket_channel/status.dart' as status;
 import 'dart:convert';
 
-import 'package:weezemaster/core/services/token_services.dart';
 import 'package:weezemaster/core/utils/constants.dart';
+import 'package:weezemaster/translation.dart';
 
 class ArtistScreen extends StatefulWidget {
   final String id;
@@ -141,7 +141,7 @@ class _ArtistScreenState extends State<ArtistScreen> with SingleTickerProviderSt
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(artist?.name ?? 'Loading...'),
+        title: Text(artist?.name ?? '${translate(context)!.loading}...'),
         bottom: TabBar(
           controller: _tabController,
           tabs: const [

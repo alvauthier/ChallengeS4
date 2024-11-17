@@ -4,6 +4,7 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 
 import 'package:weezemaster/core/services/token_services.dart';
+import 'package:weezemaster/translation.dart';
 
 class ConfigQueueScreen extends StatefulWidget {
   const ConfigQueueScreen({super.key});
@@ -57,7 +58,7 @@ class _ConfigQueueScreenState extends State<ConfigQueueScreen> {
     final newValue = _controller.text;
     if (newValue.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Value cannot be empty')),
+        SnackBar(content: Text(translate(context)!.value_not_empty)),
       );
       return;
     }
@@ -76,7 +77,7 @@ class _ConfigQueueScreenState extends State<ConfigQueueScreen> {
       );
       if (response.statusCode == 200) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Configuration updated successfully')),
+          SnackBar(content: Text(translate(context)!.config_update_success)),
         );
         setState(() {
           _currentValue = newValue;
@@ -87,7 +88,7 @@ class _ConfigQueueScreenState extends State<ConfigQueueScreen> {
     } catch (e) {
       debugPrint('Error updating value: $e');
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Failed to update value')),
+        SnackBar(content: Text(translate(context)!.config_update_failed)),
       );
     }
   }
@@ -96,7 +97,7 @@ class _ConfigQueueScreenState extends State<ConfigQueueScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Configuration Queue'),
+        title: Text(translate(context)!.config_queue),
       ),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
@@ -107,8 +108,8 @@ class _ConfigQueueScreenState extends State<ConfigQueueScreen> {
                   TextField(
                     controller: _controller,
                     keyboardType: TextInputType.number,
-                    decoration: const InputDecoration(
-                      labelText: 'Number max of users before queue',
+                    decoration: InputDecoration(
+                      labelText: translate(context)!.nb_max_users_queue,
                     ),
                   ),
                   Padding(
@@ -123,9 +124,9 @@ class _ConfigQueueScreenState extends State<ConfigQueueScreen> {
                           ),
                           backgroundColor: Colors.deepOrange,
                         ),
-                        child: const Text(
-                          'Update',
-                          style: TextStyle(
+                        child: Text(
+                          translate(context)!.update,
+                          style: const TextStyle(
                             color: Colors.white,
                             fontFamily: 'Readex Pro',
                           ),

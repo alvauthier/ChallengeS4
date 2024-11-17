@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:weezemaster/core/services/api_services.dart';
 import 'package:weezemaster/core/models/category.dart';
+import 'package:weezemaster/translation.dart';
 import 'blocs/categories_bloc.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -18,7 +19,7 @@ class CategoriesScreen extends StatelessWidget {
       context: context,
       builder: (BuildContext dialogContext) {
         return AlertDialog(
-          title: const Text('Ajouter une catégorie'),
+          title: Text(translate(context)!.add_category),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -35,7 +36,7 @@ class CategoriesScreen extends StatelessWidget {
               onPressed: () {
                 Navigator.of(dialogContext).pop();
               },
-              child: const Text('Annuler'),
+              child: Text(translate(context)!.cancel),
             ),
             TextButton(
               onPressed: () async {
@@ -44,13 +45,13 @@ class CategoriesScreen extends StatelessWidget {
                   Navigator.of(dialogContext).pop();
                   categoriesBloc.add(CategoriesDataLoaded());
                 } catch (e) {
-                  print('An error occurred while adding category: $e');
+                  debugPrint('An error occurred while adding category: $e');
                   ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Failed to add category: $e')),
+                    SnackBar(content: Text('${translate(context)!.add_category_failed} $e')),
                   );
                 }
               },
-              child: const Text('Ajouter'),
+              child: Text(translate(context)!.add),
             ),
           ],
         );
@@ -67,14 +68,14 @@ class CategoriesScreen extends StatelessWidget {
       context: context,
       builder: (BuildContext dialogContext) {
         return AlertDialog(
-          title: const Text('Modifier les informations de la catégorie'),
+          title: Text(translate(context)!.update_category),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               TextField(
                 controller: _nameController,
-                decoration: const InputDecoration(labelText: 'Nom'),
+                decoration: InputDecoration(labelText: translate(context)!.lastname),
               ),
               const SizedBox(height: 8),
             ],
@@ -84,7 +85,7 @@ class CategoriesScreen extends StatelessWidget {
               onPressed: () {
                 Navigator.of(dialogContext).pop();
               },
-              child: const Text('Annuler'),
+              child: Text(translate(context)!.cancel),
             ),
             TextButton(
               onPressed: () async {
@@ -96,13 +97,13 @@ class CategoriesScreen extends StatelessWidget {
                   Navigator.of(dialogContext).pop();
                   categoriesBloc.add(CategoriesDataLoaded());
                 } catch (e) {
-                  print('An error occurred while updating category: $e');
+                  debugPrint('An error occurred while updating category: $e');
                   ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Failed to update category: $e')),
+                    SnackBar(content: Text('${translate(context)!.update_category_failed} $e')),
                   );
                 }
               },
-              child: const Text('Mettre à jour'),
+              child: Text(translate(context)!.update),
             ),
           ],
         );

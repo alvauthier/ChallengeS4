@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:weezemaster/core/services/api_services.dart';
 import 'package:weezemaster/core/models/artist.dart';
+import 'package:weezemaster/translation.dart';
 import 'blocs/artists_bloc.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -18,7 +19,7 @@ class ArtistsScreen extends StatelessWidget {
       context: context,
       builder: (BuildContext dialogContext) {
         return AlertDialog(
-          title: const Text('Ajouter un artiste'),
+          title: Text(translate(context)!.add_artist),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -35,7 +36,7 @@ class ArtistsScreen extends StatelessWidget {
               onPressed: () {
                 Navigator.of(dialogContext).pop();
               },
-              child: const Text('Annuler'),
+              child: Text(translate(context)!.cancel),
             ),
             TextButton(
               onPressed: () async {
@@ -46,13 +47,13 @@ class ArtistsScreen extends StatelessWidget {
                   Navigator.of(dialogContext).pop();
                   artistsBloc.add(ArtistsDataLoaded());
                 } catch (e) {
-                  print('An error occurred while adding artist: $e');
+                  debugPrint('An error occurred while adding artist: $e');
                   ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Failed to add artist: $e')),
+                    SnackBar(content: Text('${translate(context)!.add_artist_failed} $e')),
                   );
                 }
               },
-              child: const Text('Ajouter'),
+              child: Text(translate(context)!.add),
             ),
           ],
         );
@@ -69,14 +70,14 @@ class ArtistsScreen extends StatelessWidget {
       context: context,
       builder: (BuildContext dialogContext) {
         return AlertDialog(
-          title: const Text('Modifier les informations de l\'artiste'),
+          title: Text(translate(context)!.update_artist),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               TextField(
                 controller: _nameController,
-                decoration: const InputDecoration(labelText: 'Nom'),
+                decoration: InputDecoration(labelText: translate(context)!.lastname),
               ),
               const SizedBox(height: 8),
             ],
@@ -86,7 +87,7 @@ class ArtistsScreen extends StatelessWidget {
               onPressed: () {
                 Navigator.of(dialogContext).pop();
               },
-              child: const Text('Annuler'),
+              child: Text(translate(context)!.cancel),
             ),
             TextButton(
               onPressed: () async {
@@ -98,13 +99,13 @@ class ArtistsScreen extends StatelessWidget {
                   Navigator.of(dialogContext).pop();
                   artistsBloc.add(ArtistsDataLoaded());
                 } catch (e) {
-                  print('An error occurred while updating artist: $e');
+                  debugPrint('An error occurred while updating artist: $e');
                   ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Failed to update artist: $e')),
+                    SnackBar(content: Text('${translate(context)!.update_artist_failed} $e')),
                   );
                 }
               },
-              child: const Text('Mettre à jour'),
+              child: Text(translate(context)!.update),
             ),
           ],
         );
@@ -119,14 +120,14 @@ class ArtistsScreen extends StatelessWidget {
       context: context,
       builder: (BuildContext dialogContext) {
         return AlertDialog(
-          title: const Text('Supprimer l\'artiste'),
-          content: Text('Êtes-vous sûr de vouloir supprimer ${artist.name} ?'),
+          title: Text(translate(context)!.delete_artist),
+          content: Text('${translate(context)!.confirm_delete} ${artist.name} ?'),
           actions: [
             TextButton(
               onPressed: () {
                 Navigator.of(dialogContext).pop();
               },
-              child: const Text('Annuler'),
+              child: Text(translate(context)!.cancel),
             ),
             TextButton(
               onPressed: () async {
@@ -135,13 +136,13 @@ class ArtistsScreen extends StatelessWidget {
                   Navigator.of(dialogContext).pop();
                   artistsBloc.add(ArtistsDataLoaded());
                 } catch (e) {
-                  print('An error occurred while deleting artist: $e');
+                  debugPrint('An error occurred while deleting artist: $e');
                   ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Failed to delete artist: $e')),
+                    SnackBar(content: Text('${translate(context)!.delete_artist_failed} $e')),
                   );
                 }
               },
-              child: const Text('Supprimer'),
+              child: Text(translate(context)!.delete),
             ),
           ],
         );

@@ -5,6 +5,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:weezemaster/core/models/user.dart';
 import 'package:weezemaster/core/services/token_services.dart';
+import 'package:weezemaster/translation.dart';
 import 'blocs/users_bloc.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:http/http.dart' as http;
@@ -55,7 +56,7 @@ class UsersScreenState extends State<UsersScreen> {
         return StatefulBuilder(
           builder: (context, setState) {
             return AlertDialog(
-              title: const Text('Modifier les informations de l\'utilisateur'),
+              title: Text(translate(context)!.update_user),
               content: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
@@ -118,17 +119,17 @@ class UsersScreenState extends State<UsersScreen> {
                   const SizedBox(height: 8),
                   TextField(
                     controller: _firstnameController,
-                    decoration: const InputDecoration(labelText: 'Prénom'),
+                    decoration: InputDecoration(labelText: translate(context)!.firstname),
                   ),
                   const SizedBox(height: 8),
                   TextField(
                     controller: _lastnameController,
-                    decoration: const InputDecoration(labelText: 'Nom'),
+                    decoration: InputDecoration(labelText: translate(context)!.lastname),
                   ),
                   const SizedBox(height: 8),
                   TextField(
                     controller: _emailController,
-                    decoration: const InputDecoration(labelText: 'Email'),
+                    decoration: InputDecoration(labelText: translate(context)!.email),
                   ),
                 ],
               ),
@@ -137,7 +138,7 @@ class UsersScreenState extends State<UsersScreen> {
                   onPressed: () {
                     Navigator.of(dialogContext).pop();
                   },
-                  child: const Text('Annuler'),
+                  child: Text(translate(context)!.cancel),
                 ),
                 TextButton(
                   onPressed: () async {
@@ -171,13 +172,13 @@ class UsersScreenState extends State<UsersScreen> {
                       Navigator.of(dialogContext).pop();
                       usersBloc.add(UsersDataLoaded());
                     } catch (e) {
-                      print('An error occurred while updating user: $e');
+                      debugPrint('An error occurred while updating user: $e');
                       ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text('Failed to update user: $e')),
+                        SnackBar(content: Text('${translate(context)!.update_user_failed} $e')),
                       );
                     }
                   },
-                  child: const Text('Mettre à jour'),
+                  child: Text(translate(context)!.update),
                 ),
               ],
             );
@@ -205,8 +206,8 @@ class UsersScreenState extends State<UsersScreen> {
                     subtitle: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('Email: ${user.email}'),
-                        Text('Role: ${user.role}'),
+                        Text('${translate(context)!.email} : ${user.email}'),
+                        Text('${translate(context)!.role} : ${user.role}'),
                       ],
                     ),
                     trailing: user.role != 'admin'

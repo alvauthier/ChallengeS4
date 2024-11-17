@@ -39,23 +39,23 @@ class MyTicketsScreenState extends State<MyTicketsScreen> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text('Revendre le ticket'),
+          title: Text(translate(context)!.resell_ticket),
           content: TextField(
             controller: _priceController,
             keyboardType: TextInputType.number,
             decoration: InputDecoration(
-              hintText: 'Entrez le prix (max ${maxPrice.toStringAsFixed(2)} €)',
+              hintText: '${translate(context)!.enter_price} (max ${maxPrice.toStringAsFixed(2)} €)',
             ),
           ),
           actions: <Widget>[
             TextButton(
-              child: const Text('Annuler'),
+              child: Text(translate(context)!.cancel),
               onPressed: () {
                 context.pop();
               },
             ),
             TextButton(
-              child: const Text('Revendre'),
+              child: Text(translate(context)!.resell),
               onPressed: () async {
                 final enteredPrice = double.tryParse(_priceController.text);
                 if (enteredPrice != null && enteredPrice <= maxPrice) {
@@ -65,8 +65,8 @@ class MyTicketsScreenState extends State<MyTicketsScreen> {
                 } else {
                   context.pop();
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Le prix de revente ne peut pas dépasser le prix d\'achat.'),
+                    SnackBar(
+                      content: Text(translate(context)!.resale_price_not_superior_to_buy_price),
                     ),
                   );
                 }
@@ -100,8 +100,8 @@ class MyTicketsScreenState extends State<MyTicketsScreen> {
     if (response.statusCode == 201 || response.statusCode == 200) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Ticket mis en vente avec succès!'),
+          SnackBar(
+            content: Text(translate(context)!.ticket_add_sale_success),
           ),
         );
         context.pushNamed('my-tickets');
@@ -109,8 +109,8 @@ class MyTicketsScreenState extends State<MyTicketsScreen> {
     } else {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Erreur lors de la mise en vente du ticket.'),
+          SnackBar(
+            content: Text(translate(context)!.ticket_add_sale_failed),
           ),
         );
       }
@@ -134,8 +134,8 @@ class MyTicketsScreenState extends State<MyTicketsScreen> {
     if (response.statusCode == 204) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Annulation de la mise en vente réussie !'),
+          SnackBar(
+            content: Text(translate(context)!.ticket_cancel_sale_success),
           ),
         );
         context.pushNamed('my-tickets');
@@ -143,8 +143,8 @@ class MyTicketsScreenState extends State<MyTicketsScreen> {
     } else {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Erreur lors de l\'annulation de la mise en vente.'),
+          SnackBar(
+            content: Text(translate(context)!.ticket_cancel_sale_failed),
           ),
         );
       }

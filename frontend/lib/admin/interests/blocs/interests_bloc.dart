@@ -13,7 +13,7 @@ class InterestsBloc extends Bloc<InterestsEvent, InterestsState> {
       emit(InterestsLoading());
 
       try {
-        final interests = await ApiServices.getAllInterests();
+        final interests = await ApiServices.getAllInterestsWithoutArtists();
         emit(InterestsDataLoadingSuccess(interests: interests));
       } on ApiException catch (error) {
         emit(InterestsDataLoadingError(errorMessage: error.message));

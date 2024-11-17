@@ -104,6 +104,7 @@ func main() {
 	authenticated.DELETE("/users/:id", controller.DeleteUser, middleware.CheckRole("admin"))
 
 	authenticated.GET("/interests", controller.GetAllInterests, middleware.CheckRole("user", "organizer", "admin"))
+	authenticated.GET("/interests-no-artists", controller.GetAllInterestsWithoutArtists, middleware.CheckRole("admin"))
 	authenticated.GET("/interests/:id", controller.GetInterest, middleware.CheckRole("admin"))
 	authenticated.POST("/interests", controller.CreateInterest, middleware.CheckRole("admin"))
 	authenticated.PATCH("/interests/:id", controller.UpdateInterest, middleware.CheckRole("admin"))

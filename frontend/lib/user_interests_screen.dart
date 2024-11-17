@@ -155,12 +155,15 @@ class UserInterestsScreenState extends State<UserInterestsScreen> {
                 padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 30),
                 child: Column(
                   children: [
-                    Text(
-                      translate(context)!.my_interests,
-                      style: const TextStyle(
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                        fontFamily: 'Readex Pro',
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 40.0),
+                      child: Text(
+                        translate(context)!.my_interests,
+                        style: const TextStyle(
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
+                          fontFamily: 'Readex Pro',
+                        ),
                       ),
                     ),
                     const SizedBox(height: 40),
@@ -199,7 +202,7 @@ class UserInterestsScreenState extends State<UserInterestsScreen> {
                 child: Column(
                   children: [
                     Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 30.0),
+                      padding: const EdgeInsets.symmetric(horizontal: 40.0),
                       child: Text(
                         translate(context)!.my_interests,
                         style: const TextStyle(
@@ -247,7 +250,7 @@ class UserInterestsScreenState extends State<UserInterestsScreen> {
               child: Column(
                 children: [
                   Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 30.0),
+                    padding: const EdgeInsets.symmetric(horizontal: 40.0),
                     child: Text(
                       translate(context)!.my_interests,
                       style: const TextStyle(

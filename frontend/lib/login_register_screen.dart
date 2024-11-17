@@ -38,7 +38,7 @@ class LoginRegisterScreen extends StatelessWidget {
                           height: 0.9,
                         ),
                       ),
-                      const SizedBox(height: 50),
+                      const SizedBox(height: 30),
                       SizedBox(
                         width: double.infinity,
                         height: 50,

@@ -164,6 +164,8 @@ func main() {
 	router.GET("/ws-community", controller.HandleWebSocketCommunity)
 
 	authenticated.GET("/logs", controller.GetLogs, middleware.CheckRole("admin"))
+	authenticated.GET("/config/:key", controller.GetConfigValue, middleware.CheckRole("admin"))
+	authenticated.POST("/config/:key", controller.UpdateConfigValue, middleware.CheckRole("admin"))
 
 	// router.Start(":8080")
 	server := &http.Server{

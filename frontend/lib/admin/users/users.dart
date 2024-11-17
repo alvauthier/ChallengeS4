@@ -1,15 +1,11 @@
-import 'dart:convert';
-import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:weezemaster/core/models/user.dart';
 import 'package:weezemaster/core/services/token_services.dart';
 import 'package:weezemaster/translation.dart';
 import 'blocs/users_bloc.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:http/http.dart' as http;
-import 'package:http_parser/http_parser.dart';
 
 class UsersScreen extends StatefulWidget {
   const UsersScreen({super.key});
@@ -23,10 +19,6 @@ class UsersScreenState extends State<UsersScreen> {
   final TextEditingController _lastnameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
 
-  File? _image;
-  String? _base64Image;
-  final picker = ImagePicker();
-
   @override
   void initState() {
     super.initState();
@@ -38,17 +30,6 @@ class UsersScreenState extends State<UsersScreen> {
     _firstnameController.text = user.firstname;
     _lastnameController.text = user.lastname;
     _emailController.text = user.email;
-    _image = null;
-
-    Future<void> getImage() async {
-      final pickedImage = await picker.pickImage(source: ImageSource.gallery);
-      if (pickedImage != null) {
-        setState(() {
-          _image = File(pickedImage.path);
-          _base64Image = base64Encode(_image!.readAsBytesSync());
-        });
-      }
-    }
 
     showDialog(
       context: context,
@@ -60,63 +41,6 @@ class UsersScreenState extends State<UsersScreen> {
               content: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  GestureDetector(
-                    onTap: () async {
-                      await getImage();
-                      setState(() {});
-                    },
-                    child: Stack(
-                      children: [
-                        ClipOval(
-                          child: _image != null
-                              ? Image.file(
-                            _image!,
-                            width: 120,
-                            height: 120,
-                            fit: BoxFit.cover,
-                          )
-                              : (user.image != ""
-                              ? Image.network(
-                            '${dotenv.env['API_PROTOCOL']}://${dotenv.env['API_HOST']}${dotenv.env['API_PORT']}/uploads/users/${user.image}',
-                            width: 120,
-                            height: 120,
-                            fit: BoxFit.cover,
-                          )
-                              : const Image(
-                            image: AssetImage("assets/user-placeholder.jpg"),
-                            width: 120,
-                            height: 120,
-                            fit: BoxFit.cover,
-                          )),
-                        ),
-                        Positioned(
-                          bottom: 0,
-                          right: 0,
-                          child: Container(
-                            width: 30,
-                            height: 30,
-                            decoration: const BoxDecoration(
-                              color: Colors.deepOrange,
-                              shape: BoxShape.circle,
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.black26,
-                                  offset: Offset(0, 2),
-                                  blurRadius: 6.0,
-                                ),
-                              ],
-                            ),
-                            child: const Icon(
-                              Icons.edit,
-                              color: Colors.white,
-                              size: 16,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 8),
                   TextField(
                     controller: _firstnameController,
                     decoration: InputDecoration(labelText: translate(context)!.firstname),
@@ -156,16 +80,6 @@ class UsersScreenState extends State<UsersScreen> {
                       request.fields['email'] = _emailController.text;
                       request.fields['firstname'] = _firstnameController.text;
                       request.fields['lastname'] = _lastnameController.text;
-
-                      if (_image != null) {
-                        request.files.add(
-                          await http.MultipartFile.fromPath(
-                            'image',
-                            _image!.path,
-                            contentType: MediaType('image', _image!.path.split('.').last),
-                          ),
-                        );
-                      }
 
                       await request.send();
 

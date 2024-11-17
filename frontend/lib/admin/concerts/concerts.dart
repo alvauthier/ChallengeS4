@@ -1,14 +1,10 @@
-import 'dart:convert';
-import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:omni_datetime_picker/omni_datetime_picker.dart';
 import 'package:weezemaster/core/models/concert.dart';
 import 'package:weezemaster/core/services/token_services.dart';
 import 'package:weezemaster/translation.dart';
 import 'package:http/http.dart' as http;
-import 'package:http_parser/http_parser.dart';
 import 'blocs/concerts_bloc.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -23,20 +19,7 @@ class ConcertsScreenState extends State<ConcertsScreen> {
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _locationController = TextEditingController();
 
-  File? _image;
-  String? _base64Image;
-  final picker = ImagePicker();
   DateTime? _selectedDate;
-
-  Future<void> getImage() async {
-    final pickedImage = await picker.pickImage(source: ImageSource.gallery);
-    setState(() {
-      if (pickedImage != null) {
-        _image = File(pickedImage.path);
-        _base64Image = base64Encode(_image!.readAsBytesSync());
-      }
-    });
-  }
 
   Future<void> _selectDate(BuildContext context) async {
     DateTime? dateTime = await showOmniDateTimePicker(
@@ -73,30 +56,6 @@ class ConcertsScreenState extends State<ConcertsScreen> {
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  GestureDetector(
-                    onTap: () async {
-                      await getImage();
-                      setState(() {});
-                    },
-                    child: _image != null
-                        ? Image.file(
-                      _image!,
-                      height: 200,
-                      fit: BoxFit.cover,
-                    )
-                        : (concert.image != ""
-                        ? Image.network(
-                      '${dotenv.env['API_PROTOCOL']}://${dotenv.env['API_HOST']}${dotenv.env['API_PORT']}/uploads/concerts/${concert.image}',
-                      height: 200,
-                      fit: BoxFit.cover,
-                    )
-                        : Container(
-                      height: 200,
-                      color: Colors.grey[300],
-                      child: const Icon(Icons.camera_alt),
-                    )),
-                  ),
-                  const SizedBox(height: 8),
                   TextField(
                     controller: _nameController,
                     decoration: const InputDecoration(labelText: 'Nom'),
@@ -143,7 +102,6 @@ class ConcertsScreenState extends State<ConcertsScreen> {
                     _nameController.text = concert.name;
                     _locationController.text = concert.location;
                     _selectedDate = DateTime.parse(concert.date);
-                    _image = null;
 
                     Navigator.of(dialogContext).pop();
                   },
@@ -165,16 +123,6 @@ class ConcertsScreenState extends State<ConcertsScreen> {
                       request.fields['name'] = _nameController.text;
                       request.fields['location'] = _locationController.text;
                       request.fields['date'] = '${_selectedDate!.toLocal().toIso8601String().split('T')[0]} ${_selectedDate!.toLocal().toIso8601String().split('T')[1].split(':').sublist(0, 2).join(':')}';
-
-                      if (_image != null) {
-                        request.files.add(
-                          await http.MultipartFile.fromPath(
-                            'image',
-                            _image!.path,
-                            contentType: MediaType('image', _image!.path.split('.').last),
-                          ),
-                        );
-                      }
 
                       await request.send();
 

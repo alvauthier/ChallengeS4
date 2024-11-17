@@ -104,11 +104,11 @@ func main() {
 	authenticated.PATCH("/interests/:id", controller.UpdateInterest, middleware.CheckRole("admin"))
 	authenticated.DELETE("/interests/:id", controller.DeleteInterest, middleware.CheckRole("admin"))
 
-	router.GET("/artists", controller.GetAllArtists)
+	authenticated.GET("/artists", controller.GetAllArtists, middleware.CheckRole("admin"))
 	router.GET("/artists/:id", controller.GetArtist)
-	router.POST("/artists", controller.CreateArtist)
-	router.PATCH("/artists/:id", controller.UpdateArtist)
-	router.DELETE("/artists/:id", controller.DeleteArtist)
+	authenticated.POST("/artists", controller.CreateArtist, middleware.CheckRole("admin"))
+	authenticated.PATCH("/artists/:id", controller.UpdateArtist, middleware.CheckRole("admin"))
+	authenticated.DELETE("/artists/:id", controller.DeleteArtist, middleware.CheckRole("admin"))
 
 	authenticated.GET("/categories", controller.GetAllCategories, middleware.CheckRole("user", "organizer", "admin"))
 	authenticated.GET("/categories/:id", controller.GetCategory, middleware.CheckRole("admin"))
@@ -163,7 +163,7 @@ func main() {
 	router.GET("/ws-queue", controller.HandleWebSocketQueue)
 	router.GET("/ws-community", controller.HandleWebSocketCommunity)
 
-	router.GET("/logs", controller.GetLogs)
+	authenticated.GET("/logs", controller.GetLogs, middleware.CheckRole("admin"))
 
 	// router.Start(":8080")
 	server := &http.Server{

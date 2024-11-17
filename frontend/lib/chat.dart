@@ -44,6 +44,7 @@ class ChatScreenState extends State<ChatScreen> {
   late String buyerId = "";
   late List messages = [];
   final TextEditingController _controller = TextEditingController();
+  final ScrollController _scrollController = ScrollController();
   final storage = const FlutterSecureStorage();
   String? userId;
   late String concertName;
@@ -119,6 +120,12 @@ class ChatScreenState extends State<ChatScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(translate(context)!.price_success)),
         );
+        final priceMessage = {
+          "conversation_id": widget.id,
+          "new_price": price,
+        };
+        _channel?.sink.add(jsonEncode(priceMessage));
+        debugPrint('Price update message WebSocket sent: $priceMessage');
       } else {
         debugPrint('Failed to update price: ${response.body}');
         ScaffoldMessenger.of(context).showSnackBar(
@@ -167,7 +174,20 @@ class ChatScreenState extends State<ChatScreen> {
   @override
   void dispose() {
     _channel?.sink.close(status.goingAway);
+    _scrollController.dispose();
     super.dispose();
+  }
+
+  void _scrollToBottom() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (_scrollController.hasClients) {
+        _scrollController.animateTo(
+          _scrollController.position.maxScrollExtent,
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeOut,
+        );
+      }
+    });
   }
 
   void _connectWebSocket() {
@@ -184,14 +204,18 @@ class ChatScreenState extends State<ChatScreen> {
 
     _channel!.stream.listen((message) {
       final decodedMessage = jsonDecode(message);
-
+      debugPrint('WebSocket message received: $decodedMessage');
       if (decodedMessage.containsKey('conversation_id')) {
         setState(() {
           widget.id = decodedMessage['conversation_id'];
         });
-      } else if (decodedMessage['type'] == 'price_update') {
-        _handlePriceUpdate(decodedMessage);
+        if (decodedMessage.containsKey('new_price')) {
+          setState(() {
+            price = decodedMessage['new_price'].toString();
+          });
+        }
       } else {
+        debugPrint(decodedMessage["Content"]);
         setState(() {
           messages.add({
             "authorId": decodedMessage["AuthorId"],
@@ -199,6 +223,7 @@ class ChatScreenState extends State<ChatScreen> {
             "readed": decodedMessage["Readed"],
           });
         });
+        _scrollToBottom();
       }
     }, onError: (error) {
       debugPrint('Erreur WebSocket: $error');
@@ -214,7 +239,6 @@ class ChatScreenState extends State<ChatScreen> {
       "conversation_id": widget.id.isNotEmpty ? widget.id : "",
       "sender_id": userId,
       "receiver_id": widget.resellerId,
-      "price": double.tryParse(widget.price ?? '0') ?? 0.0,
     };
 
     _channel?.sink.add(jsonEncode(payload));
@@ -312,6 +336,7 @@ class ChatScreenState extends State<ChatScreen> {
           }
         });
         _isLoading = false;
+        _scrollToBottom();
       } catch (e) {
         if (e is ApiException) {
           debugPrint("Failed to fetch conversation: ${e.toString()}");
@@ -410,9 +435,6 @@ class ChatScreenState extends State<ChatScreen> {
                       final newPrice = priceController.text;
                       if (newPrice.isNotEmpty) {
                         await updateConversationPrice(widget.id, double.parse(newPrice));
-                        setState(() {
-                          price = newPrice.toString();
-                        });
                       }
                       context.pop();
                     },
@@ -436,13 +458,13 @@ class ChatScreenState extends State<ChatScreen> {
     );
   }
 
-  void _handlePriceUpdate(Map<String, dynamic> message) {
-    if (message.containsKey('new_price')) {
-      setState(() {
-        price = message['new_price'].toString();
-      });
-    }
-  }
+  // void _handlePriceUpdate(Map<String, dynamic> message) {
+  //   if (message.containsKey('new_price')) {
+  //     setState(() {
+  //       price = message['new_price'].toString();
+  //     });
+  //   }
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -517,6 +539,7 @@ class ChatScreenState extends State<ChatScreen> {
               ),
               Expanded(
                 child: ListView.builder(
+                  controller: _scrollController,
                   padding: const EdgeInsets.symmetric(vertical: 16.0),
                   itemCount: messages.length,
                   itemBuilder: (context, index) {

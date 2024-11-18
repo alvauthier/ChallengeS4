@@ -288,6 +288,7 @@ func CreateConcert(c echo.Context) error {
 		}
 	}
 
+	c.Logger().Infof("event=ConcertAdded concert_id=%s timestamp=%s", concert.ID, time.Now().Format(time.RFC3339))
 	return c.JSON(http.StatusOK, map[string]interface{}{
 		"concert":    concert,
 		"categories": concertCategories,

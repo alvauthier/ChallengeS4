@@ -563,7 +563,7 @@ func createAccessToken(id uuid.UUID, email, role string) (string, error) {
 			"id":    id.String(),
 			"email": email,
 			"role":  role,
-			"exp":   time.Now().Add(time.Minute * 1).Unix(),
+			"exp":   time.Now().Add(time.Minute * 60).Unix(),
 			"iat":   time.Now().Unix(),
 			"jti":   generateJTI(),
 		})
